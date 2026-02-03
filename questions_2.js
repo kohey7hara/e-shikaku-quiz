@@ -1,118 +1,189 @@
 const part2 = [
-    // =================================================================
-    // 5. CNN (画像認識)
-    // =================================================================
+    // 5. CNN実装・データ拡張・正規化
     {
-        category: "CNN",
-        question: "畳み込み層の出力サイズ計算式は？ (入力$H$, カーネル$K$, パディング$P$, ストライド$S$)",
-        options: ["$(H - K + 2P)/S + 1$", "$(H - K + P)/S - 1$", "$H \\times K + P$", "$(H - K)/S$"],
-        answer: 0,
-        explanation: "出力サイズ = (入力 - カーネル + 2×パディング) / ストライド + 1 です。"
+        category: "CNN実装",
+        question: "入力32x32に対し、Conv(K=5,S=1)→Pool(2,S=2)→Conv(K=5,S=1)→Pool(2,S=2)後のサイズは？",
+        options: ["32x32", "11x11", "5x5", "8x8"],
+        answer: 2,
+        explanation: "1回目: (32-5)+1=28 -> Poolで14。2回目: (14-5)+1=10 -> Poolで5。"
     },
     {
-        category: "CNN",
-        question: "Global Average Pooling (GAP) の主な利点は？",
-        options: ["解像度を上げる", "全結合層のパラメータ数を削減し、過学習を防ぐ", "エッジを強調する", "計算量を増やす"],
-        answer: 1,
-        explanation: "特徴マップ全体の平均をとって1つの値にするため、巨大な全結合層パラメータを削除でき、モデルが軽量化されます。"
-    },
-    {
-        category: "ResNet",
-        question: "ResNetの残差ブロック $H(x) = F(x) + x$ の目的は？",
-        options: ["勾配消失を防ぎ、層を深くできるようにする", "パラメータ数を減らす", "計算速度を上げる", "画像サイズを変える"],
-        answer: 0,
-        explanation: "スキップ接続（Shortcut Connection）により、勾配が直接下層に伝わるため、100層を超える深層学習が可能になりました。"
+        category: "CNN実装",
+        question: "PyTorchの `model.forward()` の説明として正しいのは？",
+        options: ["返り値は確率である", "正方形ならサイズ依存しない", "2回使うPool層はパラメータを共有する", "入力は正規化されている前提"],
+        answer: 3,
+        explanation: "前処理で正規化（Normalize）を行ってから入力するのが一般的です。"
     },
     {
         category: "データ拡張",
-        question: "文字認識タスクでやってはいけないデータ拡張は？",
-        options: ["平行移動", "輝度変更", "左右反転・回転", "ノイズ付加"],
+        question: "文字認識タスクで不適切なデータ拡張は？",
+        options: ["平行移動", "輝度変更", "左右反転・回転", "拡大縮小"],
         answer: 2,
-        explanation: "「6と9」「bとd」のように、回転や反転で意味が変わるデータがあるため不適切です。"
-    },
-
-    // =================================================================
-    // 6. 物体検出・セグメンテーション
-    // =================================================================
-    {
-        category: "物体検出",
-        question: "YOLO (You Only Look Once) の特徴は？",
-        options: ["Two-stage検出器", "Region Proposalを行う", "グリッド分割によるOne-stage検出器", "推論が遅い"],
-        answer: 2,
-        explanation: "YOLOは候補領域提案を行わず、画像をグリッドに分割して一度にクラスと位置を予測する高速なOne-stage手法です。"
+        explanation: "「6と9」のように意味が変わるため不適切です。"
     },
     {
-        category: "物体検出",
-        question: "IoU (Intersection over Union) の計算式は？",
-        options: ["共通部分 / 和集合", "和集合 / 共通部分", "正解 / 全体", "TP / (TP+FP)"],
+        category: "データ拡張",
+        question: "ColorJitterで白飛びが発生した。修正案は？",
+        options: ["brightnessの変動幅を小さくする", "contrastを変更", "hueを変更", "flipを削除"],
         answer: 0,
-        explanation: "IoU（Jaccard係数）は、予測ボックスと正解ボックスの「重なり面積」を「合わせた面積」で割った値です。"
+        explanation: "brightnessの係数が大きすぎると画素値が飽和します。"
     },
     {
-        category: "物体検出",
-        question: "同じ物体に対して複数のバウンディングボックスが出た際、重複を取り除く処理は？",
-        options: ["NMS (Non-Maximum Suppression)", "Batch Normalization", "Dropout", "MaxPooling"],
-        answer: 0,
-        explanation: "NMSは、信頼度スコアが高いボックスを残し、それとIoUが高い（重なっている）他のボックスを削除する処理です。"
-    },
-    {
-        category: "セグメンテーション",
-        question: "セマンティックセグメンテーションとインスタンスセグメンテーションの違いは？",
-        options: ["違いはない", "セマンティックは個体を区別しない、インスタンスは個体を区別する", "セマンティックは四角形で囲む", "インスタンスは画素単位ではない"],
+        category: "正規化",
+        question: "Batch Normalizationの `track_running_stats=True` 時の推論（eval）挙動は？",
+        options: ["そのバッチの統計量を使用", "学習中の移動統計量を使用", "常に0と1を使用", "直前の学習バッチを使用"],
         answer: 1,
-        explanation: "「人」というクラスを塗る際、セマンティックは全て同じ色で塗りますが、インスタンスは「Aさん」「Bさん」を別の色（ID）で区別します。"
+        explanation: "推論時は安定した結果を出すため、学習中に蓄積した移動平均・分散を使います。"
     },
     {
-        category: "セグメンテーション",
-        question: "U-Netの「スキップコネクション」の役割は？",
-        options: ["位置情報の復元", "パラメータ削減", "クラス分類", "ノイズ除去"],
+        category: "正規化",
+        question: "異なる層でBatch Normalizationのインスタンスを共有するとどうなる？",
+        options: ["効率的である", "学習済み表現が破壊される", "精度が上がる", "問題ない"],
+        answer: 1,
+        explanation: "層ごとに分布やパラメータ（γ, β）が異なるため、共有すると学習できません。"
+    },
+    {
+        category: "アンサンブル",
+        question: "アンサンブル学習の説明として不適切なものは？",
+        options: ["異なる原理のモデルは組み合わせられない", "バギングは並列学習", "スタッキングはメタモデルを使う", "ブースティングは直列学習"],
         answer: 0,
-        explanation: "エンコーダで失われた位置情報を、デコーダ側に直接転送（結合）することで、精細なセグメンテーションを実現します。"
+        explanation: "原理の異なるモデル（NNと決定木など）を組み合わせることで精度向上が期待できます。"
+    },
+    {
+        category: "アンサンブル",
+        question: "GBDT、RF、バギング、ブースティングの組み合わせ。（あ）直列修正 （う）並列多数決",
+        options: ["(あ)RF (う)GBDT", "(あ)GBDT (う)RF", "(あ)RF (う)バギング", "(あ)GBDT (う)ブースティング"],
+        answer: 1,
+        explanation: "直列・修正はブースティング（GBDT）、並列・多数決はバギング（Random Forest）です。"
+    },
+    {
+        category: "アンサンブル",
+        question: "XGBoostの正則化項 $\\gamma T$ の $\\gamma$ を小さくするとどうなる？",
+        options: ["過学習抑制", "木の葉の数が増えやすくなる", "L2正則化が強まる", "L1正則化が強まる"],
+        answer: 1,
+        explanation: "葉を増やすペナルティが減るため、木が複雑になりやすくなります。"
     },
 
-    // =================================================================
-    // 7. RNN・自然言語処理
-    // =================================================================
+    // 6. ResNet / ViT
+    {
+        category: "ResNet",
+        question: "ResNetの学習曲線（層を増やした結果）から読み取れる事実は？",
+        options: ["過学習した", "Plain Netは層を増やすと訓練誤差も増えた（劣化）", "ResNetでも劣化は防げなかった", "層数に関係なく性能は同じ"],
+        answer: 1,
+        explanation: "Plain Netでは層を深くすると訓練誤差が悪化する「劣化」が起きますが、ResNetはこれを解決しました。"
+    },
+    {
+        category: "ResNet",
+        question: "残差ブロック $H(x) = F(x) + x$ が学習するものは？",
+        options: ["出力 $H(x)$", "入力 $x$", "残差 $F(x) = H(x) - x$", "入力の逆数"],
+        answer: 2,
+        explanation: "入力と出力の差分（残差）を学習します。"
+    },
+    {
+        category: "ResNet",
+        question: "20層程度の浅いモデルでの比較結果は？（不適切なものを選ぶ）",
+        options: ["ResNetの方が誤差が小さい", "PlainもResNetも誤差は同じ", "層数が小さいモデルでは汎化性能を向上できていない", "訓練誤差はResNetの方が小さい"],
+        answer: 2,
+        explanation: "浅い層でもResNetの方がわずかに性能が良いため、「向上できていない」という記述は不適切です。"
+    },
+    {
+        category: "ViT",
+        question: "Vision Transformer (ViT) の構成要素として正しいのは？",
+        options: ["Decoderのみ", "Encoderのみ", "CNNとRNNのハイブリッド", "Encoder-Decoder"],
+        answer: 1,
+        explanation: "ViTはTransformerのEncoder部分のみを使用します。"
+    },
+    {
+        category: "ViT",
+        question: "ViTの入力ベクトル $z_0$ の正しい定義は？（$E_{pos}$のサイズに注目）",
+        options: ["パッチのみ", "パッチ + 位置(N個)", "クラストークン + パッチ + 位置(N+1個)", "クラストークン + パッチ"],
+        answer: 2,
+        explanation: "クラストークンを含めた $N+1$ 個のベクトルに対し、それぞれ位置エンコーディングを加算します。"
+    },
+    {
+        category: "ViT",
+        question: "ViTをファインチューニングする際、画像サイズが大きくなった場合の対処は？",
+        options: ["パッチサイズを変える", "位置エンコーディングを2次元補間する", "MLPヘッドを固定する", "画像をリサイズして戻す"],
+        answer: 1,
+        explanation: "パッチサイズを固定するとパッチ数が増えるため、位置エンコーディングを補間して引き伸ばします。"
+    },
+
+    // 7. RNN / NLP
     {
         category: "RNN",
-        question: "LSTMが勾配消失を防ぐために導入した仕組みは？",
-        options: ["ゲート機構（忘却ゲート等）", "マックスプーリング", "ドロップアウト", "ReLU"],
-        answer: 0,
-        explanation: "入力・出力・忘却のゲートとセル状態（Cell State）を用いることで、長期的な依存関係を保持します。"
+        question: "BPTTの説明として正しいのは？",
+        options: ["メモリ効率が良い", "勾配降下法が使えない", "時間方向に展開して誤差逆伝播を行う", "各時刻で重みが異なる"],
+        answer: 2,
+        explanation: "RNNを時間方向に展開し、長いネットワークとみなして学習します。"
     },
     {
-        category: "NLP",
-        question: "Word2VecのSkip-gramモデルは何を予測するか？",
-        options: ["周辺語から中心語", "中心語から周辺語", "次の文", "品詞"],
+        category: "RNN",
+        question: "双方向RNN（LSTMユニット数64）の出力サイズは？",
+        options: ["64", "128", "32", "256"],
         answer: 1,
-        explanation: "Skip-gramは「ある単語（中心語）」から「その周りにある単語（周辺語）」を予測するように学習します。（逆はCBOW）"
+        explanation: "順方向64 + 逆方向64 = 128 です。"
+    },
+    {
+        category: "RNN",
+        question: "Teacher Forcingの問題点（Exposure Bias）とは？",
+        options: ["学習が遅くなる", "精度過大評価", "学習時（正解入力）と評価時（自己予測入力）で分布が異なる", "双方向RNNに使えない"],
+        answer: 2,
+        explanation: "本番では自分の予測を使わねばならず、一度のミスから崩れやすくなる問題です。"
     },
     {
         category: "Transformer",
-        question: "TransformerのSelf-Attentionにおいて、類似度（重み）を計算するベクトルのペアは？",
-        options: ["Query と Key", "Key と Value", "Query と Value", "Query と Query"],
-        answer: 0,
-        explanation: "検索クエリ(Query)と検索対象の鍵(Key)の内積で類似度を計算し、その重みでValueを合成します。"
+        question: "TransformerのDecoderにおけるPositional Encodingの入力箇所は？",
+        options: ["各層の直前", "Attentionの中", "入力Embeddingの直後（最初の一回のみ）", "出力層の直前"],
+        answer: 2,
+        explanation: "データの入り口で1回だけ加算されます。"
     },
     {
         category: "Transformer",
-        question: "TransformerにおけるPositional Encodingの役割は？",
-        options: ["単語の意味を表す", "単語の順序（位置）情報を埋め込む", "文法を解析する", "ノイズを除去する"],
-        answer: 1,
-        explanation: "Transformerは並列処理であり、RNNのように順序を自動認識できないため、位置情報を明示的に足し合わせる必要があります。"
+        question: "Self-AttentionがRNNより優れている点は？（不適切なものを除く）",
+        options: ["離れた単語の依存関係を学習しやすい", "計算量が常に少ない", "可変長を扱える", "並列処理が可能"],
+        answer: 2,
+        explanation: "「可変長を扱える」のはRNNも同じです。Transformerの利点は並列性と長距離依存です。"
+    },
+    {
+        category: "Transformer",
+        question: "学習コスト（FLOPs）の比較表から読み取れることは？",
+        options: ["Transformerはデータ量が増えてもコストが一定", "Transformerが一番遅い", "RNNの方が効率的", "精度は低い"],
+        answer: 0,
+        explanation: "ステップ数固定で学習するため、データセットの大小にかかわらず計算量は一定になります。"
     },
     {
         category: "BERT",
         question: "BERTの事前学習タスクは？",
         options: ["次単語予測", "Masked LM と Next Sentence Prediction", "翻訳", "要約"],
         answer: 1,
-        explanation: "BERTは文中の穴埋め（MLM）と、2文が連続しているかの判定（NSP）で双方向の文脈を学習します。"
+        explanation: "穴埋め問題（MLM）と隣接文予測（NSP）です。"
+    },
+    {
+        category: "BERT",
+        question: "BERTが「次の単語予測」を行わない理由は？",
+        options: ["コストが高いから", "双方向Attentionにより未来の単語が見えてしまうから", "精度が低いから", "RNNだから"],
+        answer: 1,
+        explanation: "双方向性ゆえに、単純な次単語予測ではカンニングになってしまうためです。"
     },
     {
         category: "GPT",
-        question: "GPT-3のFew-shot Learning（In-context Learning）とは？",
-        options: ["再学習を行う", "プロンプトに少数の例示を含めて推論させる", "ラベルなしデータを使う", "強化学習を行う"],
+        question: "GPT-1の事前学習タスクは？",
+        options: ["言語モデル（次単語予測）", "Masked LM", "機械翻訳", "画像生成"],
+        answer: 0,
+        explanation: "Transformer Decoderを用いた単方向の言語モデルです。"
+    },
+    {
+        category: "GPT",
+        question: "GPT-3のOne-Shot Learningとは？",
+        options: ["例題なし", "例題を1つだけプロンプトに含める", "転移学習", "教師あり学習"],
         answer: 1,
-        explanation: "重み更新（ファインチューニング）を行わず、入力プロンプトに例を与えるだけでタスクを解かせる手法です。"
+        explanation: "ファインチューニングせず、プロンプトに1つの例を含めて推論させる手法です。"
+    },
+    {
+        category: "GPT",
+        question: "GPT-3のパラメータ数と計算量の関係は？",
+        options: ["サイズが大きいほど計算量は増える", "サイズと計算量は無関係", "175Bモデルは計算量が少ない", "BERTより計算量が少ない"],
+        answer: 0,
+        explanation: "モデルサイズ（パラメータ数）に比例して、訓練に必要な計算量は増大します。"
     }
 ];
