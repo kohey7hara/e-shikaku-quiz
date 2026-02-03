@@ -12,18 +12,12 @@
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
-        :root {
-            --primary-color: #2E7D32;
-            --wrong-color: #D32F2F;
-            --bg-color: #f5f5f5;
-            --card-bg: #ffffff;
-            --text-color: #333;
-        }
-        body { font-family: sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; }
+        :root { --primary-color: #2E7D32; --wrong-color: #D32F2F; --bg-color: #f5f5f5; --card-bg: #ffffff; }
+        body { font-family: sans-serif; background: var(--bg-color); margin: 0; padding: 10px; }
         .container { max-width: 800px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; min-height: 80vh; }
         h1 { text-align: center; color: var(--primary-color); }
         .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin: 20px 0; }
-        .category-btn { padding: 12px; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; }
+        .category-btn { padding: 12px; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; user-select: none; }
         .category-btn.selected { background: var(--primary-color); color: white; border-color: var(--primary-color); }
         .action-btn { width: 100%; padding: 15px; margin-top: 20px; background: var(--primary-color); color: white; border: none; border-radius: 30px; cursor: pointer; font-size: 1.1rem; }
         .option-btn { width: 100%; padding: 15px; margin-bottom: 10px; border: 2px solid #ddd; background: white; text-align: left; cursor: pointer; border-radius: 8px; }
@@ -33,15 +27,13 @@
     </style>
 </head>
 <body>
-
 <div class="container">
     <div id="start-screen">
         <h1>🎓 E資格 徹底攻略</h1>
-        <p style="text-align:center;">全範囲完全網羅 (100問超)</p>
+        <p style="text-align:center;">全範囲完全網羅 (約100問)</p>
         <div class="category-grid" id="category-grid"></div>
         <button class="action-btn" onclick="startQuiz()">クイズを開始する</button>
     </div>
-
     <div id="quiz-screen" style="display:none;">
         <div style="text-align:right;">正解数: <span id="current-score">0</span> | 問題: <span id="current-count">1</span> / <span id="total-count">0</span></div>
         <h3 id="category-tag" style="color:var(--primary-color);"></h3>
@@ -53,7 +45,6 @@
         </div>
         <button class="action-btn" id="next-btn" style="display:none;" onclick="nextQuestion()">次の問題へ ➡</button>
     </div>
-
     <div id="result-screen" style="display:none; text-align:center;">
         <h2>学習完了！</h2>
         <h1><span id="final-percentage">0%</span></h1>
@@ -61,34 +52,25 @@
         <button class="action-btn" onclick="location.reload()">トップに戻る</button>
     </div>
 </div>
-
 <script src="questions_1.js"></script>
 <script src="questions_2.js"></script>
 <script src="questions_3.js"></script>
-
 <script>
-    // データを結合
     let quizData = [];
     if (typeof part1 !== 'undefined') quizData = quizData.concat(part1);
     if (typeof part2 !== 'undefined') quizData = quizData.concat(part2);
     if (typeof part3 !== 'undefined') quizData = quizData.concat(part3);
 
-    let currentQuestions = [];
-    let currentIndex = 0;
-    let score = 0;
+    let currentQuestions = [], currentIndex = 0, score = 0;
 
     window.onload = function() {
-        if (quizData.length === 0) {
-            alert("データファイル (questions_1.js 等) が読み込めません。");
-            return;
-        }
+        if (quizData.length === 0) { alert("データファイルが読み込めません。"); return; }
         initCategories();
     };
 
     function initCategories() {
         const categories = [...new Set(quizData.map(q => q.category))];
         const grid = document.getElementById('category-grid');
-        
         const allBtn = document.createElement('div');
         allBtn.className = 'category-btn selected';
         allBtn.innerText = 'すべて選択';
@@ -96,12 +78,10 @@
             const isSelecting = !this.classList.contains('selected');
             this.classList.toggle('selected');
             document.querySelectorAll('.category-btn:not(:first-child)').forEach(btn => {
-                if(isSelecting) btn.classList.add('selected');
-                else btn.classList.remove('selected');
+                if(isSelecting) btn.classList.add('selected'); else btn.classList.remove('selected');
             });
         };
         grid.appendChild(allBtn);
-
         categories.forEach(cat => {
             const btn = document.createElement('div');
             btn.className = 'category-btn selected';
@@ -110,8 +90,7 @@
                 this.classList.toggle('selected');
                 const btns = document.querySelectorAll('.category-btn:not(:first-child)');
                 const selected = document.querySelectorAll('.category-btn:not(:first-child).selected');
-                if(btns.length === selected.length) allBtn.classList.add('selected');
-                else allBtn.classList.remove('selected');
+                if(btns.length === selected.length) allBtn.classList.add('selected'); else allBtn.classList.remove('selected');
             };
             grid.appendChild(btn);
         });
@@ -121,12 +100,8 @@
         const selectedButtons = document.querySelectorAll('.category-btn:not(:first-child).selected');
         const selectedCategories = Array.from(selectedButtons).map(btn => btn.innerText);
         if (selectedCategories.length === 0) return alert("カテゴリを選んでください");
-
-        const filtered = quizData.filter(q => selectedCategories.includes(q.category));
-        currentQuestions = filtered.sort(() => Math.random() - 0.5);
-        
-        currentIndex = 0;
-        score = 0;
+        currentQuestions = quizData.filter(q => selectedCategories.includes(q.category)).sort(() => Math.random() - 0.5);
+        currentIndex = 0; score = 0;
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'block';
         document.getElementById('total-count').innerText = currentQuestions.length;
@@ -136,9 +111,9 @@
     function loadQuestion() {
         const q = currentQuestions[currentIndex];
         document.getElementById('current-count').innerText = currentIndex + 1;
+        document.getElementById('current-score').innerText = score;
         document.getElementById('category-tag').innerText = q.category;
         document.getElementById('question-text').innerHTML = q.question;
-        
         const container = document.getElementById('options-container');
         container.innerHTML = '';
         q.options.forEach((opt, idx) => {
@@ -158,13 +133,9 @@
         document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
         const title = document.getElementById('result-title');
         if (idx === q.answer) {
-            btn.classList.add('correct');
-            title.innerText = "⭕ 正解！";
-            score++;
+            btn.classList.add('correct'); title.innerText = "⭕ 正解！"; score++;
         } else {
-            btn.classList.add('wrong');
-            document.querySelectorAll('.option-btn')[q.answer].classList.add('correct');
-            title.innerText = "❌ 不正解...";
+            btn.classList.add('wrong'); document.querySelectorAll('.option-btn')[q.answer].classList.add('correct'); title.innerText = "❌ 不正解...";
         }
         document.getElementById('explanation-text').innerHTML = q.explanation;
         document.getElementById('explanation-area').style.display = 'block';
