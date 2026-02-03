@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E資格 徹底攻略クイズ</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary-color: #2E7D32;
+            --secondary-color: #4CAF50;
+            --wrong-color: #D32F2F;
+            --bg-color: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            min-height: 80vh;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .category-btn {
+            padding: 12px;
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-align: center;
+            transition: all 0.2s;
+            color: #555;
+            user-select: none;
+        }
+        .category-btn.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            font-weight: bold;
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: var(--secondary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #E8F5E9;
+            color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .question-box {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .option-btn:hover {
+            background-color: #f9f9f9;
+            border-color: #bbb;
+        }
+        .option-btn.correct {
+            background-color: #E8F5E9;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        .option-btn.wrong {
+            background-color: #FFEBEE;
+            border-color: var(--wrong-color);
+            color: var(--wrong-color);
+        }
+        .explanation-area {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #F1F8E9;
+            border-left: 5px solid var(--primary-color);
+            border-radius: 4px;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .action-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+        }
+        .result-screen {
+            text-align: center;
+            padding: 30px 0;
+        }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-color) 0%, #eee 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-inner {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-val { font-size: 1.8rem; font-weight: bold; color: var(--primary-color); }
+        .score-label { font-size: 0.8rem; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="start-screen">
+        <h1>🎓 E資格 徹底攻略</h1>
+        <p style="text-align:center; font-size:0.9rem; color:#666;">
+            学習したいセクションを選んでください<br>
+            (全90問以上)
+        </p>
+        <div class="category-grid" id="category-grid"></div>
+        <button class="action-btn" onclick="startQuiz()">クイズを開始する</button>
+    </div>
+
+    <div id="quiz-screen" style="display:none;">
+        <div class="progress-bar-container">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="status-bar">
+            <span>正解数: <span id="current-score">0</span></span>
+            <span>問題: <span id="current-count">1</span> / <span id="total-count">0</span></span>
+        </div>
+        
+        <div id="question-container">
+            <span class="tag" id="category-tag">カテゴリ</span>
+            <div class="question-box" id="question-text"></div>
+            <div id="options-container"></div>
+        </div>
+
+        <div class="explanation-area" id="explanation-area">
+            <h3 id="result-title" style="margin-top:0;"></h3>
+            <div id="explanation-text"></div>
+        </div>
+
+        <button class="action-btn" id="next-btn" style="display:none;" onclick="nextQuestion()">次の問題へ ➡</button>
+    </div>
+
+    <div id="result-screen" class="result-screen" style="display:none;">
+        <h2>学習完了！</h2>
+        <div class="score-circle" id="score-circle">
+            <div class="score-inner">
+                <span class="score-val" id="final-percentage">0%</span>
+                <span class="score-label">正答率</span>
+            </div>
+        </div>
+        <p>正解数: <span id="final-correct">0</span> / <span id="final-total">0</span></p>
+        <button class="action-btn" onclick="location.reload()">トップに戻る</button>
+    </div>
+</div>
+
+<script src="questions.js"></script>
+<script>
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+
+    window.onload = function() {
+        if (typeof quizData === 'undefined') {
+            alert("エラー: questions.js が見つかりません。");
+            return;
+        }
+        initCategories();
+    };
+
+    function initCategories() {
+        const categories = [...new Set(quizData.map(q => q.category))];
+        const grid = document.getElementById('category-grid');
+        
+        const allBtn = document.createElement('div');
+        allBtn.className = 'category-btn selected';
+        allBtn.innerText = 'すべて選択';
+        allBtn.onclick = function() {
+            const isSelecting = !this.classList.contains('selected');
+            this.classList.toggle('selected');
+            document.querySelectorAll('.category-btn:not(:first-child)').forEach(btn => {
+                if(isSelecting) btn.classList.add('selected');
+                else btn.classList.remove('selected');
+            });
+        };
+        grid.appendChild(allBtn);
+
+        categories.forEach(cat => {
+            const btn = document.createElement('div');
+            btn.className = 'category-btn selected';
+            btn.innerText = cat;
+            btn.onclick = function() {
+                this.classList.toggle('selected');
+                const btns = document.querySelectorAll('.category-btn:not(:first-child)');
+                const selected = document.querySelectorAll('.category-btn:not(:first-child).selected');
+                if(btns.length === selected.length) allBtn.classList.add('selected');
+                else allBtn.classList.remove('selected');
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function startQuiz() {
+        const selectedButtons = document.querySelectorAll('.category-btn:not(:first-child).selected');
+        const selectedCategories = Array.from(selectedButtons).map(btn => btn.innerText);
+
+        if (selectedCategories.length === 0) {
+            alert("カテゴリを1つ以上選択してください");
+            return;
+        }
+
+        const filteredData = quizData.filter(q => selectedCategories.includes(q.category));
+        currentQuestions = shuffleArray([...filteredData]);
+        
+        if(currentQuestions.length === 0) {
+            alert("該当する問題がありません");
+            return;
+        }
+
+        currentIndex = 0;
+        score = 0;
+        
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'block';
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('total-count').innerText = currentQuestions.length;
+        
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const q = currentQuestions[currentIndex];
+        document.getElementById('current-count').innerText = currentIndex + 1;
+        document.getElementById('current-score').innerText = score;
+        document.getElementById('category-tag').innerText = q.category;
+        
+        document.getElementById('question-text').innerHTML = q.question;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        q.options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = option;
+            btn.onclick = () => checkAnswer(index, btn);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('explanation-area').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+
+    function checkAnswer(selectedIndex, btnElement) {
+        const q = currentQuestions[currentIndex];
+        const buttons = document.querySelectorAll('.option-btn');
+        
+        buttons.forEach(btn => btn.disabled = true);
+
+        const explanationArea = document.getElementById('explanation-area');
+        const resultTitle = document.getElementById('result-title');
+        const explanationText = document.getElementById('explanation-text');
+
+        if (selectedIndex === q.answer) {
+            btnElement.classList.add('correct');
+            resultTitle.innerText = "⭕ 正解！";
+            resultTitle.style.color = "var(--primary-color)";
+            score++;
+        } else {
+            btnElement.classList.add('wrong');
+            buttons[q.answer].classList.add('correct');
+            resultTitle.innerText = "❌ 不正解...";
+            resultTitle.style.color = "var(--wrong-color)";
+        }
+
+        explanationText.innerHTML = q.explanation;
+        explanationArea.style.display = 'block';
+        document.getElementById('next-btn').style.display = 'block';
+        document.getElementById('current-score').innerText = score;
+        
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex < currentQuestions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        
+        const percentage = Math.round((score / currentQuestions.length) * 100);
+        document.getElementById('final-percentage').innerText = `${percentage}%`;
+        document.getElementById('final-correct').innerText = score;
+        document.getElementById('final-total').innerText = currentQuestions.length;
+
+        const circle = document.getElementById('score-circle');
+        circle.style.background = `conic-gradient(var(--primary-color) ${percentage}%, #eee ${percentage}% 100%)`;
+    }
+</script>
+</body>
+</html>
