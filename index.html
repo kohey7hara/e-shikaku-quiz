@@ -8,11 +8,27 @@
         body { font-family: "Helvetica Neue", Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; color: #333; }
         h1 { text-align: center; color: #2c3e50; }
         .menu-list { list-style: none; padding: 0; }
-        .menu-item { background: white; margin-bottom: 15px; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; cursor: pointer; border-left: 5px solid #0277bd; }
-        .menu-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
-        .menu-item a { text-decoration: none; color: #333; display: block; }
+        
+        /* メニュー項目のスタイル */
+        .menu-item { background: white; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; border-left: 5px solid #ccc; } /* デフォルトはグレー */
+        
+        /* 有効な項目のスタイル */
+        .menu-item.active { border-left-color: #0277bd; cursor: pointer; }
+        .menu-item.active:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        
+        /* リンクのスタイル */
+        .menu-item a { text-decoration: none; color: #333; display: block; padding: 20px; }
+        
+        /* 無効な項目のスタイル */
+        .menu-item.disabled { background-color: #eee; color: #999; padding: 20px; cursor: not-allowed; }
+        
         .menu-title { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; display: block;}
         .menu-desc { font-size: 0.85em; color: #666; }
+        .menu-item.disabled .menu-desc { color: #aaa; }
+        
+        .status-badge { float: right; font-size: 0.8em; padding: 2px 8px; border-radius: 4px; background: #eee; color: #555; }
+        .active .status-badge { background: #e1f5fe; color: #0277bd; }
+
         .old-link { text-align: center; margin-top: 30px; font-size: 0.9em; }
     </style>
 </head>
@@ -20,23 +36,42 @@
     <h1>E資格対策ドリル</h1>
     <p style="text-align:center">学習したい単元を選んでください</p>
     
-    <ul class="menu-list">
-        <li class="menu-item">
-            <a href="quiz.html?id=01_param">
-                <span class="menu-title">（２）確率モデルにおけるパラメータ推定</span>
-                <span class="menu-desc">ベイズ則 / 最尤推定 / MAP推定 / MSE など</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="quiz.html?id=02_ml">
-                <span class="menu-title">（４）機械学習の基礎</span>
-                <span class="menu-desc">評価指標 / 検証手法 / 正則化 / 前処理 など</span>
-            </a>
-        </li>
-    </ul>
+    <ul class="menu-list" id="menuContainer"></ul>
 
     <div class="old-link">
-        <a href="index_old.html">📂 以前のバージョン（単独ファイル）はこちら</a>
+        <a href="index_old.html">📂 以前のバージョンはこちら</a>
     </div>
+
+    <script src="js/config.js"></script>
+    
+    <script>
+        const container = document.getElementById('menuContainer');
+
+        // config.js のデータを元にリストを作成
+        menuConfig.forEach(item => {
+            const li = document.createElement('li');
+            
+            if (item.isActive) {
+                // 作成済み（クリック可能）
+                li.className = 'menu-item active';
+                li.innerHTML = `
+                    <a href="quiz.html?id=${item.id}">
+                        <span class="status-badge">学習可能</span>
+                        <span class="menu-title">${item.title}</span>
+                        <span class="menu-desc">${item.desc}</span>
+                    </a>
+                `;
+            } else {
+                // 準備中（クリック不可・グレーアウト）
+                li.className = 'menu-item disabled';
+                li.innerHTML = `
+                    <span class="status-badge">準備中</span>
+                    <span class="menu-title">${item.title}</span>
+                    <span class="menu-desc">${item.desc}</span>
+                `;
+            }
+            container.appendChild(li);
+        });
+    </script>
 </body>
 </html>
