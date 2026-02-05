@@ -1,55 +1,37 @@
 window.quizData = {
-    title: "6. PyTorch実装対策ドリル",
+    title: "6. PyTorch実装対策ドリル (完全版)",
     
     cheatSheet: `
-        <h3>■ 学習ループの鉄板テンプレート</h3>
-        <pre><code style="font-size:0.8em;"># 1. モデルを学習モードにする
-model.train()
-
-for data, target in train_loader:
-    # 2. データをデバイス(GPU等)に送る
-    data, target = data.to(device), target.to(device)
-    
-    # 3. 勾配をリセット (重要！)
-    optimizer.zero_grad()
-    
-    # 4. 順伝播 (Forward)
-    output = model(data)
-    
-    # 5. 損失計算
-    loss = criterion(output, target)
-    
-    # 6. 逆伝播 (Backward)
-    loss.backward()
-    
-    # 7. パラメータ更新
-    optimizer.step()
-</code></pre>
-
-        <h3>■ 推論モードの鉄板テンプレート</h3>
-        <pre><code style="font-size:0.8em;"># 1. モデルを評価モードにする (Dropout/BN固定)
-model.eval()
-
-# 2. 勾配計算を無効化 (メモリ節約・高速化)
-with torch.no_grad():
-    for data, target in test_loader:
-        data = data.to(device)
-        output = model(data)
-</code></pre>
-
-        <h3>■ 重要メソッド早見表</h3>
+        <h3>■ RNN/LSTMの入出力（最重要）</h3>
+        <p>LSTMの出力はタプル <code>(output, (h_n, c_n))</code> になります。</p>
         <table>
-            <tr><th>目的</th><th>コード</th></tr>
-            <tr><td>形状変更 (Flatten)</td><td><code>x.view(x.size(0), -1)</code></td></tr>
-            <tr><td>GPU転送</td><td><code>x.to('cuda')</code></td></tr>
-            <tr><td>重み保存</td><td><code>torch.save(model.state_dict(), path)</code></td></tr>
-            <tr><td>重み固定</td><td><code>param.requires_grad = False</code></td></tr>
+            <tr><th>項目</th><th>形状 (Batch_first=True)</th></tr>
+            <tr><td>入力</td><td><code>(Batch, Seq_len, Input_size)</code></td></tr>
+            <tr><td>出力 (Output)</td><td><code>(Batch, Seq_len, Hidden_size * D)</code><br>※D=2 (双方向), D=1 (単方向)</td></tr>
+            <tr><td>隠れ状態 (h_n, c_n)</td><td><code>(Num_layers * D, Batch, Hidden_size)</code><br>※常にBatchが2番目に来る点に注意！</td></tr>
         </table>
+
+        <h3>■ モデル構築の定石</h3>
+        <pre><code style="font-size:0.8em;"># nn.Sequential: 層を積み重ねる
+model = nn.Sequential(
+    nn.Linear(784, 256),
+    nn.ReLU(),
+    nn.Dropout(0.5),
+    nn.Linear(256, 10)
+)
+</code></pre>
+
+        <h3>■ その他頻出テクニック</h3>
+        <ul>
+            <li><strong>勾配クリッピング</strong>: <code>torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)</code></li>
+            <li><strong>重みのロード</strong>: <code>model.load_state_dict(torch.load(path))</code></li>
+            <li><strong>学習率取得</strong>: <code>optimizer.param_groups[0]['lr']</code></li>
+        </ul>
     `,
 
     questions: [
         // ---------------------------------------------------------
-        // 【基礎編】 Q1 - Q10
+        // 【Part 1: 基礎定義】
         // ---------------------------------------------------------
         {
             category: "レイヤー定義",
@@ -77,14 +59,14 @@ with torch.no_grad():
             question: "学習ループ内での正しい処理順序はどれか。",
             options: ["optimizer.zero_grad() → loss.backward() → optimizer.step()", "loss.backward() → optimizer.step() → optimizer.zero_grad()", "optimizer.step() → loss.backward() → optimizer.zero_grad()", "optimizer.zero_grad() → optimizer.step() → loss.backward()"],
             answer: 0,
-            explanation: "まず勾配をリセットし、次に逆伝播で勾配を計算し、最後にその勾配を使ってパラメータを更新します。"
+            explanation: "1.勾配リセット(zero) → 2.勾配計算(backward) → 3.更新(step) の順序が鉄則です。"
         },
         {
             category: "テンソル操作",
             question: "バッチサイズが含まれる4次元テンソル `x` (B, C, H, W) を、全結合層に入れるために2次元 (B, Features) に平坦化するコードはどれか。",
             options: ["x.view(x.size(0), -1)", "x.flatten()", "x.view(-1)", "x.reshape(0, -1)"],
             answer: 0,
-            explanation: "`x.size(0)` でバッチサイズを指定し、`-1` で残りの次元を自動計算して結合させます。`x.flatten()` だと全次元が1列になってしまいバッチが混ざります（`x.flatten(1)`ならOK）。"
+            explanation: "`x.size(0)` でバッチサイズを指定し、`-1` で残りの次元を自動計算して結合させます。"
         },
         {
             category: "推論モード",
@@ -112,88 +94,162 @@ with torch.no_grad():
             question: "学習済みモデルの重み（パラメータ）のみを辞書形式で保存する推奨される方法はどれか。",
             options: ["torch.save(model.state_dict(), path)", "torch.save(model, path)", "model.save_weights(path)", "pickle.dump(model, path)"],
             answer: 0,
-            explanation: "モデル全体（クラス定義含む）を保存するよりも、`state_dict()`（パラメータ辞書）だけを保存する方が互換性が高く推奨されています。"
+            explanation: "モデル全体よりも `state_dict()`（パラメータ辞書）を保存する方が互換性が高く推奨されています。"
         },
         {
             category: "オプティマイザ",
             question: "Adamオプティマイザを定義する際、学習させるモデルのパラメータを渡す正しいコードはどれか。",
             options: ["optim.Adam(model.parameters(), lr=0.001)", "optim.Adam(model, lr=0.001)", "optim.Adam(model.weights, lr=0.001)", "optim.Adam(lr=0.001)"],
             answer: 0,
-            explanation: "オプティマイザには更新対象となる `model.parameters()` (イテレータ) を渡す必要があります。"
+            explanation: "オプティマイザには更新対象となる `model.parameters()` を渡す必要があります。"
         },
 
         // ---------------------------------------------------------
-        // 【応用編】 Q11 - Q20
+        // 【Part 2: 実践テクニック】
         // ---------------------------------------------------------
         {
-            category: "Datasetクラス(応用)",
+            category: "Datasetクラス",
             question: "自作データセットクラスを作る際、継承すべきクラスと実装必須のメソッドの組み合わせはどれか。",
             options: ["torch.utils.data.Dataset を継承し、__len__ と __getitem__ を実装", "torch.utils.data.DataLoader を継承し、__iter__ を実装", "torch.nn.Module を継承し、forward を実装", "torch.Tensor を継承し、data を実装"],
             answer: 0,
-            explanation: "`__len__` (データ数) と `__getitem__` (インデックスに対応するデータの取得) を実装することで、DataLoaderが扱えるようになります。"
+            explanation: "`__len__` (データ数) と `__getitem__` (データ取得) を実装することで、DataLoaderが扱えるようになります。"
         },
         {
-            category: "転移学習(応用)",
-            question: "転移学習において、特定の層（例: 畳み込み層）の重みを更新しないように固定（Freeze）するコードはどれか。",
+            category: "nn.Sequential",
+            question: "複数の層（Linear, ReLU, Dropoutなど）を順番に積み重ねて1つのモジュールとして定義するコンテナはどれか。",
+            options: ["nn.Sequential", "nn.ModuleList", "nn.Container", "nn.Stack"],
+            answer: 0,
+            explanation: "`nn.Sequential(layer1, layer2, ...)` と書くことで、`model(x)` した時にデータが上から順に流れるモデルを簡単に作れます。"
+        },
+        {
+            category: "重み固定(転移学習)",
+            question: "転移学習において、特定の層（畳み込み層など）の重みを更新しないように固定するコードはどれか。",
             options: ["param.requires_grad = False", "param.freeze()", "model.stop_training()", "optimizer.ignore(param)"],
             answer: 0,
-            explanation: "各パラメータテンソルの `requires_grad` 属性を `False` にすると、勾配が計算されず、更新もされなくなります。"
+            explanation: "パラメータテンソルの `requires_grad` 属性を `False` にすると、勾配計算と更新の対象外になります。"
         },
         {
-            category: "RNNの形状(応用)",
-            question: "nn.LSTMにおいて、`batch_first=True` を指定した場合の入力テンソルの形状はどれか。",
-            options: ["(Batch, Seq_len, Input_size)", "(Seq_len, Batch, Input_size)", "(Batch, Input_size, Seq_len)", "(Seq_len, Input_size, Batch)"],
+            category: "DataLoader(Shuffle)",
+            question: "DataLoaderを作成する際、訓練（Train）用と検証（Val/Test）用での `shuffle` 引数の一般的な設定はどれか。",
+            options: ["訓練用: True, 検証用: False", "訓練用: False, 検証用: True", "両方とも True", "両方とも False"],
             answer: 0,
-            explanation: "デフォルト(`False`)は `(Seq, Batch, Input)` ですが、`True` にすると直感的な `(Batch, Seq, Input)` で扱えるようになります。"
+            explanation: "学習時は多様なバッチを作るためにシャッフルしますが、検証・テスト時は評価を一定にするため（また時系列順に見る場合など）シャッフルしないのが基本です。"
         },
         {
-            category: "勾配累積(応用)",
-            question: "メモリ不足でバッチサイズを大きくできない時、疑似的に大きなバッチサイズを実現する「勾配累積」の手順として正しいものはどれか。",
-            options: ["複数回のbackward()を行ってから、1回だけstep()とzero_grad()を実行する", "step()を複数回実行してから、backward()を実行する", "zero_grad()を省略する", "lossを足し合わせてからbackward()する"],
+            category: "勾配クリッピング",
+            question: "RNN学習時などの勾配爆発を防ぐため、勾配のノルムが指定値を超えないように制限する関数はどれか。",
+            options: ["torch.nn.utils.clip_grad_norm_", "torch.clip_grad_value", "optimizer.clip_grad", "model.clip_gradients"],
             answer: 0,
-            explanation: "PyTorchはデフォルトで勾配を加算（蓄積）する仕様です。これを利用し、数回backwardして勾配を溜めてから更新することで、大きなバッチと同じ効果を得ます。"
+            explanation: "`clip_grad_norm_` (末尾の_はインプレース操作) を `backward` の後、`step` の前に実行します。"
         },
         {
-            category: "DataLoader(応用)",
-            question: "DataLoaderの引数 `num_workers` は何を設定するものか。",
-            options: ["データ読み込みを行う並列プロセス数（CPU）", "学習に使用するGPUの数", "モデルの層の数", "バッチサイズ"],
+            category: "重みのロード",
+            question: "保存された `state_dict` (重み辞書) をモデルに読み込むメソッドはどれか。",
+            options: ["model.load_state_dict(state_dict)", "model.load_weights(state_dict)", "model.restore(state_dict)", "model.parameters = state_dict"],
             answer: 0,
-            explanation: "データのロード（前処理含む）をCPUの別プロセスで並列に行い、GPU待ち時間を減らすための設定です。"
+            explanation: "保存時は `state_dict()`、読み込み時は `load_state_dict()` です。対になっています。"
         },
         {
-            category: "ModuleList(応用)",
-            question: "複数の層をリストで管理したい場合、Pythonの標準リスト `[]` ではなく `nn.ModuleList` を使うべき理由は何か。",
-            options: ["nn.ModuleListを使わないと、中のパラメータがモデルの一部として登録されず、学習（更新）されないから", "nn.ModuleListの方が計算が速いから", "Pythonのリストは順序が保証されないから", "GPUに転送できないから"],
+            category: "Pooling",
+            question: "2x2の領域の最大値をとるプーリング層を、ストライド2（重なりなし）で定義するコードはどれか。",
+            options: ["nn.MaxPool2d(kernel_size=2, stride=2)", "nn.MaxPool2d(2, 1)", "nn.AvgPool2d(2, 2)", "nn.Pooling2d(2, 2)"],
             answer: 0,
-            explanation: "`nn.Module` を継承したクラス内では、`nn.Module` 系のコンテナに入れないとパラメータ登録（`model.parameters()`への追加）が自動で行われません。"
+            explanation: "カーネルサイズとストライドを同じ値にすると、領域が重ならずにサイズがちょうど半分になります。"
         },
         {
-            category: "forwardメソッド(応用)",
-            question: "モデルに入力 `x` を通す際、`model.forward(x)` ではなく `model(x)` と呼ぶことが推奨される理由は何か。",
-            options: ["`__call__` メソッド内で、forward以外にもHooks（フック）処理などが実行される仕組みになっているため", "forwardメソッドはprivateメソッドだから", "タイプ数が少なくて楽だから", "forwardメソッドが存在しない場合があるから"],
+            category: "GAP (Global Avg Pool)",
+            question: "CNNの出力特徴マップ `(B, C, H, W)` の `H` と `W` を平均して `(B, C, 1, 1)` にする Global Average Pooling を実装するのに適した層はどれか。",
+            options: ["nn.AdaptiveAvgPool2d((1, 1))", "nn.AvgPool2d((H, W))", "x.mean()", "nn.GlobalPool2d()"],
             answer: 0,
-            explanation: "PyTorchのモデルは `__call__` 内で `forward` を呼び出します。この前後でフック処理（層ごとの入出力確認など）が行われるため、直接 `forward` を呼ぶのは避けるべきです。"
+            explanation: "`AdaptiveAvgPool2d` は出力サイズを指定できる便利な層です。`(1, 1)` を指定すれば、入力サイズに関わらず1x1に平均化してくれます。"
         },
         {
-            category: "再現性(応用)",
-            question: "実験の再現性を確保するために、乱数シードを固定する必要がある箇所として**不足している**ものはどれか。",
-            options: ["モデルの重み初期値 (torch.manual_seed)", "データのシャッフル順序 (random.seed, numpy.random.seed)", "GPUの演算精度 (torch.backends.cudnn.deterministic = True)", "学習データのファイル名"],
-            answer: 3,
-            explanation: "ファイル名は結果に影響しません。PyTorch、NumPy、Python標準の乱数、そしてGPU（cuDNN）の非決定的な挙動を全て固定する必要があります。"
-        },
-        {
-            category: "学習率スケジューラ(応用)",
-            question: "学習が進むにつれて学習率を徐々に下げていく `lr_scheduler` を使う場合、`scheduler.step()` はどこで呼ぶのが正しいか。",
-            options: ["エポックごとのループの最後（optimizer.stepの後）", "ミニバッチごとのループの中（loss.backwardの前）", "学習開始前", "推論時"],
+            category: "Batch Norm",
+            question: "中間層の出力チャンネル数が `64` の畳み込み層の直後に Batch Normalization を入れる場合、正しい定義はどれか。",
+            options: ["nn.BatchNorm2d(64)", "nn.BatchNorm2d(128)", "nn.BatchNorm1d(64)", "nn.LayerNorm(64)"],
             answer: 0,
-            explanation: "一般的にスケジューラはエポック単位で学習率を更新します（OneCycleLRなど例外もありますが、基本はエポックの終わりです）。"
+            explanation: "BatchNorm2dの引数は「チャンネル数（特徴マップの枚数）」です。画像サイズ（H, W）ではありません。"
         },
         {
-            category: "重みの初期化(応用)",
-            question: "特定の層（例: `nn.Linear`）の重みをHeの初期値で初期化したい場合、どのように記述するか。",
-            options: ["nn.init.kaiming_normal_(layer.weight)", "layer.weight = nn.init.he()", "layer.init_weights('he')", "model.apply_init('he')"],
+            category: "再現性(乱数固定)",
+            question: "実験結果の再現性を担保するために乱数シードを固定すべき対象として、**不足しているもの**はどれか。",
+            options: ["DataLoaderのworkerプロセス数", "torch.manual_seed", "numpy.random.seed", "torch.backends.cudnn.deterministic = True"],
             answer: 0,
-            explanation: "`torch.nn.init` モジュールにある関数を使い、`layer.weight` テンソルを直接書き換えます（末尾に `_` がつくメソッドはインプレース操作を表します）。"
+            explanation: "worker数は速度に関係しますが、乱数の再現性には直接関係しません。再現性のためには PyTorch, NumPy, Python標準, cuDNN のシード/設定固定が必要です。"
+        },
+
+        // ---------------------------------------------------------
+        // 【Part 3: RNN/LSTM 特化 (要注意！)】
+        // ---------------------------------------------------------
+        {
+            category: "RNNの入力形状",
+            question: "nn.LSTM(input_size=10, hidden_size=20, batch_first=True) に入力するテンソルの正しい形状はどれか。",
+            options: ["(Batch_size, Seq_len, 10)", "(Seq_len, Batch_size, 10)", "(Batch_size, 10, Seq_len)", "(10, Batch_size, Seq_len)"],
+            answer: 0,
+            explanation: "`batch_first=True` を指定すると、バッチサイズが先頭 `(N, L, H_in)` になります。指定しないデフォルトは `(L, N, H_in)` です。"
+        },
+        {
+            category: "LSTMの戻り値",
+            question: "`output, (hn, cn) = lstm(input)` とした時、`output` 変数には何が入っているか。",
+            options: ["全ての時刻（ステップ）における隠れ層の出力", "最後の時刻の隠れ層の出力のみ", "全ての時刻のメモリセルの状態", "損失関数の値"],
+            answer: 0,
+            explanation: "`output` には「全時刻」の出力が含まれます。`hn` には「最後」の時刻の隠れ状態だけが含まれます。Seq2Seqなどで使い分けます。"
+        },
+        {
+            category: "LSTMの隠れ状態形状",
+            question: "`batch_first=True` を設定していても、戻り値の `hn` (隠れ状態) の形状は変化しない。正しい形状はどれか。",
+            options: ["(Num_layers * Num_directions, Batch_size, Hidden_size)", "(Batch_size, Num_layers, Hidden_size)", "(Num_layers, Batch_size, Hidden_size)", "(Batch_size, Seq_len, Hidden_size)"],
+            answer: 0,
+            explanation: "ここが最大の引っ掛けポイントです！ `output` はバッチファーストになりますが、`hn` と `cn` は常に `(Layers, Batch, Hidden)` の順序（Batchが2番目）です。"
+        },
+        {
+            category: "双方向LSTM",
+            question: "`nn.LSTM(..., hidden_size=50, bidirectional=True)` と定義した場合、出力テンソル (`output`) の最後の次元数（特徴量数）はいくつになるか。",
+            options: ["100 (50 × 2)", "50", "25", "200"],
+            answer: 0,
+            explanation: "双方向（Bidirectional）の場合、順方向と逆方向の隠れ状態が結合（Concat）されて出力されるため、サイズは `hidden_size * 2` になります。"
+        },
+        {
+            category: "RNNと全結合",
+            question: "RNNの出力（多対一タスクの場合、最後の時刻の出力）を全結合層に入れて分類を行う際、適切な処理はどれか。",
+            options: ["output[:, -1, :] を取り出して全結合層に入れる", "output[:, 0, :] を取り出して全結合層に入れる", "output全体を全結合層に入れる", "hn をそのまま全結合層に入れる"],
+            answer: 0,
+            explanation: "`output` は `(Batch, Seq, Hidden)` なので、`output[:, -1, :]` で「全バッチの、最後の時刻の、全特徴量」を取り出せます。"
+        },
+        {
+            category: "Embedding層",
+            question: "自然言語処理で単語IDをベクトルに変換する `nn.Embedding(num_embeddings, embedding_dim)` の `num_embeddings` には通常何を指定するか。",
+            options: ["語彙数（ユニークな単語の総数）", "1文の最大単語数", "バッチサイズ", "隠れ層のサイズ"],
+            answer: 0,
+            explanation: "Embedding層は「語彙数 × ベクトル次元」のルックアップテーブルを作る層です。"
+        },
+        {
+            category: "Dropoutの場所",
+            question: "3層のMLPにおいて、Dropout層を挿入する最も一般的な位置はどこか。",
+            options: ["活性化関数（ReLUなど）の後", "全結合層（Linear）の前", "出力層の後", "入力層の前"],
+            answer: 0,
+            explanation: "Linear → Activation → Dropout → Linear... の順が一般的です。活性化したニューロンをランダムに無効化します。"
+        },
+        {
+            category: "パラメータ更新の除外",
+            question: "特定のパラメータだけ学習率を変えたい場合、Optimizerにどう渡すべきか。",
+            options: ["[{'params': model.layer1.parameters(), 'lr': 0.01}, {'params': model.layer2.parameters(), 'lr': 0.001}] のようなリストを渡す", "Optimizerを2つ定義する", "できない", "学習ループ内で条件分岐する"],
+            answer: 0,
+            explanation: "Optimizerのコンストラクタには、パラメータのリストだけでなく、パラメータグループごとの辞書リストを渡すことができます。"
+        },
+        {
+            category: "学習率スケジューラ",
+            question: "学習率をエポックごとに減衰させる `scheduler.step()` は、学習ループのどこに記述すべきか。",
+            options: ["エポックごとのループの末尾（ミニバッチループの外）", "ミニバッチごとのループの中", "optimizer.step() の直後", "loss.backward() の前"],
+            answer: 0,
+            explanation: "多くのスケジューラ（StepLRなど）はエポック単位で動作するため、ミニバッチループを抜けた後に実行します。"
+        },
+        {
+            category: "Collate_fn",
+            question: "DataLoaderにおいて、ミニバッチ内のデータの長さがバラバラ（自然言語など）な場合に、パディング処理などを挟んでバッチを整形するために使う引数はどれか。",
+            options: ["collate_fn", "worker_init_fn", "batch_sampler", "drop_last"],
+            answer: 0,
+            explanation: "デフォルトの動作ではTensorに変換してスタックするだけなので、長さが違うとエラーになります。`collate_fn` に自作関数を渡してパディング処理を実装します。"
         }
     ]
 };
