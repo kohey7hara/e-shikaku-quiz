@@ -114,12 +114,22 @@ const menuConfig = [
         id: "05_dev_edge_dist",
         title: "5-（１）（２）エッジAI & 分散処理",
         desc: "軽量化(蒸留・量子化・プルーニング) / モデル並列・データ並列",
-        isActive: true // ★今回作成 Part 1
+        isActive: true
     },
     {
         id: "05_dev_accel_env",
         title: "5-（３）（４）ハードウェア & 環境構築",
         desc: "GPU / TPU / SIMD / コンテナ仮想化(Docker)",
-        isActive: true // ★今回作成 Part 2
+        isActive: true
+    },
+
+    // =================================================================
+    // ６．実装対策 (PyTorch)
+    // =================================================================
+    {
+        id: "06_pytorch_implementation",
+        title: "6. PyTorch実装対策ドリル",
+        desc: "モデル定義 / 学習ループ / Dataset・DataLoader / 転移学習 / GPU処理",
+        isActive: true // ★今回追加
     }
 ];
