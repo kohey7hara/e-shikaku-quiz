@@ -7,8 +7,8 @@ const menuConfig = [
     {
         id: "01_math_basics",
         title: "1-（２）（３）確率・統計 & 情報理論",
-        desc: "ベイズ則 / 最尤推定 / MAP推定 / エントロピー / KLダイバージェンス",
-        isActive: true // ★データ作成済み
+        desc: "ベイズ則 / 最尤・MAP推定 / エントロピー / KLダイバージェンス",
+        isActive: true
     },
 
     // =================================================================
@@ -17,14 +17,14 @@ const menuConfig = [
     {
         id: "02_ml_basics_1",
         title: "2-（１）機械学習の基礎：パターン認識・分類",
-        desc: "k近傍法 / 距離計算 / 教師あり・なし・半教師あり / 過学習",
-        isActive: true // データ未作成（リンク有効）
+        desc: "k近傍法 / 距離計算 / 教師あり・なし / 過学習 / バイアス・バリアンス",
+        isActive: true
     },
     {
         id: "02_ml_basics_2",
         title: "2-（１）機械学習の基礎：検証・性能指標",
         desc: "交差検証 / Accuracy / Precision / Recall / F値 / ROC / AUC",
-        isActive: true // データ未作成（リンク有効）
+        isActive: true
     },
 
     // =================================================================
@@ -33,19 +33,19 @@ const menuConfig = [
     {
         id: "03_dl_feedforward",
         title: "3-（１）順伝播型ネットワーク",
-        desc: "MLP / 損失関数(MSE, CrossEntropy) / 活性化関数(ReLU, Sigmoid)",
+        desc: "MLP / 損失関数 / 活性化関数(ReLU, Sigmoid)",
         isActive: true
     },
     {
         id: "03_dl_optimization",
         title: "3-（２）深層モデルのための最適化",
-        desc: "SGD / Momentum / Adam / 誤差逆伝播法 / 初期化(He, Xavier)",
+        desc: "SGD / Adam / 誤差逆伝播法 / 初期化(He, Xavier)",
         isActive: true
     },
     {
         id: "03_dl_regularization",
         title: "3-（３）深層モデルのための正則化",
-        desc: "L1・L2正則化 / Dropout / Early Stopping",
+        desc: "L1・L2正則化 / Dropout / Batch Norm / Early Stopping",
         isActive: true
     },
     {
@@ -57,7 +57,7 @@ const menuConfig = [
     {
         id: "03_dl_rnn",
         title: "3-（５）RNN (リカレントニューラルネットワーク)",
-        desc: "BPTT / LSTM / GRU / ゲート機構 / Seq2Seq / Attention",
+        desc: "BPTT / LSTM / GRU / Seq2Seq / Attention",
         isActive: true
     },
     {
@@ -69,7 +69,7 @@ const menuConfig = [
     {
         id: "03_dl_generalization",
         title: "3-（７）汎化性能向上のテクニック",
-        desc: "データ拡張(MixUp) / Batch Norm / アンサンブル / ハイパーパラメータ探索",
+        desc: "データ拡張(MixUp) / Batch Norm / アンサンブル",
         isActive: true
     },
 
@@ -78,8 +78,8 @@ const menuConfig = [
     // =================================================================
     {
         id: "04_app_image",
-        title: "4-（１）（２）（３）画像認識・物体検出・セグメンテーション",
-        desc: "ResNet / ViT / YOLO / R-CNN / FCN / U-Net / IoU / mAP",
+        title: "4-（１〜３）画像認識・物体検出・セグメンテーション",
+        desc: "ResNet / ViT / YOLO / R-CNN / U-Net / IoU / mAP",
         isActive: true
     },
     {
@@ -103,7 +103,7 @@ const menuConfig = [
     {
         id: "04_app_misc",
         title: "4-（８）（９）様々な学習方法 & 説明性",
-        desc: "転移学習 / 距離学習 / XAI (Grad-CAM, SHAP, LIME)",
+        desc: "転移学習 / 距離学習 / XAI (Grad-CAM, SHAP)",
         isActive: true
     },
 
@@ -111,9 +111,15 @@ const menuConfig = [
     // ５．開発・運用環境
     // =================================================================
     {
-        id: "05_dev_env",
-        title: "5-（１）〜（４）開発環境と軽量化",
-        desc: "軽量化(蒸留, 量子化) / Docker / 分散処理 / GPU / TPU",
-        isActive: true
+        id: "05_dev_edge_dist",
+        title: "5-（１）（２）エッジAI & 分散処理",
+        desc: "軽量化(蒸留・量子化・プルーニング) / モデル並列・データ並列",
+        isActive: true // ★今回作成 Part 1
+    },
+    {
+        id: "05_dev_accel_env",
+        title: "5-（３）（４）ハードウェア & 環境構築",
+        desc: "GPU / TPU / SIMD / コンテナ仮想化(Docker)",
+        isActive: true // ★今回作成 Part 2
     }
 ];
