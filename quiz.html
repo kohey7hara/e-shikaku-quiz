@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E資格対策クイズ</title>
+    <style>
+        body { font-family: "Helvetica Neue", Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; color: #333; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        .home-btn { text-decoration: none; background: #6c757d; color: white; padding: 8px 15px; border-radius: 5px; font-size: 0.9em; }
+        
+        /* タブデザイン */
+        .tabs { display: flex; margin-bottom: 20px; gap: 10px; }
+        .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; color: #555; background: #e9ecef; border-radius: 5px; transition: 0.2s; }
+        .tab.active { background: #0277bd; color: white; }
+        
+        /* コンテンツエリア */
+        .content-area { display: none; }
+        .content-area.active { display: block; animation: fadeIn 0.3s; }
+
+        /* チートシート */
+        .cheat-sheet { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); line-height: 1.6; }
+        .cheat-sheet h3 { border-left: 4px solid #0277bd; padding-left: 10px; margin-top: 25px; background: #f0f7ff; padding: 5px 10px; }
+        .cheat-sheet table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.9em; }
+        .cheat-sheet th, .cheat-sheet td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .cheat-sheet th { background-color: #e1f5fe; }
+        
+        /* クイズカード */
+        .question-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .category-tag { display: inline-block; background: #e1f5fe; color: #0277bd; padding: 3px 8px; border-radius: 3px; font-size: 0.75em; font-weight: bold; margin-bottom: 8px; }
+        .question-text { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; }
+        .option-btn { width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; border: 1px solid #ddd; background: #fff; border-radius: 5px; cursor: pointer; transition: 0.2s; font-size: 0.95em;}
+        .option-btn:hover { background-color: #f8f9fa; }
+        
+        .result { margin-top: 15px; padding: 15px; border-radius: 5px; display: none; }
+        .correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .explanation { margin-top: 10px; font-size: 0.9em; line-height: 1.5; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 10px;}
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <header>
+        <h3 id="quizTitle" style="margin:0;">読み込み中...</h3>
+        <a href="index.html" class="home-btn">メニューへ</a>
+    </header>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('cheatsheet')">📖 要点まとめ</div>
+        <div class="tab" onclick="switchTab('quiz')">✍️ 演習問題</div>
+    </div>
+
+    <div id="cheatsheet-area" class="content-area active">
+        <div id="cheatSheetContent" class="cheat-sheet"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="tab" style="background:#0277bd; color:white; width:200px; display:inline-block;" onclick="switchTab('quiz')">問題を解く！</button>
+        </div>
+    </div>
+
+    <div id="quiz-area" class="content-area">
+        <div id="scoreBoard" style="text-align:center; font-weight:bold; margin-bottom:15px; color:#555;"></div>
+        <div id="quizContainer"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

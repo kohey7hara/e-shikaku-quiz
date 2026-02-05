@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E資格対策ドリル - メニュー</title>
+    <style>
+        body { font-family: "Helvetica Neue", Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; color: #333; }
+        h1 { text-align: center; color: #2c3e50; }
+        .menu-list { list-style: none; padding: 0; }
+        .menu-item { background: white; margin-bottom: 15px; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; cursor: pointer; border-left: 5px solid #0277bd; }
+        .menu-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        .menu-item a { text-decoration: none; color: #333; display: block; }
+        .menu-title { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; display: block;}
+        .menu-desc { font-size: 0.85em; color: #666; }
+        .old-link { text-align: center; margin-top: 30px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>E資格対策ドリル</h1>
+    <p style="text-align:center">学習したい単元を選んでください</p>
+    
+    <ul class="menu-list">
+        <li class="menu-item">
+            <a href="quiz.html?id=01_param">
+                <span class="menu-title">（２）確率モデルにおけるパラメータ推定</span>
+                <span class="menu-desc">ベイズ則 / 最尤推定 / MAP推定 / MSE など</span>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a href="quiz.html?id=02_ml">
+                <span class="menu-title">（４）機械学習の基礎</span>
+                <span class="menu-desc">評価指標 / 検証手法 / 正則化 / 前処理 など</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="old-link">
+        <a href="index_old.html">📂 以前のバージョン（単独ファイル）はこちら</a>
+    </div>
+</body>
+</html>
