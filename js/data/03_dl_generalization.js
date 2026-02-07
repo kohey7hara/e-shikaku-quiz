@@ -4,102 +4,118 @@ window.quizData = {
     cheatSheet: `
         <style>
             .flow-wrap { display: flex; align-items: center; justify-content: center; gap: 5px; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; flex-wrap: wrap; }
-            .flow-box { border: 2px solid #333; padding: 8px; background: white; border-radius: 5px; text-align: center; width: 90px; position: relative; }
+            .flow-box { border: 2px solid #333; padding: 8px; background: white; border-radius: 5px; text-align: center; width: 100px; position: relative; }
             .arrow { color: #555; font-weight: bold; }
             
             .norm-visual-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; }
-            .norm-card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; width: 45%; min-width: 250px; background: #fff; }
+            .norm-card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; width: 45%; min-width: 300px; background: #fff; vertical-align: top; }
             
-            .data-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin: 10px auto; width: 80%; }
-            .cell { height: 20px; background: #eee; border: 1px solid #ddd; }
+            .data-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin: 5px auto; width: 60%; }
+            .cell { height: 15px; background: #eee; border: 1px solid #ddd; }
             
-            /* Batch Norm: 縦（データ間）でまとめる */
-            .bn-highlight { background-color: #3498db; } 
+            /* 色分け */
+            .bn-highlight { background-color: #3498db; } /* Blue */
+            .ln-highlight { background-color: #e74c3c; } /* Red */
+            .in-highlight { background-color: #27ae60; } /* Green */
             
-            /* Layer Norm: 横（データ内全Ch）でまとめる */
-            .ln-highlight { background-color: #e74c3c; }
-            
-            /* Instance Norm: 個別 */
-            .in-highlight { background-color: #27ae60; }
-            
+            .pros-cons { font-size: 0.8em; text-align: left; margin-top: 8px; background: #f9f9f9; padding: 5px; border-radius: 4px; }
+            .pros-cons li { margin-bottom: 3px; list-style-type: none; padding-left: 1em; text-indent: -1em; }
+            .mark-good { color: #27ae60; font-weight: bold; }
+            .mark-bad { color: #e74c3c; font-weight: bold; }
+
             .tech-table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
             .tech-table th { background: #eee; border: 1px solid #ccc; padding: 5px; }
             .tech-table td { border: 1px solid #ccc; padding: 5px; }
         </style>
 
         <h3>■ 正規化 (Normalization) の位置と役割</h3>
-        <p>「学習を安定・高速化」させるために、層と層の間でデータを整形します。</p>
+        <p>「学習を安定・高速化」させるために、層と層の間でデータを整形（平均0, 分散1）します。</p>
         
         <div class="flow-wrap">
             <div class="flow-box">
                 Affine<br>
                 <small>畳み込み等</small>
-                <br>$Wx+b$
+                <br><strong>Wx + b</strong>
             </div>
             <div class="arrow">→</div>
             <div class="flow-box" style="background:#eafaf1; border-color:#27ae60;">
                 <strong>正規化</strong><br>
                 <small>Normalize</small>
-                <br>$\hat{x} = \frac{x-\mu}{\sigma}$
+                <br><span style="font-family:serif;">(x - &mu;) / &sigma;</span>
             </div>
             <div class="arrow">→</div>
             <div class="flow-box" style="background:#fef9e7; border-color:#f39c12;">
                 <strong>活性化</strong><br>
                 <small>ReLU等</small>
-                <br>$f(\hat{x})$
+                <br><strong>f(x)</strong>
             </div>
         </div>
         <p style="font-size:0.8em; color:#666;">
-            ※平均0、分散1に揃えることで、データの偏りを正します。<br>
-            ※その後、学習可能なパラメータ $\gamma, \beta$ で適度にスケール・シフトします。
+            ※そのあと、学習可能なパラメータ &gamma; (スケール), &beta; (シフト) で調整します。
         </p>
 
-        <h3>■ 図解：正規化の守備範囲（どこをまとめる？）</h3>
-        <p>「N: バッチ(データ数)」「C: チャンネル(特徴)」の行列でイメージしてください。</p>
+        <h3>■ 図解：正規化の守備範囲と使い分け</h3>
+        <p>「データのどこを使って平均・分散を計算するか」の違いです。</p>
         
         <div class="norm-visual-container">
             <div class="norm-card">
-                <strong>Batch Norm (CNN向)</strong><br>
-                <small>同じチャンネルの「全データ」をまとめる</small>
+                <strong style="color:#3498db;">Batch Norm (BN)</strong><br>
+                <small>同じチャンネルの「バッチ全体」をまとめる</small>
                 <div class="data-grid">
                     <div class="cell bn-highlight"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
                     <div class="cell bn-highlight"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
                     <div class="cell bn-highlight"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
                 </div>
-                <div style="font-size:0.8em; color:#3498db;">縦方向 (Batch依存)</div>
+                <div class="pros-cons">
+                    <li><span class="mark-good">〇</span> <strong>CNN (画像)</strong> の標準。学習が爆速になる。</li>
+                    <li><span class="mark-bad">×</span> <strong>バッチサイズ依存</strong>。サイズが小さいと計算が狂う。</li>
+                    <li><span class="mark-bad">×</span> RNN (系列データ) には不向き。</li>
+                </div>
             </div>
 
             <div class="norm-card">
-                <strong>Layer Norm (RNN/Transfomer向)</strong><br>
+                <strong style="color:#e74c3c;">Layer Norm (LN)</strong><br>
                 <small>1つのデータの「全チャンネル」をまとめる</small>
                 <div class="data-grid">
                     <div class="cell ln-highlight"></div><div class="cell ln-highlight"></div><div class="cell ln-highlight"></div><div class="cell ln-highlight"></div>
                     <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
                     <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
                 </div>
-                <div style="font-size:0.8em; color:#e74c3c;">横方向 (Batch非依存)</div>
+                <div class="pros-cons">
+                    <li><span class="mark-good">〇</span> <strong>RNN / Transformer (NLP)</strong> の標準。</li>
+                    <li><span class="mark-good">〇</span> バッチサイズに依存しない。</li>
+                    <li><span class="mark-bad">×</span> 画像処理ではBNに劣ることが多い。</li>
+                </div>
             </div>
             
             <div class="norm-card">
-                <strong>Instance Norm (Style変換向)</strong><br>
+                <strong style="color:#27ae60;">Instance Norm (IN)</strong><br>
                 <small>1データ・1チャンネルごとに独立</small>
                 <div class="data-grid">
                     <div class="cell in-highlight"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
                     <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
                     <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
                 </div>
-                <div style="font-size:0.8em; color:#27ae60;">個別に計算</div>
+                <div class="pros-cons">
+                    <li><span class="mark-good">〇</span> <strong>スタイル変換 (GAN)</strong> で有効。</li>
+                    <li><span class="mark-good">〇</span> 画像ごとのコントラストを正規化できる。</li>
+                    <li><span class="mark-bad">×</span> 分類タスクでは重要な情報も消してしまう。</li>
+                </div>
             </div>
 
             <div class="norm-card">
-                <strong>Group Norm (汎用)</strong><br>
+                <strong style="color:#27ae60;">Group Norm (GN)</strong><br>
                 <small>チャンネルをいくつかのグループに分ける</small>
                 <div class="data-grid">
                     <div class="cell in-highlight"></div><div class="cell in-highlight"></div><div class="cell"></div><div class="cell"></div>
                     <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
                     <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
                 </div>
-                <div style="font-size:0.8em; color:#27ae60;">Batch Normの代替 (Batchサイズ小でもOK)</div>
+                <div class="pros-cons">
+                    <li><span class="mark-good">〇</span> <strong>物体検出</strong>など高解像度タスク向け。</li>
+                    <li><span class="mark-good">〇</span> バッチサイズが小さくても(2〜4)安定する。</li>
+                    <li><span class="mark-good">〇</span> BNの代替として優秀。</li>
+                </div>
             </div>
         </div>
 
@@ -132,11 +148,11 @@ window.quizData = {
             <tr>
                 <td rowspan="3"><strong>アンサンブル</strong><br>(合議制)</td>
                 <td><strong>バギング</strong><br>(Bagging)</td>
-                <td>並列に独立学習 → 多数決・平均。<br>例: Random Forest。<br><strong>バリアンス</strong>を下げる。</td>
+                <td>並列に独立学習 → 多数決・平均。<br>例: Random Forest。<br><strong>バリアンス</strong>（過学習）を下げる。</td>
             </tr>
             <tr>
                 <td><strong>ブースティング</strong><br>(Boosting)</td>
-                <td>直列に学習。前のモデルの失敗を次が修正。<br>例: XGBoost, LightGBM。<br><strong>バイアス</strong>を下げる。</td>
+                <td>直列に学習。前のモデルの失敗を次が修正。<br>例: XGBoost, LightGBM。<br><strong>バイアス</strong>（学習不足）を下げる。</td>
             </tr>
             <tr>
                 <td><strong>スタッキング</strong><br>(Stacking)</td>
@@ -149,7 +165,7 @@ window.quizData = {
             </tr>
             <tr>
                 <td><strong>ランダムサーチ</strong></td>
-                <td>ランダムに試す。グリッドより効率が良いことが多い。</td>
+                <td>ランダムに試す。グリッドより効率が良いことが多い（重要なパラメータを細かく探索できるため）。</td>
             </tr>
             <tr>
                 <td><strong>ベイズ最適化</strong></td>
@@ -159,6 +175,7 @@ window.quizData = {
     `,
 
     questions: [
+        // ... (問題データは変更なし) ...
         // ---------------------------------------------------------
         // 【基礎編】 Q1 - Q15
         // ---------------------------------------------------------
@@ -167,7 +184,7 @@ window.quizData = {
             question: "Batch Normalization（バッチ正規化）を導入する主な目的として、最も適切なものはどれか。",
             options: ["内部共変量シフト（学習中の層ごとの入力分布の変化）を抑え、学習を安定・高速化させる", "モデルのパラメータ数を減らす", "過学習を完全に防ぐ", "入力画像サイズを小さくする"],
             answer: 0,
-            explanation: "層が深くなると、手前の層の更新によって分布がコロコロ変わり、後ろの層が学習しづらくなる現象（内部共変量シフト）を解決します。"
+            explanation: "層が深くなるにつれ、手前の層の更新によって分布がコロコロ変わり、後ろの層が学習しづらくなる現象（内部共変量シフト）を解決します。"
         },
         {
             category: "BNの推論時",
@@ -234,7 +251,7 @@ window.quizData = {
         },
         {
             category: "正規化のスケール戻し",
-            question: "Batch Normalizationなどの正規化層では、$\hat{x} = \frac{x-\mu}{\sigma}$ で正規化した後に、$y = \gamma \hat{x} + \beta$ という変換を行う。この $\gamma$ と $\beta$ は何か。",
+            question: "Batch Normalizationなどの正規化層では、正規化した後に $y = \\gamma x + \\beta$ という変換を行う。この $\\gamma$ と $\\beta$ は何か。",
             options: ["学習によって更新されるパラメータ（スケールとシフト）", "固定の定数（1と0）", "バッチサイズ", "学習率"],
             answer: 0,
             explanation: "単に正規化するだけだと表現力が落ちる場合があるため、モデルが必要に応じて元の分布に戻したり変形したりできるように、学習可能なパラメータを持たせています。"
