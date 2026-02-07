@@ -9,6 +9,8 @@ window.quizData = {
             .graph-icon { width: 60px; height: 40px; border: 1px solid #ccc; background: #fff; margin: auto; }
             .graph-line { stroke: #e74c3c; stroke-width: 2; fill: none; }
             .axis { stroke: #ccc; stroke-width: 1; }
+            .bar-container { display: flex; align-items: flex-end; justify-content: space-around; height: 35px; width: 50px; margin: auto; }
+            .bar { width: 10px; background: #3498db; }
         </style>
 
         <h3>■ 順伝播の流れ：①計算 → ②変換</h3>
@@ -34,72 +36,114 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ 【重要】タスク別・出力層の鉄板セット</h3>
-        <p>最終段（出力層）では、タスクに応じて<strong>②活性化関数</strong>を使い分けます。<br>※①全結合層は、必要な出力数（クラス数など）に合わせるために必ず存在します。</p>
+        <h3>■ 活性化関数図鑑 (E資格 必須セット)</h3>
+        <p>形状と「微分の性質」が問われます。</p>
         <table>
-            <tr><th>タスク</th><th>② 活性化関数の選択</th><th>損失関数の選択</th></tr>
-            <tr>
-                <td><strong>回帰</strong><br>(数値予測)</td>
-                <td><strong>恒等関数</strong> (Identity)<br><small>※何もせず値をそのまま通す</small></td>
-                <td><strong>平均二乗誤差</strong><br>(MSE)</td>
-            </tr>
-            <tr>
-                <td><strong>2値分類</strong><br>(Yes/No)</td>
-                <td><strong>Sigmoid</strong><br><small>※出力を 0.0〜1.0 の確率にする</small></td>
-                <td><strong>バイナリ<br>クロスエントロピー</strong></td>
-            </tr>
-            <tr>
-                <td><strong>多クラス分類</strong><br>(どれか1つ)</td>
-                <td><strong>Softmax</strong><br><small>※出力の合計を 1.0 (100%) にする</small></td>
-                <td><strong>交差エントロピー</strong><br>(Cross Entropy)</td>
-            </tr>
-        </table>
-
-        <h3>■ 中間層（隠れ層）の活性化関数とグラフ</h3>
-        <p>学習効率を決める重要なパーツです。形状をイメージで覚えましょう。</p>
-        <table>
-            <tr><th>関数名</th><th>グラフ形状 (イメージ)</th><th>特徴・微分の最大値</th></tr>
+            <tr><th>関数名</th><th>形状 (イメージ)</th><th>特徴・試験のツボ</th></tr>
             <tr>
                 <td><strong>ReLU</strong><br>(Rectified Linear Unit)</td>
                 <td>
                     <svg class="graph-icon" viewBox="0 0 60 40">
-                        <line x1="0" y1="30" x2="60" y2="30" class="axis" /> <line x1="30" y1="0" x2="30" y2="40" class="axis" /> <polyline points="0,30 30,30 55,5" class="graph-line" />
+                        <line x1="0" y1="30" x2="60" y2="30" class="axis" />
+                        <line x1="30" y1="0" x2="30" y2="40" class="axis" />
+                        <polyline points="0,30 30,30 55,5" class="graph-line" />
                     </svg>
                 </td>
                 <td>
-                    <strong>「カクッとした形」</strong><br>
-                    ・$x > 0$ で傾きが常に <strong>1.0</strong>。<br>
-                    ・勾配消失しにくく、計算最速。<br>
-                    ・今のディープラーニングの主役。
+                    <strong>「今の主役」</strong><br>
+                    ・$x > 0$ で微分値が <strong>1.0</strong>（勾配消失しない）。<br>
+                    ・$x \\le 0$ で微分値 0。<br>
+                    ・計算が超高速。
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Leaky ReLU</strong><br>(LReLU)</td>
+                <td>
+                    <svg class="graph-icon" viewBox="0 0 60 40">
+                        <line x1="0" y1="30" x2="60" y2="30" class="axis" />
+                        <line x1="30" y1="0" x2="30" y2="40" class="axis" />
+                        <polyline points="0,35 30,30 55,5" class="graph-line" />
+                    </svg>
+                </td>
+                <td>
+                    <strong>「死んだReLU対策」</strong><br>
+                    ・$x < 0$ でもわずかに傾き（$\\alpha=0.01$等）を持つ。<br>
+                    ・学習が止まる現象(Dying ReLU)を防ぐ。
                 </td>
             </tr>
             <tr>
                 <td><strong>Sigmoid</strong><br>(シグモイド)</td>
                 <td>
                     <svg class="graph-icon" viewBox="0 0 60 40">
-                        <line x1="0" y1="35" x2="60" y2="35" class="axis" /> <line x1="30" y1="0" x2="30" y2="40" class="axis" /> <path d="M5,35 C20,35 20,5 55,5" class="graph-line" />
+                        <line x1="0" y1="35" x2="60" y2="35" class="axis" />
+                        <line x1="30" y1="0" x2="30" y2="40" class="axis" />
+                        <path d="M5,35 C20,35 20,5 55,5" class="graph-line" />
                     </svg>
                 </td>
                 <td>
-                    <strong>「滑らかなS字 (0〜1)」</strong><br>
-                    ・微分最大値は <strong>0.25</strong> ($x=0$)。<br>
-                    ・1より小さいため、層を重ねると勾配が消えていく（勾配消失）。
+                    <strong>「確率 (0〜1) に変換」</strong><br>
+                    ・2値分類の出力層で使う。<br>
+                    ・中間層で使うと<strong>勾配消失</strong>の原因になる（最大微分値0.25）。
                 </td>
             </tr>
             <tr>
                 <td><strong>Tanh</strong><br>(タンエイチ)</td>
                 <td>
                     <svg class="graph-icon" viewBox="0 0 60 40">
-                        <line x1="0" y1="20" x2="60" y2="20" class="axis" /> <line x1="30" y1="0" x2="30" y2="40" class="axis" /> <path d="M5,35 C25,35 35,5 55,5" class="graph-line" />
+                        <line x1="0" y1="20" x2="60" y2="20" class="axis" />
+                        <line x1="30" y1="0" x2="30" y2="40" class="axis" />
+                        <path d="M5,35 C25,35 35,5 55,5" class="graph-line" />
                     </svg>
                 </td>
                 <td>
-                    <strong>「ゼロ中心のS字 (-1〜1)」</strong><br>
-                    ・微分最大値は <strong>1.0</strong> ($x=0$)。<br>
-                    ・0を中心に対称なので、Sigmoidより学習バランスが良い。
+                    <strong>「ゼロ中心 (-1〜1)」</strong><br>
+                    ・Sigmoidより学習効率が良い。<br>
+                    ・RNNなどでよく使われる。
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Step関数</strong><br>(階段関数)</td>
+                <td>
+                    <svg class="graph-icon" viewBox="0 0 60 40">
+                        <line x1="0" y1="30" x2="60" y2="30" class="axis" />
+                        <line x1="30" y1="0" x2="30" y2="40" class="axis" />
+                        <polyline points="0,30 30,30 30,10 60,10" class="graph-line" />
+                    </svg>
+                </td>
+                <td>
+                    <strong>「元祖・パーセプトロン」</strong><br>
+                    ・0か1か。<br>
+                    ・$x=0$ で不連続、他は傾き0のため、<strong>誤差逆伝播法が使えない</strong>。
                 </td>
             </tr>
         </table>
+
+        <h3>■ 多クラス分類の切り札：Softmax関数</h3>
+        <p>出力層で使われます。数値を「確率分布」に変換します。</p>
+        <div style="display:flex; justify-content:space-around; align-items:center; background:#fff; padding:10px; border:1px solid #ccc; border-radius:5px;">
+            <div style="text-align:center;">
+                <strong>入力 (Logits)</strong><br>
+                <small>バラバラな数値</small><br>
+                <code>[2.0, 1.0, 0.1]</code>
+            </div>
+            <div class="arrow">→</div>
+            <div style="text-align:center; background:#eef; padding:5px; border-radius:5px;">
+                <strong>Softmax</strong><br>
+                <small>$y_i = \frac{e^{x_i}}{\sum e^{x_k}}$</small>
+            </div>
+            <div class="arrow">→</div>
+            <div style="text-align:center;">
+                <strong>出力 (Probability)</strong><br>
+                <small>合計 1.0 (100%)</small><br>
+                <div class="bar-container">
+                    <div class="bar" style="height:25px;"></div>
+                    <div class="bar" style="height:10px;"></div>
+                    <div class="bar" style="height:2px;"></div>
+                </div>
+                <code>[0.7, 0.2, 0.1]</code>
+            </div>
+        </div>
+        <p style="font-size:0.8em; color:#666; margin-top:5px;">※入力の大小関係を保ったまま、合計が1になるように正規化します。</p>
     `,
 
     questions: [
