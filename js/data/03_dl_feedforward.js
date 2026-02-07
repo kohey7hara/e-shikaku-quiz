@@ -2,23 +2,93 @@ window.quizData = {
     title: "3-（１）順伝播型ネットワーク：MLP・活性化関数",
     
     cheatSheet: `
-        <h3>■ 【重要】タスク別・出力層と損失関数の組み合わせ</h3>
-        <p>この表はE資格で最も問われる基本セットです。丸暗記しましょう。</p>
+        <style>
+            .flow-box { display: flex; align-items: center; justify-content: center; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; }
+            .step { border: 2px solid #333; padding: 5px 10px; background: white; border-radius: 5px; text-align: center; }
+            .arrow { margin: 0 5px; font-weight: bold; color: #555; }
+            .note { font-size: 0.8em; color: #666; margin-top: 5px; }
+        </style>
+
+        <h3>■ 順伝播 (Forward Propagation) の流れ</h3>
+        <p>データは層を通過するたびに、「線形変換」と「非線形変換」を繰り返します。</p>
+        
+        <div class="flow-box">
+            <div class="step">
+                <strong>入力 $x$</strong><br>
+                <small>画像・数値</small>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step" style="background:#eef;">
+                <strong>① 全結合層</strong><br>
+                (Affine)<br>
+                $u = Wx + b$
+            </div>
+            <div class="arrow">→</div>
+            <div class="step" style="background:#fee;">
+                <strong>② 活性化関数</strong><br>
+                (Activation)<br>
+                $z = f(u)$
+            </div>
+            <div class="arrow">→</div>
+            <div class="step">
+                <strong>次の層へ</strong><br>
+                <small>または出力</small>
+            </div>
+        </div>
+        <p class="note">
+            <strong>① 線形変換</strong>: 回転・拡大縮小・平行移動。<br>
+            <strong>② 非線形変換</strong>: 複雑な境界線を引くために必須（これがないと層を重ねる意味がない）。
+        </p>
+
+        <h3>■ 【重要】タスク別・出力層の鉄板セット</h3>
+        <p>「どんな問題を解くか」で、最後のドア（出力層）と採点方法（損失関数）が決まります。</p>
         <table>
-            <tr><th>タスク</th><th>出力層の活性化関数</th><th>損失関数</th></tr>
-            <tr><td><strong>回帰</strong> (数値予測)</td><td><strong>恒等関数</strong> (そのまま)</td><td><strong>平均二乗誤差 (MSE)</strong></td></tr>
-            <tr><td><strong>2値分類</strong> (Yes/No)</td><td><strong>シグモイド関数</strong></td><td><strong>バイナリクロスエントロピー</strong></td></tr>
-            <tr><td><strong>多クラス分類</strong> (どれか1つ)</td><td><strong>ソフトマックス関数</strong></td><td><strong>交差エントロピー誤差</strong></td></tr>
-            <tr><td><strong>マルチラベル分類</strong> (複数可)</td><td><strong>シグモイド関数</strong></td><td><strong>バイナリクロスエントロピー</strong><br>(クラスごとに独立判定)</td></tr>
+            <tr><th>タスク</th><th>出力層の関数</th><th>損失関数</th><th>イメージ</th></tr>
+            <tr>
+                <td><strong>回帰</strong><br>(数値予測)</td>
+                <td><strong>恒等関数</strong><br>(何もせずそのまま)</td>
+                <td><strong>平均二乗誤差</strong><br>(MSE)</td>
+                <td>ズレの二乗を最小化</td>
+            </tr>
+            <tr>
+                <td><strong>2値分類</strong><br>(Yes/No)</td>
+                <td><strong>Sigmoid</strong><br>(確率 0.0〜1.0)</td>
+                <td><strong>バイナリ<br>クロスエントロピー</strong></td>
+                <td>コインの表裏</td>
+            </tr>
+            <tr>
+                <td><strong>多クラス分類</strong><br>(どれか1つ)</td>
+                <td><strong>Softmax</strong><br>(合計が100%になる)</td>
+                <td><strong>交差エントロピー</strong><br>(Cross Entropy)</td>
+                <td>サイコロの目</td>
+            </tr>
+            <tr>
+                <td><strong>マルチラベル</strong><br>(複数OK)</td>
+                <td><strong>Sigmoid</strong><br>(個別に判定)</td>
+                <td><strong>バイナリ<br>クロスエントロピー</strong></td>
+                <td>タグ付け</td>
+            </tr>
         </table>
 
-        <h3>■ 主な活性化関数とその特徴</h3>
+        <h3>■ 中間層（隠れ層）の活性化関数</h3>
+        <p>学習をうまく進めるための関数たちです。</p>
         <table>
-            <tr><th>関数</th><th>式 / 特徴</th><th>微分の最大値</th></tr>
-            <tr><td><strong>Sigmoid</strong></td><td>$f(x) = \\frac{1}{1+e^{-x}}$<br>出力：(0, 1)。勾配消失しやすい。</td><td><strong>0.25</strong> ($x=0$の時)</td></tr>
-            <tr><td><strong>Tanh</strong></td><td>双曲線正接関数。<br>出力：(-1, 1)。<strong>ゼロ中心</strong>の分布を作る。</td><td><strong>1.0</strong> ($x=0$の時)</td></tr>
-            <tr><td><strong>ReLU</strong></td><td>$f(x) = \\max(0, x)$<br>現在主流。計算が高速で勾配消失しにくい。</td><td><strong>1.0</strong> ($x>0$の時)</td></tr>
-            <tr><td><strong>Leaky ReLU</strong></td><td>$x<0$ でもわずかに傾きを持つ (Dying ReLU対策)。</td><td>1.0 / $\\alpha$</td></tr>
+            <tr><th>関数</th><th>形状・特徴</th><th>微分の最大値</th></tr>
+            <tr>
+                <td><strong>ReLU</strong><br>(Rectified Linear Unit)</td>
+                <td><strong>「正ならそのまま、負なら0」</strong><br>・計算が超高速。<br>・正の領域で勾配が減衰しない（勾配消失に強い）。<br>・現在のデファクトスタンダード。</td>
+                <td><strong>1.0</strong><br>($x>0$)</td>
+            </tr>
+            <tr>
+                <td><strong>Sigmoid</strong><br>(シグモイド)</td>
+                <td><strong>「滑らかなS字（0〜1）」</strong><br>・微分最大値が小さい。<br>・層を深くすると<strong>勾配消失</strong>する。</td>
+                <td><strong>0.25</strong><br>($x=0$)</td>
+            </tr>
+            <tr>
+                <td><strong>Tanh</strong><br>(ハイパボリックタンジェント)</td>
+                <td><strong>「滑らかなS字（-1〜1）」</strong><br>・<strong>ゼロ中心</strong>の分布を作るため、Sigmoidより学習効率が良い。</td>
+                <td><strong>1.0</strong><br>($x=0$)</td>
+            </tr>
         </table>
     `,
 
