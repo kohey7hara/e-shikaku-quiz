@@ -7,10 +7,14 @@ window.quizData = {
             .cnn-row { display: flex; align-items: center; justify-content: center; gap: 5px; flex-wrap: wrap; }
             .cnn-box { border: 2px solid #333; padding: 10px; background: white; border-radius: 5px; text-align: center; width: 80px; font-size: 0.8em; position: relative; }
             .cnn-arrow { font-weight: bold; color: #555; }
-            .grid-icon { width: 100px; height: 100px; margin: auto; background: #fff; }
-            .grid-cell { fill: #fff; stroke: #ccc; stroke-width: 1; }
-            .filter-highlight { fill: rgba(231, 76, 60, 0.3); stroke: #e74c3c; stroke-width: 2; }
-            .pool-highlight { fill: rgba(52, 152, 219, 0.3); stroke: #3498db; stroke-width: 2; }
+            
+            /* 安全な図解スタイル（SVG不使用） */
+            .visual-box { display: inline-block; padding: 10px; background: white; border: 1px solid #ccc; border-radius: 8px; margin: 5px; vertical-align: top; width: 45%; min-width: 250px; }
+            .grid-table { border-collapse: collapse; margin: auto; }
+            .grid-table td { width: 20px; height: 20px; border: 1px solid #ccc; text-align: center; font-size: 0.7em; color: #eee; }
+            .highlight-conv { background-color: rgba(231, 76, 60, 0.2); border: 2px solid #e74c3c !important; color: #e74c3c !important; font-weight: bold; }
+            .highlight-pool { background-color: rgba(52, 152, 219, 0.2); border: 2px solid #3498db !important; color: #3498db !important; font-weight: bold; }
+            
             .calc-box { background:#eef; padding:10px; border-radius:5px; text-align:center; font-weight:bold; margin: 10px 0; border: 1px solid #ccd; }
         </style>
 
@@ -41,7 +45,7 @@ window.quizData = {
                     (Sub)<br>
                     <small>圧縮・不変性</small>
                 </div>
-                <div class="cnn-arrow">...繰返...</div>
+                <div class="cnn-arrow">...</div>
                 <div class="cnn-arrow">→</div>
                 <div class="cnn-box" style="background:#fceceb; border-color:#e74c3c;">
                     <strong>全結合</strong><br>
@@ -51,46 +55,30 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ 1. 畳み込み (Convolution) の仕組み</h3>
-        <div style="display:flex; align-items:center; justify-content:space-around;">
-            <div style="text-align:center;">
-                <svg class="grid-icon" viewBox="0 0 100 100">
-                    <rect x="10" y="10" width="20" height="20" class="grid-cell" /> <rect x="30" y="10" width="20" height="20" class="grid-cell" /> <rect x="50" y="10" width="20" height="20" class="grid-cell" /> <rect x="70" y="10" width="20" height="20" class="grid-cell" />
-                    <rect x="10" y="30" width="20" height="20" class="grid-cell" /> <rect x="30" y="30" width="20" height="20" class="grid-cell" /> <rect x="50" y="30" width="20" height="20" class="grid-cell" /> <rect x="70" y="30" width="20" height="20" class="grid-cell" />
-                    <rect x="10" y="50" width="20" height="20" class="grid-cell" /> <rect x="30" y="50" width="20" height="20" class="grid-cell" /> <rect x="50" y="50" width="20" height="20" class="grid-cell" /> <rect x="70" y="50" width="20" height="20" class="grid-cell" />
-                    <rect x="10" y="70" width="20" height="20" class="grid-cell" /> <rect x="30" y="70" width="20" height="20" class="grid-cell" /> <rect x="50" y="70" width="20" height="20" class="grid-cell" /> <rect x="70" y="70" width="20" height="20" class="grid-cell" />
-                    
-                    <rect x="10" y="10" width="60" height="60" class="filter-highlight" />
-                </svg>
+        <h3>■ 図解：畳み込みとプーリング</h3>
+        <div style="text-align:center;">
+            <div class="visual-box">
+                <h4>1. 畳み込み (Conv)</h4>
+                <p style="font-size:0.8em; color:#666;">フィルタをスライドさせて<br>特徴（エッジ等）を抽出</p>
+                <table class="grid-table">
+                    <tr><td class="highlight-conv">1</td><td class="highlight-conv">0</td><td>1</td><td>0</td></tr>
+                    <tr><td class="highlight-conv">0</td><td class="highlight-conv">1</td><td>0</td><td>1</td></tr>
+                    <tr><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+                    <tr><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+                </table>
+                <div style="margin-top:5px; font-size:0.8em; color:#e74c3c;">▲ 3x3フィルタ等で積和演算</div>
             </div>
-            <div style="width:60%;">
-                <p><strong>フィルタ（カーネル）</strong>をスライドさせながら、画像の一部（局所）と積和演算を行います。</p>
-                <ul>
-                    <li><strong>局所受容野</strong>: 近くのピクセル同士の関係を見る。</li>
-                    <li><strong>重み共有</strong>: 同じフィルタを全体で使い回すため、パラメータが少なくて済む。</li>
-                </ul>
-            </div>
-        </div>
 
-        <h3>■ 2. プーリング (Pooling) の仕組み</h3>
-        <div style="display:flex; align-items:center; justify-content:space-around; margin-top:10px;">
-            <div style="text-align:center;">
-                <svg class="grid-icon" viewBox="0 0 100 100">
-                    <rect x="10" y="10" width="20" height="20" class="grid-cell" /> <rect x="30" y="10" width="20" height="20" class="grid-cell" /> <rect x="50" y="10" width="20" height="20" class="grid-cell" /> <rect x="70" y="10" width="20" height="20" class="grid-cell" />
-                    <rect x="10" y="30" width="20" height="20" class="grid-cell" /> <rect x="30" y="30" width="20" height="20" class="grid-cell" /> <rect x="50" y="30" width="20" height="20" class="grid-cell" /> <rect x="70" y="30" width="20" height="20" class="grid-cell" />
-                    <rect x="10" y="50" width="20" height="20" class="grid-cell" /> <rect x="30" y="50" width="20" height="20" class="grid-cell" /> <rect x="50" y="50" width="20" height="20" class="grid-cell" /> <rect x="70" y="50" width="20" height="20" class="grid-cell" />
-                    <rect x="10" y="70" width="20" height="20" class="grid-cell" /> <rect x="30" y="70" width="20" height="20" class="grid-cell" /> <rect x="50" y="70" width="20" height="20" class="grid-cell" /> <rect x="70" y="70" width="20" height="20" class="grid-cell" />
-                    
-                    <rect x="10" y="10" width="40" height="40" class="pool-highlight" />
-                    <text x="30" y="35" text-anchor="middle" fill="#3498db" font-size="20" font-weight="bold">Max</text>
-                </svg>
-            </div>
-            <div style="width:60%;">
-                <p>画像を縮小（ダウンサンプリング）します。</p>
-                <ul>
-                    <li><strong>Max Pooling</strong>: 領域内の最大値をとる（主流）。</li>
-                    <li><strong>不変性</strong>: 画像が少しズレても、最大値が変わらなければ結果は同じになる（ロバスト性が向上）。</li>
-                </ul>
+            <div class="visual-box">
+                <h4>2. プーリング (Pool)</h4>
+                <p style="font-size:0.8em; color:#666;">最大値をとって<br>画像を小さくする</p>
+                <table class="grid-table">
+                    <tr><td class="highlight-pool">9</td><td class="highlight-pool">3</td><td>2</td><td>1</td></tr>
+                    <tr><td class="highlight-pool">4</td><td class="highlight-pool">5</td><td>0</td><td>8</td></tr>
+                    <tr><td>2</td><td>1</td><td>6</td><td>7</td></tr>
+                    <tr><td>0</td><td>5</td><td>3</td><td>4</td></tr>
+                </table>
+                <div style="margin-top:5px; font-size:0.8em; color:#3498db;">▲ Max Pooling (最大値9を採用)</div>
             </div>
         </div>
 
