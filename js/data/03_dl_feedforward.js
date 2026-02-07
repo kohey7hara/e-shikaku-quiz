@@ -4,90 +4,100 @@ window.quizData = {
     cheatSheet: `
         <style>
             .flow-box { display: flex; align-items: center; justify-content: center; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; }
-            .step { border: 2px solid #333; padding: 5px 10px; background: white; border-radius: 5px; text-align: center; }
+            .step { border: 2px solid #333; padding: 5px 10px; background: white; border-radius: 5px; text-align: center; width: 100px; }
             .arrow { margin: 0 5px; font-weight: bold; color: #555; }
-            .note { font-size: 0.8em; color: #666; margin-top: 5px; }
+            .graph-icon { width: 60px; height: 40px; border: 1px solid #ccc; background: #fff; margin: auto; }
+            .graph-line { stroke: #e74c3c; stroke-width: 2; fill: none; }
+            .axis { stroke: #ccc; stroke-width: 1; }
         </style>
 
-        <h3>■ 順伝播 (Forward Propagation) の流れ</h3>
-        <p>データは層を通過するたびに、「線形変換」と「非線形変換」を繰り返します。</p>
-        
+        <h3>■ 順伝播の流れ：①計算 → ②変換</h3>
         <div class="flow-box">
             <div class="step">
-                <strong>入力 $x$</strong><br>
-                <small>画像・数値</small>
+                <strong>入力 $x$</strong>
             </div>
             <div class="arrow">→</div>
             <div class="step" style="background:#eef;">
                 <strong>① 全結合層</strong><br>
                 (Affine)<br>
-                $u = Wx + b$
+                <small>行列演算<br>$Wx+b$</small>
             </div>
             <div class="arrow">→</div>
             <div class="step" style="background:#fee;">
                 <strong>② 活性化関数</strong><br>
                 (Activation)<br>
-                $z = f(u)$
+                <small>非線形変換<br>$f(u)$</small>
             </div>
             <div class="arrow">→</div>
             <div class="step">
-                <strong>次の層へ</strong><br>
-                <small>または出力</small>
+                <strong>出力 $y$</strong>
             </div>
         </div>
-        <p class="note">
-            <strong>① 線形変換</strong>: 回転・拡大縮小・平行移動。<br>
-            <strong>② 非線形変換</strong>: 複雑な境界線を引くために必須（これがないと層を重ねる意味がない）。
-        </p>
 
         <h3>■ 【重要】タスク別・出力層の鉄板セット</h3>
-        <p>「どんな問題を解くか」で、最後のドア（出力層）と採点方法（損失関数）が決まります。</p>
+        <p>最終段（出力層）では、タスクに応じて<strong>②活性化関数</strong>を使い分けます。<br>※①全結合層は、必要な出力数（クラス数など）に合わせるために必ず存在します。</p>
         <table>
-            <tr><th>タスク</th><th>出力層の関数</th><th>損失関数</th><th>イメージ</th></tr>
+            <tr><th>タスク</th><th>② 活性化関数の選択</th><th>損失関数の選択</th></tr>
             <tr>
                 <td><strong>回帰</strong><br>(数値予測)</td>
-                <td><strong>恒等関数</strong><br>(何もせずそのまま)</td>
+                <td><strong>恒等関数</strong> (Identity)<br><small>※何もせず値をそのまま通す</small></td>
                 <td><strong>平均二乗誤差</strong><br>(MSE)</td>
-                <td>ズレの二乗を最小化</td>
             </tr>
             <tr>
                 <td><strong>2値分類</strong><br>(Yes/No)</td>
-                <td><strong>Sigmoid</strong><br>(確率 0.0〜1.0)</td>
+                <td><strong>Sigmoid</strong><br><small>※出力を 0.0〜1.0 の確率にする</small></td>
                 <td><strong>バイナリ<br>クロスエントロピー</strong></td>
-                <td>コインの表裏</td>
             </tr>
             <tr>
                 <td><strong>多クラス分類</strong><br>(どれか1つ)</td>
-                <td><strong>Softmax</strong><br>(合計が100%になる)</td>
+                <td><strong>Softmax</strong><br><small>※出力の合計を 1.0 (100%) にする</small></td>
                 <td><strong>交差エントロピー</strong><br>(Cross Entropy)</td>
-                <td>サイコロの目</td>
-            </tr>
-            <tr>
-                <td><strong>マルチラベル</strong><br>(複数OK)</td>
-                <td><strong>Sigmoid</strong><br>(個別に判定)</td>
-                <td><strong>バイナリ<br>クロスエントロピー</strong></td>
-                <td>タグ付け</td>
             </tr>
         </table>
 
-        <h3>■ 中間層（隠れ層）の活性化関数</h3>
-        <p>学習をうまく進めるための関数たちです。</p>
+        <h3>■ 中間層（隠れ層）の活性化関数とグラフ</h3>
+        <p>学習効率を決める重要なパーツです。形状をイメージで覚えましょう。</p>
         <table>
-            <tr><th>関数</th><th>形状・特徴</th><th>微分の最大値</th></tr>
+            <tr><th>関数名</th><th>グラフ形状 (イメージ)</th><th>特徴・微分の最大値</th></tr>
             <tr>
                 <td><strong>ReLU</strong><br>(Rectified Linear Unit)</td>
-                <td><strong>「正ならそのまま、負なら0」</strong><br>・計算が超高速。<br>・正の領域で勾配が減衰しない（勾配消失に強い）。<br>・現在のデファクトスタンダード。</td>
-                <td><strong>1.0</strong><br>($x>0$)</td>
+                <td>
+                    <svg class="graph-icon" viewBox="0 0 60 40">
+                        <line x1="0" y1="30" x2="60" y2="30" class="axis" /> <line x1="30" y1="0" x2="30" y2="40" class="axis" /> <polyline points="0,30 30,30 55,5" class="graph-line" />
+                    </svg>
+                </td>
+                <td>
+                    <strong>「カクッとした形」</strong><br>
+                    ・$x > 0$ で傾きが常に <strong>1.0</strong>。<br>
+                    ・勾配消失しにくく、計算最速。<br>
+                    ・今のディープラーニングの主役。
+                </td>
             </tr>
             <tr>
                 <td><strong>Sigmoid</strong><br>(シグモイド)</td>
-                <td><strong>「滑らかなS字（0〜1）」</strong><br>・微分最大値が小さい。<br>・層を深くすると<strong>勾配消失</strong>する。</td>
-                <td><strong>0.25</strong><br>($x=0$)</td>
+                <td>
+                    <svg class="graph-icon" viewBox="0 0 60 40">
+                        <line x1="0" y1="35" x2="60" y2="35" class="axis" /> <line x1="30" y1="0" x2="30" y2="40" class="axis" /> <path d="M5,35 C20,35 20,5 55,5" class="graph-line" />
+                    </svg>
+                </td>
+                <td>
+                    <strong>「滑らかなS字 (0〜1)」</strong><br>
+                    ・微分最大値は <strong>0.25</strong> ($x=0$)。<br>
+                    ・1より小さいため、層を重ねると勾配が消えていく（勾配消失）。
+                </td>
             </tr>
             <tr>
-                <td><strong>Tanh</strong><br>(ハイパボリックタンジェント)</td>
-                <td><strong>「滑らかなS字（-1〜1）」</strong><br>・<strong>ゼロ中心</strong>の分布を作るため、Sigmoidより学習効率が良い。</td>
-                <td><strong>1.0</strong><br>($x=0$)</td>
+                <td><strong>Tanh</strong><br>(タンエイチ)</td>
+                <td>
+                    <svg class="graph-icon" viewBox="0 0 60 40">
+                        <line x1="0" y1="20" x2="60" y2="20" class="axis" /> <line x1="30" y1="0" x2="30" y2="40" class="axis" /> <path d="M5,35 C25,35 35,5 55,5" class="graph-line" />
+                    </svg>
+                </td>
+                <td>
+                    <strong>「ゼロ中心のS字 (-1〜1)」</strong><br>
+                    ・微分最大値は <strong>1.0</strong> ($x=0$)。<br>
+                    ・0を中心に対称なので、Sigmoidより学習バランスが良い。
+                </td>
             </tr>
         </table>
     `,
