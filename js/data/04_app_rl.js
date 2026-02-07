@@ -3,22 +3,27 @@ window.quizData = {
     
     cheatSheet: `
         <style>
-            .rl-loop { display: flex; align-items: center; justify-content: center; gap: 20px; background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative; }
-            .rl-box { border: 2px solid #333; padding: 15px; border-radius: 8px; background: #fff; text-align: center; width: 100px; z-index: 2; }
-            .agent { border-color: #3498db; color: #3498db; font-weight: bold; }
-            .env { border-color: #27ae60; color: #27ae60; font-weight: bold; }
+            .rl-loop { display: flex; align-items: center; justify-content: center; gap: 40px; background: #f9f9f9; padding: 30px; border-radius: 8px; margin-bottom: 20px; position: relative; height: 120px; }
+            .rl-box { border: 2px solid #333; padding: 10px; border-radius: 8px; background: #fff; text-align: center; width: 80px; z-index: 2; height: 50px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+            .agent { border-color: #3498db; color: #3498db; }
+            .env { border-color: #27ae60; color: #27ae60; }
             
-            .arrow-top { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 60%; border-top: 2px solid #555; height: 10px; }
-            .arrow-bottom { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); width: 60%; border-bottom: 2px solid #555; height: 10px; }
-            .label-top { position: absolute; top: -5px; width: 100%; text-align: center; font-size: 0.8em; background: #f9f9f9; }
-            .label-bottom { position: absolute; bottom: -5px; width: 100%; text-align: center; font-size: 0.8em; background: #f9f9f9; }
+            .arrow-top-container { position: absolute; top: 25px; left: 50%; transform: translateX(-50%); width: 60%; text-align: center; }
+            .arrow-line-top { border-top: 2px solid #555; width: 100%; height: 10px; position: relative; }
+            .arrow-line-top::after { content: ''; position: absolute; right: 0; top: -5px; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid #555; }
+            .label-top { background: #f9f9f9; padding: 0 5px; font-size: 0.8em; position: relative; top: -12px; }
+
+            .arrow-bottom-container { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 60%; text-align: center; }
+            .arrow-line-bottom { border-bottom: 2px solid #555; width: 100%; height: 10px; position: relative; }
+            .arrow-line-bottom::before { content: ''; position: absolute; left: 0; bottom: -5px; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-right: 8px solid #555; }
+            .label-bottom { background: #f9f9f9; padding: 0 5px; font-size: 0.8em; position: relative; bottom: -12px; }
 
             .method-grid { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
-            .method-card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; width: 30%; min-width: 280px; background: #fff; vertical-align: top; }
+            .method-card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; width: 30%; min-width: 250px; background: #fff; vertical-align: top; }
             .method-title { font-weight: bold; border-bottom: 2px solid #333; margin-bottom: 5px; display: inline-block; }
 
-            .tech-list { font-size: 0.85em; text-align: left; padding-left: 15px; }
-            .tech-list li { margin-bottom: 5px; }
+            .tech-list { font-size: 0.85em; text-align: left; padding-left: 15px; margin: 0; }
+            .tech-list li { margin-bottom: 3px; }
 
             .comp-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; }
             .comp-table th { background: #eee; border: 1px solid #ccc; padding: 5px; }
@@ -26,8 +31,8 @@ window.quizData = {
             .good { color: #27ae60; font-weight: bold; }
             .bad { color: #c0392b; font-weight: bold; }
             
-            .dqn-features { display: flex; gap: 5px; margin-top: 5px; }
-            .feature-box { flex: 1; border: 1px dashed #e74c3c; padding: 5px; font-size: 0.75em; text-align: center; background: #fceceb; border-radius: 4px; }
+            .dqn-features { display: flex; gap: 5px; margin-top: 5px; flex-direction: column; }
+            .feature-box { border: 1px dashed #e74c3c; padding: 3px; font-size: 0.75em; text-align: center; background: #fceceb; border-radius: 4px; }
         </style>
 
         <h3>■ 強化学習の基本ループ (The Loop)</h3>
@@ -35,30 +40,38 @@ window.quizData = {
         
         <div class="rl-loop">
             <div class="rl-box agent">Agent<br>(脳)</div>
-            <div class="rl-box env">Env<br>(世界)</div>
             
-            <div class="arrow-top"><span class="label-top">行動 (Action) $a_t$</span></div>
-            <div class="arrow-bottom"><span class="label-bottom">状態 (State) $s_{t+1}$ + 報酬 (Reward) $r_{t+1}$</span></div>
+            <div class="arrow-top-container">
+                <span class="label-top">行動 (Action) $a_t$</span>
+                <div class="arrow-line-top"></div>
+            </div>
+
+            <div class="arrow-bottom-container">
+                <div class="arrow-line-bottom"></div>
+                <span class="label-bottom">状態 $s_{t+1}$ + 報酬 $r_{t+1}$</span>
+            </div>
+
+            <div class="rl-box env">Env<br>(世界)</div>
         </div>
 
         <h3>■ 3大アプローチの比較</h3>
         <div class="method-grid">
             <div class="method-card">
                 <div class="method-title" style="border-color:#e74c3c;">価値ベース (DQN)</div>
-                <p style="font-size:0.8em;">「どの状態が良いか」を極める。</p>
+                <p style="font-size:0.8em; margin: 5px 0;">「どの状態が良いか」を極める。</p>
                 <ul class="tech-list">
                     <li><strong>Q関数 $Q(s, a)$</strong> を学習。</li>
                     <li>値が最大の行動を選ぶ。</li>
                     <li><span class="good">強み</span>: サンプル効率が良い。</li>
-                    <li><span class="bad">弱み</span>: 連続的な行動（ロボットアームの角度など）は苦手。</li>
+                    <li><span class="bad">弱み</span>: 連続的な行動は苦手。</li>
                 </ul>
             </div>
 
             <div class="method-card">
                 <div class="method-title" style="border-color:#3498db;">方策ベース</div>
-                <p style="font-size:0.8em;">「どう動くか」を直接学ぶ。</p>
+                <p style="font-size:0.8em; margin: 5px 0;">「どう動くか」を直接学ぶ。</p>
                 <ul class="tech-list">
-                    <li><strong>方策 $\pi(a|s)$</strong> を学習。</li>
+                    <li><strong>方策 $\\pi(a|s)$</strong> を学習。</li>
                     <li>確率的に行動を決定。</li>
                     <li><span class="good">強み</span>: <strong>連続値の行動</strong>も扱える。</li>
                     <li><span class="bad">弱み</span>: 学習が不安定になりやすい。</li>
@@ -67,10 +80,10 @@ window.quizData = {
 
             <div class="method-card">
                 <div class="method-title" style="border-color:#9b59b6;">Actor-Critic (A3C)</div>
-                <p style="font-size:0.8em;">両者のハイブリッド。</p>
+                <p style="font-size:0.8em; margin: 5px 0;">両者のハイブリッド。</p>
                 <ul class="tech-list">
-                    <li><strong>Actor (役者)</strong>: 行動を決める（方策）。</li>
-                    <li><strong>Critic (評論家)</strong>: 行動を採点する（価値）。</li>
+                    <li><strong>Actor</strong>: 行動を決める（方策）。</li>
+                    <li><strong>Critic</strong>: 行動を採点する（価値）。</li>
                     <li><span class="good">強み</span>: 安定かつ高速。現在の主流。</li>
                 </ul>
             </div>
@@ -113,8 +126,8 @@ window.quizData = {
 
         <h3>■ その他重要キーワード</h3>
         <ul>
-            <li><strong>$\epsilon$-greedy法</strong>: 「活用（今のベスト）」と「探索（ランダムな挑戦）」のバランスを取る手法。確率 $\epsilon$ でランダム行動する。</li>
-            <li><strong>割引率 $\gamma$ (Gamma)</strong>: 未来の報酬をどれくらい割り引いて評価するか。0なら現在のみ、1なら永遠の未来まで考慮。</li>
+            <li><strong>$\\epsilon$-greedy法</strong>: 「活用（今のベスト）」と「探索（ランダムな挑戦）」のバランスを取る手法。確率 $\\epsilon$ でランダム行動する。</li>
+            <li><strong>割引率 $\\gamma$ (Gamma)</strong>: 未来の報酬をどれくらい割り引いて評価するか。0なら現在のみ、1なら永遠の未来まで考慮。</li>
             <li><strong>ベルマン方程式</strong>: 「現在の価値」＝「即時報酬」＋「次の状態の価値（割引あり）」という再帰的な関係式。強化学習の根幹。</li>
         </ul>
     `,
@@ -147,16 +160,16 @@ window.quizData = {
         {
             category: "探索と活用",
             question: "強化学習における「探索 (Exploration)」と「活用 (Exploitation)」のトレードオフに対処するための、最も基本的な手法は何か。",
-            options: ["$\epsilon$-greedy法", "勾配降下法", "バックプロパゲーション", "ドロップアウト"],
+            options: ["$\\epsilon$-greedy法", "勾配降下法", "バックプロパゲーション", "ドロップアウト"],
             answer: 0,
-            explanation: "確率 $\epsilon$ でランダムな行動（探索）をし、それ以外は現在知っている最良の行動（活用）をとる手法です。"
+            explanation: "確率 $\\epsilon$ でランダムな行動（探索）をし、それ以外は現在知っている最良の行動（活用）をとる手法です。"
         },
         {
             category: "割引率",
-            question: "割引率 $\gamma$ (0 <= $\gamma$ <= 1) を小さく設定した場合（0に近づけた場合）、エージェントはどのような振る舞いをするか。",
+            question: "割引率 $\\gamma$ (0 <= $\\gamma$ <= 1) を小さく設定した場合（0に近づけた場合）、エージェントはどのような振る舞いをするか。",
             options: ["目先の即時報酬のみを重視する（近視眼的になる）", "遠い未来の報酬を重視する（長期的視野になる）", "ランダムに行動する", "行動しなくなる"],
             answer: 0,
-            explanation: "$\gamma=0$ だと「次の瞬間の報酬」しか見なくなります。$\gamma$ が1に近いほど、遠い未来の結果も考慮します。"
+            explanation: "$\\gamma=0$ だと「次の瞬間の報酬」しか見なくなります。$\\gamma$ が1に近いほど、遠い未来の結果も考慮します。"
         },
         {
             category: "A3Cの特徴",
@@ -202,7 +215,7 @@ window.quizData = {
             question: "DQNの改良版である「Double DQN」は、DQNのどのような問題を解決するために提案されたか。",
             options: ["Q値の過大評価（Overestimation）問題。ノイズによって最大値が実際より高く見積もられてしまうバイアスを防ぐ", "学習速度が遅い問題", "勾配消失問題", "メモリ不足問題"],
             answer: 0,
-            explanation: "DQNは $\max$ 操作を行うため、たまたま高く出た値を過信しがちです。Double DQNは「行動を選ぶNW」と「価値を評価するNW」を分けることでこれを防ぎます。"
+            explanation: "DQNは $\\max$ 操作を行うため、たまたま高く出た値を過信しがちです。Double DQNは「行動を選ぶNW」と「価値を評価するNW」を分けることでこれを防ぎます。"
         },
         {
             category: "Dueling DQN(応用)",
@@ -248,10 +261,10 @@ window.quizData = {
         },
         {
             category: "Noisy Nets(応用)",
-            question: "「Noisy Networks」は、$\epsilon$-greedy法の代わりにどのような方法で探索を行うか。",
+            question: "「Noisy Networks」は、$\\epsilon$-greedy法の代わりにどのような方法で探索を行うか。",
             options: ["ニューラルネットワークの重みに学習可能なノイズを加えることで、決定論的になりがちな挙動に揺らぎを持たせる", "入力画像にノイズを加える", "報酬にノイズを加える", "出力をランダムにする"],
             answer: 0,
-            explanation: "$\epsilon$-greedyのように無理やりランダム行動させるのではなく、ネットワーク自体に揺らぎを持たせることで、より洗練された探索を行います（Rainbowの一部）。"
+            explanation: "$\\epsilon$-greedyのように無理やりランダム行動させるのではなく、ネットワーク自体に揺らぎを持たせることで、より洗練された探索を行います（Rainbowの一部）。"
         },
         {
             category: "モデルベース強化学習(応用)",
