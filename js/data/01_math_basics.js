@@ -2,28 +2,112 @@ window.quizData = {
     title: "1. 数学的基礎：確率・統計 & 情報理論",
     
     cheatSheet: `
-        <h3>■ 確率・統計：パラメータ推定</h3>
-        <p>数式だけでなく「イメージ」で区別することが重要です。</p>
-        <table>
-            <tr><th>用語</th><th>イメージ・試験のツボ</th></tr>
-            <tr><td><strong>ベイズの定理</strong></td><td><strong>「逆算の公式」</strong><br>結果から原因の確率を求める。<br>式：$P(Y|X) \\propto P(X|Y)P(Y)$</td></tr>
-            <tr><td><strong>最尤推定 (MLE)</strong></td><td><strong>「データ至上主義」</strong><br>尤度（データへの当てはまり）だけを最大化。<br>欠点：<strong>過学習</strong>しやすい。</td></tr>
-            <tr><td><strong>MAP推定</strong></td><td><strong>「データ ＋ 事前の思い込み」</strong><br>尤度 × <strong>事前確率</strong> を最大化。<br>事前確率が<strong>正則化</strong>（ブレーキ）の役割を果たす。</td></tr>
-            <tr><td><strong>ベイズ推定</strong></td><td><strong>「一点張りしない」</strong><br>答えを点ではなく<strong>「分布」</strong>で出す。<br>積分計算が必要でコストが高い。</td></tr>
-            <tr><td><strong>平均二乗誤差 (MSE)</strong></td><td><strong>「ガウス分布の親戚」</strong><br>誤差が<strong>ガウス分布</strong>に従うと仮定した最尤推定と同じ。</td></tr>
-        </table>
+        <style>
+            .concept-box { border-left: 4px solid #3498db; padding: 10px; background: #f0f8ff; margin-bottom: 10px; }
+            .visual-bar { display: inline-block; width: 10px; background: #ccc; margin-right: 2px; vertical-align: bottom; }
+            .h-high { height: 40px; background: #e74c3c; } /* 高い確率 */
+            .h-mid { height: 20px; background: #3498db; }  /* 中くらいの確率 */
+            .h-low { height: 5px; background: #ccc; }     /* 低い確率 */
+            .dist-curve { width: 100px; height: 40px; border-radius: 50% 50% 0 0; border: 2px solid #333; border-bottom: none; display:inline-block; text-align:center; line-height:35px; color:#555; font-size:0.8em;}
+        </style>
 
-        <h3>■ 情報理論：エントロピー・距離</h3>
-        <table>
-            <tr><th>用語</th><th>イメージ・試験のツボ</th></tr>
-            <tr><td><strong>自己情報量</strong></td><td><strong>「驚きの大きさ」</strong><br>確率が低い（レア）ほど値は大きい。常にプラス。</td></tr>
-            <tr><td><strong>エントロピー</strong></td><td><strong>「予測のつかなさ（乱雑さ）」</strong><br><strong>一様分布</strong>（どれが出るか不明）で最大。<br>確率100%（バレバレ）で 0。</td></tr>
-            <tr><td><strong>KLダイバージェンス</strong></td><td><strong>「分布間の距離（一方通行）」</strong><br><strong>非対称</strong> ($P||Q \\neq Q||P$)。<br>常に 0 以上。</td></tr>
-            <tr><td><strong>クロスエントロピー</strong></td><td><strong>「KLの相棒」</strong><br>これを最小化 ＝ KLダイバージェンスの最小化。</td></tr>
-            <tr><td><strong>相互情報量</strong></td><td><strong>「ヒントの価値」</strong><br>$Y$を知って$X$の謎がどれだけ解けたか。<br>独立なら <strong>0</strong>。</td></tr>
-        </table>
+        <h3>■ 確率・統計：パラメータ推定の比較</h3>
+        <p>「データ（結果）」から「パラメータ（原因）」を探るアプローチの違いです。</p>
+
+        <div class="concept-box">
+            <h4>1. 最尤推定 (MLE) vs MAP推定</h4>
+            <table>
+                <tr>
+                    <th>最尤推定 (MLE)</th>
+                    <th>MAP推定</th>
+                </tr>
+                <tr>
+                    <td style="text-align:center;">
+                        <span style="font-size:2em;">🎯</span><br>
+                        <strong>データだけを見る</strong><br>
+                        <small>「データが全てだ！」</small>
+                    </td>
+                    <td style="text-align:center;">
+                        <span style="font-size:2em;">🧠 + 🎯</span><br>
+                        <strong>事前知識 + データ</strong><br>
+                        <small>「経験則(事前分布)も加味する」</small>
+                    </td>
+                </tr>
+                <tr>
+                    <td>データの尤度 $P(D|\\theta)$ を最大化。<br>※データが少ないと<strong>過学習</strong>する。</td>
+                    <td>事後確率 $P(\\theta|D)$ を最大化。<br>※事前分布が<strong>正則化項</strong>として働く。</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="concept-box">
+            <h4>2. 点推定 vs ベイズ推定</h4>
+            <table>
+                <tr>
+                    <th>点推定 (MLE, MAP)</th>
+                    <th>ベイズ推定</th>
+                </tr>
+                <tr>
+                    <td style="text-align:center;">
+                        <div style="font-size:1.5em; font-weight:bold;">📍 ピンポイント</div>
+                        <small>答えは「1つ」の値</small>
+                    </td>
+                    <td style="text-align:center;">
+                        <div class="dist-curve" style="border-color:#e67e22; background:#fdf2e9;">山(分布)</div>
+                        <small>答えは「確率分布」</small>
+                    </td>
+                </tr>
+                <tr>
+                    <td>計算が速い。<br>「予測値」しか分からない。</td>
+                    <td>計算が重い（積分が必要）。<br><strong>「予測の自信のなさ（不確実性）」</strong>も分かる。</td>
+                </tr>
+            </table>
+        </div>
+
+        <h3>■ 情報理論：エントロピーの可視化</h3>
+        
+        <div class="concept-box">
+            <h4>エントロピー（乱雑さ・予測のつかなさ）</h4>
+            <table>
+                <tr>
+                    <th>エントロピーが小さい</th>
+                    <th>エントロピーが大きい</th>
+                </tr>
+                <tr>
+                    <td style="text-align:center;">
+                        <div class="visual-bar h-high"></div>
+                        <div class="visual-bar h-low"></div>
+                        <div class="visual-bar h-low"></div>
+                        <div class="visual-bar h-low"></div>
+                        <br><strong>「ほぼ決まり」</strong>
+                    </td>
+                    <td style="text-align:center;">
+                        <div class="visual-bar h-mid"></div>
+                        <div class="visual-bar h-mid"></div>
+                        <div class="visual-bar h-mid"></div>
+                        <div class="visual-bar h-mid"></div>
+                        <br><strong>「どれか分からない」</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td>確率の偏りが激しい。<br>例：イカサマコイン（表99%）</td>
+                    <td>確率が均等（一様分布）。<br>例：公平なサイコロ（どれも1/6）</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="concept-box">
+            <h4>距離の概念</h4>
+            <ul>
+                <li><strong>KLダイバージェンス</strong>: <br>
+                分布 $P$ と $Q$ の「重ね合わせのズレ」。<br>
+                $P$から見た$Q$の距離 $\\neq$ $Q$から見た$P$の距離（<strong>非対称</strong>）。</li>
+                <li><strong>相互情報量</strong>:<br>
+                $X$ と $Y$ の「共有している情報」。<br>
+                円グラフの重なり部分のイメージ（独立なら重なりゼロ）。</li>
+            </ul>
+        </div>
     `,
-
     questions: [
         // ---------------------------------------------------------
         // 【基礎編】 Q1 - Q10
