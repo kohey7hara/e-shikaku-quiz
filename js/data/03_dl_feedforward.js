@@ -9,7 +9,7 @@ window.quizData = {
             .graph-icon { width: 60px; height: 40px; border: 1px solid #ccc; background: #fff; margin: auto; }
             .graph-line { stroke: #e74c3c; stroke-width: 2; fill: none; }
             .axis { stroke: #ccc; stroke-width: 1; }
-            .bar-container { display: flex; align-items: flex-end; justify-content: space-around; height: 35px; width: 50px; margin: auto; }
+            .bar-container { display: flex; align-items: flex-end; justify-content: space-around; height: 35px; width: 60px; margin: auto; }
             .bar { width: 10px; background: #3498db; }
         </style>
 
@@ -35,6 +35,32 @@ window.quizData = {
                 <strong>出力 $y$</strong>
             </div>
         </div>
+
+        <h3>■ 【重要】タスク別・出力層の鉄板セット</h3>
+        <p>最終段（出力層）では、タスクに応じて<strong>②活性化関数</strong>を使い分けます。<br>※①全結合層は、必要な出力数（クラス数など）に合わせるために必ず存在します。</p>
+        <table>
+            <tr><th>タスク</th><th>② 活性化関数の選択</th><th>損失関数の選択</th></tr>
+            <tr>
+                <td><strong>回帰</strong><br>(数値予測)</td>
+                <td><strong>恒等関数</strong> (Identity)<br><small>※何もせず値をそのまま通す</small></td>
+                <td><strong>平均二乗誤差</strong><br>(MSE)</td>
+            </tr>
+            <tr>
+                <td><strong>2値分類</strong><br>(Yes/No)</td>
+                <td><strong>Sigmoid</strong><br><small>※出力を 0.0〜1.0 の確率にする</small></td>
+                <td><strong>バイナリ<br>クロスエントロピー</strong></td>
+            </tr>
+            <tr>
+                <td><strong>多クラス分類</strong><br>(どれか1つ)</td>
+                <td><strong>Softmax</strong><br><small>※出力の合計を 1.0 (100%) にする</small></td>
+                <td><strong>交差エントロピー</strong><br>(Cross Entropy)</td>
+            </tr>
+            <tr>
+                <td><strong>マルチラベル</strong><br>(複数OK)</td>
+                <td><strong>Sigmoid</strong><br><small>※各クラス独立して判定</small></td>
+                <td><strong>バイナリ<br>クロスエントロピー</strong></td>
+            </tr>
+        </table>
 
         <h3>■ 活性化関数図鑑 (E資格 必須セット)</h3>
         <p>形状と「微分の性質」が問われます。</p>
@@ -143,7 +169,6 @@ window.quizData = {
                 <code>[0.7, 0.2, 0.1]</code>
             </div>
         </div>
-        <p style="font-size:0.8em; color:#666; margin-top:5px;">※入力の大小関係を保ったまま、合計が1になるように正規化します。</p>
     `,
 
     questions: [
