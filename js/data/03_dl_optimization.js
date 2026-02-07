@@ -2,22 +2,108 @@ window.quizData = {
     title: "3-（２）深層モデルのための最適化",
     
     cheatSheet: `
-        <h3>■ 【暗記】初期化手法と活性化関数の組み合わせ</h3>
-        <p>これを間違えると学習が進まないため、試験でも実務でも必須知識です。</p>
+        <style>
+            .flow-box { display: flex; align-items: center; justify-content: center; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; flex-wrap: wrap; }
+            .step { border: 2px solid #333; padding: 5px 10px; background: white; border-radius: 5px; text-align: center; width: 90px; margin: 5px; }
+            .optimizer-step { border: 2px solid #e74c3c; background: #fceceb; font-weight: bold; }
+            .arrow { margin: 0 5px; font-weight: bold; color: #555; }
+            .tree-container { display: flex; justify-content: space-around; align-items: flex-start; margin-top: 10px; }
+            .tree-box { border: 1px solid #ccc; padding: 8px; border-radius: 5px; background: #fff; width: 30%; text-align: center; font-size: 0.85em; }
+            .arrow-down { text-align: center; font-size: 1.2em; color: #555; margin: 2px 0; }
+            .plus { font-weight: bold; color: #e74c3c; }
+        </style>
+
+        <h3>■ 最適化の学習フロー：どこで使われる？</h3>
+        <p>オプティマイザは、逆伝播で計算された「勾配」を受け取り、<strong>「重みをどう更新するか」</strong>を決定する司令塔です。</p>
+        <div class="flow-box">
+            <div class="step">入力 $x$</div>
+            <div class="arrow">→</div>
+            <div class="step">順伝播<br>(Forward)</div>
+            <div class="arrow">→</div>
+            <div class="step">損失 $L$</div>
+            <div class="arrow">→</div>
+            <div class="step">逆伝播<br>(Backward)</div>
+            <div class="arrow">→</div>
+            <div class="step optimizer-step">
+                <strong>最適化</strong><br>
+                (Update)<br>
+                <small>$w \leftarrow w - \eta \Delta$</small>
+            </div>
+        </div>
+
+        <h3>■ オプティマイザの進化系統樹</h3>
+        <p>「方向（慣性）」と「歩幅（学習率）」の2つの進化ルートがあり、それが合体して最強のAdamになりました。</p>
+        
+        <div style="text-align:center; border:2px solid #333; padding:5px; background:#eee; font-weight:bold; margin-bottom:5px;">
+            SGD (確率的勾配降下法)<br>
+            <small>基本。「今の傾き」だけで進む。</small>
+        </div>
+        
+        <div class="tree-container">
+            <div class="tree-box" style="background:#eafaf1;">
+                <strong>① 方向の調整</strong><br>
+                <small>振動を抑える</small>
+                <div class="arrow-down">↓</div>
+                <strong>Momentum</strong><br>
+                <small>「慣性」を追加。<br>ボールが転がる動き。</small>
+            </div>
+
+            <div style="padding-top:40px; font-weight:bold; font-size:1.5em;">＋</div>
+
+            <div class="tree-box" style="background:#fff7e6;">
+                <strong>② 歩幅の調整</strong><br>
+                <small>学習率を自動調整</small>
+                <div class="arrow-down">↓</div>
+                <strong>AdaGrad</strong><br>
+                <small>過去の勾配の二乗和で割る。<br><span style="color:red;">欠点: 止まる</span></small>
+                <div class="arrow-down">↓</div>
+                <strong>RMSProp</strong><br>
+                <small>過去を徐々に忘れる。<br><span style="color:blue;">解決: 止まらない</span></small>
+            </div>
+        </div>
+
+        <div class="arrow-down">↓ 合体</div>
+        
+        <div style="text-align:center; border:2px solid #e74c3c; padding:10px; background:#fff; font-weight:bold; margin-top:5px;">
+            Adam<br>
+            <small>Momentum (慣性) + RMSProp (自動調整)<br>現在のデファクトスタンダード。</small>
+        </div>
+
+        <h3>■ 学習データの使い方の違い</h3>
         <table>
-            <tr><th>初期化手法</th><th>適した活性化関数</th><th>特徴</th></tr>
-            <tr><td><strong>Xavier (Glorot) の初期値</strong></td><td><strong>Sigmoid, Tanh</strong><br>(S字カーブ系)</td><td>分散を $\\frac{1}{n}$ (または $\\frac{2}{n_{in}+n_{out}}$) に設定。<br>左右対称の関数に適する。</td></tr>
-            <tr><td><strong>He (Kaiming) の初期値</strong></td><td><strong>ReLU, Leaky ReLU</strong></td><td>分散を $\\frac{2}{n}$ に設定。<br>Xavierの2倍の広がりを持たせる。</td></tr>
+            <tr><th>名称</th><th>1回の更新に使うデータ数</th><th>特徴</th></tr>
+            <tr>
+                <td><strong>バッチ学習</strong><br>(最急降下法)</td>
+                <td>全データ ($N$個)</td>
+                <td>・計算が安定する。<br>・重すぎて計算が終わらない。<br>・局所解にハマりやすい。</td>
+            </tr>
+            <tr>
+                <td><strong>オンライン学習</strong><br>(本来のSGD)</td>
+                <td>1個</td>
+                <td>・計算が速い。<br>・ノイズが激しく、ジグザグに進む。<br>・局所解から脱出しやすい。</td>
+            </tr>
+            <tr>
+                <td><strong>ミニバッチ学習</strong><br>(今の主流)</td>
+                <td>$M$個 ($M \ll N$)<br>例: 32, 64, 128</td>
+                <td>・上記2つのいいとこ取り。<br>・GPUの並列計算を活用できる。</td>
+            </tr>
         </table>
 
-        <h3>■ オプティマイザ（最適化手法）の進化</h3>
-        <ul>
-            <li><strong>SGD (確率的勾配降下法)</strong>: 基本形。今のデータだけ見て進む。<br>$w \\leftarrow w - \\eta \\frac{\\partial L}{\\partial w}$</li>
-            <li><strong>Momentum</strong>: 「慣性」を追加。過去の移動方向を維持して振動を抑える。</li>
-            <li><strong>AdaGrad</strong>: 学習率を調整。過去の勾配の二乗和で割る。<br>学習が進むと学習率が0になり止まる欠点あり。</li>
-            <li><strong>RMSProp</strong>: AdaGradを改良。過去の記憶を徐々に忘れる（指数移動平均）ことで止まらないようにした。</li>
-            <li><strong>Adam</strong>: <strong>Momentum + RMSProp</strong>。慣性と学習率調整の両方を持つ最強の手法。</li>
-        </ul>
+        <h3>■ 【暗記】初期化手法と活性化関数の組み合わせ</h3>
+        <p>ここを間違えるとスタートラインに立てません。</p>
+        <table>
+            <tr><th>初期化手法</th><th>相性の良い関数</th><th>理由</th></tr>
+            <tr>
+                <td><strong>Xavier (Glorot)</strong></td>
+                <td><strong>Sigmoid, Tanh</strong><br>(S字系)</td>
+                <td>左右対称な関数のため、分散 $\frac{1}{n}$ で広げるのが最適。</td>
+            </tr>
+            <tr>
+                <td><strong>He (Kaiming)</strong></td>
+                <td><strong>ReLU</strong><br>(折れ線系)</td>
+                <td>負の値が0になる（半分消える）ため、分散を $\frac{2}{n}$ に倍増させてバランスを取る。</td>
+            </tr>
+        </table>
     `,
 
     questions: [
