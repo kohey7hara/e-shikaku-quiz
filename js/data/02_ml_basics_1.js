@@ -2,21 +2,65 @@ window.quizData = {
     title: "2-（１）機械学習の基礎 Vol.1：パターン認識・課題",
     
     cheatSheet: `
-        <h3>■ 距離計算とパターン認識</h3>
+        <h3>■ 距離・類似度：試験で問われる「使い分け」</h3>
+        <p>データの性質に合わせて、どの距離を使うべきかが問われます。</p>
         <table>
-            <tr><th>用語</th><th>定義・特徴</th></tr>
-            <tr><td><strong>ユークリッド距離</strong></td><td>一般的な「直線距離」。$L_2$ノルム。<br>$\\sqrt{\\sum (x_i - y_i)^2}$</td></tr>
-            <tr><td><strong>マンハッタン距離</strong></td><td>軸に沿って移動する距離。$L_1$ノルム。<br>$\\sum |x_i - y_i|$</td></tr>
-            <tr><td><strong>コサイン距離</strong></td><td>ベクトルの<strong>「角度（方向）」</strong>の違い。<br>$1 - \\cos \\theta$。大きさは無視される。</td></tr>
-            <tr><td><strong>マハラノビス距離</strong></td><td>データの<strong>分散・相関</strong>を考慮した距離。<br>分布の中心からの距離として使われる。</td></tr>
-            <tr><td><strong>k近傍法 (k-NN)</strong></td><td>近くの $k$ 個のデータの多数決で決める。<br>学習プロセスがない（<strong>怠惰学習</strong>）。</td></tr>
+            <tr><th>名称</th><th>数式・定義</th><th>脳内イメージ・特徴</th></tr>
+            <tr>
+                <td><strong>ユークリッド距離</strong><br>($L_2$ノルム)</td>
+                <td>$\\sqrt{\\sum (x_i - y_i)^2}$</td>
+                <td><strong>「定規で測った直線距離」</strong><br>・最も一般的。<br>・最短距離を行くイメージ。</td>
+            </tr>
+            <tr>
+                <td><strong>マンハッタン距離</strong><br>($L_1$ノルム)</td>
+                <td>$\\sum |x_i - y_i|$</td>
+                <td><strong>「碁盤の目の移動距離」</strong><br>・タクシーがビル街を走る距離。<br>・軸に沿ってカクカク進む。</td>
+            </tr>
+            <tr>
+                <td><strong>コサイン距離</strong><br>(1 - 類似度)</td>
+                <td>$1 - \\frac{\\mathbf{x} \\cdot \\mathbf{y}}{|\\mathbf{x}| |\\mathbf{y}|}$</td>
+                <td><strong>「方向（角度）の違い」</strong><br>・ベクトルの<strong>長さは無視</strong>。<br>・文章の類似度などで活躍。</td>
+            </tr>
+            <tr>
+                <td><strong>マハラノビス距離</strong></td>
+                <td>$\\sqrt{(\\mathbf{x}-\\mathbf{\\mu})^T \\Sigma^{-1} (\\mathbf{x}-\\mathbf{\\mu})}$</td>
+                <td><strong>「分布の広がりを考慮した距離」</strong><br>・分散で割って正規化するイメージ。<br>・異常検知によく使われる。</td>
+            </tr>
         </table>
 
-        <h3>■ 学習の課題とバイアス・バリアンス</h3>
+        <h3>■ 学習の課題：バイアス・バリアンスのトレードオフ</h3>
+        <p>モデルの複雑さと誤差の関係を表す最重要概念です。</p>
+        <table>
+            <tr><th>状態</th><th>バイアス<br><small>(思い込み)</small></th><th>バリアンス<br><small>(変動)</small></th><th>モデルの特徴</th></tr>
+            <tr>
+                <td><strong>未学習</strong><br>(Underfitting)</td>
+                <td style="color:red; font-weight:bold;">高い (High)</td>
+                <td style="color:blue;">低い (Low)</td>
+                <td><strong>「単純すぎる」</strong><br>データの特徴を捉えられていない。<br>例：直線で近似</td>
+            </tr>
+            <tr>
+                <td><strong>適正学習</strong><br>(Just right)</td>
+                <td>低〜中</td>
+                <td>低〜中</td>
+                <td><strong>「ちょうどいい」</strong><br>汎化性能が高い状態。</td>
+            </tr>
+            <tr>
+                <td><strong>過学習</strong><br>(Overfitting)</td>
+                <td style="color:blue;">低い (Low)</td>
+                <td style="color:red; font-weight:bold;">高い (High)</td>
+                <td><strong>「複雑すぎる」</strong><br>ノイズまで学習してしまう。<br>未知のデータに弱い。</td>
+            </tr>
+        </table>
+
+        <h3>■ その他重要ワード</h3>
         <ul>
-            <li><strong>過学習 (Overfitting)</strong>: 訓練データに適合しすぎること。<br>→ <strong>バリアンスが高い</strong>状態（モデルが複雑すぎる）。</li>
-            <li><strong>未学習 (Underfitting)</strong>: 学習不足。<br>→ <strong>バイアスが高い</strong>状態（モデルが単純すぎる）。</li>
-            <li><strong>次元の呪い</strong>: 次元が増えると空間がスカスカになり、距離の概念が意味をなさなくなる現象。</li>
+            <li><strong>k近傍法 (k-NN)</strong>: 「近くの $k$ 人の多数決」で決める。<br>
+                <ul>
+                    <li>$k$ が小さい ($k=1$) → 境界が複雑（ギザギザ） → <strong>過学習</strong>しやすい</li>
+                    <li>$k$ が大きい ($k=N$) → 境界が単純（平坦） → <strong>未学習</strong>しやすい</li>
+                </ul>
+            </li>
+            <li><strong>次元の呪い</strong>: 次元が増えると空間の体積が爆発的に増え、データがスカスカになる現象。<br>→ 近傍法などが機能しなくなるため、次元削減が必要。</li>
         </ul>
     `,
 
