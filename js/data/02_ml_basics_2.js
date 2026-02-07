@@ -2,28 +2,79 @@ window.quizData = {
     title: "2-（１）機械学習の基礎 Vol.2：検証・性能指標",
     
     cheatSheet: `
-        <h3>■ 混同行列 (Confusion Matrix)</h3>
-        <table>
-            <tr><th></th><th>予測: Positive (1)</th><th>予測: Negative (0)</th></tr>
-            <tr><th>実際: Positive (1)</th><td><strong>TP</strong> (True Positive)<br>正解（真陽性）</td><td><strong>FN</strong> (False Negative)<br>見逃し（偽陰性）</td></tr>
-            <tr><th>実際: Negative (0)</th><td><strong>FP</strong> (False Positive)<br>誤警報（偽陽性）</td><td><strong>TN</strong> (True Negative)<br>正解（真陰性）</td></tr>
+        <h3>■ 混同行列 (Confusion Matrix) の読み解き方</h3>
+        <p>「予測」が主語か、「実際」が主語かで名前が決まります。</p>
+        <table style="text-align:center;">
+            <tr>
+                <th style="background:#eee;"></th>
+                <th style="background:#eef;">予測：Positive (1)<br><small>「ある！」と予測</small></th>
+                <th style="background:#fee;">予測：Negative (0)<br><small>「ない...」と予測</small></th>
+            </tr>
+            <tr>
+                <th style="background:#eef;">実際：Positive (1)<br><small>実は「ある」</small></th>
+                <td style="color:blue;"><strong>TP</strong> (True Positive)<br>ヒット（正解）</td>
+                <td style="color:red;"><strong>FN</strong> (False Negative)<br><strong>見逃し</strong>（偽陰性）<br><small>病気を見落とす等</small></td>
+            </tr>
+            <tr>
+                <th style="background:#fee;">実際：Negative (0)<br><small>実は「ない」</small></th>
+                <td style="color:red;"><strong>FP</strong> (False Positive)<br><strong>誤警報</strong>（偽陽性）<br><small>スパムじゃないのに隔離等</small></td>
+                <td style="color:blue;"><strong>TN</strong> (True Negative)<br>正解（真陰性）</td>
+            </tr>
         </table>
-        
-        <h3>■ 主要な評価指標</h3>
-        <ul>
-            <li><strong>正解率 (Accuracy)</strong>: $(TP+TN)/All$<br>全体の正答率。不均衡データでは信用できない。</li>
-            <li><strong>適合率 (Precision)</strong>: $TP/(TP+FP)$<br>予測したもののうち、正しかった割合。「誤検知(FP)を減らしたい」時に重視。</li>
-            <li><strong>再現率 (Recall)</strong>: $TP/(TP+FN)$<br>実際の正解のうち、見つけられた割合。「見逃し(FN)を減らしたい」時に重視。</li>
-            <li><strong>F値 (F-measure)</strong>: PrecisionとRecallの<strong>調和平均</strong>。<br>バランスを見る指標。$2 \\cdot \\frac{Pre \\cdot Rec}{Pre + Rec}$</li>
-        </ul>
+
+        <h3>■ Precision vs Recall：永遠のトレードオフ</h3>
+        <p>「何を減らしたいか」で使い分けます。両立は困難です。</p>
+        <table>
+            <tr><th>指標</th><th>数式・意味</th><th>脳内イメージ・重視する場面</th></tr>
+            <tr>
+                <td><strong>適合率</strong><br>(Precision)</td>
+                <td>$\\frac{TP}{TP + \\mathbf{FP}}$<br>予測した中で、どれだけ当たったか？</td>
+                <td><strong>「オオカミ少年にならない」</strong><br>・<strong>誤検知(FP)</strong> を減らしたい。<br>・例：スパムフィルタ（大事なメールを消したくない）</td>
+            </tr>
+            <tr>
+                <td><strong>再現率</strong><br>(Recall)</td>
+                <td>$\\frac{TP}{TP + \\mathbf{FN}}$<br>取りこぼしなく拾えたか？</td>
+                <td><strong>「怪しい奴は全員拾う」</strong><br>・<strong>見逃し(FN)</strong> を減らしたい。<br>・例：がん検診（病気の人を見逃したくない）</td>
+            </tr>
+            <tr>
+                <td><strong>F値</strong><br>(F-measure)</td>
+                <td>$2 \\cdot \\frac{Pre \\cdot Rec}{Pre + Rec}$<br>（調和平均）</td>
+                <td><strong>「バランス重視」</strong><br>PrecisionとRecallのバランスが良いと高くなる。<br>片方が0だと0になる。</td>
+            </tr>
+            <tr>
+                <td><strong>正解率</strong><br>(Accuracy)</td>
+                <td>$\\frac{TP+TN}{All}$</td>
+                <td><strong>「全体の正答率」</strong><br>※不均衡データ（病気1人、健康99人など）では、全員「健康」と答えるだけで99%になるため<strong>信用できない</strong>。</td>
+            </tr>
+        </table>
 
         <h3>■ その他の重要指標</h3>
-        <ul>
-            <li><strong>ROC曲線 / AUC</strong>: 縦軸にTPR(Recall)、横軸にFPRをとった曲線。曲線下の面積(AUC)が大きいほど良い。</li>
-            <li><strong>IoU (Intersection over Union)</strong>: 物体検出で利用。<br>$\\frac{\\text{領域の重なり}}{\\text{領域の和集合}}$</li>
-            <li><strong>Micro平均</strong>: 全体のTP, FP数を合計してから計算（データ数が多いクラスの影響大）。</li>
-            <li><strong>Macro平均</strong>: クラスごとの指標を計算してから平均（全クラス平等）。</li>
-        </ul>
+        <table>
+            <tr><th>名称</th><th>内容・特徴</th></tr>
+            <tr>
+                <td><strong>ROC曲線 / AUC</strong></td>
+                <td>
+                    ・縦軸：TPR (Recall)<br>
+                    ・横軸：FPR (偽陽性率)<br>
+                    ・<strong>AUC</strong> (面積)：1.0に近いほど優秀。0.5はランダム（コイントス）と同じ。
+                </td>
+            </tr>
+            <tr>
+                <td><strong>IoU</strong><br>(Intersection over Union)</td>
+                <td>
+                    物体検出で利用。「重なり具合」を測る。<br>
+                    $\\frac{\\text{積集合 (重なり)}}{\\text{和集合 (合わせた面積)}} = \\frac{A \\cap B}{A \\cup B}$
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Micro平均</strong><br>vs<br><strong>Macro平均</strong></td>
+                <td>
+                    多クラス分類での平均の取り方。<br>
+                    ・<strong>Micro</strong>: 全件合計してから計算（<strong>多数派</strong>クラスに引きずられる）<br>
+                    ・<strong>Macro</strong>: クラスごとに計算して平均（<strong>少数派</strong>も平等に評価）
+                </td>
+            </tr>
+        </table>
     `,
 
     questions: [
