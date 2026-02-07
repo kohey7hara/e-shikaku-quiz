@@ -5,46 +5,61 @@ window.quizData = {
         <style>
             .flow-box { display: flex; align-items: center; justify-content: center; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; flex-wrap: wrap; }
             .step { border: 2px solid #333; padding: 5px 10px; background: white; border-radius: 5px; text-align: center; width: 90px; margin: 5px; }
+            .init-step { border: 2px solid #3498db; background: #ebf5fb; font-weight: bold; }
             .optimizer-step { border: 2px solid #e74c3c; background: #fceceb; font-weight: bold; }
             .arrow { margin: 0 5px; font-weight: bold; color: #555; }
+            .loop-arrow { border-top: 2px dashed #999; width: 100%; text-align: center; margin-top: 5px; font-size: 0.8em; color: #777; }
             .opt-icon { width: 80px; height: 50px; background: #fff; margin: auto; border: 1px solid #eee; }
             .path-line { fill: none; stroke-width: 3; stroke-linecap: round; }
-            .contour { stroke: #ddd; stroke-width: 1; fill: none; }
         </style>
 
-        <h3>■ 最適化の学習フロー：どこで使われる？</h3>
-        <p>オプティマイザは、逆伝播の最後（ゴール）で登場し、<strong>「重みを更新する」</strong>役割を担います。</p>
-        <div class="flow-box">
-            <div class="step">入力 $x$</div>
-            <div class="arrow">→</div>
-            <div class="step">順伝播<br>(Forward)</div>
-            <div class="arrow">→</div>
-            <div class="step">損失 $L$</div>
-            <div class="arrow">→</div>
-            <div class="step">逆伝播<br>(Backward)</div>
-            <div class="arrow">→</div>
-            <div class="step optimizer-step">
-                <strong>最適化</strong><br>
-                (Update)<br>
-                <small>$w \leftarrow w - \eta \Delta$</small>
+        <h3>■ 学習の全体タイムライン：初期化はどこ？</h3>
+        <p>「初期化」は学習ループに入る前の<strong>準備段階（Step 0）</strong>で行われます。<br>ここでの設定（He/Xavier）が、その後の学習効率を決定づけます。</p>
+        
+        <div class="flow-box" style="display:block; text-align:center;">
+            <div style="display:inline-block; vertical-align:top; margin-right:20px;">
+                <div style="margin-bottom:5px; font-weight:bold; color:#3498db;">Step 0: 準備 (1回だけ)</div>
+                <div class="step init-step">
+                    <strong>初期化</strong><br>
+                    (Init)<br>
+                    <small>重み $W$ に<br>乱数を入れる</small>
+                </div>
+            </div>
+
+            <div style="display:inline-block; vertical-align:top; font-size:2em; color:#555; padding-top:10px;">→</div>
+
+            <div style="display:inline-block; vertical-align:top; margin-left:20px; border:2px dashed #999; padding:10px; border-radius:10px; background:#fff;">
+                <div style="margin-bottom:5px; font-weight:bold; color:#e74c3c;">Step 1〜N: 学習ループ (繰り返し)</div>
+                <div style="display:flex; align-items:center;">
+                    <div class="step">順伝播<br>(Forward)</div>
+                    <div class="arrow">→</div>
+                    <div class="step">逆伝播<br>(Backward)</div>
+                    <div class="arrow">→</div>
+                    <div class="step optimizer-step">
+                        <strong>最適化</strong><br>
+                        (Update)<br>
+                        <small>SGD/Adam等</small>
+                    </div>
+                </div>
+                <div class="loop-arrow">↑ 次のミニバッチへ (繰り返し) ↑</div>
             </div>
         </div>
 
-        <h3>■ オプティマイザ図鑑 (特徴と弱点)</h3>
-        <p>「谷底（★）」に向かってどう進むか、軌跡の違いで覚えましょう。</p>
+        <h3>■ オプティマイザ図鑑 (E資格 完全版)</h3>
+        <p>基本の5つに加え、試験に出る派生形2つを追加しました。</p>
         <table>
-            <tr><th>名称</th><th>軌跡イメージ</th><th>特徴・弱点 (試験のツボ)</th></tr>
+            <tr><th>名称</th><th>軌跡イメージ</th><th>特徴・試験のツボ</th></tr>
             <tr>
                 <td><strong>SGD</strong><br>(確率的勾配降下法)</td>
                 <td>
                     <svg class="opt-icon" viewBox="0 0 80 50">
-                        <ellipse cx="70" cy="25" rx="5" ry="5" fill="#e74c3c" /> <path d="M10,10 L30,40 L50,15 L60,30 L70,25" stroke="#e74c3c" class="path-line" stroke-linejoin="bevel"/>
+                        <ellipse cx="70" cy="25" rx="5" ry="5" fill="#e74c3c" />
+                        <path d="M10,10 L30,40 L50,15 L60,30 L70,25" stroke="#e74c3c" class="path-line" stroke-linejoin="bevel"/>
                     </svg>
                 </td>
                 <td>
                     <strong>「千鳥足の酔っ払い」</strong><br>
-                    現在の勾配だけを見て進む。<br>
-                    <span style="color:red;">⚠ 弱点:</span> <strong>ジグザグする</strong>（峡谷などで壁にぶつかりながら進むため効率が悪い）。
+                    <span style="color:red;">⚠ 弱点:</span> ジグザグして効率が悪い。
                 </td>
             </tr>
             <tr>
@@ -57,9 +72,22 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「重い鉄球 (慣性)」</strong><br>
-                    過去の移動方向（速度）を維持する。<br>
-                    SGDの振動を抑える。<br>
-                    <span style="color:red;">⚠ 弱点:</span> 勢いがつきすぎて<strong>行き過ぎる</strong>（オーバーシュート）ことがある。
+                    過去の速度を維持。<br>
+                    <span style="color:red;">⚠ 弱点:</span> 行き過ぎる（オーバーシュート）。
+                </td>
+            </tr>
+            <tr>
+                <td><strong>NAG</strong><br>(Nesterov)</td>
+                <td>
+                    <svg class="opt-icon" viewBox="0 0 80 50">
+                        <ellipse cx="70" cy="25" rx="5" ry="5" fill="#2980b9" />
+                        <path d="M10,10 Q40,60 80,30 M80,30 L70,25" stroke="#2980b9" class="path-line" fill="none" stroke-dasharray="2,2"/>
+                    </svg>
+                </td>
+                <td>
+                    <strong>「先読みするMomentum」</strong><br>
+                    「慣性で進んだ<strong>未来の位置</strong>」で勾配を計算して補正する。<br>
+                    Momentumの行き過ぎブレーキ版。
                 </td>
             </tr>
             <tr>
@@ -68,12 +96,12 @@ window.quizData = {
                     <svg class="opt-icon" viewBox="0 0 80 50">
                         <ellipse cx="70" cy="25" rx="5" ry="5" fill="#ccc" />
                         <path d="M10,25 L30,25 L40,25" stroke="#f39c12" class="path-line" stroke-dasharray="5,2"/>
-                        <circle cx="40" cy="25" r="3" fill="#f39c12" /> </svg>
+                        <circle cx="40" cy="25" r="3" fill="#f39c12" />
+                    </svg>
                 </td>
                 <td>
                     <strong>「疲れるランナー」</strong><br>
-                    過去の勾配の二乗和 $h$ で学習率を割る。<br>
-                    <span style="color:red;">⚠ 弱点:</span> $h$ が増え続け、学習率がほぼ0になり<strong>途中で止まる</strong>（鞍点などで動けなくなる）。
+                    <span style="color:red;">⚠ 弱点:</span> 学習率が0になり<strong>止まる</strong>。
                 </td>
             </tr>
             <tr>
@@ -86,8 +114,20 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「忘れるAdaGrad」</strong><br>
-                    AdaGradの改良版。<br>
-                    過去の記憶を徐々に忘れる（指数移動平均）ことで、<strong>学習率が0にならずに進み続ける</strong>。
+                    過去を徐々に忘れることで、学習を継続させる。
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Adadelta</strong><br>(アダデルタ)</td>
+                <td>
+                    <svg class="opt-icon" viewBox="0 0 80 50">
+                        <ellipse cx="70" cy="25" rx="5" ry="5" fill="#16a085" />
+                        <path d="M10,25 L40,25 L70,25" stroke="#16a085" class="path-line" />
+                    </svg>
+                </td>
+                <td>
+                    <strong>「学習率の設定不要」</strong><br>
+                    RMSPropと似ているが、<strong>学習率ハイパーパラメータが存在しない</strong>（単位を揃える工夫で自動化）。
                 </td>
             </tr>
             <tr>
@@ -99,26 +139,26 @@ window.quizData = {
                     </svg>
                 </td>
                 <td>
-                    <strong>「Momentum + RMSProp」</strong><br>
-                    慣性（方向）と学習率調整（歩幅）を合体。<br>
-                    今の<strong>デファクトスタンダード</strong>（とりあえずこれを使う）。
+                    <strong>「全部入り」</strong><br>
+                    Momentum + RMSProp。<br>
+                    今のデファクトスタンダード。
                 </td>
             </tr>
         </table>
 
         <h3>■ 【暗記】初期化手法の鉄板セット</h3>
-        <p>「スタート地点（初期値）」と「活性化関数」の相性です。</p>
+        <p>Step 0（準備段階）で、乱数の「広がり具合（分散）」をどう決めるかです。</p>
         <table>
-            <tr><th>初期化手法</th><th>相性の良い関数</th><th>覚え方</th></tr>
+            <tr><th>初期化手法</th><th>相性の良い関数</th><th>特徴</th></tr>
             <tr>
                 <td><strong>Xavier (Glorot)</strong></td>
                 <td><strong>Sigmoid, Tanh</strong><br>(S字・対称)</td>
-                <td>分散 $\\frac{1}{n}$。<br>「グロロットはシグモイド」</td>
+                <td>分散 $\\frac{1}{n}$。<br>左右対称な関数で、信号の強さを保つ。</td>
             </tr>
             <tr>
                 <td><strong>He (Kaiming)</strong></td>
                 <td><strong>ReLU</strong><br>(折れ線・非対称)</td>
-                <td>分散 $\\frac{2}{n}$。<br>ReLUで半分消える分、<strong>2倍</strong>にする。</td>
+                <td>分散 $\\frac{2}{n}$。<br>ReLUを通すと半分消えるので、<strong>2倍</strong>にして補う。</td>
             </tr>
         </table>
     `,
