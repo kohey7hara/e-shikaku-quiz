@@ -61,7 +61,6 @@ window.quizData = {
                     <rect x="10" y="70" width="20" height="20" class="grid-cell" /> <rect x="30" y="70" width="20" height="20" class="grid-cell" /> <rect x="50" y="70" width="20" height="20" class="grid-cell" /> <rect x="70" y="70" width="20" height="20" class="grid-cell" />
                     
                     <rect x="10" y="10" width="60" height="60" class="filter-highlight" />
-                    <path d="M75,40 L90,40" stroke="#e74c3c" stroke-width="3" marker-end="url(#arrowhead)" />
                 </svg>
             </div>
             <div style="width:60%;">
@@ -98,7 +97,7 @@ window.quizData = {
         <h3>■ 【絶対暗記】出力サイズの計算公式</h3>
         <p>入力 $H$, フィルタ $K$, パディング $P$, ストライド $S$ のとき：</p>
         <div class="calc-box">
-            $$H' = \frac{H + 2P - K}{S} + 1$$
+            $$H' = \\frac{H + 2P - K}{S} + 1$$
         </div>
         <p>※試験では割り切れる設定がほとんどです。割り切れない場合は切り捨て (`floor`) が一般的。</p>
 
@@ -160,9 +159,9 @@ window.quizData = {
         {
             category: "1x1畳み込み",
             question: "「1x1畳み込み（Pointwise Convolution）」の主な利用目的は何か。",
-            options: ["特徴マップの「チャンネル数」を増減（主に圧縮）させ、計算量を削減する", "画像の解像度を上げる", "ぼかし効果を入れる", "エッジを検出する"],
+            options: ["特徴マップの「チャンネル数」を増減（主に圧縮）させ、計算量を削減する", "画像を拡大する", "ぼかし効果を入れる", "エッジを検出する"],
             answer: 0,
-            explanation: "GoogleLeNet (Inception) などで導入されました。縦横サイズは変えずに、チャンネル方向の線形結合を行うことで次元圧縮します。"
+            explanation: "縦横サイズは変えずに、チャンネル方向の線形結合を行うことで次元圧縮などを行います。"
         },
         {
             category: "Im2Col",
