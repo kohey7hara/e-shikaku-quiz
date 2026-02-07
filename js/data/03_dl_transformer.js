@@ -1,31 +1,125 @@
 window.quizData = {
-    title: "3-（６）Transformer",
+    title: "3-（６）Transformer：Attention機構",
     
     cheatSheet: `
+        <style>
+            .concept-container { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+            .concept-box { border: 1px solid #ccc; border-radius: 8px; padding: 10px; width: 45%; min-width: 300px; background: #fff; }
+            .flow-vertical { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+            .step-box { border: 2px solid #333; padding: 8px; border-radius: 5px; background: #fff; width: 80%; text-align: center; font-size: 0.85em; position: relative; }
+            .arrow-down { color: #555; font-weight: bold; }
+            
+            /* 色分け */
+            .bg-q { background-color: #fceceb; border-color: #e74c3c; color: #c0392b; }
+            .bg-k { background-color: #ebf5fb; border-color: #3498db; color: #2980b9; }
+            .bg-v { background-color: #eafaf1; border-color: #27ae60; color: #27ae60; }
+            .bg-attn { background-color: #f9e79f; border-color: #f1c40f; }
+            
+            .calc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; text-align: center; font-size: 0.8em; margin: 10px 0; }
+            .qkv-label { font-weight: bold; padding: 5px; border-radius: 4px; }
+            
+            .analogy-table { width: 100%; border-collapse: collapse; font-size: 0.9em; margin-top: 10px; }
+            .analogy-table th { background: #eee; padding: 5px; border: 1px solid #ccc; }
+            .analogy-table td { padding: 5px; border: 1px solid #ccc; }
+        </style>
+
+        <h3>■ Transformerとは？（RNNとの違い）</h3>
+        <p>「Attention（注意機構）だけで十分だ」という論文 (Attention Is All You Need) から生まれました。</p>
+        <div class="concept-container">
+            <div class="concept-box">
+                <strong>従来のRNN / LSTM</strong><br>
+                <div style="margin-top:5px; text-align:center;">
+                    [I] → [love] → [AI]<br>
+                    <span style="color:red; font-size:0.8em;">順番に計算（遅い・忘れる）</span>
+                </div>
+                <ul>
+                    <li>単語を<strong>1つずつ</strong>処理する。</li>
+                    <li>長文になると過去を忘れる。</li>
+                    <li>並列計算ができない（GPU活用度低）。</li>
+                </ul>
+            </div>
+            <div class="concept-box" style="border: 2px solid #3498db;">
+                <strong>Transformer</strong><br>
+                <div style="margin-top:5px; text-align:center;">
+                    [I, love, AI] (一括入力)<br>
+                    <span style="color:blue; font-size:0.8em;">並列計算（速い・全部見る）</span>
+                </div>
+                <ul>
+                    <li>文章全体を<strong>一度に</strong>処理する。</li>
+                    <li>離れた単語の関係も一瞬で捉える。</li>
+                    <li><strong>並列計算</strong>が得意（高速）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>■ Attention (Q, K, V) の直感的イメージ</h3>
+        <p>「検索エンジン」や「辞書」に例えられます。</p>
+        
+        <div class="calc-grid">
+            <div class="qkv-label bg-q">Query (Q)<br>「検索ワード」</div>
+            <div class="qkv-label bg-k">Key (K)<br>「見出し・タグ」</div>
+            <div class="qkv-label bg-v">Value (V)<br>「本文・中身」</div>
+        </div>
+
+        <table class="analogy-table">
+            <tr><th>項目</th><th>役割</th><th>図書館での例え</th></tr>
+            <tr>
+                <td><strong>Query</strong></td>
+                <td>知りたい情報（起点）。</td>
+                <td>「AIの歴史を知りたい」（検索者の意図）</td>
+            </tr>
+            <tr>
+                <td><strong>Key</strong></td>
+                <td>検索対象との関連度を測るための指標。</td>
+                <td>本の「タイトル」や「背表紙」</td>
+            </tr>
+            <tr>
+                <td><strong>Value</strong></td>
+                <td>最終的に取り出す情報。</td>
+                <td>本の「中身（文章）」</td>
+            </tr>
+        </table>
+        <p style="font-size:0.8em; margin-top:5px;">
+            ※ $Q$ と $K$ の類似度（内積）を計算し、その類似度に応じて $V$ を混ぜ合わせます。<br>
+            <strong>「関連する $V$ だけを強く取り込む」</strong> 仕組みです。
+        </p>
+
         <h3>■ Scaled Dot-Product Attention（絶対暗記）</h3>
-        <p>Transformerの核となる計算式です。</p>
-        <div style="background:#eef; padding:10px; border-radius:5px; text-align:center; font-weight:bold;">
+        <div style="background:#eef; padding:10px; border-radius:5px; text-align:center; font-weight:bold; margin-bottom:10px;">
             $$Attention(Q, K, V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V$$
         </div>
-        <ul>
-            <li><strong>Q (Query)</strong>: 検索したい情報（検索クエリ）。</li>
-            <li><strong>K (Key)</strong>: 検索対象の見出し（インデックス）。</li>
-            <li><strong>V (Value)</strong>: 取り出したい中身（コンテンツ）。</li>
-            <li><strong>$\\sqrt{d_k}$</strong>: スケーリング係数。内積が大きくなりすぎて勾配消失するのを防ぐ。</li>
-        </ul>
+        
+        <div class="flow-vertical" style="background:#f9f9f9; padding:10px; border-radius:8px;">
+            <div class="step-box">
+                <strong>Step 1: 類似度計算</strong><br>
+                $QK^T$ (内積)<br>
+                <small>クエリとキーが似ているか？</small>
+            </div>
+            <div class="arrow-down">↓</div>
+            <div class="step-box">
+                <strong>Step 2: スケーリング</strong><br>
+                $\\div \\sqrt{d_k}$<br>
+                <small>値が大きくなりすぎるのを防ぐ<br>(勾配消失対策)</small>
+            </div>
+            <div class="arrow-down">↓</div>
+            <div class="step-box">
+                <strong>Step 3: 確率化 (重み付け)</strong><br>
+                softmax<br>
+                <small>合計1.0にする</small>
+            </div>
+            <div class="arrow-down">↓</div>
+            <div class="step-box bg-attn">
+                <strong>Step 4: 値の取得</strong><br>
+                $\\times V$<br>
+                <small>重みに応じてValueを合成</small>
+            </div>
+        </div>
 
-        <h3>■ Attentionの種類</h3>
-        <table>
-            <tr><th>種類</th><th>Q, K, Vの出処</th><th>役割</th></tr>
-            <tr><td><strong>Self-Attention</strong></td><td>全て<strong>同じ層</strong>の出力<br>($Q=K=V$)</td><td>文中の単語間の関係性（係り受けなど）を学習する。</td></tr>
-            <tr><td><strong>Source-Target Attention</strong><br>(Cross Attention)</td><td>Q: <strong>デコーダ</strong><br>K, V: <strong>エンコーダ</strong></td><td>翻訳などで、入力文（エンコーダ）のどの情報を翻訳に使うかを見る。</td></tr>
-            <tr><td><strong>Masked Attention</strong></td><td>Self-Attentionと同じ<br>ただし未来を隠す</td><td>デコーダ学習時に、<strong>カンニング（未来の単語を見る）</strong>を防ぐ。</td></tr>
-        </table>
-
-        <h3>■ その他の構成要素</h3>
+        <h3>■ その他の重要構成要素</h3>
         <ul>
-            <li><strong>Multi-Head Attention</strong>: Attentionを複数並列に行い、異なる種類の関連性（文法、意味など）を同時に捉える。</li>
-            <li><strong>Positional Encoding</strong>: RNNと違い順序情報がないため、位置情報を足し算で埋め込む。</li>
+            <li><strong>Multi-Head Attention</strong>: Attentionを8個など並列に行う。「文法」「意味」「文脈」など異なる視点の情報を同時に捉えるため。</li>
+            <li><strong>Positional Encoding</strong>: Transformerは順序という概念がないため、「位置情報（1番目、2番目...）」をベクトルに足し算して教える。</li>
+            <li><strong>Position-wise FFN</strong>: 各位置ごとに独立して行われる全結合層。</li>
         </ul>
     `,
 
@@ -34,148 +128,148 @@ window.quizData = {
         // 【基礎編】 Q1 - Q10
         // ---------------------------------------------------------
         {
-            category: "基本構造",
-            question: "Transformerの画期的な特徴であり、RNNを使わずに系列データを処理できるようになった要因は何か。",
-            options: ["Attention機構のみを用いた（Attention is All You Need）", "CNNを多層化した", "強化学習を取り入れた", "メモリセルを増やした"],
+            category: "Attentionの数式",
+            question: "Scaled Dot-Product Attentionの数式 $Attention(Q, K, V) = \\text{softmax}(\\frac{QK^T}{\\sqrt{d_k}})V$ において、分母の $\\sqrt{d_k}$ は何のためにあるか。",
+            options: ["内積の値が大きくなりすぎて、Softmaxの勾配が消失するのを防ぐため", "計算速度を上げるため", "次元数を減らすため", "負の値にならないようにするため"],
             answer: 0,
-            explanation: "再帰結合（RNN）や畳み込み（CNN）を使わず、Attentionのみで文脈を捉えるアーキテクチャを提案し、並列計算を可能にしました。"
+            explanation: "次元数 $d_k$ が大きいと内積の和が大きくなり、Softmax関数の端（勾配がほぼ0の部分）に行ってしまうのを防ぐスケーリング係数です。"
         },
         {
-            category: "Scaled Dot-Product Attention",
-            question: "Transformerで用いられるAttentionの計算式として正しいものはどれか。",
-            options: ["$\\text{softmax}(\\frac{QK^T}{\\sqrt{d_k}})V$", "$\\text{softmax}(QK^T)V$", "$\\tanh(\\frac{QK^T}{\\sqrt{d_k}})V$", "$\\frac{QV^T}{\\sqrt{d_k}}K$"],
+            category: "Q, K, V",
+            question: "Attention機構における $Q, K, V$ の名称として正しい組み合わせはどれか。",
+            options: ["Query, Key, Value", "Question, Keyword, Vector", "Queue, Kernel, Volume", "Quantization, Knowledge, Verification"],
             answer: 0,
-            explanation: "QueryとKeyの内積を取り、スケーリングしてSoftmaxで確率化し、それを重みとしてValueを足し合わせます。"
+            explanation: "検索システム（QueryでKeyを探し、Valueを取り出す）のアナロジーから来ています。"
         },
         {
             category: "Positional Encoding",
             question: "Transformerにおいて「Positional Encoding（位置エンコーディング）」が必要な理由は何か。",
-            options: ["Transformerの構造自体には、単語の「順序」を認識する仕組みがないため", "単語の意味をベクトル化するため", "計算速度を上げるため", "過学習を防ぐため"],
+            options: ["Transformerの構造自体には再帰（RNN）も畳み込み（CNN）もなく、単語の「順序情報」を認識できないため", "単語の意味を強調するため", "計算量を減らすため", "過学習を防ぐため"],
             answer: 0,
-            explanation: "Attentionは「どの単語と関連があるか」は見ますが、「隣にあるか」などの位置情報は無視します（順列不変）。そのため、位置情報を別途足し合わせる必要があります。"
-        },
-        {
-            category: "Self-Attention",
-            question: "「Self-Attention（自己注意機構）」において、Query(Q), Key(K), Value(V) はどこから来るか。",
-            options: ["全て同じ入力（前の層の出力）から生成される", "Qはデコーダ、KとVはエンコーダから来る", "QとKは入力、Vは外部メモリから来る", "全てランダムに生成される"],
-            answer: 0,
-            explanation: "自分自身の入力 $X$ に対して、重み $W^Q, W^K, W^V$ を掛けて $Q, K, V$ を作ります。つまり「自分自身の中での関係性」を見ます。"
-        },
-        {
-            category: "Source-Target Attention",
-            question: "Seq2Seqモデルのデコーダ側にある「Source-Target Attention（またはEncoder-Decoder Attention）」において、Query(Q)はどこから来るか。",
-            options: ["デコーダ（自分自身）の前の層", "エンコーダの出力", "Positional Encoding", "外部データベース"],
-            answer: 0,
-            explanation: "「翻訳したい内容（デコーダのQ）」を使って、「原文（エンコーダのK, V）」から情報を検索する、という構造です。"
+            explanation: "Attentionは「どの単語とどの単語が関連しているか」を見ますが、「どちらが前か」は分かりません。そのため、位置情報を入力に足し合わせます。"
         },
         {
             category: "Multi-Head Attention",
-            question: "「Multi-Head Attention」を採用する（Attentionを複数並列にする）主な利点は何か。",
-            options: ["異なる部分空間（意味、文法、共起など）の異なる関係性を同時に学習できる", "計算量が削減できる", "パラメータ数が減る", "層を深くしなくて済む"],
+            question: "「Multi-Head Attention」を採用する（Attentionを複数並列に行う）主な利点は何か。",
+            options: ["異なる部分空間（視点）の特徴を同時に学習できる（例：あるヘッドは文法を、別のヘッドは意味関係を見るなど）", "計算が1回で済むので速い", "パラメータ数が減る", "長期記憶が保持できる"],
             answer: 0,
-            explanation: "1つのAttention（シングルヘッド）だと1種類の関係しか見れませんが、ヘッドを増やすことで「誰が」や「いつ」など複数の視点を同時に持てます。"
+            explanation: "1つのAttentionだけでは捉えきれない、複数の異なる関係性を同時に捉えることができます（アンサンブルのような効果）。"
+        },
+        {
+            category: "Self-Attention",
+            question: "「Self-Attention（自己注意機構）」の特徴として正しいものはどれか。",
+            options: ["$Q, K, V$ の全てが「同じ入力元（同じ層の出力）」から作られる", "$Q$ はDecoder、$K, V$ はEncoderから来る", "自分自身の未来の情報だけを見る", "ランダムに注意を向ける"],
+            answer: 0,
+            explanation: "自分（入力文）の中での単語間の係り受け（例えば代名詞が何を指すかなど）を学習します。"
+        },
+        {
+            category: "論文",
+            question: "Transformerが提案された、Googleによる2017年の有名な論文のタイトルは何か。",
+            options: ["Attention Is All You Need", "Deep Residual Learning", "ImageNet Classification with Deep CNN", "Learning to Forget"],
+            answer: 0,
+            explanation: "「必要なのはAttentionだけ（RNNやCNNはいらない）」という衝撃的なタイトルで、その後のNLP界を塗り替えました。"
+        },
+        {
+            category: "計算量",
+            question: "系列長を $n$、埋め込み次元を $d$ としたとき、Self-Attentionの計算量はオーダーでどう表されるか。",
+            options: ["$O(n^2 d)$", "$O(n d^2)$", "$O(n)$", "$O(n^3)$"],
+            answer: 0,
+            explanation: "全ての単語対（$n \\times n$）について類似度を計算するため、系列長 $n$ の二乗に比例します。そのため、極端に長い文章は苦手です。"
         },
         {
             category: "Masked Attention",
-            question: "デコーダ側のSelf-Attentionにおいて、未来の単語（まだ生成していない単語）を参照できないようにする処理を何と呼ぶか。",
-            options: ["Masking (Masked Attention)", "Padding", "Clipping", "Dropout"],
+            question: "Decoder側で使われる「Masked Self-Attention」の役割は何か。",
+            options: ["ある単語を予測する際に、「未来の単語」をカンニングできないように隠すこと", "重要でない単語を無視すること", "計算量を減らすこと", "パディング部分を無視すること"],
             answer: 0,
-            explanation: "学習時は正解文が全て見えていますが、予測時には未来の単語は見えないはずです。カンニングを防ぐために、未来のスコアを $-\\infty$ にしてSoftmax結果を0にします。"
+            explanation: "生成タスクでは、まだ生成していない「未来の単語」は見えてはいけません。マスク行列（下三角行列）を使って未来の注意スコアを $-\\infty$ にします。"
         },
         {
-            category: "Feed Forward Network",
-            question: "Transformerの各層に含まれる「Position-wise Feed-Forward Networks」は、どのような構造か。",
-            options: ["各単語（位置）ごとに独立して適用される、2層の全結合ネットワーク", "全単語を結合するリカレントネットワーク", "畳み込みニューラルネットワーク", "ルックアップテーブル"],
+            category: "FFN",
+            question: "Transformerの各層にある「Position-wise Feed-Forward Networks」は、どのような処理を行うか。",
+            options: ["各位置（単語）ごとに独立して、同じパラメータの全結合層を適用する", "全単語をまとめて畳み込む", "時系列順に処理する", "入力と出力を逆転させる"],
             answer: 0,
-            explanation: "Attentionで集めた情報を、各単語ごとに個別に変換する層です。単語間の相互作用はAttentionで行い、情報の加工はここで行います。"
+            explanation: "Attentionで混ぜ合わされた情報を、単語ごとに個別に非線形変換します。構造は $ReLU(xW_1+b_1)W_2+b_2$ の2層MLPです。"
         },
         {
-            category: "残差接続",
-            question: "Transformerの各サブレイヤー（AttentionやFFN）の出力で行われる「Add & Norm」の「Add」は何を指すか。",
-            options: ["残差接続（Residual Connection）：入力 $x$ を出力に足す", "バイアス項の加算", "次の層への加算", "位置情報の加算"],
+            category: "Source-Target Attention",
+            question: "Encoder-Decoder型のTransformerにおいて、Decoderにある「Source-Target Attention（Cross Attention）」の $K$ と $V$ はどこから来るか。",
+            options: ["Encoderの最終出力", "Decoderの一つ前の層", "入力埋め込み", "ランダムな値"],
             answer: 0,
-            explanation: "ResNetと同様に、勾配消失を防ぎ学習を安定させるために、入力をそのまま出力に足し合わせます。"
-        },
-        {
-            category: "Layer Normalization",
-            question: "Transformerで採用されている正規化手法は「Batch Normalization」ではなく何か。",
-            options: ["Layer Normalization", "Instance Normalization", "Group Normalization", "Weight Normalization"],
-            answer: 0,
-            explanation: "NLPでは文の長さ（バッチ内のパディング量）がバラバラなため、バッチ単位で統計をとるBatch Normよりも、個々のデータ内で正規化するLayer Normが適しています。"
+            explanation: "Encoderが作った「入力文の情報」を、Decoderが検索（Query）して利用するためのAttentionです。"
         },
 
         // ---------------------------------------------------------
         // 【応用編】 Q11 - Q20
         // ---------------------------------------------------------
         {
-            category: "スケーリング係数(応用)",
-            question: "Scaled Dot-Product Attentionにおいて、内積 $QK^T$ を $\\sqrt{d_k}$ で割る（スケーリングする）数学的な理由は何か。",
-            options: ["次元数 $d_k$ が大きくなると内積の値が大きくなりすぎ、Softmaxの勾配が極端に小さくなる（勾配消失）のを防ぐため", "計算速度を速めるため", "値を0〜1の範囲に収めるため", "KeyとQueryの次元を合わせるため"],
+            category: "Positional Encodingの式(応用)",
+            question: "原論文におけるPositional Encodingでは、どのような関数を用いて位置情報を生成しているか。",
+            options: ["サイン波 (sin) とコサイン波 (cos) の周期関数", "学習可能な埋め込み層 (Learnable Embedding)", "0から1までの線形増加", "正規分布乱数"],
             answer: 0,
-            explanation: "内積の分散は次元数 $d_k$ に比例して大きくなります。値が大きいとSoftmax関数の端（勾配がほぼ0の部分）に行ってしまい、学習が進まなくなります。"
+            explanation: "異なる周波数のsin/cos関数を使うことで、相対的な位置関係をモデルが学習しやすくしています（※BERTなどでは学習可能パラメータを使うことも多い）。"
         },
         {
-            category: "計算量比較(応用)",
-            question: "系列長を $n$、埋め込み次元を $d$ としたとき、Self-Attention層の計算量はオーダー表記でどうなるか。（$d$は$n$より小さいとする）",
-            options: ["$O(n^2 \\cdot d)$", "$O(n \\cdot d^2)$", "$O(n)$", "$O(\\log n)$"],
+            category: "Layer Normalization(応用)",
+            question: "TransformerではBatch Normalizationではなく「Layer Normalization」が使われる。Layer Normの特徴はどれか。",
+            options: ["1つのサンプル内の全ニューロン（特徴量）で正規化を行い、バッチサイズに依存しない", "バッチ全体の平均を使う", "チャンネルごとに正規化する", "重みを正規化する"],
             answer: 0,
-            explanation: "全ての単語対（$n \\times n$）について内積計算を行うため、系列長 $n$ の二乗に比例します。これが非常に長い文章でTransformerが重くなる理由です。"
+            explanation: "NLPでは文の長さがバラバラでバッチ統計量が不安定になりやすいため、サンプル単位で正規化するLayer Normが適しています。"
         },
         {
-            category: "RNNとの比較(応用)",
-            question: "RNNと比較した際の、Transformerの最大のメリット（学習時）は何か。",
-            options: ["再帰的な計算がないため、系列全体を一括で並列計算できる（高速化）", "パラメータ数が圧倒的に少ない", "メモリ使用量が少ない", "短い文章の精度が高い"],
+            category: "BERT vs GPT(応用)",
+            question: "Transformerの構造において、BERTとGPTはそれぞれどの部分を使用しているか。",
+            options: ["BERTはEncoderのみ、GPTはDecoderのみ", "BERTはDecoderのみ、GPTはEncoderのみ", "両方ともEncoder-Decoder", "両方ともEncoderのみ"],
             answer: 0,
-            explanation: "RNNは前の単語の計算が終わらないと次に行けませんが、TransformerはAttention行列を一発で計算できるため、GPUの並列性能をフルに活かせます。"
+            explanation: "BERTは文脈を双方向から読む理解タスク向け（Encoder）、GPTは次単語予測による生成タスク向け（Decoder）です。"
         },
         {
-            category: "長距離依存性(応用)",
-            question: "TransformerがRNNよりも「長距離の依存関係（離れた単語同士の関係）」を捉えやすい理由は何か。",
-            options: ["Attentionにより、どんなに離れた単語でもパスの長さ（距離）が常に「1」だから", "記憶セル（Memory Cell）の容量が大きいから", "逆伝播の回数が多いから", "Positional Encodingがあるから"],
+            category: "Residual Connection(応用)",
+            question: "Transformerの各サブレイヤー（AttentionやFFN）の後には「Add & Norm」がある。「Add」が指すResidual Connection（残差結合）の主な効果は何か。",
+            options: ["勾配消失を防ぎ、深い層まで学習を可能にする", "パラメータ数を増やす", "計算速度を上げる", "ノイズを除去する"],
             answer: 0,
-            explanation: "RNNではステップ数分のホップが必要ですが、Attentionは全単語に直接アクセスできるため、距離に関係なく情報を取得できます（Path Length = $O(1)$）。"
+            explanation: "ResNet由来の技術で、入力 $x$ を出力に足し合わせる（$F(x) + x$）ことで、勾配の高速道路を作り学習を安定させます。"
         },
         {
-            category: "Positional Encoding(応用)",
-            question: "オリジナルのTransformer論文で採用されたPositional Encodingは、どのような関数を用いているか。",
-            options: ["正弦波（sin）と余弦波（cos）の組み合わせ", "学習可能なパラメータ（Embedding層）", "0から1への線形増加", "乱数"],
+            category: "内積と類似度(応用)",
+            question: "Attentionにおいて、QueryとKeyの「内積」をとる幾何学的な意味は何か。",
+            options: ["2つのベクトルの向きがどれくらい似ているか（類似度）を測る", "2つのベクトルの距離を測る", "2つのベクトルの外積をとる", "ベクトルを回転させる"],
             answer: 0,
-            explanation: "学習不要な固定の関数（周期の異なるsin/cos）を使っています。これにより、学習時より長い文章が来てもある程度対応できるとされています（BERTなどは学習可能パラメータを使います）。"
+            explanation: "内積が大きい＝ベクトルの向きが揃っている＝関連度が高い、と解釈してAttentionスコアにします。"
         },
         {
-            category: "Source-Target Attention(応用)",
-            question: "Source-Target Attentionにおいて、Query(Q)の次元数を $d_q$、Key(K)の次元数を $d_k$ としたとき、計算可能であるための条件は何か。",
-            options: ["$d_q = d_k$ （内積をとるため次元が一致している必要がある）", "$d_q > d_k$", "$d_q < d_k$", "特に制約はない"],
+            category: "Softmaxの役割(応用)",
+            question: "Attentionスコアの計算でSoftmax関数を通す理由は何か。",
+            options: ["スコアを確率分布（合計1.0、すべて正の値）に変換し、Valueの加重平均をとれるようにするため", "最大値だけを取り出すため", "計算を簡単にするため", "負の値を作るため"],
             answer: 0,
-            explanation: "Attentionスコアは $Q$ と $K$ の内積（ドット積）で計算するため、この2つのベクトルの次元数は一致していなければなりません。"
+            explanation: "どこにどれくらい注目するかを「割合」で表現するためです。"
         },
         {
-            category: "BERTのAttention(応用)",
-            question: "BERT（Encoderのみのモデル）が「双方向（Bidirectional）」の文脈を学習できるのは、Transformerのどの機能のおかげか。",
-            options: ["Maskedではない通常のSelf-Attentionを使っているため（全単語がお互いを参照できる）", "Masked Attentionを使っているため", "Source-Target Attentionを使っているため", "RNNを使っているため"],
+            category: "Warmup(応用)",
+            question: "Transformerの学習時によく用いられる、学習率を初期は線形に上げ、その後減衰させるスケジューリングを何と呼ぶか。",
+            options: ["Warmup", "Dropout", "Early Stopping", "Gradient Clipping"],
             answer: 0,
-            explanation: "GPTなどは未来を隠すMasked Attentionを使いますが、BERTは穴埋め問題（MLM）を解くため、マスクなしのSelf-Attentionで前後の文脈を同時に見ることができます。"
+            explanation: "Transformerは初期の勾配が不安定なため、いきなり高い学習率で始めると発散しやすいです。徐々に上げるWarmupが必須テクニックです。"
         },
         {
-            category: "Transformerの弱点(応用)",
-            question: "Transformer（特に初期のモデル）の弱点として挙げられるものはどれか。",
-            options: ["系列長 $n$ に対して計算量とメモリが二乗（$O(n^2)$）で増えるため、極端に長い文章を扱いにくい", "並列計算ができない", "短い文章の精度がRNNより低い", "勾配消失が起きやすい"],
+            category: "CNNとの比較(応用)",
+            question: "CNNと比較した際のTransformer（Self-Attention）の利点として、「大域的な情報の取得」という観点から正しい説明はどれか。",
+            options: ["CNNは層を重ねないと遠くの情報を見れないが、Transformerは1層目から文中のあらゆる距離の単語関係を直接捉えられる", "Transformerは局所的な情報しか見れない", "CNNの方が長距離依存に強い", "どちらも同じ"],
             answer: 0,
-            explanation: "この $O(n^2)$ 問題を解決するために、後にSparse AttentionやReformer、Linformerなどの「効率的Transformer（X-formers）」が多数提案されています。"
+            explanation: "Self-Attentionは全単語間のリンクを持つため、距離に関係なくパスの長さが1（直接参照）となり、長距離の依存関係を捉えやすいです。"
         },
         {
-            category: "学習率のスケジューリング(応用)",
-            question: "Transformerの学習において推奨される、学習率を「最初は徐々に上げ、その後徐々に下げる」スケジューリング手法を何と呼ぶか。",
-            options: ["Warmup (Warmup Steps)", "Step Decay", "Cosine Annealing", "Early Stopping"],
+            category: "帰納的バイアス(応用)",
+            question: "CNNやRNNと比較して、Transformerは「帰納的バイアス（Inductive Bias）」が弱いと言われる。これは何を意味するか。",
+            options: ["画像や時間といったデータ構造への仮定（局所性や順序）がモデルに組み込まれておらず、大量のデータで学習しないとパターンを見つけにくい", "初期値に依存しやすい", "過学習しにくい", "バイアス項が存在しない"],
             answer: 0,
-            explanation: "学習初期は勾配が不安定なため、小さな学習率から始めて徐々に本来の学習率まで上げていく「Warmup」が、Transformerの学習安定化には不可欠です。"
+            explanation: "CNNは「隣同士は関係ある」、RNNは「時間は続く」という前提（バイアス）がありますが、Transformerにはそれがないため、柔軟ですが大量のデータが必要です。"
         },
         {
-            category: "FFNの次元(応用)",
-            question: "TransformerのFeed-Forward Networkにおける中間層の次元数（$d_{ff}$）は、埋め込み次元（$d_{model}$）と比べて通常どう設定されるか。",
-            options: ["埋め込み次元よりも大きく設定される（例：4倍）", "埋め込み次元と同じ", "埋め込み次元よりも小さく設定される（ボトルネック）", "ランダムに設定される"],
+            category: "Label Smoothing(応用)",
+            question: "Transformerの学習（翻訳タスクなど）で過学習を防ぐためによく使われる、正解ラベルの確率を1.0ではなく0.9などに下げる手法は何か。",
+            options: ["Label Smoothing", "Dropout", "Batch Norm", "Weight Decay"],
             answer: 0,
-            explanation: "論文（Baseモデル）では $d_{model}=512$ に対し、$d_{ff}=2048$ と4倍に拡大しています。一度高次元に写像してから元に戻すことで表現力を高めています。"
+            explanation: "「絶対にこれだ！」と確信しすぎるのを防ぎ、汎化性能を向上させるテクニックです。"
         }
     ]
 };
