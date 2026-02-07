@@ -13,12 +13,15 @@ window.quizData = {
             .flow-step { background: #eafaf1; border-left: 4px solid #27ae60; padding: 8px; font-size: 0.9em; position: relative; }
             .step-num { font-weight: bold; color: #27ae60; margin-right: 5px; }
             
-            .shape-box { border: 2px solid #3498db; background: #ebf5fb; padding: 10px; border-radius: 8px; text-align: center; font-family: monospace; margin: 5px 0; }
+            .shape-box { border: 2px solid #3498db; background: #ebf5fb; padding: 10px; border-radius: 8px; text-align: center; font-family: monospace; margin: 5px 0; font-size: 0.95em; }
             .dim-label { font-size: 0.75em; color: #555; display: block; margin-bottom: 2px; }
             
-            .lstm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
-            .lstm-io { border: 1px solid #999; padding: 5px; border-radius: 4px; background: #fff; text-align: center; font-size: 0.8em; }
-            .batch-first { background: #fceceb; border-color: #e74c3c; font-weight: bold; }
+            /* 数式用CSS（安全版） */
+            .math-row { display: flex; align-items: center; justify-content: center; gap: 5px; }
+            .fraction { display: flex; flex-direction: column; align-items: center; text-align: center; margin: 0 2px; }
+            .numer { border-bottom: 1px solid #333; padding: 0 5px; display: block; }
+            .denom { padding: 0 5px; display: block; }
+            .floor-bracket { font-size: 1.5em; font-weight: lighter; }
 
             .tips-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; }
             .tips-table th { background: #eee; border: 1px solid #ccc; padding: 5px; }
@@ -80,7 +83,16 @@ window.quizData = {
         </div>
         <p>出力サイズの計算式（割り算は切り捨て <code>floor</code>）：</p>
         <div class="shape-box" style="background:#fff; border-color:#27ae60;">
-            $$H_{out} = \left\lfloor \frac{H_{in} + 2P - K}{S} + 1 \right\rfloor$$
+            <div class="math-row">
+                <span>H<sub>out</sub> = </span>
+                <span class="floor-bracket">&lfloor;</span>
+                <div class="fraction">
+                    <span class="numer">H<sub>in</sub> + 2P - K</span>
+                    <span class="denom">S</span>
+                </div>
+                <span> + 1 </span>
+                <span class="floor-bracket">&rfloor;</span>
+            </div>
         </div>
 
         <h3>■ 4. 自作Datasetクラスの必須メソッド</h3>
