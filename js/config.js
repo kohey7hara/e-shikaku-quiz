@@ -89,6 +89,12 @@ const menuConfig = [
         isActive: true
     },
     {
+        id: "04_app_nlp_advanced",
+        title: "4-（５）発展的NLP",
+        desc: "ELMo, fastText, Tokenization",
+        isActive: true
+    },
+    {
         id: "04_app_generative",
         title: "4-（６）生成モデル",
         desc: "GAN / VAE / 拡散モデル / フローベース",
