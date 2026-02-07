@@ -11,28 +11,33 @@ window.quizData = {
             .axis { stroke: #ccc; stroke-width: 1; }
             .bar-container { display: flex; align-items: flex-end; justify-content: space-around; height: 35px; width: 60px; margin: auto; }
             .bar { width: 10px; background: #3498db; }
+            
+            /* 数式代替CSS */
+            .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; font-size: 0.9em; }
+            .numer { border-bottom: 1px solid #000; padding: 0 2px; }
+            .denom { padding: 0 2px; }
         </style>
 
         <h3>■ 順伝播の流れ：①計算 → ②変換</h3>
         <div class="flow-box">
             <div class="step">
-                <strong>入力 $x$</strong>
+                <strong>入力 <i>x</i></strong>
             </div>
             <div class="arrow">→</div>
             <div class="step" style="background:#eef;">
                 <strong>① 全結合層</strong><br>
                 (Affine)<br>
-                <small>行列演算<br>$Wx+b$</small>
+                <small>行列演算<br><i>Wx + b</i></small>
             </div>
             <div class="arrow">→</div>
             <div class="step" style="background:#fee;">
                 <strong>② 活性化関数</strong><br>
                 (Activation)<br>
-                <small>非線形変換<br>$f(u)$</small>
+                <small>非線形変換<br><i>f(u)</i></small>
             </div>
             <div class="arrow">→</div>
             <div class="step">
-                <strong>出力 $y$</strong>
+                <strong>出力 <i>y</i></strong>
             </div>
         </div>
 
@@ -77,8 +82,8 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「今の主役」</strong><br>
-                    ・$x > 0$ で微分値が <strong>1.0</strong>（勾配消失しない）。<br>
-                    ・$x \\le 0$ で微分値 0。<br>
+                    ・<i>x</i> > 0 で微分値が <strong>1.0</strong>（勾配消失しない）。<br>
+                    ・<i>x</i> &le; 0 で微分値 0。<br>
                     ・計算が超高速。
                 </td>
             </tr>
@@ -93,7 +98,7 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「死んだReLU対策」</strong><br>
-                    ・$x < 0$ でもわずかに傾き（$\\alpha=0.01$等）を持つ。<br>
+                    ・<i>x</i> < 0 でもわずかに傾き（&alpha;=0.01等）を持つ。<br>
                     ・学習が止まる現象(Dying ReLU)を防ぐ。
                 </td>
             </tr>
@@ -139,7 +144,7 @@ window.quizData = {
                 <td>
                     <strong>「元祖・パーセプトロン」</strong><br>
                     ・0か1か。<br>
-                    ・$x=0$ で不連続、他は傾き0のため、<strong>誤差逆伝播法が使えない</strong>。
+                    ・<i>x</i>=0 で不連続、他は傾き0のため、<strong>誤差逆伝播法が使えない</strong>。
                 </td>
             </tr>
         </table>
@@ -155,7 +160,13 @@ window.quizData = {
             <div class="arrow">→</div>
             <div style="text-align:center; background:#eef; padding:5px; border-radius:5px;">
                 <strong>Softmax</strong><br>
-                <small>$y_i = \frac{e^{x_i}}{\sum e^{x_k}}$</small>
+                <small>
+                    <i>y<sub>i</sub></i> = 
+                    <span class="frac">
+                        <span class="numer">exp(<i>x<sub>i</sub></i>)</span>
+                        <span class="denom">&Sigma; exp(<i>x<sub>k</sub></i>)</span>
+                    </span>
+                </small>
             </div>
             <div class="arrow">→</div>
             <div style="text-align:center;">
