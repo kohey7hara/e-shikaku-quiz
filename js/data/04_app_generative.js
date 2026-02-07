@@ -2,25 +2,147 @@ window.quizData = {
     title: "4-（６）生成モデル：VAE, GAN, 拡散モデル",
     
     cheatSheet: `
-        <h3>■ 識別モデル vs 生成モデル</h3>
-        <ul>
-            <li><strong>識別モデル</strong> ($P(y|x)$): 入力 $x$ からラベル $y$ を予測（分類など）。</li>
-            <li><strong>生成モデル</strong> ($P(x)$): データ $x$ そのものの分布を学習し、新しいデータを生成する。</li>
-        </ul>
+        <style>
+            .gen-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
+            .gen-card { border: 1px solid #ccc; border-radius: 8px; padding: 15px; width: 30%; min-width: 300px; background: #fff; position: relative; }
+            .gen-title { font-weight: bold; border-bottom: 2px solid #333; margin-bottom: 10px; display: inline-block; }
+            
+            /* VAE */
+            .vae-flow { display: flex; align-items: center; justify-content: center; font-size: 0.8em; }
+            .vae-box { border: 1px solid #999; padding: 5px; border-radius: 4px; background: #eee; width: 60px; text-align: center; }
+            .vae-z { border: 2px solid #3498db; background: #ebf5fb; color: #3498db; border-radius: 50%; width: 40px; height: 40px; line-height: 40px; text-align: center; font-weight: bold; margin: 0 5px; }
+            
+            /* GAN */
+            .gan-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.8em; text-align: center; }
+            .gan-g { border: 2px solid #e74c3c; background: #fceceb; padding: 5px; border-radius: 5px; }
+            .gan-d { border: 2px solid #8e44ad; background: #f4ecf7; padding: 5px; border-radius: 5px; grid-column: span 2; margin-top: 5px; }
+            .gan-arrow { font-weight: bold; color: #555; }
 
-        <h3>■ 代表的な生成モデル</h3>
-        <table>
-            <tr><th>モデル</th><th>仕組み</th><th>特徴</th></tr>
-            <tr><td><strong>VAE</strong><br>(変分オートエンコーダ)</td><td>入力 → <strong>潜在変数 $z$ (確率分布)</strong> → 再構成。<br>ロス = 再構成誤差 + <strong>KLダイバージェンス</strong>。</td><td>画像が少しぼやけやすい。<br>数学的に扱いやすい。</td></tr>
-            <tr><td><strong>GAN</strong><br>(敵対的生成NW)</td><td><strong>G (生成器)</strong> vs <strong>D (識別器)</strong> の競争。<br>Minimaxゲームを行う。</td><td>くっきりした画像が作れる。<br>学習が不安定（モード崩壊）。</td></tr>
-            <tr><td><strong>拡散モデル</strong><br>(Diffusion)</td><td>画像にノイズを徐々に加え(拡散)、それを逆再生(除去)する過程を学習。</td><td>生成が高品質で多様。<br>生成（推論）に時間がかかる。</td></tr>
+            /* Diffusion */
+            .diff-flow { display: flex; align-items: center; justify-content: space-between; font-size: 0.8em; background: #eafaf1; padding: 5px; border-radius: 5px; }
+            .diff-img { width: 30px; height: 30px; background: #ccc; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; }
+            .diff-noise { background: #555; color: #fff; }
+            
+            .comp-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; }
+            .comp-table th { background: #eee; border: 1px solid #ccc; padding: 5px; }
+            .comp-table td { border: 1px solid #ccc; padding: 5px; }
+            .good { color: #27ae60; font-weight: bold; }
+            .bad { color: #c0392b; font-weight: bold; }
+            
+            .math-box { background:#f9f9f9; padding:8px; border-left:3px solid #f39c12; margin: 5px 0; font-size: 0.85em; }
+        </style>
+
+        <h3>■ 生成モデルの分類と仕組み</h3>
+        <p>「データ $x$ の分布 $P(x)$ を学習」し、新しいデータを生み出します。</p>
+        
+        <div class="gen-container">
+            <div class="gen-card">
+                <div class="gen-title" style="border-color:#3498db;">VAE</div>
+                <small>(Variational Autoencoder)</small>
+                <div style="margin: 10px 0; text-align:center;">
+                    <div class="vae-flow">
+                        <div class="vae-box">入力 $x$</div>
+                        <span>→</span>
+                        <div style="font-size:0.7em;">Encoder<br>($\mu, \sigma$)</div>
+                        <span>→</span>
+                        <div class="vae-z">$z$</div>
+                        <span>→</span>
+                        <div style="font-size:0.7em;">Decoder<br>(復元)</div>
+                        <span>→</span>
+                        <div class="vae-box">出力 $x'$</div>
+                    </div>
+                </div>
+                <p style="font-size:0.85em;">
+                    入力を「確率分布（平均と分散）」に圧縮し、そこからサンプリングして復元。<br>
+                    <strong>潜在空間 $z$ が連続的</strong>になるのが特徴。
+                </p>
+            </div>
+
+            <div class="gen-card">
+                <div class="gen-title" style="border-color:#e74c3c;">GAN</div>
+                <small>(Generative Adversarial Net)</small>
+                <div style="margin: 10px 0;">
+                    <div class="gan-layout">
+                        <div class="gan-g"><strong>G</strong>enerator<br>(偽造者)</div>
+                        <div style="padding:5px;">本物データ<br>$x$</div>
+                        <div class="gan-d"><strong>D</strong>iscriminator<br>(鑑定士)</div>
+                    </div>
+                    <div style="text-align:center; font-size:0.8em; margin-top:5px;">
+                        GはDを騙したい ⇔ DはGを見破りたい<br>
+                        (いたちごっこ)
+                    </div>
+                </div>
+            </div>
+
+            <div class="gen-card">
+                <div class="gen-title" style="border-color:#27ae60;">拡散モデル</div>
+                <small>(Diffusion Model)</small>
+                <div style="margin: 10px 0;">
+                    <div style="text-align:center; font-size:0.7em; margin-bottom:2px;">拡散過程 (ノイズ付加) →</div>
+                    <div class="diff-flow">
+                        <div class="diff-img" style="background:#fff; border:1px solid #333;">画像</div>
+                        <span>→</span>
+                        <div class="diff-img" style="background:#ddd;">少</div>
+                        <span>→</span>
+                        <div class="diff-img diff-noise">ノイズ</div>
+                    </div>
+                    <div class="diff-flow" style="margin-top:5px; background:#fceceb;">
+                        <div class="diff-img" style="background:#fff; border:1px solid #333;">生成</div>
+                        <span>←</span>
+                        <div class="diff-img" style="background:#ddd;">除去</div>
+                        <span>←</span>
+                        <div class="diff-img diff-noise">入力</div>
+                    </div>
+                    <div style="text-align:center; font-size:0.7em; margin-top:2px;">← 逆拡散過程 (生成)</div>
+                </div>
+                <p style="font-size:0.85em;">
+                    ノイズを除去する処理を学習。<br>
+                    現在の画像生成AI（Stable Diffusion等）の主流。
+                </p>
+            </div>
+        </div>
+
+        <h3>■ 3大モデルの比較：強みと弱み</h3>
+        <table class="comp-table">
+            <tr><th>モデル</th><th>強み (Pros)</th><th>弱み (Cons)</th><th>主な用途</th></tr>
+            <tr>
+                <td><strong>VAE</strong></td>
+                <td><span class="good">数学的に安定</span>。<br>潜在空間が綺麗に整う。</td>
+                <td><span class="bad">ぼやけた画像</span>になりやすい。<br>(平均化されるため)</td>
+                <td>異常検知<br>特徴抽出</td>
+            </tr>
+            <tr>
+                <td><strong>GAN</strong></td>
+                <td><span class="good">くっきり高画質</span>。<br>生成速度が速い。</td>
+                <td><span class="bad">学習が不安定</span>。<br><strong>モード崩壊</strong>が起きる。</td>
+                <td>StyleGAN<br>Pix2Pix</td>
+            </tr>
+            <tr>
+                <td><strong>拡散モデル</strong><br>(Diffusion)</td>
+                <td><span class="good">最高品質・多様性</span>。<br>学習が安定している。</td>
+                <td><span class="bad">生成が遅い</span>。<br>(何度も計算が必要)</td>
+                <td>DALL-E 2<br>Stable Diffusion</td>
+            </tr>
         </table>
 
-        <h3>■ 重要キーワード</h3>
-        <ul>
-            <li><strong>Reparameterization Trick</strong>: VAEで確率的なサンプリングをしつつ、誤差逆伝播（微分）を可能にする式変形。</li>
-            <li><strong>モード崩壊 (Mode Collapse)</strong>: GANが特定のパターンの画像しか生成しなくなってしまう現象。</li>
-        </ul>
+        <h3>■ E資格対策：重要キーワード</h3>
+        <div class="math-box">
+            <strong>1. VAEの損失関数 (ELBO: 変分下界)</strong><br>
+            $Loss = \underbrace{E_{z \sim q}[\log p(x|z)]}_{\text{再構成誤差}} - \underbrace{D_{KL}(q(z|x) || p(z))}_{\text{正則化項 (KL)}}$<br>
+            <small>※「入力を正しく復元したい」のと「$z$ を標準正規分布に近づけたい」のトレードオフ。</small>
+        </div>
+        <div class="math-box">
+            <strong>2. Reparameterization Trick</strong><br>
+            確率的なサンプリング操作 $z \sim N(\mu, \sigma^2)$ は微分ができないため、<br>
+            $z = \mu + \sigma \odot \epsilon$ ($\epsilon$ は定数のノイズ) と書き換えて、誤差逆伝播を可能にする技。
+        </div>
+        <div class="math-box">
+            <strong>3. GANの評価指標</strong><br>
+            <ul>
+                <li><strong>Inception Score (IS)</strong>: 生成画像が「くっきりしているか(確信度)」と「多様か」を見る。</li>
+                <li><strong>FID (Fréchet Inception Distance)</strong>: 本物画像と生成画像の分布の距離。<strong>低いほど良い</strong>（近い）。</li>
+            </ul>
+        </div>
     `,
 
     questions: [
@@ -28,148 +150,148 @@ window.quizData = {
         // 【基礎編】 Q1 - Q10
         // ---------------------------------------------------------
         {
-            category: "基本概念",
-            question: "「生成モデル」と「識別モデル」の違いについて、正しい記述はどれか。",
-            options: ["識別モデルはデータからラベルを予測する条件付き確率 $P(y|x)$ を学ぶが、生成モデルはデータの分布 $P(x)$ そのものを学ぶ", "生成モデルは教師あり学習しかできない", "識別モデルの方がパラメータ数が多い", "生成モデルは画像専用である"],
+            category: "生成モデルの定義",
+            question: "識別モデルが $P(y|x)$ （入力からラベルの確率）を学習するのに対し、生成モデルが学習しようとする確率分布はどれか。",
+            options: ["データの同時確率分布 $P(x, y)$ または データの周辺確率分布 $P(x)$", "事後確率 $P(y|x)$", "条件付き確率 $P(x|y)$ のみ", "決定境界"],
             answer: 0,
-            explanation: "生成モデルは「データがどのように発生したか」という分布そのものをモデリングするため、そこから新しいサンプリング（生成）が可能です。"
+            explanation: "生成モデルはデータそのものの分布を学習し、そこから新しいサンプル $x$ を生成することを目指します。"
         },
         {
             category: "VAEの構造",
-            question: "VAE（変分オートエンコーダ）が、通常のオートエンコーダと決定的に異なる点は何か。",
-            options: ["潜在変数 $z$ を固定値ではなく「確率分布（平均と分散）」として扱う", "エンコーダが存在しない", "デコーダが存在しない", "入力と出力が異なるデータである"],
+            question: "VAE (Variational Autoencoder) のEncoderが出力するものは何か。",
+            options: ["潜在変数 $z$ の確率分布のパラメータ（平均 $\\mu$ と分散 $\\sigma^2$）", "固定された潜在ベクトル $z$", "復元された画像", "クラスラベル"],
             answer: 0,
-            explanation: "データを一点に圧縮するのではなく、「このあたりにあるはず」という分布（ガウス分布）に変換することで、未知のデータを生成できるようにしています。"
-        },
-        {
-            category: "GANの構造",
-            question: "GAN（敵対的生成ネットワーク）を構成する2つのネットワークの役割は何か。",
-            options: ["Generator（生成器）は偽造データを作り、Discriminator（識別器）は真贋を見抜く", "Generatorは画像を圧縮し、Discriminatorは復元する", "Generatorはノイズを除去し、Discriminatorはノイズを加える", "両方とも画像を分類する"],
-            answer: 0,
-            explanation: "「偽札作り」と「警察」のいたちごっこに例えられます。互いに競い合うことで精度を高めていきます。"
+            explanation: "入力を一点に圧縮するのではなく、「この辺りにあるはず」という分布（ガウス分布）のパラメータに変換します。"
         },
         {
             category: "Reparameterization Trick",
-            question: "VAEにおいて、学習時に「Reparameterization Trick」が必要になる理由は何か。",
-            options: ["確率的なサンプリング操作が含まれると、そこで微分ができず誤差逆伝播がストップしてしまうため", "計算速度を上げるため", "潜在変数の次元を減らすため", "過学習を防ぐため"],
+            question: "VAEにおいて「Reparameterization Trick」を用いる主な理由は何か。",
+            options: ["確率的なサンプリング処理を含むネットワークでも、誤差逆伝播法（Backpropagation）による勾配計算を可能にするため", "計算速度を上げるため", "潜在変数の次元を減らすため", "過学習を防ぐため"],
             answer: 0,
-            explanation: "確率分布からのランダムな「サンプリング」は微分不可能です。そこで $z = \\mu + \\sigma \\odot \\epsilon$ （$\\epsilon$は乱数）と書き換えることで、$\\mu$ と $\\sigma$ で微分可能にします。"
+            explanation: "$z$ の確率性を外部ノイズ $\\epsilon$ に分離することで、$\\mu$ と $\\sigma$ に関して微分可能にします。"
+        },
+        {
+            category: "GANの仕組み",
+            question: "GAN (Generative Adversarial Networks) におけるGenerator (生成器) の目的は何か。",
+            options: ["Discriminator (識別器) が「本物だ」と誤認するようなデータを生成すること", "Discriminatorの学習を助けること", "入力画像を正確に復元すること", "潜在変数を推定すること"],
+            answer: 0,
+            explanation: "Discriminatorを騙す（識別エラー率を最大化する）ことがGeneratorの勝利条件です（Minimaxゲーム）。"
         },
         {
             category: "モード崩壊",
-            question: "GANの学習における失敗例「モード崩壊 (Mode Collapse)」とはどのような現象か。",
-            options: ["Generatorが、Discriminatorを騙しやすい特定のパターンの画像（似たような画像）ばかりを生成するようになる現象", "画像がノイズだらけになる現象", "Discriminatorが強くなりすぎて学習が止まる現象", "Generatorが真っ白な画像を生成する現象"],
+            question: "GANの学習における失敗例の一つ「モード崩壊 (Mode Collapse)」とはどのような現象か。",
+            options: ["Generatorが、Discriminatorを騙しやすい特定のパターン（似たような画像）ばかりを生成し、多様性が失われる現象", "Generatorがノイズしか生成しなくなる現象", "Discriminatorが強くなりすぎて学習が止まる現象", "画像がぼやける現象"],
             answer: 0,
-            explanation: "「この絵を出せば騙せる！」と味を占めてしまい、多様性が失われた状態です（例：どんな入力を入れても「数字の1」しか出なくなる）。"
+            explanation: "生成画像のバリエーションがなくなり、例えば「数字の7」しか出さなくなるような状態です。"
         },
         {
-            category: "拡散モデル",
-            question: "近年注目されている「拡散モデル (Diffusion Model)」の基本的な生成プロセスはどれか。",
-            options: ["完全なノイズ画像からスタートし、徐々にノイズを除去して意味のある画像を復元する", "潜在変数をGANで生成する", "画像をパッチに分割して並べ替える", "画像を圧縮して解凍する"],
+            category: "拡散モデルの概要",
+            question: "拡散モデル (Diffusion Model) の画像生成プロセス（逆拡散過程）の基本的な動作はどれか。",
+            options: ["完全なノイズ画像からスタートし、徐々にノイズを除去（Denoising）していき、鮮明な画像を生成する", "潜在変数から一発で画像を生成する", "2つの画像を合成する", "画像を圧縮する"],
             answer: 0,
-            explanation: "インクが水に拡散して消えていく過程（順方向）を学習し、逆に時間を巻き戻してインクを復元する（逆方向）イメージです。"
+            explanation: "学習時はノイズを徐々に加えて画像を破壊し、生成時はその逆手順（ノイズの予測・除去）を行います。"
         },
         {
-            category: "VAEの損失関数",
-            question: "VAEの損失関数（変分下限 / ELBO）は、「再構成誤差」と、もう一つ何の和で構成されるか。",
-            options: ["KLダイバージェンス（正則化項）", "敵対的損失", "L1正則化項", "ドロップアウト項"],
+            category: "VAEの弱点",
+            question: "一般的に、GANと比較した際のVAEの生成画像の特徴（弱点）は何か。",
+            options: ["全体的にぼやけた（Blurry）画像になりやすい", "ノイズが多すぎる", "幾何学的な歪みが生じやすい", "色が反転しやすい"],
             answer: 0,
-            explanation: "潜在変数の分布 $q(z|x)$ が、事前分布 $p(z)$（通常は標準正規分布）に近づくように制約をかける項（KL項）が必要です。"
+            explanation: "再構成誤差（MSEなど）と正則化項のバランスを取る結果、平均的な（無難な）画像を出力する傾向があり、高周波成分（詳細）が失われやすいです。"
         },
         {
-            category: "GANの目的関数",
-            question: "GANの学習は、数学的にはどのような問題として定式化されるか。",
-            options: ["ミニマックス（Minimax）問題", "最大化問題", "最小二乗法", "線形計画問題"],
+            category: "DCGAN",
+            question: "GANの学習を安定させるために、全結合層の代わりに畳み込み層を使用するなどしたアーキテクチャを何と呼ぶか。",
+            options: ["DCGAN (Deep Convolutional GAN)", "StyleGAN", "CycleGAN", "BigGAN"],
             answer: 0,
-            explanation: "Generatorは損失を最小化したい、Discriminatorは損失（見破る確率）を最大化したい、というサドルポイント探索問題になります。"
+            explanation: "Pooling層を廃止してStrided Convolutionを使う、Batch Normを入れるなどの指針を示し、GANの実用化に貢献しました。"
         },
         {
-            category: "条件付きGAN",
-            question: "「Conditional GAN (cGAN)」の特徴は何か。",
-            options: ["生成時に「クラスラベル」などの条件を与えることで、生成する画像の種類を指定できる", "条件を満たすまで学習を繰り返す", "特定の条件でのみ動作する", "条件分岐を含むネットワークである"],
+            category: "Pix2Pix",
+            question: "「線画から着色画像」「航空写真から地図」のように、ペアとなる画像データを用いて変換を行うモデルはどれか。",
+            options: ["Pix2Pix", "CycleGAN", "StyleGAN", "VAE"],
             answer: 0,
-            explanation: "通常のGANはランダムなノイズから生成するため何が出るか制御できませんが、cGANはラベル（例：「犬」）も入力することで出力を制御できます。"
+            explanation: "条件付きGAN (cGAN) の一種で、入力画像という条件のもとで目的の画像を生成します。ペアデータが必要です。"
         },
         {
-            category: "オートエンコーダ",
-            question: "オートエンコーダにおいて、入力層よりも中間層（潜在変数）の次元を小さくする理由として適切なものはどれか。",
-            options: ["重要な特徴量だけを抽出（次元圧縮）し、ノイズを除去するため", "計算を速くするためだけ", "入力を暗号化するため", "画像を拡大するため"],
+            category: "CycleGAN",
+            question: "Pix2Pixとは異なり、「ペアではない」画像データセット間（例：馬の集合とシマウマの集合）でのスタイル変換を可能にしたモデルはどれか。",
+            options: ["CycleGAN", "DCGAN", "StarGAN", "BigGAN"],
             answer: 0,
-            explanation: "ボトルネック（くびれ）を作ることで、ネットワークは無理やり情報を圧縮しなければならなくなり、結果としてデータの本質的な特徴を獲得します。"
+            explanation: "「変換して、また元に戻したときに、元の画像と一致すべき」というサイクル一貫性損失 (Cycle Consistency Loss) を導入しました。"
         },
 
         // ---------------------------------------------------------
         // 【応用編】 Q11 - Q20
         // ---------------------------------------------------------
         {
-            category: "Reparameterization(応用)",
-            question: "VAEのReparameterization Trickの式 $z = \\mu + \\sigma \\odot \\epsilon$ において、$\\epsilon$ は通常どのような分布からサンプリングされるか。",
-            options: ["標準正規分布 $N(0, 1)$", "一様分布", "ベルヌーイ分布", "ポアソン分布"],
+            category: "KLダイバージェンス(応用)",
+            question: "VAEの損失関数に含まれる「KLダイバージェンス」項の役割は何か。",
+            options: ["エンコーダが出力する分布 $q(z|x)$ を、事前分布 $p(z)$（通常は標準正規分布）に近づける正則化", "画像をくっきりさせる", "再構成誤差を最小化する", "潜在変数の次元を増やす"],
             answer: 0,
-            explanation: "平均0、分散1の正規分布からノイズ $\\epsilon$ を取り、それに分散 $\\sigma$ を掛けて平均 $\\mu$ を足すことで、任意のガウス分布を作ります。"
+            explanation: "これがないと、$z$ がバラバラの場所に配置されてしまい、未知のデータを生成するための連続的な潜在空間が形成されません。"
         },
         {
-            category: "GANの勾配消失(応用)",
-            question: "GANの学習初期において、Discriminatorが強すぎると（完璧に見破れるようになると）Generatorの学習が進まなくなる理由は何か。",
-            options: ["Discriminatorによる判定が完璧（確率1.0か0.0）になると、勾配が消失してGeneratorがどう改善すればいいか分からなくなるため", "Generatorが諦めてしまうから", "モード崩壊が起きるから", "過学習するから"],
+            category: "GANの損失関数(応用)",
+            question: "標準的なGANの損失関数は、数理的にはどのような距離（ダイバージェンス）の最小化と解釈できるか。",
+            options: ["Jensen-Shannon (JS) ダイバージェンス", "KLダイバージェンス", "ユークリッド距離", "コサイン類似度"],
             answer: 0,
-            explanation: "シグモイド関数の両端（0や1付近）は微分値がほぼ0です。Dが圧勝するとGに伝わる勾配がなくなります。これを防ぐためにWasserstein GANなどが提案されました。"
+            explanation: "Discriminatorが最適なとき、Generatorの学習は本物分布と生成分布のJSダイバージェンスを最小化することと等価になります。"
         },
         {
-            category: "Pix2Pix(応用)",
-            question: "「線画をカラー写真に変換する」など、ペアとなる画像データがある場合の画像変換に使われるGANモデルはどれか。",
-            options: ["Pix2Pix", "CycleGAN", "StyleGAN", "DCGAN"],
+            category: "FID (応用)",
+            question: "生成モデルの評価指標「FID (Fréchet Inception Distance)」の特徴として正しいものはどれか。",
+            options: ["Inceptionモデルの特徴量空間において、実画像と生成画像の分布の距離を測る。値が「小さい」ほど良い", "値が「大きい」ほど良い", "画像のピクセルごとの差を測る", "人間の主観評価と相関しない"],
             answer: 0,
-            explanation: "入力画像と正解画像のペアを使って、cGANの一種として学習します。"
+            explanation: "平均と共分散行列を用いて2つのガウス分布間の距離を測ります。値が0に近いほど、生成画像は実画像に近い（高品質かつ多様）とみなされます。"
         },
         {
-            category: "CycleGAN(応用)",
-            question: "「馬の画像をシマウマに変換する」など、ペアとなる正解画像が存在しないデータセットでも学習できるモデルはどれか。",
-            options: ["CycleGAN", "Pix2Pix", "VGG", "ResNet"],
+            category: "WGAN (応用)",
+            question: "GANの学習不安定性を解消するために、「Wasserstein距離（Earth Mover's Distance）」を損失関数に導入したモデルは何か。",
+            options: ["WGAN (Wasserstein GAN)", "DCGAN", "StyleGAN", "ProGAN"],
             answer: 0,
-            explanation: "「馬→シマウマ→馬」と変換して元に戻るか（サイクル一貫性損失）を制約にすることで、ペア画像なしでのスタイル変換を可能にしました。"
+            explanation: "分布が重なっていなくても勾配が消失しないWasserstein距離を使うことで、学習が劇的に安定しました。"
         },
         {
-            category: "WGAN(応用)",
-            question: "Wasserstein GAN (WGAN) が導入した「Wasserstein距離（Earth Mover's Distance）」のメリットは何か。",
-            options: ["分布同士が重なっていなくても距離を測れるため、勾配消失しにくく学習が安定する", "計算が非常に高速である", "画像が鮮明になる", "モード崩壊を完全に防げる"],
+            category: "拡散モデルの学習(応用)",
+            question: "拡散モデル（DDPM）の学習時に、ニューラルネットワーク（U-Net等）が予測するターゲットは具体的に何か。",
+            options: ["そのステップで画像に加えられた「ノイズ成分」", "ノイズ除去後の「きれいな画像」", "次のステップの画像", "画像のクラスラベル"],
             answer: 0,
-            explanation: "従来のJSダイバージェンスなどは分布が重なっていないと値が定数になり勾配が消えましたが、EM距離は離れていても「どれくらい離れているか」という勾配を持ちます。"
+            explanation: "「入力画像（ノイズ混じり）に含まれているノイズはこれくらいだ」と予測し、それを引き算することでノイズ除去を行います。"
         },
         {
-            category: "VAE vs GAN(応用)",
-            question: "一般的に、VAEとGANが生成する画像の特徴的な違い（画質面）は何か。",
-            options: ["VAEは全体的に「ぼやけた」画像になりやすく、GANは「くっきり」した画像になりやすい", "VAEは鮮明だがノイズが多く、GANは滑らか", "VAEは白黒、GANはカラー", "違いはない"],
+            category: "Score-based Model(応用)",
+            question: "拡散モデルと関連が深い「スコアベースモデル」において、学習する「スコア」とは何を指すか。",
+            options: ["データ分布の対数確率密度の勾配 $\\nabla_x \\log p(x)$", "画像の画質スコア", "分類の確信度", "ノイズの大きさ"],
             answer: 0,
-            explanation: "VAEは分布の平均（期待値）を出そうとするため、細部が平均化されてぼやける傾向があります。GANは識別器を騙そうとするため、細部までリアルな（鋭い）画像を作ります。"
-        },
-        {
-            category: "フローベース生成モデル(応用)",
-            question: "「Flow-based生成モデル（Glowなど）」の最大の特徴でありメリットは何か。",
-            options: ["変数変換のヤコビアンを用いて、尤度（Likelihood）を厳密に計算でき、かつ可逆（Invertible）である", "計算量が最も少ない", "圧縮率が最も高い", "離散データに特化している"],
-            answer: 0,
-            explanation: "VAEは下限の近似、GANは尤度計算不可ですが、Flowモデルは可逆関数を重ねることで尤度を直接最大化でき、潜在変数と画像を1対1で行き来できます。"
-        },
-        {
-            category: "拡散モデルの欠点(応用)",
-            question: "高品質な画像を生成できる拡散モデルだが、GANと比較した際の主なデメリットは何か。",
-            options: ["生成（推論）にかかる時間が長い（何回もノイズ除去ステップを踏む必要があるため）", "学習が不安定", "多様性がない", "モデルサイズが小さい"],
-            answer: 0,
-            explanation: "ノイズ除去プロセスを数百〜千回繰り返す必要があるため、1枚の生成に時間がかかります（これを高速化する研究がLatent Diffusionなどです）。"
-        },
-        {
-            category: "DCGAN(応用)",
-            question: "初期のGANを安定化させた「DCGAN」が導入した構造上の工夫として正しいものはどれか。",
-            options: ["全結合層を廃止して畳み込み層（CNN）を使用し、Batch NormalizationやLeaky ReLUを採用した", "層を非常に深くした", "Transformerを導入した", "Dropoutを多用した"],
-            answer: 0,
-            explanation: "それまで全結合層メインで不安定だったGANに、CNNのアーキテクチャやBatchNormを適切に組み込み、画像生成の標準形を作りました。"
+            explanation: "データが存在する方向（密度の高い方向）を示すベクトル場を学習することで、ノイズだらけの空間からデータのある場所へ戻れるようにします。"
         },
         {
             category: "StyleGAN(応用)",
-            question: "高解像度でリアルな顔画像を生成できる「StyleGAN」の特徴的な入力方法はどれか。",
-            options: ["潜在変数 $z$ を直接入力せず、Mapping Networkを通してスタイル情報 $w$ に変換し、各層にAdaINで注入する", "画像をパッチに分割して入力する", "ノイズを入力せず、画像のみを入力する", "3Dモデルを入力する"],
+            question: "StyleGANの特徴的な構造である「Mapping Network」の役割は何か。",
+            options: ["潜在変数 $z$ を、より解きほぐされた（Disentangled）中間潜在空間 $w$ に変換し、スタイルの制御をしやすくする", "画像を生成する", "画像の解像度を上げる", "ノイズを除去する"],
             answer: 0,
-            explanation: "従来の「入力層にノイズを入れる」方式をやめ、スタイル（髪型、肌の色など）を制御する情報を各階層に流し込むことで、高度な制御と画質を実現しました。"
+            explanation: "正規分布からサンプリングされた $z$ をそのまま使うのではなく、非線形変換した $w$ を使うことで、「髪の色」や「向き」などの特徴を独立して操作しやすくしています。"
+        },
+        {
+            category: "Conditional GAN(応用)",
+            question: "「Conditional GAN (cGAN)」において、生成したい画像の条件（ラベルなど）はどのようにモデルに入力されるか。",
+            options: ["GeneratorとDiscriminatorの「両方」に入力される", "Generatorのみに入力される", "Discriminatorのみに入力される", "損失関数のみに使われる"],
+            answer: 0,
+            explanation: "Dにも条件を見せることで、「（条件通りの）本物か？」を判定させます。これによりGは条件に沿った画像を生成するようになります。"
+        },
+        {
+            category: "VQ-VAE(応用)",
+            question: "「VQ-VAE (Vector Quantized VAE)」の特徴は何か。",
+            options: ["潜在変数を連続値ではなく「離散的（デジタル）」なコードブックのベクトルとして扱う", "潜在変数をなくした", "GANと結合した", "時間を扱うことができる"],
+            answer: 0,
+            explanation: "潜在空間を離散化（量子化）することで、ぼやけを防ぎ、PixelCNNやTransformerなどの自己回帰モデルと組み合わせやすくしました（DALL-E 1などで使用）。"
+        },
+        {
+            category: "CLIP(応用)",
+            question: "画像生成AI（Stable Diffusion等）で、テキストから画像を生成する際に重要な役割を果たすOpenAIのモデル「CLIP」は何を学習したものか。",
+            options: ["画像とテキストのペアデータを使い、それぞれの特徴ベクトルが似た意味なら近くなるように対照学習したモデル", "画像からテキストを生成するモデル", "テキストから画像を生成するモデル", "画像の分類モデル"],
+            answer: 0,
+            explanation: "「テキスト」と「画像」を同じベクトル空間に埋め込むことができるため、拡散モデルの条件付け（テキストプロンプトの理解）に利用されます。"
         }
     ]
 };
