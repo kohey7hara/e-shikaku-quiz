@@ -3,105 +3,99 @@ window.quizData = {
     
     cheatSheet: `
         <style>
-            .flow-box { display: flex; align-items: center; justify-content: center; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; flex-wrap: wrap; }
-            .step { border: 2px solid #333; padding: 5px 10px; background: white; border-radius: 5px; text-align: center; width: 90px; margin: 5px; }
-            .optimizer-step { border: 2px solid #e74c3c; background: #fceceb; font-weight: bold; }
-            .arrow { margin: 0 5px; font-weight: bold; color: #555; }
-            .tree-container { display: flex; justify-content: space-around; align-items: flex-start; margin-top: 10px; }
-            .tree-box { border: 1px solid #ccc; padding: 8px; border-radius: 5px; background: #fff; width: 30%; text-align: center; font-size: 0.85em; }
-            .arrow-down { text-align: center; font-size: 1.2em; color: #555; margin: 2px 0; }
-            .plus { font-weight: bold; color: #e74c3c; }
+            .opt-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+            .opt-card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; width: 45%; background: #fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); min-width: 300px; }
+            .opt-title { font-weight: bold; border-bottom: 2px solid #333; margin-bottom: 5px; padding-bottom: 2px; }
+            .opt-icon { width: 100%; height: 60px; background: #f9f9f9; border-radius: 4px; margin-bottom: 5px; position: relative; overflow: hidden; }
+            .contour { fill: none; stroke: #ddd; stroke-width: 1; }
+            .path-line { fill: none; stroke-width: 2; stroke-linecap: round; }
+            .weakness { color: #c0392b; font-size: 0.9em; margin-top: 5px; }
+            .feature { font-size: 0.9em; color: #2c3e50; }
         </style>
 
-        <h3>■ 最適化の学習フロー：どこで使われる？</h3>
-        <p>オプティマイザは、逆伝播で計算された「勾配」を受け取り、<strong>「重みをどう更新するか」</strong>を決定する司令塔です。</p>
-        <div class="flow-box">
-            <div class="step">入力 $x$</div>
-            <div class="arrow">→</div>
-            <div class="step">順伝播<br>(Forward)</div>
-            <div class="arrow">→</div>
-            <div class="step">損失 $L$</div>
-            <div class="arrow">→</div>
-            <div class="step">逆伝播<br>(Backward)</div>
-            <div class="arrow">→</div>
-            <div class="step optimizer-step">
-                <strong>最適化</strong><br>
-                (Update)<br>
-                <small>$w \leftarrow w - \eta \Delta$</small>
-            </div>
-        </div>
+        <h3>■ オプティマイザ図鑑：軌跡と進化</h3>
+        <p>谷底（最適解）を目指してボールを転がすイメージで理解しましょう。</p>
 
-        <h3>■ オプティマイザの進化系統樹</h3>
-        <p>「方向（慣性）」と「歩幅（学習率）」の2つの進化ルートがあり、それが合体して最強のAdamになりました。</p>
-        
-        <div style="text-align:center; border:2px solid #333; padding:5px; background:#eee; font-weight:bold; margin-bottom:5px;">
-            SGD (確率的勾配降下法)<br>
-            <small>基本。「今の傾き」だけで進む。</small>
-        </div>
-        
-        <div class="tree-container">
-            <div class="tree-box" style="background:#eafaf1;">
-                <strong>① 方向の調整</strong><br>
-                <small>振動を抑える</small>
-                <div class="arrow-down">↓</div>
-                <strong>Momentum</strong><br>
-                <small>「慣性」を追加。<br>ボールが転がる動き。</small>
+        <div class="opt-container">
+            <div class="opt-card">
+                <div class="opt-title">1. SGD (確率的勾配降下法)</div>
+                <div class="opt-icon">
+                    <svg viewBox="0 0 100 60">
+                        <ellipse cx="50" cy="30" rx="40" ry="25" class="contour" />
+                        <ellipse cx="50" cy="30" rx="25" ry="15" class="contour" />
+                        <circle cx="50" cy="30" r="2" fill="#333" />
+                        <path d="M10,10 L30,50 L50,20 L60,40 L50,30" stroke="red" class="path-line" />
+                    </svg>
+                </div>
+                <div class="feature"><strong>「千鳥足の酔っ払い」</strong><br>現在の勾配だけを見て進む。</div>
+                <div class="weakness">⚠ <strong>ジグザグする</strong>：谷（峡谷）で壁にぶつかりながら進むため効率が悪い。</div>
             </div>
 
-            <div style="padding-top:40px; font-weight:bold; font-size:1.5em;">＋</div>
+            <div class="opt-card">
+                <div class="opt-title">2. Momentum (慣性)</div>
+                <div class="opt-icon">
+                    <svg viewBox="0 0 100 60">
+                        <ellipse cx="50" cy="30" rx="40" ry="25" class="contour" />
+                        <ellipse cx="50" cy="30" rx="25" ry="15" class="contour" />
+                        <circle cx="50" cy="30" r="2" fill="#333" />
+                        <path d="M10,10 Q30,60 50,30" stroke="blue" class="path-line" />
+                    </svg>
+                </div>
+                <div class="feature"><strong>「重い鉄球」</strong><br>過去の移動方向（慣性）を維持する。<br>SGDの振動を抑える。</div>
+                <div class="weakness">⚠ <strong>行き過ぎる</strong>：勢いがつきすぎて最適解を通り過ぎることがある。</div>
+            </div>
 
-            <div class="tree-box" style="background:#fff7e6;">
-                <strong>② 歩幅の調整</strong><br>
-                <small>学習率を自動調整</small>
-                <div class="arrow-down">↓</div>
-                <strong>AdaGrad</strong><br>
-                <small>過去の勾配の二乗和で割る。<br><span style="color:red;">欠点: 止まる</span></small>
-                <div class="arrow-down">↓</div>
-                <strong>RMSProp</strong><br>
-                <small>過去を徐々に忘れる。<br><span style="color:blue;">解決: 止まらない</span></small>
+            <div class="opt-card">
+                <div class="opt-title">3. AdaGrad (適応的学習率)</div>
+                <div class="opt-icon">
+                    <svg viewBox="0 0 100 60">
+                        <ellipse cx="50" cy="30" rx="40" ry="25" class="contour" />
+                        <ellipse cx="50" cy="30" rx="25" ry="15" class="contour" />
+                        <circle cx="50" cy="30" r="2" fill="#333" />
+                        <path d="M10,10 L30,25 L40,28 L45,29" stroke="orange" class="path-line" />
+                    </svg>
+                </div>
+                <div class="feature"><strong>「疲れるランナー」</strong><br>よく動くパラメータの学習率を下げ、あまり動かないパラメータを重視する。</div>
+                <div class="weakness">⚠ <strong>止まる</strong>：過去の勾配の二乗和 $h$ が増え続け、学習率がほぼ0になり<strong>学習が停止</strong>する。</div>
+            </div>
+
+            <div class="opt-card">
+                <div class="opt-title">4. RMSProp</div>
+                <div class="opt-icon">
+                    <svg viewBox="0 0 100 60">
+                        <ellipse cx="50" cy="30" rx="40" ry="25" class="contour" />
+                        <ellipse cx="50" cy="30" rx="25" ry="15" class="contour" />
+                        <circle cx="50" cy="30" r="2" fill="#333" />
+                        <path d="M10,10 L35,20 L50,30" stroke="green" class="path-line" />
+                    </svg>
+                </div>
+                <div class="feature"><strong>「忘れるAdaGrad」</strong><br>指数移動平均を使い、大昔の記憶を捨てる。</div>
+                <div class="weakness">💡 <strong>AdaGradの改良版</strong>：学習率が0にならず、学習が継続できる。</div>
+            </div>
+            
+            <div class="opt-card" style="width:95%; background:#f0f8ff; border:2px solid #3498db;">
+                <div class="opt-title" style="text-align:center; border:none;">5. Adam (Adaptive Moment Estimation)</div>
+                <div class="feature" style="text-align:center;">
+                    <strong>「Momentum」 + 「RMSProp」</strong><br>
+                    慣性（方向の調整）と、学習率の自動調整（歩幅の調整）を合体。<br>
+                    ハイパーパラメータの調整が少なくても安定する、<strong>現在のデファクトスタンダード</strong>。
+                </div>
             </div>
         </div>
-
-        <div class="arrow-down">↓ 合体</div>
-        
-        <div style="text-align:center; border:2px solid #e74c3c; padding:10px; background:#fff; font-weight:bold; margin-top:5px;">
-            Adam<br>
-            <small>Momentum (慣性) + RMSProp (自動調整)<br>現在のデファクトスタンダード。</small>
-        </div>
-
-        <h3>■ 学習データの使い方の違い</h3>
-        <table>
-            <tr><th>名称</th><th>1回の更新に使うデータ数</th><th>特徴</th></tr>
-            <tr>
-                <td><strong>バッチ学習</strong><br>(最急降下法)</td>
-                <td>全データ ($N$個)</td>
-                <td>・計算が安定する。<br>・重すぎて計算が終わらない。<br>・局所解にハマりやすい。</td>
-            </tr>
-            <tr>
-                <td><strong>オンライン学習</strong><br>(本来のSGD)</td>
-                <td>1個</td>
-                <td>・計算が速い。<br>・ノイズが激しく、ジグザグに進む。<br>・局所解から脱出しやすい。</td>
-            </tr>
-            <tr>
-                <td><strong>ミニバッチ学習</strong><br>(今の主流)</td>
-                <td>$M$個 ($M \ll N$)<br>例: 32, 64, 128</td>
-                <td>・上記2つのいいとこ取り。<br>・GPUの並列計算を活用できる。</td>
-            </tr>
-        </table>
 
         <h3>■ 【暗記】初期化手法と活性化関数の組み合わせ</h3>
-        <p>ここを間違えるとスタートラインに立てません。</p>
+        <p>「左右対称か、そうでないか」でペアが決まります。</p>
         <table>
-            <tr><th>初期化手法</th><th>相性の良い関数</th><th>理由</th></tr>
+            <tr><th>初期化手法</th><th>相性の良い関数</th><th>特徴・覚え方</th></tr>
             <tr>
                 <td><strong>Xavier (Glorot)</strong></td>
-                <td><strong>Sigmoid, Tanh</strong><br>(S字系)</td>
-                <td>左右対称な関数のため、分散 $\frac{1}{n}$ で広げるのが最適。</td>
+                <td><strong>Sigmoid, Tanh</strong><br>(S字・対称)</td>
+                <td>分散を $\\frac{1}{n}$ に設定。<br>「グロロット(Glorot)はシグモイド」と覚える。</td>
             </tr>
             <tr>
                 <td><strong>He (Kaiming)</strong></td>
-                <td><strong>ReLU</strong><br>(折れ線系)</td>
-                <td>負の値が0になる（半分消える）ため、分散を $\frac{2}{n}$ に倍増させてバランスを取る。</td>
+                <td><strong>ReLU</strong><br>(折れ線・非対称)</td>
+                <td>分散を $\\frac{2}{n}$ に設定。<br>ReLUは負が0になる(半分消える)ので、<strong>2倍</strong>の分散が必要。</td>
             </tr>
         </table>
     `,
