@@ -2,111 +2,51 @@ window.quizData = {
     title: "1. 数学的基礎：確率・統計 & 情報理論",
     
     cheatSheet: `
-        <style>
-            .concept-box { border-left: 4px solid #3498db; padding: 10px; background: #f0f8ff; margin-bottom: 10px; }
-            .visual-bar { display: inline-block; width: 10px; background: #ccc; margin-right: 2px; vertical-align: bottom; }
-            .h-high { height: 40px; background: #e74c3c; } /* 高い確率 */
-            .h-mid { height: 20px; background: #3498db; }  /* 中くらいの確率 */
-            .h-low { height: 5px; background: #ccc; }     /* 低い確率 */
-            .dist-curve { width: 100px; height: 40px; border-radius: 50% 50% 0 0; border: 2px solid #333; border-bottom: none; display:inline-block; text-align:center; line-height:35px; color:#555; font-size:0.8em;}
-        </style>
+        <h3>■ パラメータ推定の「3つの流派」比較</h3>
+        <p>「手元のデータ」と「事前の知識」をどう扱うかの違いを整理しましょう。</p>
+        <table>
+            <tr><th>手法</th><th>狙い（数式の意味）</th><th>脳内イメージ・特徴</th></tr>
+            <tr>
+                <td><strong>最尤推定 (MLE)</strong><br>Maximum Likelihood</td>
+                <td>尤度 $P(D|\\theta)$ を最大化<br>「データに最も当てはまる値」を探す</td>
+                <td><strong>「データ至上主義」</strong><br>手元のデータだけを信じる。<br>データが少ないと極端な値になりがち（<strong>過学習</strong>）。</td>
+            </tr>
+            <tr>
+                <td><strong>MAP推定</strong><br>Maximum A Posteriori</td>
+                <td>事後確率 $P(\\theta|D)$ を最大化<br>「尤度 × <strong>事前確率</strong>」を最大化</td>
+                <td><strong>「データ ＋ 経験則」</strong><br>事前分布が「常識（ブレーキ）」として働く。<br>これが<strong>正則化</strong>の役割を果たす。</td>
+            </tr>
+            <tr>
+                <td><strong>ベイズ推定</strong><br>Bayesian Inference</td>
+                <td>事後分布 $P(\\theta|D)$ そのものを求める<br>（点ではなく分布）</td>
+                <td><strong>「一点張りしない」</strong><br>答えを1つに決めず、「分布（山）」で答える。<br>計算コストが高い（積分が必要）。</td>
+            </tr>
+        </table>
 
-        <h3>■ 確率・統計：パラメータ推定の比較</h3>
-        <p>「データ（結果）」から「パラメータ（原因）」を探るアプローチの違いです。</p>
-
-        <div class="concept-box">
-            <h4>1. 最尤推定 (MLE) vs MAP推定</h4>
-            <table>
-                <tr>
-                    <th>最尤推定 (MLE)</th>
-                    <th>MAP推定</th>
-                </tr>
-                <tr>
-                    <td style="text-align:center;">
-                        <span style="font-size:2em;">🎯</span><br>
-                        <strong>データだけを見る</strong><br>
-                        <small>「データが全てだ！」</small>
-                    </td>
-                    <td style="text-align:center;">
-                        <span style="font-size:2em;">🧠 + 🎯</span><br>
-                        <strong>事前知識 + データ</strong><br>
-                        <small>「経験則(事前分布)も加味する」</small>
-                    </td>
-                </tr>
-                <tr>
-                    <td>データの尤度 $P(D|\\theta)$ を最大化。<br>※データが少ないと<strong>過学習</strong>する。</td>
-                    <td>事後確率 $P(\\theta|D)$ を最大化。<br>※事前分布が<strong>正則化項</strong>として働く。</td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="concept-box">
-            <h4>2. 点推定 vs ベイズ推定</h4>
-            <table>
-                <tr>
-                    <th>点推定 (MLE, MAP)</th>
-                    <th>ベイズ推定</th>
-                </tr>
-                <tr>
-                    <td style="text-align:center;">
-                        <div style="font-size:1.5em; font-weight:bold;">📍 ピンポイント</div>
-                        <small>答えは「1つ」の値</small>
-                    </td>
-                    <td style="text-align:center;">
-                        <div class="dist-curve" style="border-color:#e67e22; background:#fdf2e9;">山(分布)</div>
-                        <small>答えは「確率分布」</small>
-                    </td>
-                </tr>
-                <tr>
-                    <td>計算が速い。<br>「予測値」しか分からない。</td>
-                    <td>計算が重い（積分が必要）。<br><strong>「予測の自信のなさ（不確実性）」</strong>も分かる。</td>
-                </tr>
-            </table>
-        </div>
-
-        <h3>■ 情報理論：エントロピーの可視化</h3>
-        
-        <div class="concept-box">
-            <h4>エントロピー（乱雑さ・予測のつかなさ）</h4>
-            <table>
-                <tr>
-                    <th>エントロピーが小さい</th>
-                    <th>エントロピーが大きい</th>
-                </tr>
-                <tr>
-                    <td style="text-align:center;">
-                        <div class="visual-bar h-high"></div>
-                        <div class="visual-bar h-low"></div>
-                        <div class="visual-bar h-low"></div>
-                        <div class="visual-bar h-low"></div>
-                        <br><strong>「ほぼ決まり」</strong>
-                    </td>
-                    <td style="text-align:center;">
-                        <div class="visual-bar h-mid"></div>
-                        <div class="visual-bar h-mid"></div>
-                        <div class="visual-bar h-mid"></div>
-                        <div class="visual-bar h-mid"></div>
-                        <br><strong>「どれか分からない」</strong>
-                    </td>
-                </tr>
-                <tr>
-                    <td>確率の偏りが激しい。<br>例：イカサマコイン（表99%）</td>
-                    <td>確率が均等（一様分布）。<br>例：公平なサイコロ（どれも1/6）</td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="concept-box">
-            <h4>距離の概念</h4>
-            <ul>
-                <li><strong>KLダイバージェンス</strong>: <br>
-                分布 $P$ と $Q$ の「重ね合わせのズレ」。<br>
-                $P$から見た$Q$の距離 $\\neq$ $Q$から見た$P$の距離（<strong>非対称</strong>）。</li>
-                <li><strong>相互情報量</strong>:<br>
-                $X$ と $Y$ の「共有している情報」。<br>
-                円グラフの重なり部分のイメージ（独立なら重なりゼロ）。</li>
-            </ul>
-        </div>
+        <h3>■ 情報理論の重要概念</h3>
+        <table>
+            <tr><th>用語</th><th>数式・定義</th><th>脳内イメージ・試験のツボ</th></tr>
+            <tr>
+                <td><strong>エントロピー</strong><br>(平均情報量)</td>
+                <td>$H(P) = -\\sum P(x) \\log P(x)$</td>
+                <td><strong>「予測のつかなさ（乱雑さ）」</strong><br>・一様分布（どれが出るか不明）＝ <strong>最大</strong><br>・確率100%（バレバレ）＝ <strong>0</strong></td>
+            </tr>
+            <tr>
+                <td><strong>KLダイバージェンス</strong><br>(相対エントロピー)</td>
+                <td>$D_{KL}(P||Q) = \\sum P(x) \\log \\frac{P(x)}{Q(x)}$</td>
+                <td><strong>「分布間の距離」</strong><br>・$P$と$Q$が似ていれば 0 に近づく。<br>・距離だが一方通行（<strong>非対称</strong>）。<br>・常に <strong>0以上</strong>。</td>
+            </tr>
+            <tr>
+                <td><strong>クロスエントロピー</strong></td>
+                <td>$H(P,Q) = -\\sum P(x) \\log Q(x)$</td>
+                <td><strong>「KLダイバージェンスの相棒」</strong><br>機械学習の損失関数。<br>これを最小化 ＝ KL（距離）の最小化。</td>
+            </tr>
+            <tr>
+                <td><strong>相互情報量</strong></td>
+                <td>$I(X;Y) = H(X) - H(X|Y)$</td>
+                <td><strong>「共有している情報」</strong><br>・$Y$を知ると$X$がどれだけ分かるか。<br>・独立なら <strong>0</strong>（無関係）。</td>
+            </tr>
+        </table>
     `,
     questions: [
         // ---------------------------------------------------------
