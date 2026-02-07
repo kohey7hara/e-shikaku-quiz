@@ -2,28 +2,104 @@ window.quizData = {
     title: "3-（４）CNN：畳み込みニューラルネットワーク",
     
     cheatSheet: `
+        <style>
+            .cnn-flow { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 5px; background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+            .cnn-step { border: 2px solid #333; padding: 8px; background: white; border-radius: 5px; text-align: center; width: 85px; font-size: 0.8em; }
+            .cnn-arrow { color: #555; font-weight: bold; }
+            
+            .visual-container { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+            .visual-box { border: 1px solid #ccc; padding: 10px; border-radius: 8px; background: #fff; width: 45%; min-width: 250px; }
+            .grid-table { border-collapse: collapse; margin: 10px auto; }
+            .grid-table td { width: 25px; height: 25px; border: 1px solid #ddd; text-align: center; font-size: 0.8em; color: #ccc; }
+            
+            /* 畳み込みの強調 */
+            .conv-active { border: 2px solid #e74c3c !important; color: #e74c3c !important; font-weight: bold; background: #fceceb; }
+            /* プーリングの強調 */
+            .pool-active { border: 2px solid #3498db !important; color: #3498db !important; font-weight: bold; background: #ebf5fb; }
+
+            .formula-box { background:#eef; padding:10px; border-radius:5px; text-align:center; font-weight:bold; margin: 10px 0; border: 1px solid #ccd; }
+        </style>
+
+        <h3>■ CNNの処理フロー：形を保って特徴を掴む</h3>
+        <p>全結合層（1列に潰す）と違い、CNNは「画像の形」を維持したまま、以下の流れで処理します。</p>
+        
+        <div class="cnn-flow">
+            <div class="cnn-step" style="border-style:dashed;">
+                <strong>入力</strong><br>
+                <small>画像</small>
+            </div>
+            <div class="cnn-arrow">→</div>
+            <div class="cnn-step" style="background:#eafaf1; border-color:#27ae60;">
+                <strong>畳み込み</strong><br>
+                (Conv)<br>
+                <small>特徴抽出</small>
+            </div>
+            <div class="cnn-arrow">→</div>
+            <div class="cnn-step" style="background:#fef9e7; border-color:#f39c12;">
+                <strong>ReLU</strong><br>
+                (Act)<br>
+                <small>活性化</small>
+            </div>
+            <div class="cnn-arrow">→</div>
+            <div class="cnn-step" style="background:#ebf5fb; border-color:#3498db;">
+                <strong>Pool</strong><br>
+                (Sub)<br>
+                <small>圧縮</small>
+            </div>
+            <div class="cnn-arrow">...</div>
+            <div class="cnn-step" style="background:#fceceb; border-color:#e74c3c;">
+                <strong>全結合</strong><br>
+                (FC)<br>
+                <small>分類</small>
+            </div>
+        </div>
+
+        <h3>■ 図解：畳み込みとプーリングの違い</h3>
+        <div class="visual-container">
+            <div class="visual-box">
+                <h4>1. 畳み込み (Convolution)</h4>
+                <p style="font-size:0.8em;">フィルタをスライドさせて、局所的な特徴（縦線、横線など）を見つけます。</p>
+                <table class="grid-table">
+                    <tr><td class="conv-active">1</td><td class="conv-active">0</td><td>1</td><td>0</td></tr>
+                    <tr><td class="conv-active">0</td><td class="conv-active">1</td><td>0</td><td>1</td></tr>
+                    <tr><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+                    <tr><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+                </table>
+                <div style="text-align:center; font-size:0.8em; color:#e74c3c;">
+                    ▲ フィルタと積和演算<br>(重み共有でパラメータ削減)
+                </div>
+            </div>
+
+            <div class="visual-box">
+                <h4>2. プーリング (Max Pooling)</h4>
+                <p style="font-size:0.8em;">領域内の「最大値」だけを残し、画像を縮小します。</p>
+                <table class="grid-table">
+                    <tr><td class="pool-active">9</td><td class="pool-active">3</td><td>2</td><td>1</td></tr>
+                    <tr><td class="pool-active">4</td><td class="pool-active">5</td><td>0</td><td>8</td></tr>
+                    <tr><td>2</td><td>1</td><td>6</td><td>7</td></tr>
+                    <tr><td>0</td><td>5</td><td>3</td><td>4</td></tr>
+                </table>
+                <div style="text-align:center; font-size:0.8em; color:#3498db;">
+                    ▲ 最大値「9」を採用<br>(位置ズレに強くなる)
+                </div>
+            </div>
+        </div>
+
         <h3>■ 【絶対暗記】出力サイズの計算公式</h3>
         <p>入力サイズ $H$, フィルタサイズ $K$, パディング $P$, ストライド $S$ のとき、出力サイズ $H'$ は：</p>
-        <div style="background:#eef; padding:10px; border-radius:5px; text-align:center; font-weight:bold;">
+        <div class="formula-box">
             $$H' = \\frac{H + 2P - K}{S} + 1$$
         </div>
         <p>※割り切れない場合は切り捨て（フレームワークによるが試験では割り切れることが多い）。</p>
 
-        <h3>■ CNNの構成要素</h3>
+        <h3>■ CNNの構成要素・用語</h3>
         <table>
             <tr><th>用語</th><th>役割・特徴</th></tr>
             <tr><td><strong>畳み込み層</strong> (Conv)</td><td>フィルタ（カーネル）を使って局所的な特徴を抽出する。<br><strong>重み共有</strong>によりパラメータ数を削減。</td></tr>
             <tr><td><strong>プーリング層</strong> (Pooling)</td><td>画像を縮小して、位置ズレに対する<strong>不変性</strong>（ロバスト性）を高める。<br>学習パラメータはない。Max Poolingが主流。</td></tr>
-            <tr><td><strong>全結合層</strong> (FC)</td><td>最後に特徴をまとめてクラス分類を行う。<br>最近はGAP (Global Average Pooling) に置き換わることも多い。</td></tr>
+            <tr><td><strong>1x1畳み込み</strong></td><td>サイズを変えずに<strong>チャンネル数だけを調整</strong>（圧縮）する。<br>計算量の削減（Bottleneck構造）に使われる。</td></tr>
+            <tr><td><strong>im2col</strong></td><td>畳み込みを行列演算に変換して高速化する実装テクニック。<br>GPUで一気に計算できる。</td></tr>
         </table>
-
-        <h3>■ 特殊な畳み込み</h3>
-        <ul>
-            <li><strong>1x1畳み込み (Pointwise)</strong>: チャンネル数の調整（圧縮・拡張）に使用。計算量削減に効く。</li>
-            <li><strong>Depthwise畳み込み</strong>: チャンネルごとに独立して畳み込む。</li>
-            <li><strong>逆畳み込み (Transposed Conv)</strong>: 解像度を上げる（アップサンプリング）。</li>
-            <li><strong>im2col</strong>: 畳み込みを行列演算に変換して高速化するアルゴリズム。</li>
-        </ul>
     `,
 
     questions: [
