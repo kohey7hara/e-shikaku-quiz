@@ -2,32 +2,200 @@ window.quizData = {
     title: "6. PyTorch実装対策ドリル (完全版)",
     
     cheatSheet: `
-        <h3>■ RNN/LSTMの入出力（最重要）</h3>
-        <p>LSTMの出力はタプル <code>(output, (h_n, c_n))</code> になります。</p>
-        <table>
-            <tr><th>項目</th><th>形状 (Batch_first=True)</th></tr>
-            <tr><td>入力</td><td><code>(Batch, Seq_len, Input_size)</code></td></tr>
-            <tr><td>出力 (Output)</td><td><code>(Batch, Seq_len, Hidden_size * D)</code><br>※D=2 (双方向), D=1 (単方向)</td></tr>
-            <tr><td>隠れ状態 (h_n, c_n)</td><td><code>(Num_layers * D, Batch, Hidden_size)</code><br>※常にBatchが2番目に来る点に注意！</td></tr>
+        <style>
+            .code-block { background: #2d2d2d; color: #f8f8f2; padding: 10px; border-radius: 5px; font-family: 'Consolas', monospace; font-size: 0.85em; overflow-x: auto; margin-bottom: 10px; }
+            .keyword { color: #f92672; font-weight: bold; }
+            .func { color: #66d9ef; }
+            .comment { color: #75715e; }
+            .arg { color: #fd971f; }
+
+            .flow-container { display: flex; flex-direction: column; gap: 5px; margin: 10px 0; }
+            .flow-step { background: #eafaf1; border-left: 4px solid #27ae60; padding: 8px; font-size: 0.9em; position: relative; }
+            .step-num { font-weight: bold; color: #27ae60; margin-right: 5px; }
+            
+            .shape-box { border: 2px solid #3498db; background: #ebf5fb; padding: 10px; border-radius: 8px; text-align: center; font-family: monospace; margin: 5px 0; }
+            .dim-label { font-size: 0.75em; color: #555; display: block; margin-bottom: 2px; }
+            
+            .lstm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
+            .lstm-io { border: 1px solid #999; padding: 5px; border-radius: 4px; background: #fff; text-align: center; font-size: 0.8em; }
+            .batch-first { background: #fceceb; border-color: #e74c3c; font-weight: bold; }
+
+            .tips-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; }
+            .tips-table th { background: #eee; border: 1px solid #ccc; padding: 5px; }
+            .tips-table td { border: 1px solid #ccc; padding: 5px; }
+        </style>
+
+        <h3>■ 1. 学習ループの定石（鉄の掟）</h3>
+        <p>この順番は絶対暗記です。特に <code>zero_grad</code> の位置に注意。</p>
+        <div class="flow-container">
+            <div class="flow-step">
+                <span class="step-num">1.</span> <code>optimizer.zero_grad()</code>
+                <div style="font-size:0.8em;">勾配をリセット（前回の残骸を消す）。<br>※backwardの前ならどこでも良いが、最初が無難。</div>
+            </div>
+            <div class="flow-step">
+                <span class="step-num">2.</span> <code>output = model(inputs)</code>
+                <div style="font-size:0.8em;">順伝播 (Forward)。予測値を計算。</div>
+            </div>
+            <div class="flow-step">
+                <span class="step-num">3.</span> <code>loss = criterion(output, targets)</code>
+                <div style="font-size:0.8em;">損失の計算。</div>
+            </div>
+            <div class="flow-step">
+                <span class="step-num">4.</span> <code>loss.backward()</code>
+                <div style="font-size:0.8em;">逆伝播 (Backward)。勾配を計算して蓄積。</div>
+            </div>
+            <div class="flow-step">
+                <span class="step-num">5.</span> <code>optimizer.step()</code>
+                <div style="font-size:0.8em;">パラメータ更新。</div>
+            </div>
+        </div>
+
+        <h3>■ 2. RNN/LSTMの入出力形状（最頻出）</h3>
+        <p><strong>batch_first=True</strong> かどうかで形状が激変します。</p>
+        
+        <div class="code-block">
+            nn.LSTM(input_size, hidden_size, <span class="arg">batch_first=True</span>)
+        </div>
+
+        <div style="text-align:center; font-size:0.9em; margin-bottom:5px;"><strong>batch_first=True の場合</strong></div>
+        <div class="shape-box">
+            <span class="dim-label">入力 / 出力 (output)</span>
+            ( <span style="color:#e74c3c; font-weight:bold;">Batch</span>, Seq_len, Feature )
+        </div>
+        
+        <div style="text-align:center; font-size:0.9em; margin-top:10px; margin-bottom:5px;"><strong>隠れ状態 (h_n, c_n) の場合</strong></div>
+        <p style="font-size:0.8em; color:red;">※ここは batch_first=True でも変わりません！</p>
+        <div class="shape-box" style="border-color:#e67e22; background:#fdf2e9;">
+            <span class="dim-label">h_n / c_n</span>
+            ( Layer×Direct, <span style="color:#e74c3c; font-weight:bold;">Batch</span>, Hidden )
+        </div>
+        <p style="font-size:0.8em;">
+            ※双方向(bidirectional)なら Layer×2。<br>
+            ※隠れ状態のBatchは<strong>常に2番目</strong>に来るのがE資格の罠ポイント。
+        </p>
+
+        <h3>■ 3. CNNの定義とサイズ計算</h3>
+        <div class="code-block">
+            nn.Conv2d(<span class="arg">in_ch</span>, <span class="arg">out_ch</span>, <span class="arg">kernel</span>, <span class="arg">stride</span>, <span class="arg">padding</span>)
+        </div>
+        <p>出力サイズの計算式（割り算は切り捨て <code>floor</code>）：</p>
+        <div class="shape-box" style="background:#fff; border-color:#27ae60;">
+            $$H_{out} = \left\lfloor \frac{H_{in} + 2P - K}{S} + 1 \right\rfloor$$
+        </div>
+
+        <h3>■ 4. 自作Datasetクラスの必須メソッド</h3>
+        <table class="tips-table">
+            <tr><th>メソッド</th><th>役割</th></tr>
+            <tr>
+                <td><code>__init__</code></td>
+                <td>ファイルパスの読み込みや前処理の定義。</td>
+            </tr>
+            <tr>
+                <td><code>__len__</code></td>
+                <td>データの<strong>総数</strong>を返す。<br><code>len(dataset)</code> で呼ばれる。</td>
+            </tr>
+            <tr>
+                <td><code>__getitem__</code></td>
+                <td>インデックス <code>idx</code> に対応する<strong>データ1つ</strong>を返す。<br><code>dataset[0]</code> で呼ばれる。</td>
+            </tr>
         </table>
 
-        <h3>■ モデル構築の定石</h3>
-        <pre><code style="font-size:0.8em;"># nn.Sequential: 層を積み重ねる
-model = nn.Sequential(
-    nn.Linear(784, 256),
-    nn.ReLU(),
-    nn.Dropout(0.5),
-    nn.Linear(256, 10)
-)
-</code></pre>
-
-        <h3>■ その他頻出テクニック</h3>
-        <ul>
-            <li><strong>勾配クリッピング</strong>: <code>torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)</code></li>
-            <li><strong>重みのロード</strong>: <code>model.load_state_dict(torch.load(path))</code></li>
-            <li><strong>学習率取得</strong>: <code>optimizer.param_groups[0]['lr']</code></li>
-        </ul>
+        <h3>■ 5. train() と eval() の使い分け</h3>
+        <table class="tips-table">
+            <tr><th>モード</th><th>Dropout / BatchNorm の挙動</th></tr>
+            <tr>
+                <td><code>model.train()</code><br>(学習時)</td>
+                <td>
+                    <strong>Dropout</strong>: ランダムに無効化する。<br>
+                    <strong>BN</strong>: バッチごとの統計量で正規化＆移動平均を更新。
+                </td>
+            </tr>
+            <tr>
+                <td><code>model.eval()</code><br>(推論時)</td>
+                <td>
+                    <strong>Dropout</strong>: 何もしない（全ノード使用）。<br>
+                    <strong>BN</strong>: 学習時に計算した移動平均（全体統計）を使用。
+                </td>
+            </tr>
+        </table>
     `,
+
+    questions: [
+        // ---------------------------------------------------------
+        // 【実装・知識編】
+        // ---------------------------------------------------------
+        {
+            category: "学習ループ",
+            question: "PyTorchの学習ループにおいて、`loss.backward()` の直前に行うべき必須の操作は何か。",
+            options: ["optimizer.zero_grad()", "optimizer.step()", "model.eval()", "with torch.no_grad():"],
+            answer: 0,
+            explanation: "PyTorchは勾配を累積（加算）する仕様のため、各バッチの計算前に `zero_grad()` でリセットしないと、過去の勾配が混ざってしまいます。"
+        },
+        {
+            category: "学習ループ",
+            question: "パラメータの更新（重みの書き換え）を実行するメソッドはどれか。",
+            options: ["optimizer.step()", "loss.backward()", "model.forward()", "optimizer.update()"],
+            answer: 0,
+            explanation: "`backward()` で計算された勾配情報を元に、定義された最適化アルゴリズム（SGD, Adam等）に従ってパラメータを更新するのが `step()` です。"
+        },
+        {
+            category: "推論モード",
+            question: "検証（Validation）やテストデータの推論を行う際、DropoutやBatch Normalizationを推論用モードに切り替えるためのメソッドはどれか。",
+            options: ["model.eval()", "model.train()", "model.test()", "model.predict()"],
+            answer: 0,
+            explanation: "これを忘れると、Dropoutが効いたままになったり、Batch Normが不安定になったりして、正しい精度が出ません。"
+        },
+        {
+            category: "勾配計算の無効化",
+            question: "推論時にメモリ消費を抑え、計算を高速化するために、勾配計算を無効化するコンテキストマネージャはどれか。",
+            options: ["with torch.no_grad():", "with torch.grad_off():", "model.freeze():", "optimizer.stop():"],
+            answer: 0,
+            explanation: "推論時は逆伝播（バックプロパゲーション）を行わないため、計算グラフを保存する必要がありません。`no_grad()` を使うことでメモリを節約できます。"
+        },
+        {
+            category: "LSTMの形状",
+            question: "`batch_first=True` で作成した `nn.LSTM` に、バッチサイズ32、シーケンス長10、特徴量64のデータを入力する場合、入力テンソルの形状はどうあるべきか。",
+            options: ["(32, 10, 64)", "(10, 32, 64)", "(32, 64, 10)", "(64, 32, 10)"],
+            answer: 0,
+            explanation: "`batch_first=True` なら `(Batch, Seq, Feature)` です。Default (`False`) の場合は `(Seq, Batch, Feature)` になります。"
+        },
+        {
+            category: "LSTMの隠れ状態",
+            question: "`nn.LSTM` の出力には、全時刻の出力 `output` と、最終時刻の隠れ状態 `(h_n, c_n)` がある。`batch_first=True` の設定であっても、`h_n` の形状はどうなるか。",
+            options: ["(Num_layers * Num_directions, Batch, Hidden_size)", "(Batch, Num_layers * Num_directions, Hidden_size)", "(Num_layers, Seq_len, Batch)", "(Batch, Seq_len, Hidden_size)"],
+            answer: 0,
+            explanation: "【超重要】`h_n` と `c_n` の形状は `batch_first` の影響を受けず、常にバッチサイズが2番目に来ます。"
+        },
+        {
+            category: "CNNの出力サイズ",
+            question: "`nn.Conv2d` (入力サイズH=32, カーネルK=3, ストライドS=1, パディングP=1) を通した後の出力サイズH'はいくつか。",
+            options: ["32", "30", "28", "34"],
+            answer: 0,
+            explanation: "式：$(32 + 2\\times1 - 3) / 1 + 1 = 31 / 1 + 1 = 32$。パディング $P=1, K=3, S=1$ はサイズを変えない（Same Padding）設定です。"
+        },
+        {
+            category: "Datasetクラス",
+            question: "PyTorchでカスタムデータセットを作る際、`torch.utils.data.Dataset` を継承して実装しなければならない2つのメソッドはどれか。",
+            options: ["__len__ と __getitem__", "__init__ と __call__", "__next__ と __iter__", "forward と backward"],
+            answer: 0,
+            explanation: "`__len__` はデータの総数、`__getitem__` はインデックスに対応するデータを返すために必須です。"
+        },
+        {
+            category: "GPU移動",
+            question: "モデルやデータをGPUに転送するための正しいコードはどれか。（`device = 'cuda'` とする）",
+            options: ["model.to(device)", "model.cuda_transfer()", "model.gpu()", "model.move(device)"],
+            answer: 0,
+            explanation: "`.to(device)` が一般的です。`model.cuda()` も使えますが、CPU/GPUを動的に切り替えるには `.to()` が便利です。"
+        },
+        {
+            category: "モデルの保存",
+            question: "学習済みモデルの「重みパラメータのみ」を保存する推奨される方法はどれか。",
+            options: ["torch.save(model.state_dict(), 'path.pth')", "torch.save(model, 'path.pth')", "model.save_weights('path.pth')", "pickle.dump(model, 'path.pth')"],
+            answer: 0,
+            explanation: "モデル全体（クラス構造含む）を保存するより、`state_dict()`（辞書形式のパラメータ）だけを保存する方が、ロード時の互換性トラブルが少なく推奨されます。"
+        }
+    ]
+};
 
     questions: [
         // ---------------------------------------------------------
