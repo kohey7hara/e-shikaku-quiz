@@ -4,15 +4,16 @@ window.quizData = {
     cheatSheet: `
         <style>
             .concept-wrap { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
-            .concept-card { border: 1px solid #ccc; border-radius: 8px; padding: 15px; width: 45%; min-width: 300px; background: #fff; vertical-align: top; }
+            /* ↓ widthを100%にして、中のコンテンツが横に広がるように変更 */
+            .concept-card { border: 1px solid #ccc; border-radius: 8px; padding: 15px; width: 100%; background: #fff; vertical-align: top; }
             .card-title { font-weight: bold; border-bottom: 2px solid #333; margin-bottom: 10px; display: inline-block; }
             
-            /* 転移学習用 */
-            .layer-stack { display: flex; flex-direction: column; gap: 2px; width: 60%; margin: 0 auto; }
-            .layer { padding: 5px; text-align: center; font-size: 0.8em; border-radius: 3px; border: 1px solid #999; }
+            /* 転移学習用：横向きレイアウト */
+            .tl-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+            .tl-block { border: 1px solid #999; padding: 8px; border-radius: 4px; text-align: center; font-size: 0.85em; min-width: 80px; }
             .frozen { background-color: #ddd; color: #777; border-style: dashed; }
             .train { background-color: #fceceb; border-color: #e74c3c; color: #c0392b; font-weight: bold; }
-            .arrow-down { text-align: center; color: #555; }
+            .tl-arrow { color: #555; font-weight: bold; font-size: 1.2em; }
 
             /* 距離学習用 */
             .triplet-container { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 10px; font-size: 0.8em; }
@@ -40,30 +41,39 @@ window.quizData = {
         <div class="concept-wrap">
             <div class="concept-card">
                 <div class="card-title" style="border-color:#3498db;">転移学習 (Transfer Learning)</div>
-                <div class="layer-stack">
-                    <div class="layer train">出力層 (新規)</div>
-                    <div class="arrow-down">↑ 学習 (Backprop)</div>
-                    <div class="layer frozen">中間層 (固定)</div>
-                    <div class="layer frozen">中間層 (固定)</div>
-                    <div class="layer frozen">入力層 (固定)</div>
+                <p style="font-size:0.85em; margin-bottom:5px;">学習済みモデルの重みを固定し、最後の層だけすげ替えて学習。</p>
+                
+                <div class="tl-container">
+                    <div class="tl-block frozen">入力層<br>(固定)</div>
+                    <div class="tl-arrow">→</div>
+                    <div class="tl-block frozen">中間層<br>(固定)</div>
+                    <div class="tl-arrow">→</div>
+                    <div class="tl-block frozen">中間層<br>(固定)</div>
+                    <div class="tl-arrow">→</div>
+                    <div class="tl-block train">出力層<br>(新規学習)</div>
                 </div>
-                <ul style="font-size:0.85em; margin-top:10px;">
-                    <li><strong>特徴</strong>: 学習済みモデルの重みを固定し、最後の層だけすげ替えて学習。</li>
+
+                <ul style="font-size:0.85em; margin-top:5px;">
                     <li><span class="good">強み</span>: データが少なくても学習できる。計算が速い。</li>
                     <li><span class="bad">弱み</span>: 元のタスクと大きく違うタスクには不向き。</li>
                 </ul>
             </div>
+            
             <div class="concept-card">
                 <div class="card-title" style="border-color:#e74c3c;">ファインチューニング</div>
-                <div class="layer-stack">
-                    <div class="layer train">出力層 (学習)</div>
-                    <div class="arrow-down">↑ 全体を微調整</div>
-                    <div class="layer train">中間層 (学習)</div>
-                    <div class="layer train">中間層 (学習)</div>
-                    <div class="layer train">入力層 (学習)</div>
+                <p style="font-size:0.85em; margin-bottom:5px;">学習済みモデルを初期値として、全体を再学習（微調整）。</p>
+                
+                <div class="tl-container">
+                    <div class="tl-block train">入力層<br>(学習)</div>
+                    <div class="tl-arrow">→</div>
+                    <div class="tl-block train">中間層<br>(学習)</div>
+                    <div class="tl-arrow">→</div>
+                    <div class="tl-block train">中間層<br>(学習)</div>
+                    <div class="tl-arrow">→</div>
+                    <div class="tl-block train">出力層<br>(学習)</div>
                 </div>
-                <ul style="font-size:0.85em; margin-top:10px;">
-                    <li><strong>特徴</strong>: 学習済みモデルを初期値として、全体を再学習（微調整）。</li>
+
+                <ul style="font-size:0.85em; margin-top:5px;">
                     <li><span class="good">強み</span>: タスクに特化した高精度なモデルになる。</li>
                     <li><span class="bad">弱み</span>: ある程度のデータ量が必要（過学習リスク）。<strong>壊滅的忘却</strong>に注意。</li>
                 </ul>
@@ -73,7 +83,7 @@ window.quizData = {
         <h3>■ 2. 距離学習 (Metric Learning)</h3>
         <p>「似たものは近く、違うものは遠く」なるように空間を学習します。</p>
         <div class="concept-wrap">
-            <div class="concept-card" style="width:100%;">
+            <div class="concept-card">
                 <div class="card-title" style="border-color:#27ae60;">Triplet Loss の仕組み</div>
                 <div class="triplet-container">
                     <div style="text-align:center;">
