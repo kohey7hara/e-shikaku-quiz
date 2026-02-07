@@ -12,85 +12,20 @@ window.quizData = {
             .lstm-box { border: 2px solid #3498db; background: #ebf5fb; padding: 10px; border-radius: 8px; margin: 5px; width: 45%; vertical-align: top; display: inline-block; }
             .gate-icon { display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #333; color: white; font-size: 0.7em; text-align: center; margin: 2px; }
             
-            /* 用語マップ用スタイル */
-            .map-container { display: flex; flex-direction: column; gap: 10px; background: #fff; border: 1px solid #ccc; padding: 10px; border-radius: 8px; margin-bottom: 20px; }
-            .map-row { display: flex; align-items: stretch; justify-content: space-around; gap: 10px; }
-            .map-col { flex: 1; border: 1px dashed #999; padding: 5px; border-radius: 5px; text-align: center; position: relative; background: #fafafa; }
-            .map-label { font-size: 0.8em; font-weight: bold; color: #555; background: #eee; display: inline-block; padding: 2px 5px; border-radius: 3px; margin-bottom: 5px; }
-            
-            .term-tag { display: block; margin: 3px auto; padding: 3px; font-size: 0.75em; border-radius: 4px; font-weight: bold; color: white; width: 90%; }
-            .tag-struct { background-color: #3498db; } /* 構造 */
-            .tag-train { background-color: #e74c3c; } /* 学習 */
-            .tag-eval { background-color: #f39c12; }  /* 評価 */
-            
-            .arrow-down { font-size: 1.2em; color: #555; text-align: center; }
-            .connect-line { border-top: 2px solid #333; margin: 10px 0; position: relative; }
-            .connect-label { position: absolute; top: -12px; left: 40%; background: #fff; padding: 0 5px; font-size: 0.8em; font-weight: bold; color: #e67e22; }
+            .seq-container { display: flex; justify-content: center; align-items: center; background: #fff; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 10px; }
+            .box-enc { background: #fef9e7; border: 2px solid #f39c12; padding: 10px; border-radius: 5px; text-align: center; }
+            .box-dec { background: #fceceb; border: 2px solid #e74c3c; padding: 10px; border-radius: 5px; text-align: center; }
+            .context-vec { background: #333; color: #fff; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; margin: 0 10px; }
+            .attention-line { border-top: 2px dashed #e74c3c; width: 100%; margin-top: 5px; position: relative; }
+            .attention-text { position: absolute; top: -12px; left: 35%; background: #fff; font-size: 0.7em; color: #e74c3c; padding: 0 5px; }
 
-            .tf-compare { display: flex; font-size: 0.8em; margin-top: 10px; background: #eee; padding: 5px; border-radius: 5px; }
-            .tf-box { flex: 1; padding: 5px; text-align: center; }
+            .table-wrap { overflow-x: auto; }
+            .term-map { border: 1px dashed #666; padding: 10px; background: #fff; border-radius: 5px; margin-top: 20px; }
         </style>
 
-        <h3>■ 用語マップ：どこで使われる？</h3>
-        <p>「構造」「学習時」「評価時」のどこに登場するかを整理しました。</p>
+        <h3>■ RNNの仕組み：時間を展開する</h3>
+        <p>RNNは、自身へのループ構造を持つネットワークです。<br>学習時は時間を遡って誤差を伝えます (<strong>BPTT</strong>)。</p>
         
-        <div class="map-container">
-            <div style="text-align:center; font-size:0.8em; margin-bottom:5px;">Encoder-Decoder (Seq2Seq) モデルの流れ</div>
-            
-            <div class="map-row">
-                <div class="map-col">
-                    <div class="map-label">Encoder (入力層・隠れ層)</div>
-                    <div class="term-tag tag-struct">Bidirectional RNN<br>(双方向から読む)</div>
-                    <div class="term-tag tag-struct">CEC (LSTM内)<br>(記憶を保持)</div>
-                </div>
-
-                <div class="map-col" style="flex:0.5; border:none; background:transparent; display:flex; align-items:center; justify-content:center;">
-                    <div class="term-tag tag-struct" style="background:#9b59b6; width:100%;">Attention<br>(橋渡し)</div>
-                </div>
-
-                <div class="map-col">
-                    <div class="map-label">Decoder (生成層)</div>
-                    <div class="term-tag tag-train">Teacher Forcing<br>(正解を入力)</div>
-                    <div class="term-tag tag-train">Exposure Bias<br>(TFの弊害)</div>
-                </div>
-            </div>
-
-            <div class="arrow-down">↓ 出力生成</div>
-
-            <div class="map-row">
-                <div class="map-col">
-                    <div class="map-label">損失計算 (学習時)</div>
-                    <div class="term-tag tag-train">BPTT<br>(時間を遡って逆伝播)</div>
-                    <div class="term-tag tag-train">勾配クリッピング<br>(爆発防止)</div>
-                </div>
-                <div class="map-col">
-                    <div class="map-label">精度評価 (テスト時)</div>
-                    <div class="term-tag tag-eval">Bleu Score<br>(翻訳の一致度)</div>
-                </div>
-            </div>
-        </div>
-
-        <h3>■ Teacher Forcing と Exposure Bias</h3>
-        <p>Decoderへの「入力」の違いが問題を生みます。</p>
-        <div class="tf-compare">
-            <div class="tf-box" style="border-right:1px solid #ccc;">
-                <strong>学習時 (Teacher Forcing)</strong><br>
-                前の時刻の<span style="color:red; font-weight:bold;">「正解」</span>を入力する。<br>
-                (カンニングさせる)<br>
-                ↓<br>
-                学習が速く安定する。
-            </div>
-            <div class="tf-box">
-                <strong>テスト時 (推論)</strong><br>
-                前の時刻の<span style="color:blue; font-weight:bold;">「自分の予測」</span>を入力する。<br>
-                (自力でやる)<br>
-                ↓<br>
-                学習時と条件が違う！<br>
-                これを <strong>Exposure Bias</strong> と呼ぶ。
-            </div>
-        </div>
-
-        <h3>■ RNNの基本とBPTT</h3>
         <div class="rnn-flow">
             <div class="rnn-step">
                 <div class="time-label">t-1</div>
@@ -107,16 +42,20 @@ window.quizData = {
                 $x_{t+1}$<br>↓<br><div class="hidden-state">$h_{t+1}$</div>
             </div>
         </div>
-        <p style="text-align:center; font-size:0.8em;"><strong>BPTT</strong>: 矢印を逆に辿って、過去の層まで誤差を伝えます。</p>
+        <p style="font-size:0.8em; text-align:center;">
+            前の時間の隠れ状態 $h_{t-1}$ が、現在の入力 $x_t$ と一緒に計算に使われます。<br>
+            <strong>「過去の記憶を引き継ぐ」</strong>仕組みです。
+        </p>
 
-        <h3>■ LSTM vs GRU</h3>
+        <h3>■ LSTM vs GRU (記憶の保持)</h3>
+        <p>単純なRNNは「勾配消失」で長期間の記憶ができません。<br>これを解決したのがLSTMです。</p>
         <div style="text-align:center;">
             <div class="lstm-box">
                 <strong>LSTM</strong><br>
                 <span style="font-size:0.8em; color:#3498db;">セル (Cell) + 3つのゲート</span>
                 <hr style="border:0; border-top:1px solid #abd2ef; margin:5px 0;">
                 <div style="text-align:left; font-size:0.8em;">
-                    <span class="gate-icon">C</span> <strong>CEC</strong>: 記憶のベルトコンベア<br>
+                    <span class="gate-icon">C</span> <strong>CEC</strong>: 記憶のベルトコンベア（勾配が消えない）<br>
                     <span class="gate-icon">F</span> <strong>忘却</strong>: いらない記憶を消す<br>
                     <span class="gate-icon">I</span> <strong>入力</strong>: 新しい情報を足す<br>
                     <span class="gate-icon">O</span> <strong>出力</strong>: 次に伝える情報を選ぶ
@@ -131,8 +70,77 @@ window.quizData = {
                     <span class="gate-icon" style="background:#e67e22;">R</span> <strong>リセット</strong>: 過去を無視する<br>
                     <span class="gate-icon" style="background:#e67e22;">Z</span> <strong>更新</strong>: LSTMの入力+忘却を統合<br>
                     <br>
+                    ※パラメータが少なく計算が速い
                 </div>
             </div>
+        </div>
+
+        <h3>■ Seq2Seq と Attention (翻訳モデル)</h3>
+        <p>「Encoder」で読み込み、「Decoder」で生成します。</p>
+        
+        <div class="seq-container">
+            <div class="box-enc">
+                Encoder<br>
+                <small>入力: "I am a cat"</small>
+            </div>
+            <div class="context-vec">
+                Context<br>
+                Vector
+            </div>
+            <div class="box-dec">
+                Decoder<br>
+                <small>出力: "吾輩は猫..."</small>
+            </div>
+        </div>
+        
+        <div style="margin-top:10px; background:#f9f9f9; padding:10px; border-radius:5px;">
+            <strong>Attention (注意機構) の追加</strong>
+            <div class="attention-line">
+                <span class="attention-text">直接参照 (近道)</span>
+            </div>
+            <p style="font-size:0.8em; margin-top:5px;">
+                Decoderが単語を生成するたびに、Encoderの<strong>「どの単語を見るべきか」</strong>を計算して、必要な情報を直接つまみ食いする仕組み。<br>
+                → 長い文章でも精度が落ちない。
+            </p>
+        </div>
+
+        <h3>■ 用語マップ：どこで使われる？</h3>
+        <div class="term-map">
+            <p><strong>1. Encoder (入力側)</strong></p>
+            <ul>
+                <li><strong>Bidirectional RNN</strong>: 過去と未来の両方向から読む。</li>
+                <li><strong>CEC</strong>: LSTM内部で記憶を保持する。</li>
+            </ul>
+            
+            <p><strong>2. Attention (中間)</strong></p>
+            <ul>
+                <li><strong>Attention</strong>: Encoderの隠れ状態とDecoderの隠れ状態を照らし合わせる。</li>
+            </ul>
+
+            <p><strong>3. Decoder (出力側)</strong></p>
+            <ul>
+                <li><strong>Teacher Forcing</strong>: 学習時、正解を入力する（カンニング）。</li>
+                <li><strong>Exposure Bias</strong>: テスト時、自分の予測を入力するため、学習時と条件がズレる問題。</li>
+            </ul>
+
+            <p><strong>4. 学習・評価全体</strong></p>
+            <ul>
+                <li><strong>BPTT</strong>: 時間を遡る誤差逆伝播法（学習アルゴリズム）。</li>
+                <li><strong>勾配クリッピング</strong>: 勾配爆発を防ぐ（学習テクニック）。</li>
+                <li><strong>Bleu Score</strong>: 翻訳の精度を測る（評価指標）。</li>
+            </ul>
+        </div>
+
+        <h3>■ 重要用語まとめ</h3>
+        <div class="table-wrap">
+            <table>
+                <tr><th>用語</th><th>内容</th></tr>
+                <tr><td><strong>BPTT</strong></td><td>Backpropagation Through Time。時間を遡って勾配を計算する。</td></tr>
+                <tr><td><strong>CEC</strong></td><td>Constant Error Carousel。LSTMの中心部。「記憶をそのまま保持」し、勾配を1.0で伝えるため<strong>勾配消失しない</strong>。</td></tr>
+                <tr><td><strong>勾配クリッピング</strong></td><td>勾配が閾値を超えたらノルムをカットする。<strong>勾配爆発</strong>対策。</td></tr>
+                <tr><td><strong>Teacher Forcing</strong></td><td>学習時、前の時刻の「予測」ではなく「正解」を入力するテクニック。学習が安定・高速化する。</td></tr>
+                <tr><td><strong>Bidirectional RNN</strong></td><td>過去から未来（順方向）と、未来から過去（逆方向）の両方から学習する。</td></tr>
+            </table>
         </div>
     `,
 
