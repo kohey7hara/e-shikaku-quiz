@@ -4,7 +4,7 @@ window.quizData = {
     cheatSheet: `
         <style>
             .gen-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
-            .gen-card { border: 1px solid #ccc; border-radius: 8px; padding: 15px; width: 30%; min-width: 300px; background: #fff; }
+            .gen-card { border: 1px solid #ccc; border-radius: 8px; padding: 15px; width: 30%; min-width: 300px; background: #fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); }
             .gen-title { font-weight: bold; border-bottom: 2px solid #333; margin-bottom: 10px; display: inline-block; }
             
             /* VAE */
@@ -22,13 +22,22 @@ window.quizData = {
             .diff-step { width: 40px; height: 40px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 0.7em; background: #fff; }
             .diff-noise { background: #7f8c8d; color: white; }
             
-            .comp-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; }
+            /* Table & Layout */
+            .comp-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; background: #fff; }
             .comp-table th { background: #eee; border: 1px solid #ccc; padding: 5px; }
             .comp-table td { border: 1px solid #ccc; padding: 5px; }
             .good { color: #27ae60; font-weight: bold; }
             .bad { color: #c0392b; font-weight: bold; }
             
             .keyword-box { background:#f9f9f9; padding:8px; border-left:3px solid #f39c12; margin: 5px 0; font-size: 0.85em; }
+
+            /* History List */
+            .history-list { font-size: 0.85em; list-style: none; padding: 0; margin-top: 5px; }
+            .history-list li { margin-bottom: 8px; border-bottom: 1px dashed #ddd; padding-bottom: 5px; display: flex; align-items: baseline; }
+            .hist-year { min-width: 45px; font-weight: bold; color: #888; font-size: 0.9em; }
+            .hist-content { flex: 1; }
+            .hist-name { color: #e74c3c; font-weight: bold; margin-right: 5px; }
+            .hist-desc { font-size: 0.9em; color: #444; }
         </style>
 
         <h3>■ 生成モデルの分類と仕組み</h3>
@@ -42,18 +51,19 @@ window.quizData = {
                     <div class="vae-flow">
                         <div class="vae-box">入</div>
                         <span>&rarr;</span>
-                        <div style="font-size:0.7em;">Encoder<br>(&mu;, &sigma;)</div>
+                        <div style="font-size:0.7em;">Enc<br>(&mu;, &sigma;)</div>
                         <span>&rarr;</span>
                         <div class="vae-z">z</div>
                         <span>&rarr;</span>
-                        <div style="font-size:0.7em;">Decoder</div>
+                        <div style="font-size:0.7em;">Dec</div>
                         <span>&rarr;</span>
                         <div class="vae-box">出</div>
                     </div>
                 </div>
                 <p style="font-size:0.85em;">
-                    入力を「確率分布（平均・分散）」に圧縮し、そこからサンプリングして復元。<br>
-                    <strong>潜在空間 z が連続的</strong>になる。
+                    入力を「確率分布」に圧縮。<br>
+                    <strong>潜在空間 z が連続的</strong>。<br>
+                    画像はぼやけやすい。
                 </p>
             </div>
 
@@ -62,16 +72,18 @@ window.quizData = {
                 <small>(敵対的生成NW)</small>
                 <div style="margin: 10px 0;">
                     <div class="gan-layout">
-                        <div class="gan-g"><strong>G</strong><br>偽造者</div>
+                        <div class="gan-g"><strong>G</strong><br>偽造</div>
                         <div style="font-size:1.5em;">vs</div>
-                        <div class="gan-d"><strong>D</strong><br>鑑定士</div>
+                        <div class="gan-d"><strong>D</strong><br>鑑定</div>
                     </div>
                     <div style="text-align:center; font-size:0.8em; margin-top:5px;">
-                        GはDを騙したい<br>DはGを見破りたい
+                        Minimaxゲーム
                     </div>
                 </div>
                 <p style="font-size:0.85em;">
-                    2つのNWが競い合う（Minimaxゲーム）。くっきりした画像が作れる。
+                    2つのNWが競い合う。<br>
+                    <strong>くっきり高画質</strong>。<br>
+                    学習不安定(モード崩壊)。
                 </p>
             </div>
 
@@ -89,50 +101,68 @@ window.quizData = {
                     </div>
                 </div>
                 <p style="font-size:0.85em;">
-                    ノイズを徐々に除去する過程を学習。<br>
-                    <strong>最高品質・多様性</strong>があるが、計算が遅い。
+                    ノイズ除去を学習。<br>
+                    <strong>最高品質・多様性</strong>。<br>
+                    計算が遅い。
                 </p>
             </div>
         </div>
 
-        <h3>■ 3大モデルの比較</h3>
-        <table class="comp-table">
-            <tr><th>モデル</th><th>強み (Pros)</th><th>弱み (Cons)</th><th>主な用途</th></tr>
-            <tr>
-                <td><strong>VAE</strong></td>
-                <td><span class="good">数学的に安定</span>。<br>潜在空間が綺麗。</td>
-                <td><span class="bad">ぼやける</span>。<br>(平均化されるため)</td>
-                <td>異常検知<br>特徴抽出</td>
-            </tr>
-            <tr>
-                <td><strong>GAN</strong></td>
-                <td><span class="good">くっきり高画質</span>。<br>生成速度が速い。</td>
-                <td><span class="bad">学習が不安定</span>。<br><strong>モード崩壊</strong>が起きる。</td>
-                <td>StyleGAN<br>Pix2Pix</td>
-            </tr>
-            <tr>
-                <td><strong>拡散モデル</strong><br>(Diffusion)</td>
-                <td><span class="good">最高品質・多様性</span>。<br>学習が安定。</td>
-                <td><span class="bad">生成が遅い</span>。<br>(何度も計算が必要)</td>
-                <td>DALL-E 2<br>Stable Diffusion</td>
-            </tr>
-        </table>
+        <h3>■ GANの変遷・派生モデル (重要)</h3>
+        <p style="font-size:0.85em;">「学習の安定化」と「高画質化」の歴史です。</p>
+        <ul class="history-list">
+            <li>
+                <span class="hist-year">2015</span>
+                <div class="hist-content">
+                    <span class="hist-name">DCGAN</span>
+                    <span class="hist-desc">
+                        CNN構造を導入。Pooling廃止(<strong>Strided Conv</strong>)、<strong>Batch Norm</strong>、Gの出力以外は<strong>Leaky ReLU</strong>を使用。
+                    </span>
+                </div>
+            </li>
+            <li>
+                <span class="hist-year">2017</span>
+                <div class="hist-content">
+                    <span class="hist-name">WGAN</span>
+                    <span class="hist-desc">
+                        損失関数に<strong>Wasserstein距離(EM距離)</strong>を採用。勾配消失を防ぎ学習安定。<strong>Lipschitz連続性</strong>の制約(Weight Clipping)が必要。
+                    </span>
+                </div>
+            </li>
+            <li>
+                <span class="hist-year">2017</span>
+                <div class="hist-content">
+                    <span class="hist-name">CycleGAN</span>
+                    <span class="hist-desc">
+                        <strong>ペア画像なし</strong>でスタイル変換(馬⇔縞馬)。<strong>サイクル一貫性損失</strong>(行って戻って元通りか)を導入。
+                    </span>
+                </div>
+            </li>
+            <li>
+                <span class="hist-year">2018~</span>
+                <div class="hist-content">
+                    <span class="hist-name">StyleGAN</span>
+                    <span class="hist-desc">
+                        高解像度・高品質。<strong>AdaIN</strong>でスタイル(髪型、年齢等)を分離して制御可能にした。
+                    </span>
+                </div>
+            </li>
+        </ul>
 
         <h3>■ E資格対策：重要キーワード</h3>
         <div class="keyword-box">
             <strong>1. VAEの損失関数 (ELBO)</strong><br>
-            「再構成誤差（入力を復元したい）」＋「正則化項（zを正規分布に近づけたい）」の和。<br>
-            ※正則化には <strong>KLダイバージェンス</strong> を使う。
+            「再構成誤差」＋「正則化項（<strong>KLダイバージェンス</strong>）」の和。<br>
+            ※<strong>Reparameterization Trick</strong>で確率操作を微分可能にする。
         </div>
         <div class="keyword-box">
-            <strong>2. Reparameterization Trick</strong><br>
-            確率的なサンプリング操作は微分ができないため、ノイズ &epsilon; を外に出して式変形し、<strong>誤差逆伝播を可能にする</strong>テクニック。
-        </div>
-        <div class="keyword-box">
-            <strong>3. GANの評価指標: FID</strong><br>
-            Fréchet Inception Distance。<br>
-            本物画像と生成画像の「特徴量の分布」の距離。<br>
+            <strong>2. GANの評価指標: FID</strong><br>
+            Fréchet Inception Distance。生成画像と本物画像の「特徴マップの分布間距離」。<br>
             <strong>値が小さいほど良い</strong>（分布が似ている＝高品質）。
+        </div>
+        <div class="keyword-box">
+            <strong>3. モード崩壊 (Mode Collapse)</strong><br>
+            GANの学習失敗例。Generatorが「Discriminatorを騙しやすい特定の画像」ばかり生成し、<strong>多様性が失われる</strong>現象。
         </div>
     `,
 
