@@ -4,7 +4,7 @@ const menuConfig = [
     {
         id: "07_pass_bootcamp_2026",
         title: "合格圏ブートキャンプ 2026",
-        desc: "手計算・Softmax・Attention配線・正規化・PyTorch内部仕様・LLM/RAG・新シラバスを横断する最優先ドリル",
+        desc: "手計算・図表長文・Softmax・Attention配線・正規化・PyTorch内部仕様・LLM/RAG・新シラバスを横断する最優先ドリル",
         isActive: true,
         featured: true
     },

@@ -82,6 +82,14 @@ window.quizData = {
           <li><code>backward()</code>は勾配を上書きせず加算します。通常は各更新の前に<code>zero_grad()</code>で前回分を消します。</li>
           <li><code>permute()</code>後はデータの並びが非連続になる場合があります。安全に形を変えるなら<code>reshape()</code>、または<code>contiguous().view()</code>を使います。</li>
         </ul>
+        <h3>9. 図表・長文問題の読み方</h3>
+        <ol>
+          <li><strong>最後の一文を先に読む：</strong>何を答える問題かを確定します。</li>
+          <li><strong>図へ日本語を書き足す：</strong>矢印は「何が、どこから、どこへ」を表すか確認します。</li>
+          <li><strong>使う数字だけ丸で囲む：</strong>飾りの条件と計算に必要な条件を分けます。</li>
+          <li><strong>各選択肢を図へ戻す：</strong>用語の印象ではなく、図の流れと矛盾しないかで消去します。</li>
+        </ol>
+        <p>この後半には、本試験を想定した図解付き長文問題があります。最初は時間を測らず、図の矢印へQ・K・Vやテンソル形状を書き込んでください。</p>
     `,
     questions: [
         {
@@ -458,3 +466,80 @@ window.quizData.questions.forEach(question => {
     question.beginnerReviewed = true;
     if (bootcampBeginnerQuestionUpdates[question.id]) Object.assign(question, bootcampBeginnerQuestionUpdates[question.id]);
 });
+
+const bootcampVisualQuestions = [
+    {
+        id: "visual-transformer-routing", category: "Transformer", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">次の図はEncoder-Decoder TransformerのDecoder側を簡略化したものである。Cross-Attentionへ入るXとして正しいものを選べ。</div><div class="exam-figure"><span class="figure-title">Cross-Attentionの入力経路</span><div class="diagram-row"><div class="diagram-node primary">Encoderの出力</div><div class="diagram-arrow">→</div><div class="diagram-node">K・V</div><div class="diagram-arrow">↘</div><div class="diagram-node accent">Cross-Attention</div></div><div class="diagram-row"><div class="diagram-node primary">Decoderの現在の表現</div><div class="diagram-arrow">→</div><div class="diagram-node warn">X</div><div class="diagram-arrow">↗</div></div><p class="figure-caption">Qは「何を探すか」、Kは「検索用の見出し」、Vは「取り出す内容」と考える。</p></div>`,
+        options: ["Query（Q）", "Key（K）", "Value（V）", "位置エンコーディングだけ"], answer: 0,
+        explanation: `<p><strong>正解はQuery（Q）です。</strong></p><p>Decoderは「今ほしい情報」をQとして出し、Encoderの出力をK・Vとして検索します。したがって配線は、<strong>Decoder→Q、Encoder→KとV</strong>です。</p><ol class="step-list"><li>Cross-Attentionでは、異なる場所から入力が来ます。</li><li>質問する側がDecoderなのでQです。</li><li>元文の情報を持つEncoderがK・Vです。</li></ol><p><strong>ひっかけ：</strong>Self-AttentionならQ・K・Vは同じ系列から作ります。</p>`
+    },
+    {
+        id: "visual-residual-projection", category: "CNN・ResNet", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">残差ブロックで主経路F(x)の形が16×16×128になった。入力xは32×32×64である。加算を成立させるため、スキップ経路Xに必要な処理はどれか。</div><div class="exam-figure"><span class="figure-title">Residual Block</span><div class="diagram-row"><div class="diagram-node primary">x<br>32×32×64</div><div class="diagram-arrow">→</div><div class="diagram-node">F(x)<br>16×16×128</div><div class="diagram-arrow">↘</div><div class="diagram-node accent">要素ごとの加算</div></div><div class="diagram-row"><div class="diagram-node primary">x</div><div class="diagram-arrow">→</div><div class="diagram-node warn">X</div><div class="diagram-arrow">↗</div></div></div>`,
+        options: ["1×1畳み込み、stride=2、出力128チャネル", "3×3 MaxPoolだけ", "Global Average Pooling", "何もしない恒等写像"], answer: 0,
+        explanation: `<p><strong>加算する2つのテンソルは形が同じでなければなりません。</strong></p><p>高さ・幅は32→16なのでstride=2、チャネルは64→128なので出力128チャネルへの変換が必要です。1×1畳み込みなら空間サイズとチャネル数を同時に合わせられます。</p><p><strong>確認：</strong>X(x)も16×16×128となり、F(x)+X(x)が可能になります。</p>`
+    },
+    {
+        id: "visual-cnn-shape-pipeline", category: "CNN", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">次のCNNに32×32×3の画像を1枚入力する。最後の特徴マップの形として正しいものを選べ。Convの表記はK=kernel、S=stride、P=padding、C=出力チャネルを表す。</div><div class="exam-figure"><span class="figure-title">形状を左から追う</span><div class="diagram-row"><div class="diagram-node primary">入力<br>32×32×3</div><div class="diagram-arrow">→</div><div class="diagram-node">Conv<br>K3 S1 P1 C16</div><div class="diagram-arrow">→</div><div class="diagram-node">MaxPool<br>K2 S2</div><div class="diagram-arrow">→</div><div class="diagram-node">Conv<br>K3 S1 P0 C32</div></div></div>`,
+        options: ["14×14×32", "16×16×32", "15×15×16", "30×30×32"], answer: 0,
+        explanation: `<p><strong>正解は14×14×32です。</strong></p><ol class="step-list"><li>最初のConvはP=1なので32×32を維持し、チャネルだけ16になります。</li><li>MaxPoolで高さ・幅が半分になり、16×16×16です。</li><li>最後のConvはP=0なので16−3+1=14。出力チャネルは32です。</li></ol><p>したがって<strong>14×14×32</strong>です。チャネル数はkernel計算式ではなくCの指定を見る点が重要です。</p>`
+    },
+    {
+        id: "visual-confusion-matrix-long", category: "評価指標", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">病変を陽性とする分類器を100件で評価した。次の混同行列からPrecision（適合率）とRecall（再現率）の組合せを選べ。</div><div class="exam-figure"><span class="figure-title">混同行列</span><table class="figure-table"><tr><th></th><th>予測：陽性</th><th>予測：陰性</th></tr><tr><th>実際：陽性</th><td class="hot">TP=40</td><td>FN=10</td></tr><tr><th>実際：陰性</th><td>FP=15</td><td>TN=35</td></tr></table><p class="figure-caption">Precisionは「陽性と予測した中」、Recallは「実際に陽性の中」を分母にする。</p></div>`,
+        options: ["Precision≈0.727、Recall=0.800", "Precision=0.800、Recall≈0.727", "Precision≈0.533、Recall=0.800", "Precision≈0.727、Recall≈0.533"], answer: 0,
+        explanation: `<p><strong>Precision=TP/(TP+FP)=40/(40+15)=40/55≈0.727</strong>です。</p><p><strong>Recall=TP/(TP+FN)=40/(40+10)=40/50=0.800</strong>です。</p><p>FPは「誤って陽性と言った数」なのでPrecisionを下げ、FNは「陽性を見逃した数」なのでRecallを下げます。名前だけでなく、どの誤りが分母に入るかで判断します。</p>`
+    },
+    {
+        id: "visual-learning-curves", category: "機械学習の課題", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">学習を12 epoch行ったところ、訓練Lossは下がり続けたが、検証Lossはepoch 6付近を最小として上昇した。最も適切な判断と対応を選べ。</div><div class="exam-figure"><span class="figure-title">学習曲線</span><svg class="curve-svg" viewBox="0 0 520 220" role="img" aria-label="訓練Lossは低下し続け、検証Lossは途中から上昇するグラフ"><line x1="55" y1="20" x2="55" y2="180" stroke="currentColor"/><line x1="55" y1="180" x2="500" y2="180" stroke="currentColor"/><polyline points="60,45 120,75 180,105 240,125 300,140 360,151 420,160 480,166" fill="none" stroke="#1769e0" stroke-width="5"/><polyline points="60,55 120,85 180,112 240,130 300,137 360,124 420,102 480,76" fill="none" stroke="#e05a47" stroke-width="5"/><line x1="300" y1="25" x2="300" y2="180" stroke="#666" stroke-dasharray="7 6"/><text x="310" y="42">epoch 6</text><text x="390" y="160" fill="#1769e0">訓練Loss</text><text x="390" y="88" fill="#e05a47">検証Loss</text><text x="8" y="28">Loss</text><text x="455" y="208">epoch</text></svg></div>`,
+        options: ["過学習の兆候。epoch 6付近を候補にEarly Stoppingする", "未学習の兆候。必ずepochを増やす", "勾配消失なので活性化関数だけを変える", "検証Lossは見ず、訓練Lossが最小のepoch 12を採用する"], answer: 0,
+        explanation: `<p><strong>訓練だけ良くなり、未知データに近い検証性能が悪化するのは過学習の典型です。</strong></p><p>モデル採用の候補は検証Lossが最小のepoch 6付近です。Early Stoppingは検証指標が一定期間改善しないとき学習を止めます。</p><p><strong>注意：</strong>グラフは1点の揺れもあるため、実装ではpatience（何epoch待つか）を設けることがあります。</p>`
+    },
+    {
+        id: "visual-pytorch-ce-code", category: "PyTorch実装", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">3クラス分類を学習する次のコードには、損失関数の使い方として不適切な箇所がある。修正として最も適切なものを選べ。</div><div class="exam-figure"><span class="figure-title">学習コード</span><pre class="code-figure"><code>criterion = nn.CrossEntropyLoss()<br>logits = model(x)　# shape: (N, 3)<br>probs = torch.softmax(logits, dim=1)<br>loss = criterion(probs, target)<br>loss.backward()</code></pre><p class="figure-caption">targetはshape (N) のクラス番号で、dtypeはtorch.longとする。</p></div>`,
+        options: ["softmax行を外し、criterion(logits, target)とする", "softmaxのdimを0に変える", "targetにもsoftmaxをかける", "loss.backward()をmodel.eval()の中で実行する"], answer: 0,
+        explanation: `<p><strong>CrossEntropyLossにはSoftmax前の生の点数logitsを渡します。</strong></p><p>内部でLogSoftmaxとNLLLossに相当する処理を、数値的に安定した形で行います。先にSoftmaxをかけると、期待する入力ではなく確率を再びロジットのように扱うことになります。</p><ol class="step-list"><li>model(x)でlogitsを得る。</li><li>criterion(logits, target)を計算する。</li><li>backward()で勾配を求める。</li></ol>`
+    },
+    {
+        id: "visual-causal-mask-matrix", category: "Transformer", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">自己回帰DecoderのSelf-Attentionに次のcausal maskを使う。行がQuery、列がKeyで、○は参照可能、×は参照禁止を表す。位置t3が参照できる位置を選べ。</div><div class="exam-figure"><span class="figure-title">Causal Mask</span><table class="figure-table"><tr><th>Q＼K</th><th>t1</th><th>t2</th><th>t3</th><th>t4</th></tr><tr><th>t1</th><td>○</td><td class="masked">×</td><td class="masked">×</td><td class="masked">×</td></tr><tr><th>t2</th><td>○</td><td>○</td><td class="masked">×</td><td class="masked">×</td></tr><tr><th>t3</th><td>○</td><td>○</td><td>○</td><td class="masked">×</td></tr><tr><th>t4</th><td>○</td><td>○</td><td>○</td><td>○</td></tr></table></div>`,
+        options: ["t1、t2、t3", "t3だけ", "t3、t4", "t1、t2、t3、t4"], answer: 0,
+        explanation: `<p><strong>t3は自分自身と過去のt1、t2を参照できますが、未来のt4は参照できません。</strong></p><p>自己回帰生成では、学習時に正解の未来トークンが入力に並んでいても、そこを見られないようにします。禁止位置のAttentionロジットへ−∞相当を加えると、Softmax後の重みはほぼ0になります。</p>`
+    },
+    {
+        id: "visual-layernorm-axis", category: "正規化", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">Transformerへの入力テンソルが(N,L,D)=(2,3,4)である。各トークンの4特徴にLayer Normalizationを適用するとき、平均と分散は何組計算されるか。</div><div class="exam-figure"><span class="figure-title">LayerNormがまとめる方向</span><div class="diagram-column"><div class="diagram-node primary">バッチN=2</div><div class="diagram-node">各バッチにトークンL=3</div><div class="diagram-node accent">各トークンの特徴D=4<br>← この4個から平均・分散 →</div></div><p class="figure-caption">文章の長さLやバッチNをまたいで一括計算しない。</p></div>`,
+        options: ["6組（N×L）", "2組（N）", "3組（L）", "4組（D）"], answer: 0,
+        explanation: `<p><strong>1トークンごとにD=4個の特徴から平均・分散を求めます。</strong></p><p>トークンはN×L=2×3=6個あるので、統計量は6組です。LayerNormは他の文章やトークンに依存しにくく、可変長系列や小さいバッチでも扱いやすい点がTransformerと相性のよい理由です。</p>`
+    },
+    {
+        id: "visual-rag-failure", category: "LLM・RAG", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">社内規程を答えるRAGで、LLMは与えられた文書には忠実だが回答を誤った。ログを見ると、検索結果の上位3件はすべて質問と無関係だった。最初に改善すべき箇所を選べ。</div><div class="exam-figure"><span class="figure-title">失敗したRAGの流れ</span><div class="diagram-row"><div class="diagram-node primary">質問</div><div class="diagram-arrow">→</div><div class="diagram-node warn">Retriever</div><div class="diagram-arrow">→</div><div class="diagram-node warn">無関係な文書<br>Top 3</div><div class="diagram-arrow">→</div><div class="diagram-node">LLM</div><div class="diagram-arrow">→</div><div class="diagram-node warn">誤答</div></div></div>`,
+        options: ["文書分割、埋め込み、検索・再ランキングなどRetriever側", "LLMの出力温度だけを上げる", "回答を長くするよう指示する", "検索を外してLLMの事前学習知識だけに任せる"], answer: 0,
+        explanation: `<p><strong>根拠文書が検索できていないため、まずRetriever側を直します。</strong></p><p>候補は、chunkの大きさと重なり、埋め込みモデル、検索方式、Top-k、メタデータ絞り込み、rerankerです。LLMが渡された文書に忠実なら、生成段階より前の検索がボトルネックです。</p><p><strong>切り分けの型：</strong>「正しい根拠が取れたか」→「根拠から正しく生成できたか」の順に確認します。</p>`
+    },
+    {
+        id: "visual-generative-models", category: "生成モデル", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">A〜Cは代表的な生成モデルの学習・生成経路を簡略化した図である。VAE、GAN、DDPMの対応として正しいものを選べ。</div><div class="exam-figure"><span class="figure-title">3つの生成モデル</span><div class="diagram-column"><div class="diagram-node"><strong>A</strong> 入力x → Encoder → μ,σ → z → Decoder → 復元x'</div><div class="diagram-node"><strong>B</strong> ノイズz → Generator → 偽物 ─┐<br>本物x ─────────────────→ Discriminator</div><div class="diagram-node"><strong>C</strong> データx₀ → 少しずつノイズ追加 → xₜ<br>xₜ → 学習した逆過程 → x₀</div></div></div>`,
+        options: ["A=VAE、B=GAN、C=DDPM", "A=GAN、B=DDPM、C=VAE", "A=DDPM、B=VAE、C=GAN", "A=VAE、B=DDPM、C=GAN"], answer: 0,
+        explanation: `<p><strong>A=VAE、B=GAN、C=DDPMです。</strong></p><ul><li><strong>VAE：</strong>μとσから潜在変数zをサンプリングし、復元項とKL項で学習します。</li><li><strong>GAN：</strong>GeneratorとDiscriminatorが敵対的に学習します。</li><li><strong>DDPM：</strong>前向き過程でノイズを加え、逆過程のノイズ除去を学習します。</li></ul><p>名称ではなく、図に現れる固有部品で識別します。</p>`
+    },
+    {
+        id: "visual-lstm-cell", category: "系列モデル", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">LSTMのセル状態を cₜ=fₜ×cₜ₋₁+iₜ×c̃ₜ で更新する。図の値を使ったとき、新しいセル状態cₜはいくつか。</div><div class="exam-figure"><span class="figure-title">LSTMセル状態の更新</span><div class="diagram-row"><div class="diagram-node primary">過去の記憶<br>cₜ₋₁=4</div><div class="diagram-node">忘却ゲート<br>fₜ=0.75</div><div class="diagram-arrow">→ 3</div><div class="diagram-node primary">新しい候補<br>c̃ₜ=2</div><div class="diagram-node">入力ゲート<br>iₜ=0.5</div><div class="diagram-arrow">→ 1</div><div class="diagram-node accent">加算<br>cₜ=?</div></div></div>`,
+        options: ["4", "3", "5", "6"], answer: 0,
+        explanation: `<p><strong>cₜ=0.75×4+0.5×2=3+1=4です。</strong></p><ol class="step-list"><li>残す過去の記憶：fₜ×cₜ₋₁=0.75×4=3</li><li>書き込む新しい情報：iₜ×c̃ₜ=0.5×2=1</li><li>両者を足してcₜ=4</li></ol><p>ゲート値は0〜1で、情報をどれだけ通すかを表します。全部を掛け合わせるのではなく、2経路を最後に足します。</p>`
+    },
+    {
+        id: "visual-mask-rcnn-pipeline", category: "物体検出・セグメンテーション", kind: "図表・長文", difficulty: "本試験型", beginnerReviewed: true,
+        question: `<div class="exam-stem">次の図はMask R-CNNの概略である。候補領域を作り、各候補が物体らしいかを示すobjectnessとboxのずれを出力するXはどれか。</div><div class="exam-figure"><span class="figure-title">Mask R-CNNの処理経路</span><div class="diagram-row"><div class="diagram-node primary">画像</div><div class="diagram-arrow">→</div><div class="diagram-node">Backbone + FPN</div><div class="diagram-arrow">→</div><div class="diagram-node warn">X</div><div class="diagram-arrow">→</div><div class="diagram-node">候補領域</div><div class="diagram-arrow">→</div><div class="diagram-node">RoI Align</div><div class="diagram-arrow">→</div><div class="diagram-node accent">分類・Box・Mask</div></div></div>`,
+        options: ["RPN（Region Proposal Network）", "Global Average Pooling", "DecoderのCross-Attention", "Discriminator"], answer: 0,
+        explanation: `<p><strong>XはRPNです。</strong></p><p>RPNは特徴マップ上で、物体がありそうかというobjectnessと、基準枠からのbox offsetを予測して候補領域を作ります。その候補をRoI Alignで同じ大きさの特徴にそろえ、後段の分類・box回帰・mask予測へ渡します。</p><p><strong>識別：</strong>候補領域を作る=RPN、候補特徴を位置ずれ少なく切り出す=RoI Alignです。</p>`
+    },
+];
+
+window.quizData.questions.push(...bootcampVisualQuestions);

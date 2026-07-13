@@ -49,6 +49,25 @@
         .question-meta span { padding:5px 8px; border:1px solid var(--line); border-radius:999px; }
         .question-meta .category-tag { color:var(--blue); background:#edf5ff; border-color:#cfe1fb; }
         .question-text { font-size:clamp(1.05rem,2.5vw,1.25rem); line-height:1.7; font-weight:750; margin-bottom:22px; }
+        .exam-stem { font-weight:500; }
+        .exam-figure { margin:16px 0; padding:16px; overflow-x:auto; border:1px solid #cfdae7; border-radius:14px; background:#f7fafc; color:#17324d; }
+        .exam-figure .figure-title { display:block; margin-bottom:12px; color:#315d85; font-size:.78rem; font-weight:900; letter-spacing:.08em; }
+        .diagram-row { display:flex; align-items:center; justify-content:center; gap:9px; min-width:620px; }
+        .diagram-column { display:grid; gap:9px; justify-items:center; }
+        .diagram-node { min-width:105px; padding:10px 12px; border:2px solid #7da4c7; border-radius:11px; background:#fff; text-align:center; font-size:.88rem; font-weight:850; box-shadow:0 4px 10px #1d365314; }
+        .diagram-node.primary { border-color:#1769df; background:#eaf3ff; }
+        .diagram-node.accent { border-color:#14a393; background:#e9faf7; }
+        .diagram-node.warn { border-color:#e2a02b; background:#fff8e8; }
+        .diagram-arrow { color:#397399; font-size:1.45rem; font-weight:900; white-space:nowrap; }
+        .diagram-label { color:#5b6f82; font-size:.75rem; font-weight:800; text-align:center; }
+        .figure-table { width:100%; min-width:520px; border-collapse:collapse; font-size:.86rem; }
+        .figure-table th,.figure-table td { border:1px solid #b9cad9; padding:8px; text-align:center; }
+        .figure-table th { background:#dfeeff; }
+        .figure-table .hot { background:#ffe2b8; font-weight:900; }
+        .figure-table .masked { color:#8d99a5; background:#edf0f3; }
+        .code-figure { margin:0; min-width:620px; white-space:pre; font:600 .82rem/1.6 ui-monospace,SFMono-Regular,Menlo,monospace; color:#dcecff; background:#102c45; border-radius:10px; padding:14px; }
+        .figure-caption { margin:10px 0 0; color:#65798b; font-size:.78rem; font-weight:650; }
+        .curve-svg { display:block; width:100%; min-width:520px; height:auto; }
         .options-container { display:grid; gap:10px; }
         .option-btn { width:100%; display:flex; gap:12px; align-items:flex-start; text-align:left; color:var(--ink); border:1px solid var(--line); background:#fff; border-radius:13px; padding:14px; font:inherit; line-height:1.55; cursor:pointer; }
         .option-btn:hover:not(:disabled) { border-color:var(--blue); background:#f6f9ff; }
@@ -78,7 +97,7 @@
         .error-message { color:var(--bad); font-weight:800; }
         [hidden] { display:none !important; }
         @keyframes fade { from { opacity:0; transform:translateY(4px); } }
-        @media(max-width:680px) { .mode-grid{grid-template-columns:1fr}.shell{width:min(100% - 20px,920px)}header{align-items:flex-start}.question-card{padding:20px}.cheat-sheet{font-size:.92rem} }
+        @media(max-width:680px) { .mode-grid{grid-template-columns:1fr}.shell{width:min(100% - 20px,920px)}header{align-items:flex-start}.question-card{padding:20px}.cheat-sheet{font-size:.92rem}.exam-figure{padding:11px} }
     </style>
 </head>
 <body>
@@ -88,6 +107,6 @@
     <section id="cheatsheet-area" class="content-area active"><div id="cheatSheetContent" class="cheat-sheet"></div><button class="primary-link" onclick="switchTab('quiz')">演習を始める</button></section>
     <section id="quiz-area" class="content-area"><div id="sessionSetup"></div><div id="scoreBoard" hidden></div><div id="quizContainer" hidden></div></section>
 </main>
-<script src="js/app.js?v=20260713-beginner"></script>
+<script src="js/app.js?v=20260713-visual"></script>
 </body>
 </html>

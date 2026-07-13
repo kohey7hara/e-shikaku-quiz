@@ -51,7 +51,7 @@ function saveAnswer(q, isCorrect) {
 
 if (quizId) {
     const script = document.createElement('script');
-    script.src = `js/data/${quizId}.js?v=20260713-beginner`;
+    script.src = `js/data/${quizId}.js?v=20260713-visual`;
     script.onload = () => window.quizData ? (currentQuizData = window.quizData, initApp()) : showError('問題データの形式が正しくありません。');
     script.onerror = () => showError('指定された問題データが見つかりません。');
     document.body.appendChild(script);
@@ -77,6 +77,7 @@ function renderSetup() {
     const questions = currentQuizData.questions;
     const attempted = questions.filter(q => progress[questionKey(q)]?.attempts).length;
     const weak = questions.filter(q => progress[questionKey(q)]?.lastCorrect === false).length;
+    const visual = questions.filter(q => q.kind === '図表・長文').length;
     document.getElementById('sessionSetup').innerHTML = `
         <div class="setup-card">
             <p class="eyebrow">SESSION SELECT</p>
@@ -89,6 +90,7 @@ function renderSetup() {
             <div class="mode-grid">
                 <button onclick="startQuiz('sprint')"><strong>10問スプリント</strong><small>約12分・毎日の仕上げ</small></button>
                 <button onclick="startQuiz('full')"><strong>全問チャレンジ</strong><small>問題順・選択肢をシャッフル</small></button>
+                ${visual ? `<button onclick="startQuiz('visual')"><strong>図表・長文演習</strong><small>${visual}問・本試験型を集中演習</small></button>` : ''}
                 <button onclick="startQuiz('weak')" ${weak ? '' : 'disabled'}><strong>誤答だけ復習</strong><small>${weak ? `${weak}問を再演習` : '誤答すると利用できます'}</small></button>
             </div>
             <p class="pace-note">本試験ペースの目安：1問72秒。迷ったら消去法で仮決めし、時間を使いすぎない。</p>
@@ -107,6 +109,7 @@ window.startQuiz = function(mode) {
     const progress = loadProgress();
     let pool = [...currentQuizData.questions];
     if (mode === 'weak') pool = pool.filter(q => progress[questionKey(q)]?.lastCorrect === false);
+    if (mode === 'visual') pool = pool.filter(q => q.kind === '図表・長文');
     pool = shuffle(pool);
     if (mode === 'sprint') pool = pool.slice(0, Math.min(10, pool.length));
     if (!pool.length) return;
