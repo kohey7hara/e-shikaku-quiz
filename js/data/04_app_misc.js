@@ -336,6 +336,46 @@ window.quizData = {
             options: ["Grad-CAMは畳み込み特徴マップ由来の粗い位置、IGは入力特徴ごとの寄与を示す", "IGは勾配を使わない", "Grad-CAMはモデル非依存", "両者は完全に同じ"],
             answer: 0,
             explanation: "どちらも勾配を使いますが、Grad-CAMは主にCNNの空間ヒートマップ、IGはbaselineからの経路積分による入力特徴の寄与です。"
+        },
+        {
+            id: "misc-active-least-confident",
+            category: "能動学習（計算）",
+            question: "3つの未ラベル標本に対する最大クラス確率が0.92、0.61、0.54だった。Least Confident法で最初に人へラベル付けを依頼する標本はどれか。",
+            options: ["最大確率0.54の標本", "最大確率0.61の標本", "最大確率0.92の標本", "無作為なので決められない"],
+            answer: 0,
+            explanation: "Least Confidentは $1-\\max_y p(y|x)$ が最大、つまりモデルの最大確信度が最小の標本を選びます。不確実度は順に0.08、0.39、0.46なので0.54の標本です。"
+        },
+        {
+            id: "misc-active-margin",
+            category: "能動学習（計算）",
+            question: "Margin Samplingで、上位2クラスの確率がA=(0.51, 0.49)、B=(0.70, 0.20)なら優先して選ぶのはどれか。",
+            options: ["A（差0.02）", "B（差0.50）", "確率和が同じなので同順位", "クラス数が不明なので計算不能"],
+            answer: 0,
+            explanation: "上位2確率の差が小さいほど判定境界付近で迷っています。Aのmarginは0.02、Bは0.50なのでAを問い合わせます。"
+        },
+        {
+            id: "misc-self-co-training",
+            category: "半教師あり学習",
+            question: "Self-trainingとCo-trainingの違いとして最も適切なものはどれか。",
+            options: ["Self-trainingは自分の高確信予測を疑似ラベルにし、Co-trainingは異なる特徴ビューの学習器が互いにラベルを補う", "両者とも必ずGANを使う", "Co-trainingは教師なしクラスタリングと同義", "Self-trainingは人手ラベルを使えない"],
+            answer: 0,
+            explanation: "Self-trainingは単一モデルの予測を再利用します。Co-trainingは条件付きで独立性の高い複数ビューを使い、学習器間で情報を補完します。"
+        },
+        {
+            id: "misc-contrastive-loss-calc",
+            category: "距離学習（計算）",
+            question: "Contrastive Lossを $L=yD^2+(1-y)\\max(0,m-D)^2$ とする。異なるクラスなのでy=0、距離D=0.4、margin m=1のときLはいくつか。",
+            options: ["0.36", "0.16", "0.60", "1.00"],
+            answer: 0,
+            explanation: "$y=0$ なので第1項は0、第2項は $(1-0.4)^2=0.6^2=0.36$ です。異なるクラスがmarginより近い場合に罰します。"
+        },
+        {
+            id: "misc-triplet-loss-calc",
+            category: "距離学習（計算）",
+            question: "Triplet Lossを $\\max(0,d(a,p)-d(a,n)+m)$ とする。正例距離0.6、負例距離0.9、margin 0.5のとき損失はいくつか。",
+            options: ["0.2", "0", "0.8", "1.0"],
+            answer: 0,
+            explanation: "$\\max(0,0.6-0.9+0.5)=\\max(0,0.2)=0.2$ です。負例を正例よりmargin分以上遠ざけるまで損失が残ります。"
         }
     ]
 };

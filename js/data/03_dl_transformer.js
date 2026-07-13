@@ -270,6 +270,11 @@ window.quizData = {
             options: ["Label Smoothing", "Dropout", "Batch Norm", "Weight Decay"],
             answer: 0,
             explanation: "「絶対にこれだ！」と確信しすぎるのを防ぎ、汎化性能を向上させるテクニックです。"
-        }
+        },
+        {id:"tr-attention-score-calc",category:"Attention(計算)",question:"$QK^T=[2,0]$、$d_k=4$のときSoftmaxへ入るスコアはどれか。",options:["$[1,0]$","$[2,0]$","$[0.5,0]$","$[4,0]$"],answer:0,explanation:"$√{d_k}=2$で割るため$[2,0]/2=[1,0]$です。"},
+        {id:"tr-softmax-two-calc",category:"Attention(計算)",question:"Softmax入力が$[0,0]$ならAttention重みはどれか。",options:["$[0.5,0.5]$","$[0,0]$","$[1,1]$","$[0,1]$"],answer:0,explanation:"指数値が等しいため重みを等分します。"},
+        {id:"tr-weighted-value",category:"Attention出力(計算)",question:"Attention重みが$[0.25,0.75]$、Valueがスカラー$[2,6]$なら出力はいくつか。",options:["5","4","8","3"],answer:0,explanation:"重み付き和$0.25×2+0.75×6=0.5+4.5=5$です。"},
+        {id:"tr-mha-dim",category:"Multi-Head(形状)",question:"$d_{model}=768$、head数12で等分すると各headの$d_k$はいくつか。",options:["64","12","768","9216"],answer:0,explanation:"$768/12=64$です。各head連結後は通常768次元へ戻ります。"},
+        {id:"tr-qkv-route-detail",category:"Cross-Attention(配線)",question:"Encoder-Decoder TransformerのCross-Attentionで正しい配線はどれか。",options:["QはDecoder、K/VはEncoder最終出力","Q/K/VすべてEncoder","Q/K/VすべてDecoder","Q/VはEncoder、KはDecoder"],answer:0,explanation:"Decoderが入力文表現を検索するため、Decoder表現をQuery、Encoder出力をKey/Valueにします。"}
     ]
 };

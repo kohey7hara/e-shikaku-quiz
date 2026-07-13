@@ -313,6 +313,14 @@ window.quizData = {
             options: ["画像とテキストのペアデータを使い、それぞれの特徴ベクトルが似た意味なら近くなるように対照学習したモデル", "画像からテキストを生成するモデル", "テキストから画像を生成するモデル", "画像の分類モデル"],
             answer: 0,
             explanation: "「テキスト」と「画像」を同じベクトル空間に埋め込むことができるため、拡散モデルの条件付け（テキストプロンプトの理解）に利用されます。"
-        }
+        },
+        {id:"gen-dae",category:"Denoising Autoencoder",question:"Denoising Autoencoderの学習方法はどれか。",options:["汚した入力から元のクリーン入力を復元する","入力をそのまま分類するだけ","識別器と敵対させる","報酬を最大化する"],answer:0,explanation:"ノイズに頑健で意味のある表現を学ぶよう、入力へノイズを加え、教師は元データにします。"},
+        {id:"gen-ae-bottleneck",category:"Autoencoder",question:"Undercomplete AutoencoderのBottleneckの目的はどれか。",options:["入力より低次元へ圧縮し、重要特徴を抽出させる","出力次元を無限にする","分類ラベルを追加する","勾配を止める"],answer:0,explanation:"単純な恒等写像を避け、再構成に必要な情報を圧縮表現へ持たせます。"},
+        {id:"gen-vae-reparam-calc",category:"VAE Reparameterization(計算)",question:"$z=\\mu+\\sigma\\epsilon$で$\\mu=2,\\sigma=0.5,\\epsilon=-1$ならzはいくつか。",options:["1.5","2.5","1","-1.5"],answer:0,explanation:"$2+0.5×(-1)=1.5$です。乱数を外部化してμ,σへ勾配を流します。"},
+        {id:"gen-elbo-sign",category:"VAE ELBO",question:"VAEのELBOとして正しい形はどれか。",options:["再構成対数尤度 − $D_{KL}(q(z|x)||p(z))$","再構成誤差 + Accuracy","GAN損失のみ","TD誤差 − 報酬"],answer:0,explanation:"再構成を良くしつつ、近似事後を事前分布へ近づけます。ELBO最大化は負のELBO最小化と対応します。"},
+        {id:"gen-flow",category:"フローベース生成モデル",question:"フローベース生成モデルの主要な特徴はどれか。",options:["可逆変換と変数変換公式により厳密尤度を計算できる","識別器が必須","潜在変数を使えない","逆変換できない"],answer:0,explanation:"可逆な写像でデータと単純分布を結び、ヤコビアン行列式で密度を変換します。"},
+        {id:"gen-flow-tradeoff",category:"フローベース(制約)",question:"フローベースモデルの設計上の代表的制約はどれか。",options:["変換を可逆かつヤコビアン計算可能にする必要がある","損失が微分不能","潜在次元を必ず1にする","画像を扱えない"],answer:0,explanation:"厳密尤度と逆生成のため、ネットワーク構造へ可逆性の制約がかかります。"},
+        {id:"gen-wgan",category:"Wasserstein GAN",question:"WGANがJSダイバージェンスの代わりに利用する考え方はどれか。",options:["Wasserstein距離（Earth Mover距離）","IoU","コサイン距離だけ","Accuracy"],answer:0,explanation:"分布の支持が重ならない場合にも意味のある滑らかな学習信号を得る狙いがあります。CriticへLipschitz制約が必要です。"},
+        {id:"gen-diffusion-forward",category:"拡散モデル(数式理解)",question:"DDPMのforward processで時刻tが進むにつれて一般に起きることはどれか。",options:["データへ段階的にガウスノイズが加わり、単純なノイズ分布へ近づく","ノイズが必ず一度で消える","識別器が生成器を分類する","潜在変数が離散化される"],answer:0,explanation:"逆過程ではノイズ除去を学習し、生成時は純粋ノイズから反復的にデータへ戻します。"}
     ]
 };

@@ -279,6 +279,14 @@ window.quizData = {
             options: ["モンテカルロ木探索 (MCTS) と Deep Learning (Value/Policy Net) の融合", "DQNのみ", "A3Cのみ", "遺伝的アルゴリズム"],
             answer: 0,
             explanation: "盤面の評価（Value Net）と次の手の確率（Policy Net）を深層学習で行い、それをガイドにしてMCTSで先読みを行いました。"
-        }
+        },
+        {id:"rl-return-calc",category:"割引収益(計算)",question:"報酬列$r_0=1,r_1=2$、$\\gamma=0.5$で2時刻だけ考えると$G_0$はいくつか。",options:["2","3","1.5","2.5"],answer:0,explanation:"$G_0=1+0.5×2=2$です。"},
+        {id:"rl-q-update",category:"Q学習(計算)",question:"$Q=2,r=1,\\gamma=0.9,\\max Q(s',a')=4,\\alpha=0.5$のQ学習更新後はどれか。",options:["3.3","4.6","2.6","5"],answer:0,explanation:"TD target=$1+0.9×4=4.6$、$Q←2+0.5(4.6-2)=3.3$です。"},
+        {id:"rl-td-error",category:"TD誤差(計算)",question:"現在価値$V(s)=3$、報酬1、$\\gamma=0.5$、次状態価値$V(s')=4$のTD誤差はどれか。",options:["0","3","-1","2"],answer:0,explanation:"$δ=r+γV(s')-V(s)=1+2-3=0$です。"},
+        {id:"rl-sarsa-target",category:"Sarsa(計算)",question:"$r=1,\\gamma=0.9$、実際に選んだ次行動の$Q(s',a')=3$ならSarsaのTD targetはどれか。",options:["3.7","4","2.7","1.9"],answer:0,explanation:"$1+0.9×3=3.7$です。maxではなく実際の次行動を使います。"},
+        {id:"rl-epsilon",category:"ε-greedy(計算)",question:"行動が4個、$\\epsilon=0.2$で、探索時は一様ランダムとする。greedy行動が選ばれる総確率はどれか。",options:["0.85","0.8","0.2","0.25"],answer:0,explanation:"活用0.8に、探索0.2のうち1/4で同じ行動を選ぶ0.05を足し0.85です。"},
+        {id:"rl-experience",category:"Experience Replay(内部)",question:"Experience Replayが相関を弱める仕組みはどれか。",options:["過去遷移をバッファからランダムサンプリング","直近遷移だけ順番通り使用","報酬を削除","方策を固定"],answer:0,explanation:"連続時刻データの強い相関を崩し、同じ経験も再利用してデータ効率を上げます。"},
+        {id:"rl-target-net",category:"Target Network(内部)",question:"DQNのTarget Networkを一定間隔で更新する主目的はどれか。",options:["TD targetが急変するmoving target問題を緩和","探索率を0にする","Replay Bufferを不要にする","行動数を減らす"],answer:0,explanation:"予測側と目標側が同時に激しく変化する不安定性を抑えます。"},
+        {id:"rl-a3c",category:"A3C(内部構造)",question:"A3CのAsynchronousが指すものはどれか。",options:["複数Actorが異なる環境を非同期に探索し、共有モデルへ更新","1環境を完全逐次処理","Replay Bufferだけを同期","行動をランダム固定"],answer:0,explanation:"並列Actorの多様な経験で相関を弱め、方策と価値をActor-Criticとして学習します。"}
     ]
 };

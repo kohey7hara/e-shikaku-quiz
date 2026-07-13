@@ -392,6 +392,38 @@ window.quizData = {
             options: ["共通の特徴表現（バックボーン）を学習することで、特定のタスクへの過学習を防ぎ、汎用的な特徴を獲得できる", "計算量が減る", "タスクごとにモデルを作るより簡単だから", "パラメータ数が増えるから"],
             answer: 0,
             explanation: "関連するタスクを同時に解くことは、暗黙的なデータ拡張や正則化の効果があり、メインタスクの精度向上にも寄与することが多いです。"
+        },
+        {
+            id: "gen-mixup-calc",
+            category: "MixUp（計算）",
+            question: "MixUpで $\\lambda=0.7$、ラベルA=[1,0]、B=[0,1]を混ぜた教師ラベルはどれか。",
+            options: ["[0.7, 0.3]", "[1, 1]", "[0.3, 0.7]", "[0.5, 0.5]"],
+            answer: 0,
+            explanation: "$\\tilde y=\\lambda y_A+(1-\\lambda)y_B=0.7[1,0]+0.3[0,1]=[0.7,0.3]$ です。画像だけでなくラベルも同じ比率で混ぜます。"
+        },
+        {
+            id: "gen-randaugment",
+            category: "RandAugment",
+            question: "RandAugmentで主に探索・指定する2つの量はどれか。",
+            options: ["適用する変換数Nと変換強度M", "層数と隠れ次元", "学習率とモメンタムだけ", "正例数と負例数"],
+            answer: 0,
+            explanation: "候補変換群からN個を選び、共通の強度Mで適用します。複雑な方策探索を簡略化したデータ拡張です。"
+        },
+        {
+            id: "gen-specaugment",
+            category: "SpecAugment",
+            question: "SpecAugmentがスペクトログラムに行う代表的な処理はどれか。",
+            options: ["時間方向と周波数方向の帯をマスクする", "全周波数を同じ値にする", "文章の単語を並べ替える", "画像のRGBをBGRへ変えるだけ"],
+            answer: 0,
+            explanation: "時間マスキングと周波数マスキングで一部を隠し、欠損に頑健な音声モデルを学習します。波形へのノイズ・音量・ピッチ変更とは適用場所が異なります。"
+        },
+        {
+            id: "gen-bootstrap-bagging",
+            category: "Bootstrap・Bagging（計算）",
+            question: "5件のデータから復元抽出で5件選ぶbootstrap標本で、特定の1件が一度も選ばれない確率はどれか。",
+            options: ["$(4/5)^5$", "$1/5$", "$(1/5)^5$", "$4/5$"],
+            answer: 0,
+            explanation: "1回の抽出で選ばれない確率は4/5。独立に5回すべて選ばれないので $(4/5)^5$ です。Random Forestはこの標本化と特徴量のランダム化を使います。"
         }
     ]
 };

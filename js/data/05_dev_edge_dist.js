@@ -281,6 +281,38 @@ window.quizData = {
             options: ["正解ラベル（Hard target）との誤差", "教師モデルの重みとの誤差", "入力データとの再構成誤差", "ランダムなノイズとの誤差"],
             answer: 0,
             explanation: "「教師の真似（暗黙知の継承）」と「正解ラベルでの学習（本来のタスク）」の両方をバランスよく（重み付けして）行います。"
+        },
+        {
+            id: "dist-fedavg-calc",
+            category: "FedAvg（計算）",
+            question: "端末Aが100件で重み2.0、端末Bが300件で重み4.0を学習した。データ件数で加重平均するFedAvg後の重みはいくつか。",
+            options: ["3.5", "3.0", "2.5", "6.0"],
+            answer: 0,
+            explanation: "$(100\\times2+300\\times4)/(100+300)=1400/400=3.5$ です。単純平均3.0ではなく、通常は各クライアントの標本数で重み付けします。"
+        },
+        {
+            id: "dist-cross-device-silo",
+            category: "連合学習（識別）",
+            question: "Cross-device型とCross-silo型の典型的な違いはどれか。",
+            options: ["Cross-deviceは多数の不安定な端末、Cross-siloは少数の組織・サーバ間を想定する", "Cross-siloだけがモデルを学習する", "Cross-deviceは必ず全データを中央送信する", "両者に違いはない"],
+            answer: 0,
+            explanation: "スマートフォン等を束ねるCross-deviceは参加・離脱や通信制約が大きく、病院・企業間のCross-siloは参加者が比較的少数で安定しています。"
+        },
+        {
+            id: "dist-data-model-parallel",
+            category: "並列化（識別）",
+            question: "データ並列とモデル並列の通信内容として典型的に正しいものはどれか。",
+            options: ["データ並列は勾配を集約し、モデル並列は層・テンソル境界の活性値などを受け渡す", "どちらも通信しない", "データ並列はモデルを層ごとに分割する", "モデル並列は各GPUへ必ず全モデルを複製する"],
+            answer: 0,
+            explanation: "データ並列は同じモデルを複製して異なるミニバッチを処理し、勾配を同期します。モデル並列はモデル自体を分割するため分割境界の通信が必要です。"
+        },
+        {
+            id: "dist-ring-allreduce",
+            category: "All-Reduce（計算）",
+            question: "4台のGPUの勾配がそれぞれ1、3、5、7で、平均勾配をAll-Reduceする場合、各GPUが得る値はいくつか。",
+            options: ["4", "16", "7", "2.5"],
+            answer: 0,
+            explanation: "合計は16、平均は $16/4=4$ です。All-Reduceは集約結果を全参加者へ配布し、データ並列のモデルを同期させます。"
         }
     ]
 };

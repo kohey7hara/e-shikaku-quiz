@@ -380,6 +380,14 @@ window.quizData = {
             options: ["多くのパラメータが完全に「0」になり、モデルがスパース（疎）になる", "全てのパラメータが均等に小さくなる", "パラメータが大きくなる", "パラメータが正規分布に従う"],
             answer: 0,
             explanation: "L1ノルムの等高線はひし形（尖っている）ため、軸上（値が0）で解が決まりやすく、不要な特徴量を削除（特徴量選択）する効果があります。"
-        }
+        },
+        {id:"opt-sgd-step-calc",category:"SGD(計算)",question:"重み$w=2$、勾配$g=3$、学習率$\\eta=0.1$のSGD更新後のwはどれか。",options:["1.7","2.3","1.9","-1"],answer:0,explanation:"$w←w-ηg=2-0.1×3=1.7$です。勾配と逆向きへ進みます。"},
+        {id:"opt-momentum-calc",category:"Momentum(計算)",question:"$v_t=0.9v_{t-1}+g_t$、$v_{t-1}=2,g_t=1$なら$v_t$はいくつか。",options:["2.8","1.9","3","1.8"],answer:0,explanation:"$0.9×2+1=2.8$です。過去の方向を慣性として残します。"},
+        {id:"opt-adagrad-calc",category:"AdaGrad(計算)",question:"AdaGradで過去の勾配二乗和が$G=9$、現在勾配$g=3$、学習率1、$\\epsilon$無視の更新量の大きさはどれか。",options:["1","3","1/3","9"],answer:0,explanation:"更新量は$ηg/√G=3/3=1$です。二乗和が増えるほど実効学習率が下がります。"},
+        {id:"opt-rmsprop-calc",category:"RMSProp(計算)",question:"RMSPropの二乗勾配移動平均$v_t=0.9v_{t-1}+0.1g_t^2$で、$v_{t-1}=4,g_t=2$なら$v_t$はどれか。",options:["4","3.6","4.4","2"],answer:0,explanation:"$0.9×4+0.1×4=4$です。過去全てを単純累積せず指数移動平均を使います。"},
+        {id:"opt-adam-first",category:"Adam(計算)",question:"Adamの一次モーメント$m_t=0.9m_{t-1}+0.1g_t$で、$m_{t-1}=0,g_t=5$なら$m_t$はどれか。",options:["0.5","5","4.5","0.1"],answer:0,explanation:"$0.9×0+0.1×5=0.5$です。実際は初期バイアス補正も行います。"},
+        {id:"opt-chain-rule-calc",category:"連鎖律(計算)",question:"$y=x^2,z=3y$のとき$x=2$での$dz/dx$はいくつか。",options:["12","6","4","3"],answer:0,explanation:"$dz/dx=(dz/dy)(dy/dx)=3×2x=3×4=12$です。"},
+        {id:"opt-xavier-var",category:"Xavier初期化(計算)",question:"単純化したXavier初期化で分散を$1/n_{in}$とすると、$n_{in}=100$での分散はどれか。",options:["0.01","0.1","1","100"],answer:0,explanation:"$1/100=0.01$です。tanh等で信号分散を保つ狙いがあります。"},
+        {id:"opt-he-var",category:"He初期化(計算)",question:"He初期化で分散を$2/n_{in}$とすると、$n_{in}=100$での分散はどれか。",options:["0.02","0.01","0.2","2"],answer:0,explanation:"$2/100=0.02$です。ReLUで負側が消える影響を補います。"}
     ]
 };

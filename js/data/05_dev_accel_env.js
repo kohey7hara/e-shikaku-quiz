@@ -281,6 +281,38 @@ window.quizData = {
             options: ["イメージ (Image)", "コンテナ (Container)", "ボリューム (Volume)", "ネットワーク (Network)"],
             answer: 0,
             explanation: "「イメージ」は金型（クラス）で、そこから実体化したものが「コンテナ（インスタンス）」です。"
+        },
+        {
+            id: "env-host-hypervisor-container",
+            category: "仮想化（識別）",
+            question: "ホスト型・ハイパーバイザ型・コンテナ型の違いとして正しいものはどれか。",
+            options: ["コンテナはホストOSのカーネルを共有し、一般に各VMがゲストOSを持つ方式より軽量", "コンテナは必ずゲストOSを丸ごと含む", "ハイパーバイザ型はホストOS上の通常アプリとしてしか動けない", "3方式は内部構造が同一"],
+            answer: 0,
+            explanation: "ホスト型VMはホストOS上、ハイパーバイザ型はハードウェア上の仮想化層、コンテナはOSカーネル共有です。図ではゲストOS層の有無を見ます。"
+        },
+        {
+            id: "env-simd-simt-mimd",
+            category: "並列計算（識別）",
+            question: "SIMD・SIMT・MIMDの説明として最も適切なものはどれか。",
+            options: ["SIMDは1命令で複数データ、SIMTは多数スレッドが同一命令列、MIMDは複数命令で複数データ", "SIMTは逐次実行だけを表す", "MIMDは1つのデータしか扱えない", "すべて同義"],
+            answer: 0,
+            explanation: "CPUベクトル命令はSIMD、GPUのwarp実行はSIMTとして説明されます。分岐でwarp内スレッドの経路が分かれると効率が落ちます。"
+        },
+        {
+            id: "env-quant-memory-calc",
+            category: "量子化（計算）",
+            question: "1億個の重みをFP32からINT8へ量子化したとき、重み格納量は概算で400MBから何MBになるか。",
+            options: ["100MB", "200MB", "50MB", "800MB"],
+            answer: 0,
+            explanation: "32bitから8bitなので1要素あたりの容量は1/4です。$400/4=100$ MB。実際にはscaleやzero-point等の追加情報もあります。"
+        },
+        {
+            id: "env-dockerfile-copy-run-cmd",
+            category: "Dockerfile（内部仕様）",
+            question: "DockerfileのRUNとCMDの違いとして正しいものはどれか。",
+            options: ["RUNはイメージ構築時に実行され、CMDはコンテナ起動時の既定コマンドを指定する", "CMDは構築時だけ実行される", "RUNはファイルをホストへコピーする命令", "両方とも必ず同時に実行される"],
+            answer: 0,
+            explanation: "RUNの結果はイメージ層へ保存されます。CMDは起動時の既定値で、実行コマンドを指定すると上書きできます。試験では実行タイミングが狙われます。"
         }
     ]
 };

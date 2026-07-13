@@ -329,6 +329,38 @@ window.quizData = {
             options: ["活性化関数をSigmoidからReLUに変更する", "Batch Normalizationを導入する", "層の数を減らす（浅くする）", "重みの初期値を全て0にする"],
             answer: 3,
             explanation: "重みを全て0にすると、全てのニューロンが同じ計算をしてしまい（対称性の破れがない）、学習が正しく進みません。これは勾配消失以前の問題です。"
+        },
+        {
+            id: "ff-bce-calc",
+            category: "二値交差エントロピー（計算）",
+            question: "正解y=1、予測確率p=0.8の二値交差エントロピー $-[y\\ln p+(1-y)\\ln(1-p)]$ はどれか。",
+            options: ["$-\\ln 0.8$", "$-\\ln 0.2$", "$0.8^2$", "$\\ln 1$"],
+            answer: 0,
+            explanation: "$y=1$ では第2項が消え、$-\\ln p=-\\ln0.8\\approx0.223$ です。自信を持って正解すると損失は小さくなります。"
+        },
+        {
+            id: "ff-ce-softmax-calc",
+            category: "Softmax・交差エントロピー（計算）",
+            question: "3クラスの予測確率が[0.1, 0.7, 0.2]で正解が第2クラスなら、交差エントロピーはどれか。",
+            options: ["$-\\ln0.7$", "$-\\ln0.1$", "$-\\ln0.2$", "$-(\\ln0.1+\\ln0.7+\\ln0.2)$"],
+            answer: 0,
+            explanation: "one-hot教師では正解クラスの項だけ残るため $-\\ln0.7\\approx0.357$ です。全クラスの対数を無条件に足しません。"
+        },
+        {
+            id: "ff-temperature-softmax",
+            category: "温度付きSoftmax",
+            question: "温度付きSoftmax $softmax(z/T)$ でTを大きくしたときの分布はどうなるか。",
+            options: ["より平坦になり、クラス間の相対情報が見えやすくなる", "必ずone-hotになる", "確率和が0になる", "最大クラスが入れ替わるとは限らず、常に逆順になる"],
+            answer: 0,
+            explanation: "Tが大きいとロジット差を縮めるため分布はsoftになります。蒸留では教師の非正解クラス間の関係も生徒へ伝えやすくします。"
+        },
+        {
+            id: "ff-multilabel-output",
+            category: "多クラス・マルチラベル（識別）",
+            question: "1枚の画像に「犬」と「屋外」が同時に成立するマルチラベル分類の典型的な出力・損失はどれか。",
+            options: ["各クラス独立Sigmoid＋BCE", "全クラス一括Softmax＋必ず1クラス", "恒等関数＋MSEだけ", "Argmaxを学習中に微分する"],
+            answer: 0,
+            explanation: "複数ラベルが同時に1になれるため、各出力を独立なBernoulli確率として扱います。排他的な多クラス分類はSoftmax＋CEが典型です。"
         }
     ]
 };
