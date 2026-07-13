@@ -82,6 +82,35 @@ window.quizData = {
             </tr>
         </table>
 
+        <h3>■ 4. Shifted Window：窓をずらして隣と会話する</h3>
+        <style>
+            .swin-pair { display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin:15px 0; }
+            .swin-panel { text-align:center; min-width:230px; }
+            .swin-grid { display:grid; grid-template-columns:repeat(4,42px); grid-template-rows:repeat(4,42px); gap:2px; justify-content:center; margin-top:8px; }
+            .swin-cell { display:grid; place-items:center; border:1px solid #9aa; font-size:.75em; }
+            .win-a { background:#d9efff; } .win-b { background:#ffe7bd; } .win-c { background:#dcf6df; } .win-d { background:#f2dcff; }
+            .shifted { outline:3px dashed #e74c3c; outline-offset:-6px; }
+            .swin-step { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; }
+            .swin-step span { padding:8px 10px; border-radius:8px; background:#eef4fa; font-weight:bold; }
+        </style>
+        <p>Swin Transformerは画像全体でAttentionをせず、小さな窓の中だけを見ることで計算を軽くします。ただし窓を固定すると、窓Aと窓Bの情報が混ざりません。</p>
+        <div class="swin-pair">
+            <div class="swin-panel"><strong>① Window Attention</strong><small><br>同じ色の窓の中で会話</small><div class="swin-grid">
+                <span class="swin-cell win-a">A</span><span class="swin-cell win-a">A</span><span class="swin-cell win-b">B</span><span class="swin-cell win-b">B</span>
+                <span class="swin-cell win-a">A</span><span class="swin-cell win-a">A</span><span class="swin-cell win-b">B</span><span class="swin-cell win-b">B</span>
+                <span class="swin-cell win-c">C</span><span class="swin-cell win-c">C</span><span class="swin-cell win-d">D</span><span class="swin-cell win-d">D</span>
+                <span class="swin-cell win-c">C</span><span class="swin-cell win-c">C</span><span class="swin-cell win-d">D</span><span class="swin-cell win-d">D</span>
+            </div></div>
+            <div class="swin-panel"><strong>② Shifted Window</strong><small><br>次の層で窓をずらす</small><div class="swin-grid shifted">
+                <span class="swin-cell win-d">D</span><span class="swin-cell win-c">C</span><span class="swin-cell win-c">C</span><span class="swin-cell win-d">D</span>
+                <span class="swin-cell win-b">B</span><span class="swin-cell win-a">A</span><span class="swin-cell win-a">A</span><span class="swin-cell win-b">B</span>
+                <span class="swin-cell win-b">B</span><span class="swin-cell win-a">A</span><span class="swin-cell win-a">A</span><span class="swin-cell win-b">B</span>
+                <span class="swin-cell win-d">D</span><span class="swin-cell win-c">C</span><span class="swin-cell win-c">C</span><span class="swin-cell win-d">D</span>
+            </div></div>
+        </div>
+        <div class="swin-step"><span>局所Attentionで軽量</span>→<span>窓をシフト</span>→<span>窓をまたぐ情報交換</span></div>
+        <p><strong>覚え方：</strong>「教室内で話す → 席替えする → 隣の教室の人とも情報がつながる」。未来を隠すMasked Attentionとは目的が違います。</p>
+
         <h3>■ 2. 物体検出 (2段階 vs 1段階)</h3>
         <p>「精度重視」か「速度重視」かでアーキテクチャが分かれます。</p>
         <table class="model-table">
@@ -277,6 +306,30 @@ window.quizData = {
             options: ["深さ（層数）、幅（チャンネル数）、解像度の3要素を、バランス良く同時にスケールアップする", "とにかく層を深くする", "画像解像度だけを上げる", "ネットワーク探索（NAS）だけで構造を決める"],
             answer: 0,
             explanation: "どれか1つだけを強化しても効率が悪いことを示し、最適なバランス係数 $\phi$ を用いてモデルを拡大する手法を提案しました。"
+        },
+        {
+            id: "image-shifted-window-purpose",
+            category: "Shifted Window",
+            question: "Swin Transformerで、連続する層のWindow位置をずらす主な目的はどれか。",
+            options: ["固定Windowの境界を越えてパッチ間の情報を交換する", "未来のパッチを隠す", "画像をランダム回転する", "クラス数を減らす"],
+            answer: 0,
+            explanation: "局所Windowだけでは窓同士が分断されます。次の層で窓をずらすと、前の層では別窓だったパッチが同じ窓に入り、情報がつながります。"
+        },
+        {
+            id: "image-window-computation",
+            category: "Shifted Window(計算量)",
+            question: "画像全体のSelf-Attentionではなく、固定サイズの局所Window内でAttentionを行う主な利点はどれか。",
+            options: ["画像サイズ増加に対する計算量を抑えやすい", "必ずパラメータ数が0になる", "位置情報が不要になる", "畳み込みと完全に同じ計算になる"],
+            answer: 0,
+            explanation: "全パッチ対のAttentionはパッチ数の二乗に比例します。窓サイズを固定すれば各パッチが見る相手を限定でき、高解像度画像を扱いやすくなります。"
+        },
+        {
+            id: "image-shifted-window-trap",
+            category: "Shifted Window(識別)",
+            question: "Shifted WindowとDecoderのCausal Maskの違いとして正しいものはどれか。",
+            options: ["Shifted Windowは局所窓間の接続、Causal Maskは未来情報の参照禁止が目的", "どちらも未来情報の参照禁止が目的", "どちらもデータ拡張である", "Shifted Windowは出力確率を正規化する"],
+            answer: 0,
+            explanation: "名前にWindowやMaskが出ても役割は別です。Shifted Windowは画像Attentionの効率と窓間接続、Causal Maskは自己回帰生成のカンニング防止です。"
         }
     ]
 };

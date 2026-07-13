@@ -123,6 +123,36 @@ window.quizData = {
                 </ul>
             </li>
         </ul>
+
+        <h3>■ Next Token Predictionと自己回帰</h3>
+        <style>
+            .token-line { display:flex; align-items:center; gap:6px; justify-content:center; flex-wrap:wrap; margin:12px 0; }
+            .token-chip { border:2px solid #3498db; background:#eef7ff; padding:8px 11px; border-radius:8px; font-weight:bold; }
+            .token-next { border-color:#e74c3c; background:#fff0f0; }
+            .rag-flow { display:flex; align-items:stretch; justify-content:center; gap:7px; flex-wrap:wrap; margin:14px 0; }
+            .rag-node { border:2px solid #27ae60; background:#effaf3; padding:10px; border-radius:10px; text-align:center; width:150px; }
+            .rag-node strong { display:block; color:#187748; }
+            .rag-arrow { align-self:center; font-weight:bold; color:#777; }
+        </style>
+        <p>GPT系は左から右へ、今までに出たトークンだけを見て次を当てます。1語生成したら、その語も入力へ足して次を予測します。</p>
+        <div class="token-line"><span class="token-chip">機械</span><span>→</span><span class="token-chip">学習</span><span>→</span><span class="token-chip">は</span><span>→</span><span class="token-chip token-next">？</span></div>
+        <div class="token-line"><small>生成後：</small><span class="token-chip">機械</span><span class="token-chip">学習</span><span class="token-chip">は</span><span class="token-chip">データ</span><span>→ 次を予測</span></div>
+        <p>数式では $P(x_{1:T})=\\prod_{t=1}^{T}P(x_t|x_{&lt;t})$。未来を見ないようCausal Maskを使うのが試験ポイントです。</p>
+
+        <h3>■ RAG：覚え直すのではなく、資料を探してから答える</h3>
+        <div class="rag-flow">
+            <div class="rag-node"><strong>① 質問</strong>ユーザー入力</div><span class="rag-arrow">→</span>
+            <div class="rag-node"><strong>② 検索</strong>外部文書から関連箇所</div><span class="rag-arrow">→</span>
+            <div class="rag-node"><strong>③ 文脈追加</strong>質問 + 取得文書</div><span class="rag-arrow">→</span>
+            <div class="rag-node"><strong>④ 生成</strong>根拠を使って回答</div>
+        </div>
+        <table class="comp-table">
+            <tr><th></th><th>RAG</th><th>Fine-tuning</th></tr>
+            <tr><td><strong>知識の入れ方</strong></td><td>推論時に外部文書を渡す</td><td>学習で重みを更新する</td></tr>
+            <tr><td><strong>更新</strong></td><td>文書DBを差し替えやすい</td><td>原則、再学習が必要</td></tr>
+            <tr><td><strong>得意</strong></td><td>最新・社内知識、根拠提示</td><td>文体・出力形式・タスク適応</td></tr>
+        </table>
+        <p><strong>試験の罠：</strong>RAGはモデルが必ず正しくなる魔法ではありません。検索失敗や、取得文書を無視する生成も起こり得ます。</p>
     `,
 
     questions: [
@@ -272,6 +302,38 @@ window.quizData = {
             options: ["`[UNK]` (Unknown)", "`[MASK]`", "`[CLS]`", "`[SEP]`"],
             answer: 0,
             explanation: "Subword分割でも対応しきれない文字などは `[UNK]` になりますが、多言語モデルなどではこれが起きないように語彙が工夫されています。"
+        },
+        {
+            id: "nlp-next-token-objective",
+            category: "Next Token Prediction",
+            question: "GPT系モデルのNext Token Predictionで最小化する代表的な損失はどれか。",
+            options: ["各位置の次トークンに対するクロスエントロピー", "画像のIoU", "Triplet Lossのみ", "再構成画像のMSEのみ"],
+            answer: 0,
+            explanation: "それ以前のトークンから正解の次トークンへ高い確率を割り当てるよう、各位置のクロスエントロピーを最小化します。"
+        },
+        {
+            id: "nlp-autoregressive-factorization",
+            category: "自己回帰(数式)",
+            question: "系列確率の自己回帰分解として正しいものはどれか。",
+            options: ["$P(x_{1:T})=\\prod_tP(x_t|x_{&lt;t})$", "$P(x_{1:T})=\\sum_tP(x_t)$", "$P(x_{1:T})=P(x_T)$", "$P(x_{1:T})=\\prod_tP(x_t|x_{&gt;t})$"],
+            answer: 0,
+            explanation: "各トークンの確率を、それより前のトークンを条件とした条件付き確率の積で表します。生成時も1トークンずつ左から右へ進みます。"
+        },
+        {
+            id: "nlp-rag-order",
+            category: "RAG",
+            question: "RAGの一般的な処理順として正しいものはどれか。",
+            options: ["質問 → 関連文書を検索 → 文書を文脈に追加 → 回答生成", "回答生成 → 文書検索 → 質問", "モデルを再学習 → 質問を削除 → 回答", "質問 → 画像分類 → 回答"],
+            answer: 0,
+            explanation: "Retrievalで関連情報を取得し、それをAugmented ContextとしてGeneratorへ渡します。検索と生成の順番を固定して覚えます。"
+        },
+        {
+            id: "nlp-rag-vs-finetune",
+            category: "RAG(識別)",
+            question: "社内規程が毎週更新され、回答に参照根拠も示したい。まず検討すべき方法はどれか。",
+            options: ["更新文書を検索対象にできるRAG", "毎回モデルをゼロから事前学習", "Dropout率だけを変更", "画像のShifted Window"],
+            answer: 0,
+            explanation: "頻繁に変わる外部知識は、重みへ埋め込むより文書DBを更新できるRAGと相性が良いです。Fine-tuningは主に振る舞いや形式の適応に向きます。"
         }
     ]
 };

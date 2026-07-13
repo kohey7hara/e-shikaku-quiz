@@ -152,6 +152,24 @@ window.quizData = {
                 <td>（貢献度）</td>
             </tr>
         </table>
+        <h3>■ 5. Integrated Gradients：0から入力まで歩いて寄与を足す</h3>
+        <style>
+            .ig-path { display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap; margin:15px 0; }
+            .ig-point { width:92px; min-height:70px; display:grid; place-items:center; text-align:center; border:2px solid #8e44ad; border-radius:10px; background:#f7effc; padding:7px; }
+            .ig-point small { display:block; color:#666; }
+            .ig-arrow { color:#8e44ad; font-weight:bold; }
+            .ig-sum { background:#eef8ff; border-left:5px solid #3498db; padding:12px; border-radius:8px; }
+        </style>
+        <p>入力地点の勾配を1回見るだけだと、モデルが飽和して勾配0でも「重要でない」と誤解します。Integrated Gradientsは基準入力から本物の入力まで少しずつ変化させ、途中の勾配を平均します。</p>
+        <div class="ig-path">
+            <div class="ig-point"><strong>基準 $x'$</strong><small>黒画像・0など</small></div><span class="ig-arrow">→</span>
+            <div class="ig-point"><strong>25%</strong><small>途中の勾配</small></div><span class="ig-arrow">→</span>
+            <div class="ig-point"><strong>50%</strong><small>途中の勾配</small></div><span class="ig-arrow">→</span>
+            <div class="ig-point"><strong>75%</strong><small>途中の勾配</small></div><span class="ig-arrow">→</span>
+            <div class="ig-point"><strong>入力 $x$</strong><small>本物の画像</small></div>
+        </div>
+        <div class="ig-sum"><strong>重要な性質：Completeness</strong><br>各特徴の寄与を全部足すと、おおむね $F(x)-F(x')$（入力と基準の出力差）になります。</div>
+        <p><strong>識別：</strong>Grad-CAMはCNNの特徴マップから粗い場所を可視化。Integrated Gradientsは微分可能なモデルで入力特徴ごとの寄与を求めます。</p>
     `,
 
     questions: [
@@ -289,18 +307,35 @@ window.quizData = {
             explanation: "例：「CG画像で学習して、実写画像でテストする」など。分布が違うと精度が落ちるため、敵対的学習などで特徴量の分布を近づけます。"
         },
         {
-            category: "CAM vs Grad-CAM(応用)",
-            question: "初期の「CAM (Class Activation Mapping)」が抱えていた制約（弱点）は何か。",
-            options: ["GAP (Global Average Pooling) 層を用いた特定のアーキテクチャでしか使えず、全結合層があるモデルなどには適用できなかった", "計算が遅すぎる", "精度が低い", "色情報を使えない"],
-            answer: 0,
-            explanation: "CAMはGAP直前の重みを使うため構造が限定されました。Grad-CAMは勾配を使うことで、GAPがなくても（どんなCNNでも）使えるように汎用化しました。"
-        },
-        {
             category: "Open Set Recognition(応用)",
             question: "距離学習などが応用される「Open Set Recognition（開集合認識）」とはどのようなタスクか。",
             options: ["学習時に見たことのないクラス（未知クラス）が入力されたときに、無理やり分類せず「未知」として拒絶するタスク", "全てのクラスが既知であるタスク", "ラベルなしデータを分類するタスク", "多ラベル分類タスク"],
             answer: 0,
             explanation: "通常のSoftmax分類器は未知の入力も無理やり既知のクラスに分類してしまいます。距離学習で「どのクラスのクラスタからも遠い」場合は未知と判定します。"
+        },
+        {
+            id: "xai-ig-baseline",
+            category: "Integrated Gradients",
+            question: "Integrated Gradientsにおけるbaselineの役割として最も適切なものはどれか。",
+            options: ["特徴がない基準状態を定め、そこから実入力までの出力変化を寄与へ分配する", "学習率を決める", "分類クラス数を決める", "勾配を常に0にする"],
+            answer: 0,
+            explanation: "baselineは比較の出発点です。画像なら黒画像などを使い、baselineから入力へ至る経路の勾配を積分します。baseline選択で解釈が変わり得ます。"
+        },
+        {
+            id: "xai-ig-completeness",
+            category: "Integrated Gradients(性質)",
+            question: "Integrated GradientsのCompletenessが表す内容はどれか。",
+            options: ["全入力特徴の寄与の和が、おおむね入力とbaselineの出力差になる", "寄与の和が必ず1になる", "全ての特徴が同じ寄与になる", "モデル精度が100%になる"],
+            answer: 0,
+            explanation: "寄与を合計すると $F(x)-F(x')$ に対応する性質です。各特徴へ出力差を配分できているかを理解する鍵になります。"
+        },
+        {
+            id: "xai-gradcam-vs-ig",
+            category: "XAI(識別)",
+            question: "Grad-CAMとIntegrated Gradientsの典型的な違いとして正しいものはどれか。",
+            options: ["Grad-CAMは畳み込み特徴マップ由来の粗い位置、IGは入力特徴ごとの寄与を示す", "IGは勾配を使わない", "Grad-CAMはモデル非依存", "両者は完全に同じ"],
+            answer: 0,
+            explanation: "どちらも勾配を使いますが、Grad-CAMは主にCNNの空間ヒートマップ、IGはbaselineからの経路積分による入力特徴の寄与です。"
         }
     ]
 };

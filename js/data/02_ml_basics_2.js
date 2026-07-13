@@ -75,6 +75,30 @@ window.quizData = {
                 </td>
             </tr>
         </table>
+
+        <h3>■ パープレキシティ：言語モデルの「迷いの数」</h3>
+        <style>
+            .ppl-flow { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:14px 0; }
+            .ppl-node { border:2px solid #3498db; background:#eef7ff; border-radius:10px; padding:10px 13px; text-align:center; min-width:150px; }
+            .ppl-node strong { display:block; color:#1769aa; }
+            .ppl-arrow { font-size:1.3em; color:#777; font-weight:bold; }
+            .ppl-choice { display:flex; justify-content:center; gap:7px; margin-top:7px; }
+            .ppl-choice span { border:1px solid #bbb; border-radius:6px; padding:4px 8px; background:white; }
+        </style>
+        <p>パープレキシティ（Perplexity; PPL）は、モデルが次の単語を平均して何択くらいで迷っているかを表す指標です。</p>
+        <div class="ppl-flow">
+            <div class="ppl-node"><strong>正解単語の確率</strong>高いほどよい</div>
+            <div class="ppl-arrow">→</div>
+            <div class="ppl-node"><strong>平均損失 $H$</strong>低いほどよい</div>
+            <div class="ppl-arrow">→</div>
+            <div class="ppl-node"><strong>$PPL=e^H$</strong>低いほどよい</div>
+        </div>
+        <div class="ppl-node" style="border-color:#27ae60;background:#effaf4;max-width:520px;margin:auto;">
+            <strong>例：PPL = 4</strong>
+            <div class="ppl-choice"><span>猫</span><span>犬</span><span>鳥</span><span>魚</span></div>
+            <small>平均的に「同程度にありそうな4候補」で迷うイメージ</small>
+        </div>
+        <p><strong>試験の罠：</strong>PPLは正解率ではありません。同じデータ・同じトークン化条件で比較し、原則として<strong>小さい方が良い</strong>と判断します。</p>
     `,
 
     questions: [
@@ -224,6 +248,30 @@ window.quizData = {
             options: ["計算コストが非常に高くなる", "バイアスが高くなる", "データが無駄になる", "評価結果の信頼性が下がる"],
             answer: 0,
             explanation: "学習と評価をデータ数分だけ繰り返すことになるため、計算時間が膨大になります。"
+        },
+        {
+            id: "metric-perplexity-meaning",
+            category: "パープレキシティ",
+            question: "言語モデルのパープレキシティ（PPL）が4であるとき、最も近い直感的な説明はどれか。",
+            options: ["次のトークンについて、平均的に同程度の4候補で迷っている", "正解率が必ず25%である", "4トークン先まで必ず予測できる", "語彙数が4である"],
+            answer: 0,
+            explanation: "PPLはモデルの不確実性を『実効的な選択肢数』として見たものです。正解率や語彙数そのものではありません。"
+        },
+        {
+            id: "metric-perplexity-calc",
+            category: "パープレキシティ(計算)",
+            question: "1トークン当たりの平均クロスエントロピーが $\\ln 5$ のとき、パープレキシティはいくつか。",
+            options: ["5", "$\\ln5$", "25", "$1/5$"],
+            answer: 0,
+            explanation: "$PPL=\\exp(H)$ なので、$\\exp(\\ln5)=5$ です。対数の底が2なら $PPL=2^H$ と書けます。"
+        },
+        {
+            id: "metric-perplexity-compare",
+            category: "パープレキシティ(比較)",
+            question: "同じテストデータと同じトークナイザで、モデルAのPPLが12、モデルBが8だった。PPLだけを基準にするとどちらが良いか。",
+            options: ["モデルB", "モデルA", "必ず同等", "PPLは大きいほど良いのでA"],
+            answer: 0,
+            explanation: "同条件ならPPLが低いモデルBの方が、正解系列へ高い確率を割り当てています。トークナイザやデータが違うPPLは単純比較できません。"
         }
     ]
 };

@@ -30,7 +30,7 @@ const menuConfig = [
     {
         id: "02_ml_basics_2",
         title: "2-（１）機械学習の基礎：検証・性能指標",
-        desc: "交差検証 / Accuracy / Precision / Recall / F値 / ROC / AUC",
+        desc: "交差検証 / Accuracy / Precision / Recall / F値 / ROC / AUC / パープレキシティ",
         isActive: true
     },
 
@@ -86,19 +86,25 @@ const menuConfig = [
     {
         id: "04_app_image",
         title: "4-（１〜３）画像認識・物体検出・セグメンテーション",
-        desc: "ResNet / ViT / YOLO / R-CNN / U-Net / IoU / mAP",
+        desc: "ResNet / ViT / Shifted Window / YOLO / R-CNN / U-Net / IoU / mAP",
         isActive: true
     },
     {
         id: "04_app_nlp",
         title: "4-（４）自然言語処理",
-        desc: "Word2Vec / BERT / GPT / Prompt Learning",
+        desc: "Word2Vec / BERT / GPT / Next Token Prediction / RAG / 自己回帰",
         isActive: true
     },
     {
         id: "04_app_nlp_advanced",
-        title: "4-（５）発展的NLP",
+        title: "4-（４）発展的NLP",
         desc: "ELMo, fastText, Tokenization",
+        isActive: true
+    },
+    {
+        id: "04_app_audio",
+        title: "4-（５）音声処理",
+        desc: "サンプリング定理 / STFT / メル尺度・MFCC / WaveNet / CTC",
         isActive: true
     },
     {
@@ -116,7 +122,7 @@ const menuConfig = [
     {
         id: "04_app_misc",
         title: "4-（８）（９）様々な学習方法 & 説明性",
-        desc: "転移学習 / 距離学習 / XAI (Grad-CAM, SHAP)",
+        desc: "転移学習 / 距離学習 / XAI (Grad-CAM, Integrated Gradients, SHAP)",
         isActive: true
     },
 
