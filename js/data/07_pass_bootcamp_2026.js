@@ -57,7 +57,7 @@ window.quizData = {
         },
         {
             id:"math-entropy", category:"応用数学・計算", kind:"手計算", difficulty:"標準",
-            question:"ベルヌーイ変数の $P(X=1)=P(X=0)=0.5$。エントロピー（底2）はいくつか。",
+            question:"2つの事象A、Bがそれぞれ確率0.5で起こる。エントロピー（底2）はいくつか。",
             options:["1 bit", "0 bit", "0.5 bit", "2 bit"], answer:0,
             explanation:"$H=-2\\times0.5\\log_2 0.5=-\\log_2 0.5=1$ bit。一様な2値分布なので不確実性は最大です。"
         },
@@ -66,12 +66,6 @@ window.quizData = {
             question:"有病率1%、感度90%、偽陽性率5%の検査で陽性となった。実際に有病である確率に最も近いものはどれか。",
             options:["約15.4%", "90%", "約1.8%", "95%"], answer:0,
             explanation:"ベイズ則より $0.9\\times0.01/(0.9\\times0.01+0.05\\times0.99)=0.009/0.0585\\approx0.154$。感度の90%を事後確率と取り違えないこと。"
-        },
-        {
-            id:"math-matrix-rank", category:"線形代数・計算", kind:"手計算", difficulty:"標準",
-            question:"行列 $A=\\begin{pmatrix}1&2\\\\2&4\\end{pmatrix}$ のランクはいくつか。",
-            options:["1", "0", "2", "4"], answer:0,
-            explanation:"第2行は第1行の2倍で独立ではありません。一方、非零行は存在するため独立な行（列）は1本、rankは1です。"
         },
         {
             id:"metric-micro-macro", category:"評価指標・計算", kind:"概念識別", difficulty:"難",
@@ -282,7 +276,7 @@ window.quizData = {
         {
             id:"xai-integrated-gradients", category:"XAI・新シラバス", kind:"概念識別", difficulty:"新シラバス",
             question:"Integrated Gradientsの説明として正しいものはどれか。",
-            options:["ベースラインから入力までの経路上で入力勾配を積分し、特徴寄与を求める", "最終畳み込み特徴マップだけを平均する", "モデルを決定木1本で完全再現する", "学習データをクラスタリングする"], answer:0,
+            options:["ベースラインから入力までの経路上で入力勾配を積分し、特徴寄与を求める", "最終畳み込み特徴マップだけを平均する", "モデルの全重みを量子化する", "正解ラベルの個数だけを数える"], answer:0,
             explanation:"ベースライン $x'$ から入力 $x$ までを補間し、勾配を積分して $(x-x')$ を掛けます。寄与の総和が概ね出力差 $F(x)-F(x')$ になるcompletenessが重要です。"
         },
         {
@@ -290,12 +284,6 @@ window.quizData = {
             question:"Grad-CAMとIntegrated Gradientsの典型的な違いとして正しいものはどれか。",
             options:["Grad-CAMは畳み込み特徴マップから粗い空間重要度、IGは入力特徴ごとの寄与を求められる", "IGはCNNにしか使えない", "Grad-CAMは勾配を一切使わない", "両者はモデル非依存の同一手法"], answer:0,
             explanation:"Grad-CAMは対象クラス勾配で特徴マップを重み付けしてヒートマップ化します。IGは微分可能モデルに対し、基準入力からの経路積分で入力次元の寄与を出します。"
-        },
-        {
-            id:"audio-nyquist", category:"音声処理・計算", kind:"手計算", difficulty:"新シラバス対応",
-            question:"最大8kHzの周波数成分を含む信号をエイリアシングなく標本化する理論上の最低サンプリング周波数はどれか。",
-            options:["16kHz", "8kHz", "4kHz", "64kHz"], answer:0,
-            explanation:"サンプリング定理より最高周波数の2倍以上が必要なので16kHz。実システムではフィルタの遷移帯域を考え、余裕を持たせます。"
         }
     ]
 };

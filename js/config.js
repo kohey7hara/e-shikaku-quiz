@@ -12,18 +12,6 @@ const menuConfig = [
     // １．数学的基礎
     // =================================================================
     {
-        id: "01_linear_algebra",
-        title: "1-（１）線形代数：行列・固有値・SVD",
-        desc: "行列積 / テンソル形状 / ランク / 勾配 / 固有値分解 / 特異値分解の手計算",
-        isActive: true
-    },
-    {
-        id: "01_probability_distributions",
-        title: "1-（２）確率・統計：確率分布と計算",
-        desc: "条件付き・周辺確率 / 期待値・分散・共分散 / 二項・カテゴリカル / ガウス・t・混合ガウス",
-        isActive: true
-    },
-    {
         id: "01_math_basics",
         title: "1-（２）（３）確率・統計 & 情報理論",
         desc: "ベイズ則 / 最尤・MAP推定 / エントロピー / KLダイバージェンス",
@@ -43,12 +31,6 @@ const menuConfig = [
         id: "02_ml_basics_2",
         title: "2-（１）機械学習の基礎：検証・性能指標",
         desc: "交差検証 / Accuracy / Precision / Recall / F値 / ROC / AUC / パープレキシティ",
-        isActive: true
-    },
-    {
-        id: "02_ml_models",
-        title: "2-（１）機械学習モデル詳解",
-        desc: "線形・ロジスティック回帰 / SVM / 決定木・Random Forest・勾配ブースティング / PCA・t-SNE / クラスタリング",
         isActive: true
     },
 
@@ -117,12 +99,6 @@ const menuConfig = [
         id: "04_app_nlp_advanced",
         title: "4-（４）発展的NLP",
         desc: "ELMo, fastText, Tokenization",
-        isActive: true
-    },
-    {
-        id: "04_app_audio",
-        title: "4-（５）音声処理",
-        desc: "サンプリング定理 / STFT / メル尺度・MFCC / WaveNet / CTC",
         isActive: true
     },
     {

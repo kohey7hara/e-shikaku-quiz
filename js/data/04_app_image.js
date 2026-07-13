@@ -334,10 +334,10 @@ window.quizData = {
         {id:"img-resnet-block",category:"ResNet(内部構造)",question:"Residual Blockの基本式として最も近いものはどれか。",options:["$y=F(x)+x$","$y=F(x)×x$のみ","$y=softmax(x)$","$y=x-F(x)$のみ"],answer:0,explanation:"残差枝F(x)と恒等写像xを加算し、勾配と情報を直接流します。形状が違う場合は射影を使います。"},
         {id:"img-bottleneck",category:"ResNet Bottleneck",question:"ResNetのBottleneck Blockで1×1畳み込みを前後に置く主な理由はどれか。",options:["3×3畳み込みの前にチャネルを圧縮し、後で復元して計算量を抑える","空間サイズを必ず0にする","Softmaxを置き換える","ラベルを圧縮する"],answer:0,explanation:"典型的に1×1で縮小→3×3で処理→1×1で拡張し、深いモデルを効率化します。"},
         {id:"img-wideresnet",category:"WideResNet",question:"WideResNetの基本的な発想はどれか。",options:["極端に深くする代わりにResidual Blockのチャネル幅を広げる","全畳み込みをRNNへ変える","入力解像度だけを下げる","スキップ接続を削除する"],answer:0,explanation:"深さだけでなく幅を増やすことで表現力と並列性を高めます。"},
-        {id:"img-rpn",category:"RPN(内部構造)",question:"Faster R-CNNのRPNが出力する代表的な2種類はどれか。",options:["各AnchorのobjectnessとBounding Box補正量","クラス文章と音声波形","最終マスクだけ","Softmax温度と学習率"],answer:0,explanation:"物体らしさとAnchorから正解Boxへ近づける回帰量を予測し、候補領域を作ります。"},
+        {id:"img-rpn",category:"RPN(内部構造)",question:"Faster R-CNNのRPNが出力する代表的な2種類はどれか。",options:["各AnchorのobjectnessとBounding Box補正量","学習率とバッチサイズ","最終マスクだけ","Softmax温度と学習率"],answer:0,explanation:"物体らしさとAnchorから正解Boxへ近づける回帰量を予測し、候補領域を作ります。"},
         {id:"img-roialign",category:"ROI Align",question:"ROI AlignがROI Poolingより位置ずれを抑える仕組みはどれか。",options:["座標の丸めを避け、双線形補間で特徴をサンプリング","全座標を整数へ切り捨て","NMSを使わない","Anchorを削除"],answer:0,explanation:"量子化によるずれがマスク境界へ悪影響を与えるため、連続座標で補間します。"},
         {id:"img-hard-negative",category:"SSD Hard Negative Mining",question:"SSDのHard Negative Miningの目的はどれか。",options:["背景Anchorが圧倒的に多い中、損失の大きい負例を選んで正負バランスを取る","難しい正例を全て削除","画像を高解像度化","IoUを常に1にする"],answer:0,explanation:"容易な背景例ばかりで学習が支配されるのを防ぎます。"},
         {id:"img-fcos-centerness",category:"FCOS Centerness",question:"FCOSのCenternessが抑制したい予測はどれか。",options:["物体中心から遠い位置が出す低品質Box","中心付近の高品質Box","全ての正例","クラス確率"],answer:0,explanation:"中心から離れた位置のBoxスコアを下げ、NMS前の順位品質を改善します。"},
-        {id:"img-maskrcnn-heads",category:"Mask R-CNN(内部構造)",question:"Mask R-CNNがFaster R-CNNへ主に追加する枝はどれか。",options:["各ROIのピクセルマスク予測Head","言語モデルHead","音声合成Head","クラスタリングHead"],answer:0,explanation:"分類・Box回帰に加えて、各インスタンスの二値マスクを並列に予測します。"}
+        {id:"img-maskrcnn-heads",category:"Mask R-CNN(内部構造)",question:"Mask R-CNNがFaster R-CNNへ主に追加する枝はどれか。",options:["各ROIのピクセルマスク予測Head","言語モデルHead","学習率予測Head","バッチサイズ予測Head"],answer:0,explanation:"分類・Box回帰に加えて、各インスタンスの二値マスクを並列に予測します。"}
     ]
 };

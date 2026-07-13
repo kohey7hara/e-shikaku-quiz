@@ -191,7 +191,7 @@ window.quizData = {
         {
             category: "誤差逆伝播法",
             question: "誤差逆伝播法（Backpropagation）において、微分を効率よく計算するために利用される数学的な性質はどれか。",
-            options: ["連鎖律 (Chain Rule)", "対角化", "特異値分解", "中心極限定理"],
+            options: ["連鎖律 (Chain Rule)", "積分法", "二分探索", "最短経路法"],
             answer: 0,
             explanation: "合成関数の微分は、各関数の微分の積で表せる（$\\frac{\\partial L}{\\partial x} = \\frac{\\partial L}{\\partial y} \\frac{\\partial y}{\\partial x}$）という性質を利用して、出力層から入力層へ勾配を伝播させます。"
         },

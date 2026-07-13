@@ -119,10 +119,6 @@ window.quizData = {
                 <td><strong>蒸留</strong><br>(Distillation)</td>
                 <td>「教師モデル（巨大）」の知識を「生徒モデル（軽量）」に教え込む。<br>出力の確率分布（Soft target）を真似させる。</td>
             </tr>
-            <tr>
-                <td><strong>メタ学習</strong><br>(Meta-Learning)</td>
-                <td>「学習の仕方を学習する」。<br>例: <strong>MAML</strong> (少ないデータですぐ適応できる初期値を探す)。Few-shot向け。</td>
-            </tr>
         </table>
 
         <h3>■ 4. 説明可能AI (XAI)</h3>
@@ -221,7 +217,7 @@ window.quizData = {
         {
             category: "距離学習",
             question: "距離学習 (Metric Learning) の目的として最も適切なものはどれか。",
-            options: ["似ているデータ同士の距離が近く、似ていないデータ同士の距離が遠くなるような「特徴空間（埋め込み）」を学習する", "分類精度を最大化する", "画像を生成する", "データをクラスタリングする"],
+            options: ["似ているデータ同士の距離が近く、似ていないデータ同士の距離が遠くなるような「特徴空間（埋め込み）」を学習する", "分類精度を最大化する", "画像を生成する", "入力をそのまま複製する"],
             answer: 0,
             explanation: "顔認証などで使われます。「Aさんの顔」と「Aさんの別の顔」を近づけ、「Bさんの顔」を遠ざけます。"
         },
@@ -256,20 +252,6 @@ window.quizData = {
             options: ["Softmax損失に「角度マージン」を加えることで、クラス間をより明確に分離し、クラス内を凝集させる", "ユークリッド距離を使う", "Triplet Lossを使う", "3次元顔モデルを使う"],
             answer: 0,
             explanation: "特徴ベクトルを球面上に配置し、角度（コサイン類似度）ベースでマージンを設けることで、Triplet Lossより安定して高性能を出せます。"
-        },
-        {
-            category: "メタ学習(応用)",
-            question: "メタ学習（Meta-Learning）の目的を表すフレーズとして最も適切なものはどれか。",
-            options: ["Learning to Learn（学習の仕方を学習する）", "End-to-End Learning", "Unsupervised Learning", "Lifelong Learning"],
-            answer: 0,
-            explanation: "「新しいタスクに出会ったとき、少ないデータですぐに適応できる能力（初期値や更新ルール）」を学習します。"
-        },
-        {
-            category: "MAML(応用)",
-            question: "メタ学習の代表的手法「MAML (Model-Agnostic Meta-Learning)」は何を最適化するか。",
-            options: ["未知のタスクに対して、わずかな勾配更新（数ステップ）で適応できる「良いモデルの初期パラメータ」", "学習率", "ネットワーク構造", "ハイパーパラメータ"],
-            answer: 0,
-            explanation: "どのタスクにも「あと少し調整すれば届く」ような、汎用性の高い初期地点を見つけ出します。"
         },
         {
             category: "SHAP(応用)",
@@ -338,26 +320,10 @@ window.quizData = {
             explanation: "どちらも勾配を使いますが、Grad-CAMは主にCNNの空間ヒートマップ、IGはbaselineからの経路積分による入力特徴の寄与です。"
         },
         {
-            id: "misc-active-least-confident",
-            category: "能動学習（計算）",
-            question: "3つの未ラベル標本に対する最大クラス確率が0.92、0.61、0.54だった。Least Confident法で最初に人へラベル付けを依頼する標本はどれか。",
-            options: ["最大確率0.54の標本", "最大確率0.61の標本", "最大確率0.92の標本", "無作為なので決められない"],
-            answer: 0,
-            explanation: "Least Confidentは $1-\\max_y p(y|x)$ が最大、つまりモデルの最大確信度が最小の標本を選びます。不確実度は順に0.08、0.39、0.46なので0.54の標本です。"
-        },
-        {
-            id: "misc-active-margin",
-            category: "能動学習（計算）",
-            question: "Margin Samplingで、上位2クラスの確率がA=(0.51, 0.49)、B=(0.70, 0.20)なら優先して選ぶのはどれか。",
-            options: ["A（差0.02）", "B（差0.50）", "確率和が同じなので同順位", "クラス数が不明なので計算不能"],
-            answer: 0,
-            explanation: "上位2確率の差が小さいほど判定境界付近で迷っています。Aのmarginは0.02、Bは0.50なのでAを問い合わせます。"
-        },
-        {
             id: "misc-self-co-training",
             category: "半教師あり学習",
             question: "Self-trainingとCo-trainingの違いとして最も適切なものはどれか。",
-            options: ["Self-trainingは自分の高確信予測を疑似ラベルにし、Co-trainingは異なる特徴ビューの学習器が互いにラベルを補う", "両者とも必ずGANを使う", "Co-trainingは教師なしクラスタリングと同義", "Self-trainingは人手ラベルを使えない"],
+            options: ["Self-trainingは自分の高確信予測を疑似ラベルにし、Co-trainingは異なる特徴ビューの学習器が互いにラベルを補う", "両者とも必ずGANを使う", "Co-trainingは単一モデルの推論と同義", "Self-trainingは人手ラベルを使えない"],
             answer: 0,
             explanation: "Self-trainingは単一モデルの予測を再利用します。Co-trainingは条件付きで独立性の高い複数ビューを使い、学習器間で情報を補完します。"
         },

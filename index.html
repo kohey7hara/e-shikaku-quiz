@@ -22,12 +22,12 @@
     <div class="section-head"><h2>分野別ドリル</h2><span>苦手カテゴリをピンポイントで補強</span></div><ul class="menu-list" id="menuContainer"></ul>
     <p class="footer-note">出題範囲は<a href="https://www.jdla.org/certificate/engineer/" target="_blank" rel="noopener">JDLA公式 E資格シラバス</a>を基準に構成しています。本ドリルは非公式の学習教材であり、合格を保証するものではありません。</p>
 </main>
-<script src="js/config.js"></script>
+<script src="js/config.js?v=20260713-scopefix"></script>
 <script>
     const card = item => `<li class="menu-item ${item.featured?'featured':''}"><a href="quiz.html?id=${item.id}"><span class="badge">${item.featured?'最優先':'演習可能'}</span><span class="menu-title">${item.title}</span><span class="menu-desc">${item.desc}</span></a></li>`;
     document.getElementById('featuredMenu').innerHTML=menuConfig.filter(x=>x.featured&&x.isActive).map(card).join('');
     document.getElementById('menuContainer').innerHTML=menuConfig.filter(x=>!x.featured&&x.isActive).map(card).join('');
-    try{const p=JSON.parse(localStorage.getItem('e-shikaku-progress-v2'))||{};const rows=Object.values(p);if(rows.length){const attempts=rows.reduce((s,x)=>s+x.attempts,0),correct=rows.reduce((s,x)=>s+x.correct,0),weak=rows.filter(x=>x.lastCorrect===false).length;document.getElementById('history').innerHTML=`<span><strong>${attempts}</strong>回答</span><span><strong>${Math.round(correct/attempts*100)}%</strong>累計正答率</span><span><strong>${weak}</strong>要復習</span>`}}catch(_){ }
+    try{const p=JSON.parse(localStorage.getItem('e-shikaku-progress-v2'))||{};const validIds=new Set(menuConfig.filter(x=>x.isActive).map(x=>x.id));const rows=Object.values(p).filter(x=>validIds.has(x.quizId));if(rows.length){const attempts=rows.reduce((s,x)=>s+x.attempts,0),correct=rows.reduce((s,x)=>s+x.correct,0),weak=rows.filter(x=>x.lastCorrect===false).length;document.getElementById('history').innerHTML=`<span><strong>${attempts}</strong>回答</span><span><strong>${Math.round(correct/attempts*100)}%</strong>累計正答率</span><span><strong>${weak}</strong>要復習</span>`}}catch(_){ }
 </script>
 </body>
 </html>

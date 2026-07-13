@@ -162,7 +162,7 @@ window.quizData = {
         {
             category: "分布仮説",
             question: "Word2Vecなどの単語埋め込み技術の基礎となっている、「単語の意味は、その周囲に現れる単語によって決まる」という考え方を何と呼ぶか。",
-            options: ["分布仮説 (Distributional Hypothesis)", "万能近似定理", "ノーフリーランチ定理", "中心極限定理"],
+            options: ["分布仮説 (Distributional Hypothesis)", "万能近似定理", "ノーフリーランチ定理", "残差学習"],
             answer: 0,
             explanation: "「王様 - 男 + 女 = 女王」のような演算ができるのも、文脈（分布）が似ている単語はベクトル空間上で近くに配置されるためです。"
         },
@@ -243,7 +243,7 @@ window.quizData = {
         {
             category: "階層的Softmax(応用)",
             question: "Word2Vecのもう一つの高速化手法「Hierarchical Softmax（階層的ソフトマックス）」はどのような構造を使うか。",
-            options: ["ハフマン木（二分木）", "決定木", "ニューラルネットワーク", "ハッシュテーブル"],
+            options: ["ハフマン木（二分木）", "畳み込み層", "注意機構", "ハッシュテーブル"],
             answer: 0,
             explanation: "頻出語ほど浅い階層になるように二分木を作り、葉ノード（単語）に到達するまでの分岐確率の積で確率を表現します。計算量が $O(V)$ から $O(\\log V)$ に減ります。"
         },
