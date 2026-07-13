@@ -4,73 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>E資格対策ドリル - メニュー</title>
+    <title>E資格 合格圏ドリル 2026</title>
     <style>
-        body { font-family: "Helvetica Neue", Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; color: #333; }
-        h1 { text-align: center; color: #2c3e50; }
-        .menu-list { list-style: none; padding: 0; }
-        
-        /* メニュー項目のスタイル */
-        .menu-item { background: white; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; border-left: 5px solid #ccc; } /* デフォルトはグレー */
-        
-        /* 有効な項目のスタイル */
-        .menu-item.active { border-left-color: #0277bd; cursor: pointer; }
-        .menu-item.active:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
-        
-        /* リンクのスタイル */
-        .menu-item a { text-decoration: none; color: #333; display: block; padding: 20px; }
-        
-        /* 無効な項目のスタイル */
-        .menu-item.disabled { background-color: #eee; color: #999; padding: 20px; cursor: not-allowed; }
-        
-        .menu-title { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; display: block;}
-        .menu-desc { font-size: 0.85em; color: #666; }
-        .menu-item.disabled .menu-desc { color: #aaa; }
-        
-        .status-badge { float: right; font-size: 0.8em; padding: 2px 8px; border-radius: 4px; background: #eee; color: #555; }
-        .active .status-badge { background: #e1f5fe; color: #0277bd; }
-
-        .old-link { text-align: center; margin-top: 30px; font-size: 0.9em; }
+        :root{--ink:#10243e;--muted:#6b7889;--blue:#1363df;--cyan:#38c8c5;--line:#dfe5ed;--paper:#f4f7fa}
+        *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 90% 0,#dff8f7 0,transparent 32rem),var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}body:before{content:"";display:block;height:6px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+        .shell{width:min(1050px,calc(100% - 32px));margin:auto;padding:52px 0 70px}.hero{display:grid;grid-template-columns:1.5fr .8fr;gap:32px;align-items:end;margin-bottom:36px}.eyebrow{color:var(--blue);font-size:.74rem;letter-spacing:.18em;font-weight:900}.hero h1{font-size:clamp(2rem,6vw,4.2rem);letter-spacing:-.055em;line-height:1.02;margin:8px 0 18px}.hero h1 span{color:var(--blue)}.lead{max-width:650px;color:var(--muted);font-size:1.02rem;line-height:1.8}.target{background:#102a43;color:#fff;border-radius:20px;padding:24px;box-shadow:0 18px 45px #102a4338}.target small,.target strong{display:block}.target strong{font-size:2.5rem;margin:3px 0}.target p{color:#c8d6e3;font-size:.83rem;line-height:1.6;margin-bottom:0}
+        .history{display:flex;gap:18px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 20px;margin-bottom:28px}.history span{color:var(--muted)}.history strong{color:var(--ink);margin-right:5px}.section-head{display:flex;justify-content:space-between;align-items:end;margin:34px 0 14px}.section-head h2{margin:0;font-size:1.35rem}.section-head span{color:var(--muted);font-size:.84rem}
+        .menu-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;list-style:none;padding:0;margin:0}.menu-item{background:#fff;border:1px solid var(--line);border-radius:16px;transition:.15s;overflow:hidden}.menu-item:hover{transform:translateY(-2px);border-color:#b9cef0;box-shadow:0 12px 24px #17385812}.menu-item a{display:block;text-decoration:none;color:inherit;padding:20px}.menu-item.featured{grid-column:1/-1;background:linear-gradient(120deg,#102a43,#16476c);color:#fff;border:0}.menu-item.featured .menu-desc{color:#c9d7e3}.menu-title{display:block;font-weight:850;font-size:1.03rem;margin-bottom:6px}.menu-desc{display:block;color:var(--muted);font-size:.84rem;line-height:1.55}.badge{float:right;font-size:.68rem;padding:5px 8px;border-radius:999px;color:var(--blue);background:#edf4ff;font-weight:900}.featured .badge{color:#102a43;background:var(--cyan)}.footer-note{color:var(--muted);font-size:.8rem;line-height:1.7;margin-top:28px}.footer-note a{color:var(--blue)}
+        @media(max-width:700px){.shell{width:min(100% - 20px,1050px);padding-top:32px}.hero{grid-template-columns:1fr}.menu-list{grid-template-columns:1fr}.menu-item.featured{grid-column:auto}.section-head{align-items:start;gap:8px;flex-direction:column}}
     </style>
 </head>
 <body>
-    <h1>E資格対策ドリル</h1>    
-    <ul class="menu-list" id="menuContainer"></ul>
-
-    <div class="old-link">
-        <a href="index_old.html">📂 以前のバージョンはこちら</a>
-    </div>
-
-    <script src="js/config.js"></script>
-    
-    <script>
-        const container = document.getElementById('menuContainer');
-
-        // config.js のデータを元にリストを作成
-        menuConfig.forEach(item => {
-            const li = document.createElement('li');
-            
-            if (item.isActive) {
-                // 作成済み（クリック可能）
-                li.className = 'menu-item active';
-                li.innerHTML = `
-                    <a href="quiz.html?id=${item.id}">
-                        <span class="status-badge">学習可能</span>
-                        <span class="menu-title">${item.title}</span>
-                        <span class="menu-desc">${item.desc}</span>
-                    </a>
-                `;
-            } else {
-                // 準備中（クリック不可・グレーアウト）
-                li.className = 'menu-item disabled';
-                li.innerHTML = `
-                    <span class="status-badge">準備中</span>
-                    <span class="menu-title">${item.title}</span>
-                    <span class="menu-desc">${item.desc}</span>
-                `;
-            }
-            container.appendChild(li);
-        });
-    </script>
+<main class="shell">
+    <section class="hero"><div><p class="eyebrow">E2026 #2 SYLLABUS READY</p><h1>合格まで、<br><span>あと一段。</span></h1><p class="lead">Aランク不合格から合格圏へ。丸暗記ではなく、数式の意味・手計算・実装の内部挙動・試験の引っかけを、72秒で見抜くための実戦ドリルです。</p></div><aside class="target"><small>安定目標</small><strong>80%+</strong><p>初見・選択肢シャッフル・時間制限ありで達成するまで、誤答だけを反復。</p></aside></section>
+    <div class="history" id="history"><span>まだ学習履歴はありません。まずは「合格圏ブートキャンプ」から始めましょう。</span></div>
+    <div class="section-head"><h2>最優先セッション</h2><span>前回の失点傾向 + E2026#2追加項目</span></div><ul class="menu-list" id="featuredMenu"></ul>
+    <div class="section-head"><h2>分野別ドリル</h2><span>苦手カテゴリをピンポイントで補強</span></div><ul class="menu-list" id="menuContainer"></ul>
+    <p class="footer-note">出題範囲は<a href="https://www.jdla.org/certificate/engineer/" target="_blank" rel="noopener">JDLA公式 E資格シラバス</a>を基準に構成しています。本ドリルは非公式の学習教材であり、合格を保証するものではありません。</p>
+</main>
+<script src="js/config.js"></script>
+<script>
+    const card = item => `<li class="menu-item ${item.featured?'featured':''}"><a href="quiz.html?id=${item.id}"><span class="badge">${item.featured?'最優先':'演習可能'}</span><span class="menu-title">${item.title}</span><span class="menu-desc">${item.desc}</span></a></li>`;
+    document.getElementById('featuredMenu').innerHTML=menuConfig.filter(x=>x.featured&&x.isActive).map(card).join('');
+    document.getElementById('menuContainer').innerHTML=menuConfig.filter(x=>!x.featured&&x.isActive).map(card).join('');
+    try{const p=JSON.parse(localStorage.getItem('e-shikaku-progress-v2'))||{};const rows=Object.values(p);if(rows.length){const attempts=rows.reduce((s,x)=>s+x.attempts,0),correct=rows.reduce((s,x)=>s+x.correct,0),weak=rows.filter(x=>x.lastCorrect===false).length;document.getElementById('history').innerHTML=`<span><strong>${attempts}</strong>回答</span><span><strong>${Math.round(correct/attempts*100)}%</strong>累計正答率</span><span><strong>${weak}</strong>要復習</span>`}}catch(_){ }
+</script>
 </body>
 </html>
