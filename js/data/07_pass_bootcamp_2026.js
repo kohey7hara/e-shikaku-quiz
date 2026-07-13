@@ -1,26 +1,87 @@
 window.quizData = {
     title: "合格圏ブートキャンプ 2026",
     cheatSheet: `
-        <p><strong>狙い：</strong>前回50%台だった4領域を、単語暗記ではなく「式 → 数値 → 内部挙動」の順で結び直します。計算は途中式を紙に書き、選択肢を見る前に答えの符号・桁・形状を予測してください。</p>
-        <h3>1. 72秒で使う計算テンプレート</h3>
+        <p><strong>このページの使い方：</strong>数式を丸暗記する必要はありません。最初に略語を日本語へ直し、次に数字を式へ1つずつ入れ、最後に答えの意味を確認します。以下は「初めて見ても計算できる」順番で書いてあります。</p>
+
+        <h3>0. 最初に覚える略語</h3>
         <table>
-          <tr><th>テーマ</th><th>最初に書く式</th><th>罠</th></tr>
-          <tr><td>Softmax</td><td>$p_i=\\exp(z_i-m)/\\sum_j\\exp(z_j-m)$</td><td>最大値 $m$ を引いても確率は不変。オーバーフローを防ぐ。</td></tr>
-          <tr><td>自己情報量</td><td>$I(x)=-\\log_2P(x)$</td><td>組合せ数を数えてから確率を作る。底2なら単位はbit。</td></tr>
-          <tr><td>混同行列</td><td>$TPR=TP/(TP+FN)$、$FPR=FP/(FP+TN)$</td><td>分母は実際の正例／実際の負例。</td></tr>
-          <tr><td>コサイン類似度</td><td>$a\\cdot b/(\\|a\\|\\|b\\|)$</td><td>内積だけではない。大きさで割る。</td></tr>
-          <tr><td>CNN出力</td><td>$\\lfloor(H+2P-D(K-1)-1)/S+1\\rfloor$</td><td>dilationがあると有効カーネルは $D(K-1)+1$。</td></tr>
-          <tr><td>Attention</td><td>$softmax(QK^T/\\sqrt{d_k})V$</td><td>Cross-Attentionは $Q$ がDecoder、$K,V$ がEncoder。</td></tr>
+          <tr><th>略語</th><th>日本語での意味</th><th>イメージ</th></tr>
+          <tr><td><strong>TP</strong><br>True Positive</td><td>本当は正例で、予測も正例</td><td>病気の人を「病気」と当てた</td></tr>
+          <tr><td><strong>FN</strong><br>False Negative</td><td>本当は正例なのに、予測は負例</td><td>病気の人を見逃した</td></tr>
+          <tr><td><strong>FP</strong><br>False Positive</td><td>本当は負例なのに、予測は正例</td><td>健康な人を「病気」と誤判定した</td></tr>
+          <tr><td><strong>TN</strong><br>True Negative</td><td>本当は負例で、予測も負例</td><td>健康な人を「健康」と当てた</td></tr>
+          <tr><td><strong>PP</strong><br>Perplexity</td><td>パープレキシティ。言語モデルの迷いの大きさ</td><td>PP=4なら、平均的に4択で迷う程度</td></tr>
+          <tr><td><strong>Q / K / V</strong></td><td>Query（質問）/ Key（索引）/ Value（中身）</td><td>質問Qに合う索引Kを探し、その中身Vを取り出す</td></tr>
         </table>
-        <h3>2. 実装の内部仕様</h3>
+
+        <h3>1. Softmax：点数を確率へ変える</h3>
+        <p><strong>ロジット</strong>は、モデルが各クラスへ付けた変換前の点数です。Softmaxは各点数を指数関数で正の値にし、合計が1になるよう割ります。</p>
+        <ol>
+          <li>最大の点数を全要素から引く。例：<code>[0,100,100] → [-100,0,0]</code></li>
+          <li>指数を取る。<code>[e^-100, 1, 1] ≒ [0,1,1]</code></li>
+          <li>合計2で割る。答えは <code>[0,0.5,0.5]</code></li>
+        </ol>
+        <p>最大値を引くのは巨大な数を作らないためです。全要素から同じ数を引いても確率は変わりません。</p>
+
+        <h3>2. 自己情報量：珍しい出来事ほど情報が大きい</h3>
+        <p>式は $I(x)=-\\log_2 P(x)$ です。$P(x)$ はその出来事の確率です。底が2なので単位はbitになります。</p>
+        <ol>
+          <li>まず出来事が何通りあるか数える。</li>
+          <li>「該当する通り数 ÷ 全通り数」で確率を出す。</li>
+          <li>その確率を $-\\log_2$ へ入れる。</li>
+        </ol>
+        <p>例：コイン3回で表が2回なら、表表裏・表裏表・裏表表の3通り。全8通りなので確率は3/8です。</p>
+
+        <h3>3. 混同行列：分母を日本語で決める</h3>
+        <p><strong>TPR（真陽性率・再現率）</strong>は「本当の正例を何割見つけたか」。したがって分母は本当の正例である <code>TP+FN</code> です。</p>
+        <p>$TPR=TP/(TP+FN)$</p>
+        <p><strong>FPR（偽陽性率）</strong>は「本当の負例を何割、正例と誤判定したか」。分母は本当の負例である <code>FP+TN</code> です。</p>
+        <p>$FPR=FP/(FP+TN)$</p>
+
+        <h3>4. コサイン類似度：向きがどれくらい近いか</h3>
+        <ol>
+          <li>内積 $a\\cdot b$ を計算する。</li>
+          <li>それぞれの長さ $\\|a\\|$ と $\\|b\\|$ を計算する。</li>
+          <li>内積を「2つの長さの積」で割る。</li>
+        </ol>
+        <p>答えは-1〜1です。1に近いほど同じ向き、0なら直角、-1なら逆向きです。</p>
+
+        <h3>5. CNNの出力サイズ：記号を先に翻訳する</h3>
+        <table>
+          <tr><th>記号</th><th>意味</th></tr>
+          <tr><td>H</td><td>入力の高さ</td></tr><tr><td>K</td><td>カーネルの大きさ</td></tr>
+          <tr><td>P</td><td>周囲へ追加する余白（padding）</td></tr><tr><td>S</td><td>何マスずつ動かすか（stride）</td></tr>
+          <tr><td>D</td><td>カーネル要素の間隔（dilation）</td></tr>
+        </table>
+        <p>出力は $\\lfloor(H+2P-D(K-1)-1)/S+1\\rfloor$。床記号 $\\lfloor x\\rfloor$ は小数点以下を切り捨てる意味です。</p>
+        <p>例：H=32、K=3、P=1、S=2、D=1なら、$(32+2-2-1)/2+1=16.5$ を切り捨てて16です。</p>
+
+        <h3>6. Attention：質問に近い情報を集める</h3>
+        <p>式は $softmax(QK^T/\\sqrt{d_k})V$ ですが、4段階に分ければ大丈夫です。</p>
+        <ol>
+          <li>Q（質問）と各K（索引）の内積を取り、似ている度合いを出す。</li>
+          <li>$\\sqrt{d_k}$ で割り、値が極端に大きくなるのを防ぐ。</li>
+          <li>Softmaxで合計1の重みにする。</li>
+          <li>その重みでV（中身）を加重平均する。</li>
+        </ol>
+        <p>Cross-Attentionでは、QはDecoder側、KとVはEncoderの出力です。</p>
+
+        <h3>7. パープレキシティ：言語モデルがどれくらい迷うか</h3>
+        <p><strong>PPはPerplexity（パープレキシティ）の略</strong>です。1トークン当たり平均クロスエントロピーをHとすると、$PP=\\exp(H)$ です。</p>
+        <ol>
+          <li>問題のHを確認する。例：$H=\\ln(4)$</li>
+          <li>式へ入れる。$PP=\\exp(\\ln(4))$</li>
+          <li>$\\exp$ と $\\ln$ は互いに打ち消すので、$PP=4$</li>
+        </ol>
+        <p>PPは小さいほど良く、1が理想です。PP=4は「平均的に4個の候補で迷っている」感覚です。</p>
+
+        <h3>8. PyTorchで混同しやすい組合せ</h3>
         <ul>
-          <li><code>CrossEntropyLoss</code> は未正規化logitsを受け取り、内部でLogSoftmaxとNLLLossを行う。</li>
-          <li><code>model.eval()</code> はDropout/BatchNormの挙動を変えるが、勾配記録は止めない。<code>torch.no_grad()</code>とは別。</li>
-          <li><code>backward()</code> は勾配を加算する。意図的な勾配蓄積でなければ更新前に<code>zero_grad()</code>。</li>
-          <li><code>permute()</code>後は非連続になり得るため、<code>view()</code>前に<code>contiguous()</code>、または<code>reshape()</code>を使う。</li>
+          <li><code>CrossEntropyLoss</code>へ渡すのはSoftmax前の点数（logits）。Softmaxと対数計算は損失関数の内部で行われます。</li>
+          <li><code>model.eval()</code>はDropoutやBatchNormを推論用へ切り替えます。<code>torch.no_grad()</code>は勾配の記録を止めます。役割が違うので推論では通常両方使います。</li>
+          <li><code>backward()</code>は勾配を上書きせず加算します。通常は各更新の前に<code>zero_grad()</code>で前回分を消します。</li>
+          <li><code>permute()</code>後はデータの並びが非連続になる場合があります。安全に形を変えるなら<code>reshape()</code>、または<code>contiguous().view()</code>を使います。</li>
         </ul>
-        <h3>3. E2026#2の追加キーワード</h3>
-        <p><strong>パープレキシティ、Shifted window、Next token prediction、RAG、自己回帰、Integrated Gradients</strong>が追加。名称だけでなく、何を入力し何を最適化・可視化するかまで説明できる状態にします。</p>
     `,
     questions: [
         {
@@ -287,3 +348,113 @@ window.quizData = {
         }
     ]
 };
+
+const bootcampBeginnerExplanations = {
+    "math-softmax-extreme": `<p><strong>まず用語：</strong>ロジットは、Softmaxへ入れる前の「各クラスの点数」です。</p><ol><li>最大値100を全要素から引き、[0,100,100]を[-100,0,0]にします。</li><li>指数を取ると[e^-100,1,1]です。e^-100はほぼ0なので、[0,1,1]と考えられます。</li><li>合計2で割ると[0,0.5,0.5]です。</li></ol><p>後ろ2つは同じ点数なので、確率を半分ずつ分け合います。</p>`,
+    "math-softmax-shift": `<p>Softmaxでは各要素の指数を合計で割ります。全要素へ同じ定数cを足すと、各指数には同じ倍率e^cが掛かります。</p><p>分子と分母の両方にe^cがあるため約分され、確率は変わりません。これを利用して最大ロジットを引くと、計算結果を変えずに巨大な指数値を防げます。</p>`,
+    "math-information-combination": `<p><strong>自己情報量</strong>は「その出来事がどれほど珍しいか」を表し、珍しいほど大きくなります。</p><ol><li>表が2回の並びは、表表裏・表裏表・裏表表の3通りです。</li><li>コイン3回の全結果は2×2×2=8通りなので、確率は3/8です。</li><li>I=-log2(3/8)=log2(8/3)≒1.42 bitです。</li></ol><p>「表表裏」だけを数えて1/8にしないことがポイントです。</p>`,
+    "math-cosine": `<p>コサイン類似度は、ベクトルの大きさではなく<strong>向きの近さ</strong>を-1〜1で測ります。</p><ol><li>内積：1×2+2×1=4</li><li>aの長さ：√(1²+2²)=√5、bの長さも√5</li><li>4÷(√5×√5)=4÷5=0.8</li></ol><p>内積4だけで終わらず、必ず2つの長さで割ります。</p>`,
+    "math-confusion": `<p><strong>TPR（True Positive Rate・真陽性率）</strong>は、本当の正例50件（TP+FN=40+10）のうち40件を見つけた割合です。40÷50=0.80です。</p><p><strong>FPR（False Positive Rate・偽陽性率）</strong>は、本当の負例50件（FP+TN=15+35）のうち15件を誤って正例にした割合です。15÷50=0.30です。</p><p>分母を「本当の正例」「本当の負例」と日本語で書くと混乱しません。</p>`,
+    "math-entropy": `<p>エントロピーは、結果がどれほど予測しにくいかを表す平均情報量です。</p><p>H=-(0.5×log2 0.5+0.5×log2 0.5)。log2 0.5=-1なので、H=-(-0.5-0.5)=1 bitです。</p><p>2つが同じ確率のとき最も迷うため、2択のエントロピーは最大の1 bitになります。</p>`,
+    "math-bayes": `<p>感度90%を、そのまま「陽性なら病気である確率」としてはいけません。最初の有病率1%も使います。</p><p>1万人で考えると、病気100人のうち陽性は90人。健康9,900人のうち偽陽性は495人です。陽性者は合計585人なので、本当に病気なのは90÷585≒0.154、約15.4%です。</p><p>人数へ置き換えると、ベイズ則の分母を作りやすくなります。</p>`,
+    "metric-micro-macro": `<p><strong>macro平均</strong>は、まずクラスごとに指標を出し、それらを同じ重みで平均します。そのため件数の少ないクラスも1クラスとして平等に扱われます。</p><p><strong>micro平均</strong>は全クラスのTPなどを先に合計するため、件数の多いクラスの影響が強くなります。少数クラスも重視したい本問ではmacro平均が適切です。</p>`,
+    "metric-perplexity": `<p><strong>PPはPerplexity（パープレキシティ）の略</strong>で、言語モデルが次のトークン選びでどれくらい迷っているかを表します。</p><ol><li>平均クロスエントロピーをHとすると、PP=exp(H)です。</li><li>H=ln(4)を代入して、PP=exp(ln(4))。</li><li>expとlnは互いに逆の演算なので、exp(ln(4))=4です。</li></ol><p>PP=4は「平均的に4個ほどの候補で迷う」程度と解釈できます。小さいほど良く、理想値は1です。</p>`,
+    "dl-cross-entropy": `<p>クロスエントロピーは、正解クラスへモデルがどれだけ高い確率を付けたかを損失にします。</p><p>one-hotとは正解だけが1、他が0の教師ラベルです。そのため式L=-Σ t_i ln(p_i)では正解クラスの項だけ残り、L=-ln(0.7)≒0.357です。</p><p>正解確率が1へ近づくほど損失は0へ近づきます。</p>`,
+    "dl-ce-gradient": `<p>Softmaxとクロスエントロピーを組み合わせると、複雑な微分が整理され、各ロジットの勾配は<strong>予測p_i－正解t_i</strong>になります。</p><p>例えば正解クラスでp=0.7、t=1なら勾配は-0.3です。勾配降下ではこのロジットを上げる方向へ更新されます。誤クラスでp=0.2、t=0なら+0.2となり、そのロジットを下げます。</p>`,
+    "dl-conv-output": `<p>記号は入力H=32、余白P=1、カーネルK=3、移動幅S=2、間隔D=1です。</p><p>出力=⌊(H+2P-D(K-1)-1)/S+1⌋へ入れると、⌊(32+2-2-1)/2+1⌋=⌊16.5⌋=16です。</p><p>⌊ ⌋は小数点以下を切り捨てる記号です。高さと幅が同じ条件なので16×16になります。</p>`,
+    "dl-conv-dilation": `<p>dilationは、カーネル要素を何マス間隔で置くかを表します。K=3、D=2なら要素を置く位置は0、2、4です。</p><p>端の位置0から4までを含む幅は5なので、有効幅はD(K-1)+1=2×2+1=5です。「3要素×間隔2=6」ではありません。</p>`,
+    "dl-conv-params": `<p>Conv2dの重みは<strong>出力チャネル数×入力チャネル数×高さ×幅</strong>です。</p><p>16×3×3×3=432個。bias=Trueなので、出力16チャネルそれぞれにバイアスが1個ずつあり16個を足します。432+16=448個です。</p>`,
+    "dl-depthwise-cost": `<p>通常畳み込みは各出力チャネルが全入力チャネルを見るため、64×64×3×3=36,864個です。</p><p>Depthwise畳み込みは各入力チャネルを別々に処理するので64×3×3=576個。Pointwiseの1×1畳み込みでチャネルを混ぜる重みは64×64=4,096個です。</p><p>合計576+4,096=4,672個となり、通常畳み込みより大幅に減ります。</p>`,
+    "dl-bn-ln-axis": `<p>Nはバッチ数、Lは系列長、Dは各トークンの特徴数です。</p><p>Layer Normalizationは、1つのトークンが持つD個の特徴の中で平均・分散を計算します。Batch Normalizationは同じ特徴について、主にバッチN方向の複数標本から統計を計算します。</p><p>LayerNormはバッチ内の他サンプルに依存しない点が重要です。</p>`,
+    "dl-normalization-use": `<p>文章は長さが違い、paddingの量も変わります。さらに大規模モデルでは小さいバッチで学習することも多く、BatchNormのバッチ統計が安定しにくくなります。</p><p>LayerNormは各トークン自身の特徴Dだけで正規化できるため、系列長やバッチサイズが変わっても使いやすいのです。どちらも通常、学習可能な拡大係数と平行移動係数を持ちます。</p>`,
+    "dl-initialization": `<p>n_inは、その層へ入ってくる入力数です。ReLUは負の入力を0にするため、およそ半分の信号が消えます。</p><p>He（Kaiming）初期化は重みの分散を約2/n_inにして、その減少を補い、層を重ねても信号や勾配が極端に小さくなりにくくします。全重みを0にすると全ユニットが同じ動きになり学習できません。</p>`,
+    "dl-dropout-scale": `<p>p=0.2は20%を捨てるという意味なので、残す確率は1-p=0.8です。</p><p>PyTorchのinverted dropoutは、学習時に残った値を1/0.8倍して平均的な大きさを保ちます。したがって10÷0.8=12.5です。</p><p>学習時に補正済みなので、推論時に改めて0.8倍する必要はありません。</p>`,
+    "transformer-routing": `<p>QはQuery（質問）、KはKey（検索用の索引）、VはValue（取り出す中身）です。</p><p>Decoderは「今の生成状態に必要な入力情報は何か」をQとして問い合わせます。Encoder出力からKとVを作り、Qに近いKのVを取り出します。</p><p>したがってCross-AttentionではQがDecoder側、KとVがEncoder側です。</p>`,
+    "transformer-self-cross": `<p>Attentionの種類は、Q・K・Vを<strong>どこから作ったか</strong>で見分けます。</p><p>Self-AttentionはQ・K・Vがすべて同じ系列由来です。Cross-AttentionはQとK/Vが別の系列由来です。Softmax、Multi-Head、位置情報の有無だけでは両者を区別できません。</p>`,
+    "transformer-scaled-calc": `<p>d_kはKeyベクトル1本の次元数です。内積の値が次元とともに大きくなりすぎないよう、Softmaxの前に√d_kで割ります。</p><p>√4=2なので、[2,0]÷2=[1,0]です。その後Softmaxを取ると、およそ[0.731,0.269]の重みになります。</p>`,
+    "transformer-mask": `<p>自己回帰Decoderは文章を左から右へ作るため、現在位置から未来の正解を見てはいけません。</p><p>参照禁止位置の点数へ-∞に近い大きな負数を足すと、指数exp(-∞)が0になり、Softmax後の重みも0になります。0を足すだけでは元の点数が残るので隠せません。</p>`,
+    "transformer-mha-shape": `<p>Multi-Head Attentionでは、モデル全体の特徴512次元を8個のheadへ等分します。</p><p>512÷8=64なので、各headのQ・K・Vは通常64次元です。8個の出力を横に連結すると64×8=512次元へ戻ります。</p>`,
+    "transformer-shifted-window": `<p>Swin Transformerは画像を小さな窓に分け、窓の中だけでAttentionを計算して計算量を抑えます。</p><p>ただし毎層同じ窓では、窓の境界を越えて情報が伝わりにくくなります。次の層で窓位置をずらすShifted Windowにより、前の層では別窓だった領域を同じ窓で結び付けます。</p>`,
+    "llm-next-token": `<p>GPTは文章を左から右へ読み、それまでのトークンから次の1トークンを予測します。これをNext Token Predictionと呼びます。</p><p>各位置で正解トークンの確率を高くする、つまりクロスエントロピーを小さくするよう学習します。文中をランダムに隠して復元するMLMとは目的が異なります。</p>`,
+    "llm-rag": `<p>RAGは<strong>Retrieval-Augmented Generation（検索拡張生成）</strong>の略です。</p><ol><li>質問に関係する文書を外部データベースから検索します。</li><li>見つけた文書を質問と一緒にプロンプトへ入れます。</li><li>言語モデルがその文脈を使って回答を生成します。</li></ol><p>モデルの重みを更新するファインチューニングとは別の仕組みです。</p>`,
+    "pytorch-ce-logits": `<p>logits（ロジット）は、Softmax前の各クラスの生の点数です。</p><p><code>CrossEntropyLoss</code>は内部でLogSoftmax（確率化して対数を取る処理）とNLLLoss（正解クラスの負の対数を取る損失）を行います。そのためモデル側で先にSoftmaxせず、shape (N,C) のlogitsをそのまま渡します。</p>`,
+    "pytorch-bce-logits": `<p>BCEはBinary Cross Entropy（二値交差エントロピー）の略です。</p><p><code>BCEWithLogitsLoss</code>はSigmoidとBCEを1つにまとめ、非常に大きい・小さいlogitでも安定して計算します。<code>BCELoss</code>は0〜1の確率を受け取るので、使うなら別途Sigmoidが必要です。</p>`,
+    "pytorch-eval-no-grad": `<p><code>model.eval()</code>はモデルの運転モードを推論用へ変えます。Dropoutを止め、BatchNormは保存済み統計を使いますが、勾配の記録自体は続きます。</p><p><code>torch.no_grad()</code>は計算グラフを作らず、勾配記録を止めてメモリを節約しますが、層のモードは変えません。推論では役割の異なる両方を使います。</p>`,
+    "pytorch-gradient-accum": `<p>PyTorchの<code>backward()</code>は、<code>.grad</code>を上書きせず加算します。</p><p>すでに3が入っているところへ新しい勾配5を計算すると、3+5=8です。通常の各ミニバッチ更新では事前に<code>zero_grad()</code>で消しますが、意図的に複数回分をためる勾配蓄積ではこの仕様を利用します。</p>`,
+    "pytorch-zero-order": `<p>1回の更新は次の順です。</p><ol><li><code>zero_grad</code>：前回の勾配を消す</li><li><code>forward</code>：入力から予測を計算する</li><li><code>loss</code>：予測と正解のずれを測る</li><li><code>backward</code>：各重みの勾配を計算する</li><li><code>step</code>：勾配を使って重みを更新する</li></ol><p><code>step</code>を<code>backward</code>より先には実行できません。</p>`,
+    "pytorch-permute-view": `<p><code>permute</code>は軸の見え方を入れ替えますが、メモリ上の実際の並びを移動しないため、非連続になる場合があります。</p><p><code>view</code>は連続した並びを前提とするので失敗することがあります。<code>reshape</code>は必要ならコピーを作るため安全です。別解は<code>y.contiguous().view(...)</code>です。</p>`,
+    "pytorch-detach": `<p>autogradは計算のつながりを記録し、逆伝播で勾配を流します。<code>detach()</code>は値を保ったまま、その地点で計算グラフとのつながりを切ったTensorを返します。</p><p>元Tensorと同じストレージを共有するため、完全に独立したコピーも欲しい場合は<code>x.detach().clone()</code>を使います。</p>`,
+    "pytorch-lstm-shape": `<p><code>h_n</code>は各層・各方向の最後の隠れ状態を持ち、形状は<strong>(層数×方向数, バッチ数, hidden_size)</strong>です。</p><p>2層、双方向なので2×2=4。batch=8、hidden_size=32を続けて、(4,8,32)です。<code>batch_first=True</code>は入力と時系列outputの軸順だけを変え、h_nには影響しません。</p>`,
+    "pytorch-autograd-inplace": `<p>in-place演算は、末尾が<code>_</code>の演算など、同じTensorの中身をその場で書き換える処理です。</p><p>autogradは逆伝播用に中間値とversion番号を保存しています。必要な値を途中で書き換えると、計算時の値と合わなくなり、エラーや誤った勾配の原因になります。</p>`,
+    "pytorch-train-bn": `<p>BatchNormは学習中、現在のミニバッチから平均と分散を計算して正規化します。同時に、推論時に使うrunning_meanとrunning_varも少しずつ更新します。</p><p><code>model.eval()</code>へ切り替えると、原則として現在のバッチではなく、この保存済みrunning統計を使います。Dropoutのようにチャネルをランダムに0にはしません。</p>`,
+    "generative-ddpm": `<p>DDPMは<strong>Denoising Diffusion Probabilistic Model（ノイズ除去拡散確率モデル）</strong>の略です。</p><p>学習では、画像へ段階的にノイズを加え、各段階で加えたノイズなどをニューラルネットに予測させます。生成では完全なランダムノイズから始め、予測したノイズを少しずつ除いて画像へ戻します。</p>`,
+    "generative-vae-elbo": `<p>VAEはVariational Autoencoder（変分オートエンコーダ）、ELBOはEvidence Lower Bound（周辺尤度の下限）の略です。</p><p>第1項は<strong>再構成</strong>で、入力をどれだけ元通りに作れたかを評価します。第2項のKLダイバージェンスは、Encoderが作る潜在分布を事前分布へ近づけ、潜在空間を整えます。</p><p>つまり「きれいに復元する」と「潜在空間をばらばらにしない」の両方を最適化します。</p>`,
+    "generative-gan-ddpm": `<p>GANはGenerative Adversarial Network（敵対的生成ネットワーク）で、偽物を作るGeneratorと見破るDiscriminatorを競わせます。</p><p>DDPMは識別器との対戦ではなく、ノイズを加える過程の逆向きを学びます。GANは少ない回数で高速生成しやすい一方、mode collapse（似た出力ばかりになる現象）が課題です。DDPMは反復回数が多いものの学習が比較的安定しています。</p>`,
+    "rl-q-sarsa": `<p>TDターゲットは「今のQ値が近づくべき目標値」です。どちらも即時報酬rと、割引率γを掛けた次状態のQ値を使います。</p><p>Q学習は次状態で最大のQ値を使うため、実際に取る行動とは別の最良行動を学ぶoff-policyです。Sarsaは実際の方策が選んだ次行動a'のQ値を使うon-policyです。</p>`,
+    "xai-integrated-gradients": `<p>Integrated Gradients（積分勾配法）は、入力の各特徴が予測へどれだけ貢献したかを求める説明手法です。</p><p>まず黒画像などの基準入力（baseline）を決め、そこから実入力まで少しずつ変化させます。その道中の勾配を平均し、入力との差を掛けます。各特徴の寄与を合計すると、おおむね実入力とbaselineの出力差になる性質があります。</p>`,
+    "xai-gradcam-ig": `<p>Grad-CAMは主にCNNの最後の畳み込み特徴マップを使い、「画像のどの辺を見たか」を粗いヒートマップで示します。</p><p>Integrated Gradients（IG）はbaselineから実入力までの勾配を積分し、入力画素や入力特徴ごとの寄与を求めます。Grad-CAMはCNNの空間位置に強く、IGは微分可能な幅広いモデルへ使える、という違いです。</p>`
+};
+
+const bootcampBeginnerQuestionUpdates = {
+    "math-confusion": {
+        question: "TP（真陽性）=40、FN（偽陰性）=10、FP（偽陽性）=15、TN（真陰性）=35のとき、TPR（真陽性率）とFPR（偽陽性率）の組はどれか。"
+    },
+    "metric-perplexity": {
+        question: "言語モデルの1トークン当たり平均クロスエントロピーHが ln(4) のとき、パープレキシティPPはいくつか。",
+        options: ["4", "ln(4)（約1.386）", "2", "16"]
+    },
+    "dl-conv-output": {
+        question: "入力32×32、kernel（カーネル）=3、stride（移動幅）=2、padding（余白）=1、dilation（間隔）=1のConv2d出力サイズはどれか。"
+    },
+    "dl-conv-dilation": {
+        question: "kernel（カーネル）=3、dilation（要素間隔）=2の1次元畳み込みで、端から端までの有効カーネル幅はいくつか。"
+    },
+    "dl-bn-ln-axis": {
+        trap: "LayerNormのLayerは『層数の方向』という意味ではありません。PyTorchのnormalized_shapeは、各データの末尾にある特徴軸Dなど、どの範囲で平均・分散を取るかを指定します。"
+    },
+    "transformer-routing": {
+        question: "Encoder-Decoder TransformerのCross-Attentionで、Q（Query）、K（Key）、V（Value）の入力元はどれか。"
+    },
+    "transformer-scaled-calc": {
+        question: "1つのQueryに対する内積スコアQK^Tが[2,0]、Keyの次元数d_kが4である。Softmaxへ入れる直前のスコアはどれか。"
+    },
+    "transformer-mask": {
+        question: "文章を左から順に生成する自己回帰Decoderのcausal maskでは、未来の参照禁止位置のAttentionロジットへ通常何を加えるか。"
+    },
+    "transformer-mha-shape": {
+        question: "モデル全体の特徴次元d_modelが512、Multi-Head Attentionのhead数が8で、各headへ等分する。各headのKey次元d_kはいくつか。"
+    },
+    "llm-rag": {
+        question: "RAG（Retrieval-Augmented Generation・検索拡張生成）の典型的な処理順として正しいものはどれか。"
+    },
+    "pytorch-ce-logits": {
+        trap: "Nは1回に処理するデータ数、Cはクラス数です。logitsは(N,C)の実数の点数、正解targetは通常(N)の整数クラス番号で、PyTorchではlong型を使います。"
+    },
+    "pytorch-bce-logits": {
+        question: "2値分類で、Sigmoid前の生の点数（logit）を直接渡せて数値的にも安定した損失関数はどれか。"
+    },
+    "rl-q-sarsa": {
+        question: "Q学習とSarsaで、TDターゲット（現在のQ値が近づく目標値）の違いとして正しいものはどれか。"
+    },
+    "generative-ddpm": {
+        question: "DDPM（ノイズ除去拡散確率モデル）の学習と生成の対応として正しいものはどれか。"
+    },
+    "generative-vae-elbo": {
+        question: "VAE（変分オートエンコーダ）でELBO（周辺尤度の下限）を最大化するとき、主要な2項はどれか。"
+    },
+    "generative-gan-ddpm": {
+        question: "GAN（敵対的生成ネットワーク）とDDPM（ノイズ除去拡散確率モデル）の違いとして最も適切なものはどれか。"
+    },
+    "xai-integrated-gradients": {
+        question: "Integrated Gradients（積分勾配法）の説明として正しいものはどれか。"
+    },
+    "xai-gradcam-ig": {
+        question: "Grad-CAMとIntegrated Gradients（IG・積分勾配法）の典型的な違いとして正しいものはどれか。"
+    }
+};
+
+window.quizData.questions.forEach(question => {
+    question.explanation = bootcampBeginnerExplanations[question.id];
+    question.beginnerReviewed = true;
+    if (bootcampBeginnerQuestionUpdates[question.id]) Object.assign(question, bootcampBeginnerQuestionUpdates[question.id]);
+});

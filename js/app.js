@@ -225,6 +225,11 @@ function formatTime(sec) {
     return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 }
 
-function typeset(element) {
-    if (window.MathJax?.typesetPromise && element) MathJax.typesetPromise([element]).catch(() => {});
+function typeset(element, attempt = 0) {
+    if (!element?.isConnected) return;
+    if (window.MathJax?.typesetPromise) {
+        MathJax.typesetPromise([element]).catch(() => {});
+        return;
+    }
+    if (attempt < 30) setTimeout(() => typeset(element, attempt + 1), 100);
 }
