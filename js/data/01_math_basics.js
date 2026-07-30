@@ -47,6 +47,13 @@ window.quizData = {
                 <td><strong>「共有している情報」</strong><br>・$Y$を知ると$X$がどれだけ分かるか。<br>・独立なら <strong>0</strong>（無関係）。</td>
             </tr>
         </table>
+
+        <h3>■ 計算問題を解く順番</h3>
+        <ol>
+            <li><strong>最尤推定 (MLE)</strong>：候補ごとに尤度 $P(D|\\theta)$ を計算し、最大のものを選ぶ。</li>
+            <li><strong>MAP推定・ベイズ推定</strong>：まず「尤度 × 事前確率」を計算し、全候補の和で割って事後確率へ正規化する。MAP推定では、その事後確率が最大の候補を選ぶ。</li>
+            <li><strong>情報量</strong>：対数の底を最初に確認する。底が2なら単位は bit、自然対数 $\\ln$ なら単位は nat。</li>
+        </ol>
     `,
     questions: [
         // ---------------------------------------------------------
@@ -181,6 +188,80 @@ window.quizData = {
             options: ["[0.25, 0.25, 0.25, 0.25]", "[1, 0, 0, 0]", "[0.7, 0.1, 0.1, 0.1]", "[0.4, 0.3, 0.2, 0.1]"],
             answer: 0,
             explanation: "全事象が等確率のとき不確実性が最も高く、エントロピーは最大になります。"
+        },
+
+        // ---------------------------------------------------------
+        // 【計算編】 Q19 - Q25
+        // ---------------------------------------------------------
+        {
+            id: "math-bayes-posterior-calc",
+            category: "ベイズ推定（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "2つのモデル $A,B$ の事前確率が $P(A)=0.4,\\ P(B)=0.6$ である。観測データ $D$ に対する尤度が $P(D|A)=0.75,\\ P(D|B)=0.25$ のとき、ベイズ推定による事後確率 $P(A|D)$ はどれか。",
+            options: ["0.25", "0.40", "約0.667", "0.75"],
+            answer: 2,
+            explanation: `<ol><li>モデルAの「尤度 × 事前確率」は $0.75\\times0.4=0.30$ です。</li><li>モデルBは $0.25\\times0.6=0.15$ です。</li><li>周辺尤度は両者の和なので、$P(D)=0.30+0.15=0.45$ です。</li><li>ベイズ則へ代入すると、$P(A|D)=0.30/0.45=2/3\\approx0.667$ です。</li></ol><p>観測前はAの確率が40%でしたが、DはAのもとで起こりやすいため、観測後は約66.7%まで上がります。</p>`
+        },
+        {
+            id: "math-mle-likelihood-product-calc",
+            category: "最尤推定（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "MLE（Maximum Likelihood Estimation：最尤推定）を行う。独立な2つの観測 $x_1,x_2$ について、候補 $\\theta_1$ では $P(x_1|\\theta_1)=0.8,\\ P(x_2|\\theta_1)=0.6$、$\\theta_2$ では $0.5,\\ 0.9$、$\\theta_3$ では $0.7,\\ 0.5$ である。最尤推定値はどれか。",
+            options: ["$\\theta_2$", "$\\theta_1$", "$\\theta_3$", "3候補は同じ"],
+            answer: 1,
+            explanation: `<ol><li>独立な観測の尤度は、各観測の確率の積です。</li><li>$L(\\theta_1)=0.8\\times0.6=0.48$。</li><li>$L(\\theta_2)=0.5\\times0.9=0.45$。</li><li>$L(\\theta_3)=0.7\\times0.5=0.35$。</li></ol><p>最大は0.48なので、最尤推定値は $\\theta_1$ です。MLEは事前確率を使わず、観測データの尤度だけを比較します。</p>`
+        },
+        {
+            id: "math-map-score-calc",
+            category: "MAP推定（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "MAP（Maximum A Posteriori：最大事後確率）推定を行う。候補 $\\theta_A,\\theta_B$ の尤度がそれぞれ $0.6,\\ 0.4$、事前確率がそれぞれ $0.2,\\ 0.8$ である。MAP推定で選ばれる候補と、その候補の正規化後の事後確率の組合せはどれか。",
+            options: ["$\\theta_A$、約0.273", "$\\theta_A$、0.600", "$\\theta_B$、0.800", "$\\theta_B$、約0.727"],
+            answer: 3,
+            explanation: `<ol><li>$\\theta_A$ のMAPスコアは、$0.6\\times0.2=0.12$ です。</li><li>$\\theta_B$ は、$0.4\\times0.8=0.32$ です。</li><li>大きい方は $\\theta_B$ なので、MAP推定では $\\theta_B$ を選びます。</li><li>正規化すると、$P(\\theta_B|D)=0.32/(0.12+0.32)=0.32/0.44\\approx0.727$ です。</li></ol><p>尤度だけなら $\\theta_A$ が有利ですが、強い事前確率を考慮すると $\\theta_B$ が選ばれます。ここがMLEとの違いです。</p>`
+        },
+        {
+            id: "math-entropy-three-outcomes-calc",
+            category: "エントロピー（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "確率分布 $P=[0.5,\\ 0.25,\\ 0.25]$ のエントロピー $H(P)=-\\sum_i P_i\\log_2P_i$ は何 bit か。$\\log_2 0.5=-1,\\ \\log_2 0.25=-2$ とする。",
+            options: ["1.5 bit", "1.0 bit", "0.5 bit", "2.0 bit"],
+            answer: 0,
+            explanation: `<ol><li>式へ代入すると、$H(P)=-[0.5\\log_2 0.5+0.25\\log_2 0.25+0.25\\log_2 0.25]$ です。</li><li>対数値を入れると、$-[0.5(-1)+0.25(-2)+0.25(-2)]$。</li><li>$-[-0.5-0.5-0.5]=1.5$ bit です。</li></ol><p>確率が1つに集中するとエントロピーは小さくなり、均等に近づくほど不確実性が増えて大きくなります。</p>`
+        },
+        {
+            id: "math-cross-entropy-one-hot-calc",
+            category: "クロスエントロピー（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "真の分布が $P=[1,0,0]$、予測分布が $Q=[0.8,0.1,0.1]$ のとき、クロスエントロピー（Cross Entropy）$H(P,Q)=-\\sum_i P_i\\log_2Q_i$ はどれか。$\\log_2 0.8\\approx-0.322$ とする。",
+            options: ["0.100 bit", "0.800 bit", "約0.322 bit", "約3.322 bit"],
+            answer: 2,
+            explanation: `<ol><li>$P=[1,0,0]$ なので、正解クラスである第1項だけが残ります。</li><li>$H(P,Q)=-[1\\times\\log_2 0.8+0\\times\\log_2 0.1+0\\times\\log_2 0.1]$。</li><li>$-\\log_2 0.8=-(-0.322)\\approx0.322$ bit です。</li></ol><p>正解クラスの予測確率0.8が1へ近づくほど、この損失は0へ近づきます。</p>`
+        },
+        {
+            id: "math-kl-divergence-binary-calc",
+            category: "KLダイバージェンス（計算）",
+            kind: "計算",
+            difficulty: "やや難",
+            question: "分布 $P=[0.5,0.5]$ と $Q=[0.25,0.75]$ に対し、KL（Kullback-Leibler）ダイバージェンス $D_{KL}(P||Q)=\\sum_iP_i\\log_2(P_i/Q_i)$ はどれか。$\\log_2(2/3)\\approx-0.585$ とする。",
+            options: ["0 bit", "約0.208 bit", "0.500 bit", "約1.585 bit"],
+            answer: 1,
+            explanation: `<ol><li>第1項は、$0.5\\log_2(0.5/0.25)=0.5\\log_2 2=0.5$ です。</li><li>第2項は、$0.5\\log_2(0.5/0.75)=0.5\\log_2(2/3)\\approx0.5\\times(-0.585)=-0.2925$ です。</li><li>合計は、$0.5-0.2925=0.2075\\approx0.208$ bit です。</li></ol><p>$P$ と $Q$ が一致していないため0より大きくなります。また、$D_{KL}(Q||P)$ は一般に別の値です。</p>`
+        },
+        {
+            id: "math-mutual-information-entropy-calc",
+            category: "相互情報量（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "確率変数 $X$ のエントロピーが $H(X)=1.5$ bit、$Y$ を知った後の条件付きエントロピーが $H(X|Y)=0.5$ bit である。相互情報量（Mutual Information）$I(X;Y)$ はどれか。",
+            options: ["0 bit", "0.5 bit", "2.0 bit", "1.0 bit"],
+            answer: 3,
+            explanation: `<ol><li>相互情報量は、$I(X;Y)=H(X)-H(X|Y)$ です。</li><li>値を代入すると、$I(X;Y)=1.5-0.5=1.0$ bit です。</li></ol><p>$Y$ を知ることで、$X$ の不確実性が1.0 bit減った、つまり $X$ について1.0 bitの情報を得たことを意味します。</p>`
         }
     ]
 };

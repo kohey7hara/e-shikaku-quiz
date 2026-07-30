@@ -14,7 +14,7 @@ const menuConfig = [
     {
         id: "01_math_basics",
         title: "1-（２）（３）確率・統計 & 情報理論",
-        desc: "ベイズ則 / 最尤・MAP推定 / エントロピー / KLダイバージェンス",
+        desc: "ベイズ推定 / 最尤・MAP推定 / エントロピー / クロスエントロピー / KLダイバージェンス / 相互情報量",
         isActive: true
     },
 
