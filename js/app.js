@@ -51,7 +51,7 @@ function saveAnswer(q, isCorrect) {
 
 if (quizId) {
     const script = document.createElement('script');
-    script.src = `js/data/${quizId}.js?v=20260730-formulaguide`;
+    script.src = `js/data/${quizId}.js?v=20260730-usecases`;
     script.onload = () => window.quizData ? (currentQuizData = window.quizData, initApp()) : showError('問題データの形式が正しくありません。');
     script.onerror = () => showError('指定された問題データが見つかりません。');
     document.body.appendChild(script);
@@ -67,7 +67,14 @@ function showError(msg) {
 function initApp() {
     document.title = currentQuizData.title;
     document.getElementById('quizTitle').textContent = currentQuizData.title;
-    document.getElementById('cheatSheetContent').innerHTML = currentQuizData.cheatSheet || '<p>要点まとめは準備中です。</p>';
+    let cheatSheet = currentQuizData.cheatSheet || '<p>要点まとめは準備中です。</p>';
+    const supplement = window.quizSupplements?.[quizId];
+    if (supplement?.html) {
+        cheatSheet = supplement.before && cheatSheet.includes(supplement.before)
+            ? cheatSheet.replace(supplement.before, `${supplement.html}${supplement.before}`)
+            : `${cheatSheet}${supplement.html}`;
+    }
+    document.getElementById('cheatSheetContent').innerHTML = cheatSheet;
     renderSetup();
     typeset(document.getElementById('cheatSheetContent'));
 }
