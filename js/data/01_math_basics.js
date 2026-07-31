@@ -2,64 +2,73 @@ window.quizData = {
     title: "1. 数学的基礎：確率・統計 & 情報理論",
     
     cheatSheet: `
-        <h3>■ パラメータ推定の「3つの流派」比較</h3>
-        <p>「手元のデータ」と「事前の知識」をどう扱うかの違いを整理しましょう。</p>
+        <h3>■ 最尤推定・MAP推定・ベイズ推定：同じデータで比べる</h3>
+        <p><strong>まず「何が与えられ、何を求めるのか」から始めます。</strong>次の例では、障害の原因候補がAとBの2つあり、新しいエラーログ $D$ が観測されたとします。このログを手掛かりに原因を推定します。</p>
         <table>
-            <tr><th>手法</th><th>狙い（数式の意味）</th><th>脳内イメージ・特徴</th></tr>
+            <tr><th>与えられたもの</th><th>意味</th><th>今回の値</th></tr>
+            <tr><td>$A,\\ B$</td><td>推定したい原因の候補</td><td>原因A、原因B</td></tr>
+            <tr><td>$D$</td><td>実際に観測されたデータ</td><td>新しいエラーログ</td></tr>
+            <tr><td>$P(A),\\ P(B)$</td><td><strong>事前確率</strong>：ログを見る前の起こりやすさ</td><td>$P(A)=0.4,\\ P(B)=0.6$</td></tr>
+            <tr><td>$P(D|A),\\ P(D|B)$</td><td><strong>尤度</strong>：その原因なら、このログが出る確率</td><td>$P(D|A)=0.75,\\ P(D|B)=0.25$</td></tr>
+        </table>
+        <p><strong>条件付き確率の読み方：</strong>$P(D|A)$ は「原因がAだったと仮定したとき、ログ $D$ が出る確率」です。縦棒 $|$ の<strong>右側を前提</strong>として読みます。</p>
+
+        <h3>■ 同じ数値を3つの手法へ代入する</h3>
+        <table>
+            <tr><th>手法</th><th>使う式</th><th>今回の計算・答え</th><th>何をしたいとき？</th></tr>
             <tr>
-                <td><strong>最尤推定 (MLE)</strong><br>Maximum Likelihood</td>
-                <td>尤度 $P(D|\\theta)$ を最大化<br>「データに最も当てはまる値」を探す</td>
-                <td><strong>「データ至上主義」</strong><br>手元のデータだけを信じる。<br>データが少ないと極端な値になりがち（<strong>過学習</strong>）。</td>
+                <td><strong>最尤推定<br>(MLE)</strong></td>
+                <td>$\\hat{\\theta}_{MLE}=\\underset{\\theta}{\\arg\\max}\\ P(D|\\theta)$<br>尤度が最大の候補を選ぶ</td>
+                <td>$P(D|A)=0.75$<br>$P(D|B)=0.25$<br>$0.75>0.25$ なので <strong>A</strong></td>
+                <td><strong>「観測データだけで決める」</strong><br>学習データに最も合うパラメータを求める場面。</td>
             </tr>
             <tr>
-                <td><strong>MAP推定</strong><br>Maximum A Posteriori</td>
-                <td>事後確率 $P(\\theta|D)$ を最大化<br>「尤度 × <strong>事前確率</strong>」を最大化</td>
-                <td><strong>「データ ＋ 経験則」</strong><br>事前分布が「常識（ブレーキ）」として働く。<br>これが<strong>正則化</strong>の役割を果たす。</td>
+                <td><strong>MAP推定</strong></td>
+                <td>$\\hat{\\theta}_{MAP}=\\underset{\\theta}{\\arg\\max}\\ P(D|\\theta)P(\\theta)$<br>尤度 × 事前確率が最大の候補を選ぶ</td>
+                <td>A：$0.75\\times0.4=0.30$<br>B：$0.25\\times0.6=0.15$<br>$0.30>0.15$ なので <strong>A</strong></td>
+                <td><strong>「データ ＋ 事前知識で決める」</strong><br>データが少ないとき、事前知識で極端な推定を抑える場面。</td>
             </tr>
             <tr>
-                <td><strong>ベイズ推定</strong><br>Bayesian Inference</td>
-                <td>事後分布 $P(\\theta|D)$ そのものを求める<br>（点ではなく分布）</td>
-                <td><strong>「一点張りしない」</strong><br>答えを1つに決めず、「分布（山）」で答える。<br>計算コストが高い（積分が必要）。</td>
+                <td><strong>ベイズ推定</strong></td>
+                <td>$P(\\theta|D)=\\dfrac{P(D|\\theta)P(\\theta)}{P(D)}$<br>各候補の事後確率を求める</td>
+                <td>$P(D)=0.30+0.15=0.45$<br>$P(A|D)=0.30/0.45\\approx0.667$<br>$P(B|D)=0.15/0.45\\approx0.333$</td>
+                <td><strong>「候補ごとの確信度を残す」</strong><br>AかBかを一点に断定せず、不確実性も含めて判断する場面。</td>
             </tr>
         </table>
 
-        <h3>■ ベイズ推定は「掛ける → 足す → 割る」</h3>
-        <p><strong>「A×A'、B×B'」というイメージは、A'とB'を尤度の意味で使っているならほぼ正解です。</strong>ただし、確率の記法で $A'$ は「Aではない」という補集合を表すことがあるため、試験では次の正式な形で覚えましょう。</p>
-        <p>$s_A=P(D|A)P(A),\\quad s_B=P(D|B)P(B)$</p>
-        <table>
-            <tr><th>仮説</th><th>事前確率</th><th>尤度</th><th>掛けた値</th><th>事後確率</th></tr>
-            <tr><td>A</td><td>$P(A)=0.4$</td><td>$P(D|A)=0.75$</td><td>$s_A=0.75\\times0.4=0.30$</td><td>$0.30/(0.30+0.15)\\approx0.667$</td></tr>
-            <tr><td>B</td><td>$P(B)=0.6$</td><td>$P(D|B)=0.25$</td><td>$s_B=0.25\\times0.6=0.15$</td><td>$0.15/(0.30+0.15)\\approx0.333$</td></tr>
-        </table>
+        <h3>■ ベイズ推定の解法は「掛ける → 足す → 割る」</h3>
+        <p>ベイズ推定では、まず各候補の<strong>尤度 × 事前確率</strong>を計算します。これはまだ合計が1ではないため、最後に正規化して事後確率へ直します。</p>
         <ol>
-            <li><strong>掛ける：</strong>各候補で「尤度 × 事前確率」を計算する。</li>
-            <li><strong>足す：</strong>$0.30+0.15=0.45$。これが観測データ $D$ の確率 $P(D)$ になる。</li>
-            <li><strong>割る：</strong>AとBの<strong>両方</strong>を0.45で割り、合計が1になる事後確率へ直す。候補が3つ以上なら全候補の和で割る。</li>
+            <li><strong>掛ける：</strong>$s_A=P(D|A)P(A)=0.75\\times0.4=0.30$、$s_B=P(D|B)P(B)=0.25\\times0.6=0.15$。</li>
+            <li><strong>足す：</strong>$P(D)=s_A+s_B=0.30+0.15=0.45$。候補が3つ以上なら、すべての候補の値を足す。</li>
+            <li><strong>割る：</strong>$P(A|D)=s_A/P(D)=0.30/0.45\\approx0.667$。Bも同様に割ると約0.333になり、合計が1になる。</li>
         </ol>
+        <p><strong>2候補の場合の式：</strong>$P(A|D)=\\dfrac{P(D|A)P(A)}{P(D|A)P(A)+P(D|B)P(B)}$</p>
+        <p><strong>「A×A'、B×B'」というイメージについて：</strong>考え方は「各候補で2つの値を掛ける」なので近いですが、正式には <strong>$P(D|A)\\times P(A)$、$P(D|B)\\times P(B)$</strong> と書きます。確率の記法で $A'$ は「Aではない」という補集合を表すことがあるため、尤度の代わりに $A'$ と書かないようにします。</p>
         <p><strong>ここが3手法の分かれ目：</strong>尤度 $0.75$ と $0.25$ だけを比べるのが<strong>最尤推定 (MLE)</strong>、掛けた値 $0.30$ と $0.15$ を比べて大きいAを選ぶのが<strong>MAP推定</strong>、Aが約66.7%・Bが約33.3%という分布を両方残すのが<strong>ベイズ推定</strong>です。</p>
 
-        <h3>■ 情報理論の重要概念</h3>
+        <h3>■ 情報理論の4概念は「何を測るか」で使い分ける</h3>
         <table>
-            <tr><th>用語</th><th>数式・定義</th><th>脳内イメージ・試験のツボ</th></tr>
+            <tr><th>用語</th><th>数式・何を測る？</th><th>簡単な例・使われる場面</th></tr>
             <tr>
                 <td><strong>エントロピー</strong><br>(平均情報量)</td>
-                <td>$H(P) = -\\sum P(x) \\log P(x)$</td>
-                <td><strong>「予測のつかなさ（乱雑さ）」</strong><br>・一様分布（どれが出るか不明）＝ <strong>最大</strong><br>・確率100%（バレバレ）＝ <strong>0</strong></td>
+                <td>$H(P) = -\\sum P(x) \\log P(x)$<br>1つの分布の迷い具合</td>
+                <td><strong>「選択肢の迷い具合」</strong><br>・例：犬50%・猫50%は迷いが大きく、犬100%なら0。<br>・場面：分類の不確実性や決定木の乱雑さを測る。</td>
             </tr>
             <tr>
                 <td><strong>KLダイバージェンス</strong><br>(相対エントロピー)</td>
-                <td>$D_{KL}(P||Q) = \\sum P(x) \\log \\frac{P(x)}{Q(x)}$</td>
-                <td><strong>「分布間の距離」</strong><br>・$P$と$Q$が似ていれば 0 に近づく。<br>・距離だが一方通行（<strong>非対称</strong>）。<br>・常に <strong>0以上</strong>。</td>
+                <td>$D_{KL}(P||Q) = \\sum P(x) \\log \\frac{P(x)}{Q(x)}$<br>分布 $Q$ の基準 $P$ からのずれ</td>
+                <td><strong>「2つの確率分布のずれ」</strong><br>・例：正解の犬80%・猫20%と、予測の犬75%・猫25%のずれ。<br>・場面：分布を近づける学習やVAEの正則化。<br>・非対称で、常に0以上。</td>
             </tr>
             <tr>
                 <td><strong>クロスエントロピー</strong></td>
-                <td>$H(P,Q) = -\\sum P(x) \\log Q(x)$</td>
-                <td><strong>「KLダイバージェンスの相棒」</strong><br>機械学習の損失関数。<br>これを最小化 ＝ KL（距離）の最小化。</td>
+                <td>$H(P,Q) = -\\sum P(x) \\log Q(x)$<br>予測 $Q$ の正解 $P$ に対する悪さ</td>
+                <td><strong>「自信満々の間違いを強く叱る」</strong><br>・例：正解が犬なのに、犬の予測確率が0.9なら小さな罰、0.1なら大きな罰。<br>・場面：画像分類などの損失関数。</td>
             </tr>
             <tr>
                 <td><strong>相互情報量</strong></td>
-                <td>$I(X;Y) = H(X) - H(X|Y)$</td>
-                <td><strong>「共有している情報」</strong><br>・$Y$を知ると$X$がどれだけ分かるか。<br>・独立なら <strong>0</strong>（無関係）。</td>
+                <td>$I(X;Y) = H(X) - H(X|Y)$<br>$Y$ を知って減った $X$ の迷い</td>
+                <td><strong>「その情報、答えの役に立つ？」</strong><br>・例：天気を知ると「傘を持つか」の迷いがどれだけ減るか。<br>・場面：特徴量選択や決定木の分割。独立なら0。</td>
             </tr>
         </table>
 
