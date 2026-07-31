@@ -51,7 +51,7 @@ function saveAnswer(q, isCorrect) {
 
 if (quizId) {
     const script = document.createElement('script');
-    script.src = `js/data/${quizId}.js?v=20260731-info-calculations`;
+    script.src = `js/data/${quizId}.js?v=20260731-distance-calculations`;
     script.onload = () => window.quizData ? (currentQuizData = window.quizData, initApp()) : showError('問題データの形式が正しくありません。');
     script.onerror = () => showError('指定された問題データが見つかりません。');
     document.body.appendChild(script);
