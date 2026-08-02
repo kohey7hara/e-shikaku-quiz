@@ -21,6 +21,9 @@ window.quizData = {
             .bg-orange { background-color: #f39c12; }
 
             .calc-box { background:#f9f9f9; padding:5px; border:1px dashed #999; margin-top:5px; font-size:0.9em; text-align:left; }
+            .syllabus-note { background:#eef7ff; border-left:5px solid #3498db; padding:12px 14px; margin:12px 0; line-height:1.7; }
+            .history-core { background:#fff8df; }
+            .model-formula { white-space:nowrap; font-weight:bold; }
         </style>
 
         <h3>■ 3大タスクの比較と出力</h3>
@@ -57,30 +60,114 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ 1. 画像認識 (代表的モデル)</h3>
+        <h3>■ 1. 画像認識モデルの歴史：「何を解決したか」でつなぐ</h3>
+        <div class="syllabus-note">
+            <strong>2026シラバスの直接対象：</strong>ResNet・WideResNetの「残差接続、Residual Block、ボトルネック構造」と、Vision Transformerの「Shifted Window、CLS token、Position embedding」です。<br>
+            <strong>VGG・AlexNetなど：</strong>シラバスの直接キーワードではありませんが、ResNetが登場した理由を理解するための歴史的な比較モデルとして学びます。
+        </div>
         <table class="model-table">
-            <tr><th>モデル</th><th>特徴・強み</th><th>キーワード</th></tr>
+            <tr><th>年</th><th>モデル</th><th>何を進歩させた？</th><th>試験での識別ポイント</th></tr>
             <tr>
+                <td>1998</td>
+                <td><strong>LeNet-5</strong></td>
+                <td>畳み込みとプーリングを重ねる初期CNNを確立。</td>
+                <td>手書き数字認識、Conv → Pool → 全結合</td>
+            </tr>
+            <tr>
+                <td>2012</td>
+                <td><strong>AlexNet</strong></td>
+                <td>大規模画像認識で深層CNNの有効性を示した。</td>
+                <td>ImageNet、GPU、ReLU、Dropout、データ拡張</td>
+            </tr>
+            <tr>
+                <td>2014</td>
                 <td><strong>VGG</strong></td>
-                <td>$3 \\times 3$ の小さなフィルタを深く重ねた単純な構造。</td>
-                <td>シンプル、パラメータ多</td>
+                <td>$3 \\times 3$ の小さな畳み込みを繰り返し、16層・19層へ深層化。</td>
+                <td>構造は単純、全結合層が大きくパラメータが多い</td>
             </tr>
             <tr>
+                <td>2014</td>
+                <td><strong>GoogLeNet</strong><br><small>Inception v1</small></td>
+                <td>$1 \\times 1$、$3 \\times 3$、$5 \\times 5$、Poolingを並列化。</td>
+                <td>Inception Module、$1 \\times 1$で次元圧縮、GAP</td>
+            </tr>
+            <tr class="history-core">
+                <td>2015</td>
                 <td><strong>ResNet</strong></td>
-                <td><strong>残差結合 (Skip Connection)</strong> で $x+F(x)$ を計算。<br>152層などの超深層でも勾配消失しない。</td>
-                <td>Residual Block<br>デファクトスタンダード</td>
+                <td><strong>残差接続</strong>で $H(x)=F(x)+x$ とし、深いPlain Networkの劣化問題を改善。</td>
+                <td>Residual Block、加算、Basic／Bottleneck、射影Shortcut</td>
+            </tr>
+            <tr class="history-core">
+                <td>2016</td>
+                <td><strong>WideResNet</strong></td>
+                <td>層を極端に増やす代わりにResidual Blockのチャネル幅を広げた。</td>
+                <td>「深さ」だけでなく「幅」を増やす</td>
             </tr>
             <tr>
+                <td>2016</td>
+                <td><strong>DenseNet</strong></td>
+                <td>各層が前の全層の特徴を受け取り、特徴を再利用。</td>
+                <td>ResNetは<strong>加算</strong>、DenseNetは<strong>チャネル方向に連結</strong></td>
+            </tr>
+            <tr>
+                <td>2017</td>
                 <td><strong>MobileNet</strong></td>
-                <td><strong>Depthwise Separable Conv</strong> を採用。<br>精度を保ちつつ計算量を劇的に削減（スマホ向け）。</td>
-                <td>軽量化、高速化</td>
+                <td><strong>Depthwise Separable Conv</strong>で計算量を削減。</td>
+                <td>Depthwise（空間）→ Pointwise（チャネル混合）</td>
             </tr>
             <tr>
+                <td>2019</td>
+                <td><strong>EfficientNet</strong></td>
+                <td>深さ・幅・入力解像度をまとめて拡大。</td>
+                <td>Compound Scaling</td>
+            </tr>
+            <tr class="history-core">
+                <td>2020</td>
                 <td><strong>ViT</strong><br>(Vision Transformer)</td>
-                <td>画像をパッチ（16x16等）に分割し、Transformerに入力。<br>CNNを超えうる精度だが大量データが必要。</td>
-                <td>Attention、Patch</td>
+                <td>画像をパッチ列に変換し、純粋なTransformer Encoderで分類。</td>
+                <td>Patch token、CLS token、Position embedding</td>
+            </tr>
+            <tr class="history-core">
+                <td>2021</td>
+                <td><strong>Swin Transformer</strong></td>
+                <td>局所WindowでAttentionし、次の層で窓をずらして窓間を接続。</td>
+                <td>Shifted Window、階層構造、高解像度へ効率的</td>
             </tr>
         </table>
+
+        <h3>■ ResNetの詳細：試験ではブロック内部まで区別する</h3>
+        <p>Residual Block全体は $y=F(x)+S(x)$ と書けます。同じ形なら $S(x)=x$、空間サイズやチャネル数が違う場合は $S(x)=W_sx$ として、$1 \\times 1$ 畳み込みなどで形を合わせます。</p>
+        <table class="model-table">
+            <tr><th>構造</th><th>中身</th><th>代表モデル</th><th>目的</th></tr>
+            <tr>
+                <td><strong>Basic Block</strong></td>
+                <td>$3 \\times 3$ → $3 \\times 3$</td>
+                <td>ResNet-18／34</td>
+                <td>比較的浅いResNetの基本ブロック</td>
+            </tr>
+            <tr>
+                <td><strong>Bottleneck Block</strong></td>
+                <td>$1 \\times 1$圧縮 → $3 \\times 3$ → $1 \\times 1$拡張</td>
+                <td>ResNet-50／101／152</td>
+                <td>深いモデルの計算量を抑える</td>
+            </tr>
+            <tr>
+                <td><strong>Identity Shortcut</strong></td>
+                <td class="model-formula">$S(x)=x$</td>
+                <td>入出力の形が同じ</td>
+                <td>パラメータを増やさず入力を加算</td>
+            </tr>
+            <tr>
+                <td><strong>Projection Shortcut</strong></td>
+                <td class="model-formula">$S(x)=W_sx$</td>
+                <td>解像度・チャネルが変化</td>
+                <td>$1 \\times 1$畳み込み等で加算可能な形へ変換</td>
+            </tr>
+        </table>
+        <div class="calc-box">
+            <strong>劣化問題と過学習は別：</strong>Plain Networkを深くしたとき、テスト誤差だけでなく<strong>訓練誤差まで悪化</strong>するのが劣化問題です。ResNetは「恒等写像なら残差 $F(x)=0$ を学べばよい」という形にし、深いネットワークを最適化しやすくしました。<br>
+            <strong>接続の識別：</strong>ResNetは $F(x)+x$ の<strong>加算</strong>、DenseNetは過去の特徴マップの<strong>連結</strong>、U-NetはEncoderとDecoderの同じ解像度の特徴を<strong>連結</strong>します。
+        </div>
 
         <h3>■ 4. Shifted Window：窓をずらして隣と会話する</h3>
         <style>
@@ -330,6 +417,116 @@ window.quizData = {
             options: ["Shifted Windowは局所窓間の接続、Causal Maskは未来情報の参照禁止が目的", "どちらも未来情報の参照禁止が目的", "どちらもデータ拡張である", "Shifted Windowは出力確率を正規化する"],
             answer: 0,
             explanation: "名前にWindowやMaskが出ても役割は別です。Shifted Windowは画像Attentionの効率と窓間接続、Causal Maskは自己回帰生成のカンニング防止です。"
+        },
+        {
+            id: "img-history-order",
+            category: "画像認識モデル史",
+            kind: "歴史・比較",
+            difficulty: "必須",
+            question: "画像認識モデルの登場順として正しいものはどれか。",
+            options: ["VGG → AlexNet → ResNet → Swin Transformer → ViT", "ResNet → VGG → AlexNet → ViT → Swin Transformer", "AlexNet → VGG → ResNet → ViT → Swin Transformer", "AlexNet → ResNet → VGG → Swin Transformer → ViT"],
+            answer: 2,
+            explanation: "代表年はAlexNet（2012）→ VGG（2014）→ ResNet（2015）→ ViT（2020）→ Swin Transformer（2021）です。年号の丸暗記より、深層CNNの成功→小フィルタで深層化→残差学習→画像のTransformer化→局所Windowで効率化、という課題解決の流れを覚えます。"
+        },
+        {
+            id: "img-alexnet-breakthrough",
+            category: "AlexNet",
+            kind: "歴史・比較",
+            difficulty: "標準",
+            question: "AlexNetが2012年の大規模画像認識で示した特徴の組として最も適切なものはどれか。",
+            options: ["全層をSelf-Attentionだけで構成し、位置埋め込みを使った", "GPUで深いCNNを学習し、ReLU・Dropout・データ拡張を活用した", "Residual Blockを152層積み重ねた", "Depthwise畳み込みだけでモバイル向けに軽量化した"],
+            answer: 1,
+            explanation: "AlexNetは大規模なImageNetとGPU計算を組み合わせ、ReLUで学習を高速化し、Dropoutやデータ拡張で過学習を抑えました。ViT、ResNet、MobileNetの特徴と混同しないことが重要です。"
+        },
+        {
+            id: "img-vgg-core",
+            category: "VGG",
+            kind: "歴史・比較",
+            difficulty: "必須",
+            question: "VGG-16／VGG-19の設計思想として最も適切なものはどれか。",
+            options: ["異なる大きさの畳み込みを並列に適用する", "入力をパッチ列へ変換してTransformerへ入れる", "層間をすべて加算するResidual Blockを使う", "$3 \\times 3$の小さな畳み込みを繰り返し、単純な規則で深くする"],
+            answer: 3,
+            explanation: "VGGは小さな$3 \\times 3$畳み込みを重ね、16層・19層へ深層化しました。構造は理解しやすい一方、後半の全結合層が大きく、パラメータ数が多い点も特徴です。"
+        },
+        {
+            id: "img-vgg-receptive-field",
+            category: "VGG（計算）",
+            kind: "手計算",
+            difficulty: "本試験型",
+            question: "ストライド1の$3 \\times 3$畳み込みを2層重ねる。チャネル数が一定でバイアスを無視すると、1回の$5 \\times 5$畳み込みと比べた説明として正しいものはどれか。",
+            options: ["受容野は$3 \\times 3$のままで、重み数は$9C^2$", "受容野は$7 \\times 7$で、重み数は$49C^2$", "受容野は$5 \\times 5$で、重み数は$18C^2$となり、途中に非線形変換も入る", "受容野は$5 \\times 5$だが、重み数は$50C^2$"],
+            answer: 2,
+            explanation: "$3 \\times 3$を2層重ねた受容野は$5 \\times 5$です。重み数は$3 \\times 3 \\times C^2$が2回なので$18C^2$で、$5 \\times 5$ 1層の$25C^2$より少なくなります。さらに活性化関数を2回入れられるため表現力も高まります。"
+        },
+        {
+            id: "img-inception-core",
+            category: "GoogLeNet／Inception",
+            kind: "歴史・比較",
+            difficulty: "標準",
+            question: "GoogLeNetのInception Moduleを正しく説明しているものはどれか。",
+            options: ["すべての層を前の全層へ密に連結する", "$1 \\times 1$・$3 \\times 3$・$5 \\times 5$畳み込みやPoolingを並列に処理し、$1 \\times 1$畳み込みで計算量も抑える", "入力をそのまま出力へ加算するだけである", "局所Windowを次の層でずらしてAttentionする"],
+            answer: 1,
+            explanation: "Inceptionは複数スケールの特徴を並列に抽出して連結します。高コストな畳み込みの前に$1 \\times 1$畳み込みでチャネルを減らすBottleneck的な設計が重要です。"
+        },
+        {
+            id: "img-resnet-degradation",
+            category: "ResNet（劣化問題）",
+            kind: "内部構造",
+            difficulty: "必須",
+            question: "ResNetが主に改善した「劣化問題（Degradation Problem）」の説明として正しいものはどれか。",
+            options: ["深いモデルでは必ずテスト誤差だけが増える過学習のこと", "画像を縮小しすぎて画素数が0になること", "GPUメモリが不足して学習できないこと", "Plain Networkを深くすると、より表現力があるはずなのに訓練誤差まで悪化する最適化上の問題"],
+            answer: 3,
+            explanation: "劣化問題は単なる過学習ではありません。層を増やしたPlain Networkで訓練誤差まで悪化する現象です。Residual Learningは恒等写像を作りやすくし、深いネットワークの最適化を容易にします。"
+        },
+        {
+            id: "img-residual-learning-formula",
+            category: "ResNet（残差学習）",
+            kind: "内部構造",
+            difficulty: "必須",
+            question: "ResNetで本来求めたい写像を$H(x)$、Residual Blockが学ぶ残差を$F(x)$とすると、関係式として正しいものはどれか。",
+            options: ["$F(x)=H(x)-x$、したがって$H(x)=F(x)+x$", "$F(x)=H(x)+x$、したがって$H(x)=F(x)-x$", "$F(x)=H(x)\\times x$", "$H(x)=\\mathrm{softmax}(F(x))$"],
+            answer: 0,
+            explanation: "Residual Blockは目的写像$H(x)$そのものではなく、入力との差$F(x)=H(x)-x$を学びます。出力側でShortcutの$x$を足し、$H(x)=F(x)+x$へ戻します。"
+        },
+        {
+            id: "img-resnet-projection-shortcut",
+            category: "ResNet（射影Shortcut）",
+            kind: "内部構造",
+            difficulty: "本試験型",
+            question: "Residual Blockで主経路の出力が$16 \\times 16 \\times 128$、入力$x$が$32 \\times 32 \\times 64$のとき、加算前のShortcutとして適切なものはどれか。",
+            options: ["入力をそのまま恒等写像で加える", "$3 \\times 3$ Max Poolingだけでチャネルも自動的に128へする", "$1 \\times 1$畳み込みをstride 2、出力128チャネルで適用する", "Global Average Poolingで$1 \\times 1 \\times 64$へする"],
+            answer: 2,
+            explanation: "加算するテンソルは高さ・幅・チャネル数が一致する必要があります。$1 \\times 1$畳み込みでstride 2にすれば$32→16$、出力128チャネルにすれば$64→128$を同時に行えます。"
+        },
+        {
+            id: "img-resnet-basic-vs-bottleneck",
+            category: "ResNet（Block比較）",
+            kind: "内部構造",
+            difficulty: "必須",
+            question: "ResNetのBasic BlockとBottleneck Blockの対応として正しいものはどれか。",
+            options: ["ResNet-18／34はBottleneck、ResNet-50以上はBasic Block", "ResNet-18／34は主に$3 \\times 3→3 \\times 3$、ResNet-50／101／152は主に$1 \\times 1→3 \\times 3→1 \\times 1$", "どのResNetも$5 \\times 5$畳み込みだけを使う", "Bottleneckはチャネルを増やすだけで、計算量削減には使わない"],
+            answer: 1,
+            explanation: "比較的浅いResNet-18／34はBasic Block、深いResNet-50／101／152はBottleneck Blockが基本です。Bottleneckは$1 \\times 1$で圧縮してから$3 \\times 3$を行い、最後に$1 \\times 1$で拡張します。"
+        },
+        {
+            id: "img-resnet-vs-densenet",
+            category: "ResNet／DenseNet比較",
+            kind: "歴史・比較",
+            difficulty: "標準",
+            question: "ResNetとDenseNetの接続方法の違いとして正しいものはどれか。",
+            options: ["どちらも過去の特徴を必ずSoftmaxで正規化する", "ResNetは連結、DenseNetは要素積を使う", "どちらも入力を破棄して新しい特徴だけを使う", "ResNetはShortcutと残差を要素ごとに加算し、DenseNetは過去の特徴マップをチャネル方向に連結する"],
+            answer: 3,
+            explanation: "ResNetの代表式は$F(x)+x$で、加算には形状一致が必要です。DenseNetは各層へ過去の特徴をConcatenateし、特徴再利用を促します。加算か連結かは頻出の識別点です。"
+        },
+        {
+            id: "img-cnn-to-vit-swin",
+            category: "CNNからViTへ",
+            kind: "歴史・比較",
+            difficulty: "必須",
+            question: "VGG／ResNetからViT、さらにSwin Transformerへの発展を正しく説明しているものはどれか。",
+            options: ["ViTは画像をPatch tokenへ変換しCLS tokenとPosition embeddingを加えてSelf-Attentionを使い、Swinは局所WindowとShifted Windowで高解像度画像を効率的に扱う", "ViTは$3 \\times 3$畳み込みだけを重ね、SwinはDropoutを初めて導入した", "ViTはResidual Blockだけで構成され、Swinは位置情報を一切使わない", "ViTもSwinもRNNで画像を1画素ずつ処理する"],
+            answer: 0,
+            explanation: "ViTは画像パッチをToken列としてTransformer Encoderへ入力します。CLS tokenを分類表現として使い、Position embeddingで位置を補います。SwinはAttentionを局所Windowへ限定し、次の層でWindowをずらして窓間の情報をつなぎます。"
         },
         {id:"img-resnet-block",category:"ResNet(内部構造)",question:"Residual Blockの基本式として最も近いものはどれか。",options:["$y=F(x)+x$","$y=F(x)×x$のみ","$y=softmax(x)$","$y=x-F(x)$のみ"],answer:0,explanation:"残差枝F(x)と恒等写像xを加算し、勾配と情報を直接流します。形状が違う場合は射影を使います。"},
         {id:"img-bottleneck",category:"ResNet Bottleneck",question:"ResNetのBottleneck Blockで1×1畳み込みを前後に置く主な理由はどれか。",options:["3×3畳み込みの前にチャネルを圧縮し、後で復元して計算量を抑える","空間サイズを必ず0にする","Softmaxを置き換える","ラベルを圧縮する"],answer:0,explanation:"典型的に1×1で縮小→3×3で処理→1×1で拡張し、深いモデルを効率化します。"},
