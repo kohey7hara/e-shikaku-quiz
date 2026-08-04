@@ -216,29 +216,77 @@ window.quizData = {
             </tr>
         </table>
 
-        <h3>■ パープレキシティ：言語モデルの「迷いの数」</h3>
+        <h3>■ パープレキシティ：Next Token Predictionの「迷い」を測る</h3>
         <style>
             .ppl-flow { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:14px 0; }
             .ppl-node { border:2px solid #3498db; background:#eef7ff; border-radius:10px; padding:10px 13px; text-align:center; min-width:150px; }
             .ppl-node strong { display:block; color:#1769aa; }
             .ppl-arrow { font-size:1.3em; color:#777; font-weight:bold; }
-            .ppl-choice { display:flex; justify-content:center; gap:7px; margin-top:7px; }
-            .ppl-choice span { border:1px solid #bbb; border-radius:6px; padding:4px 8px; background:white; }
+            .ppl-formula { background:#f7fbff; border:1px solid #cbd9e8; border-radius:12px; padding:12px; margin:14px 0; text-align:center; overflow-x:auto; }
+            .ppl-formula strong { display:block; color:#1769aa; }
+            .ppl-example { display:grid; grid-template-columns:repeat(3,minmax(155px,1fr)); gap:8px; margin:14px 0; }
+            .ppl-example div { border:1px solid #cbd9e8; border-radius:9px; padding:10px; text-align:center; background:white; }
+            .ppl-example strong { display:block; color:#1769aa; }
+            .ppl-warn { border-left:5px solid #e2a02b; background:#fff8e8; padding:12px; margin:14px 0; }
+            @media(max-width:680px) { .ppl-example { grid-template-columns:1fr; } }
         </style>
-        <p>パープレキシティ（Perplexity; PPL）は、モデルが次の単語を平均して何択くらいで迷っているかを表す指標です。</p>
+        <p>自己回帰型言語モデルは、各位置で<strong>正解の次トークン</strong>へ条件付き確率 $p_t=P(w_t\\mid w_{&lt;t})$ を割り当てます。パープレキシティ（Perplexity; PPL）は、その確率の低さを系列全体でまとめた指標です。</p>
+        <div class="ppl-formula">
+            <strong>同じ内容を表す3つの式（自然対数の場合）</strong>
+            $$H=-\\frac{1}{N}\\sum_{t=1}^{N}\\ln p_t$$
+            $$PPL=\\exp(H)=\\exp\\left(-\\frac{1}{N}\\sum_{t=1}^{N}\\ln p_t\\right)
+            =\\left(\\prod_{t=1}^{N}\\frac{1}{p_t}\\right)^{1/N}$$
+            <small>$H$は1トークン当たりのクロスエントロピー／負の対数尤度、$N$は評価対象トークン数</small>
+        </div>
         <div class="ppl-flow">
-            <div class="ppl-node"><strong>正解単語の確率</strong>高いほどよい</div>
+            <div class="ppl-node"><strong>正解トークンの確率 $p_t$</strong>高いほどよい</div>
             <div class="ppl-arrow">→</div>
             <div class="ppl-node"><strong>平均損失 $H$</strong>低いほどよい</div>
             <div class="ppl-arrow">→</div>
             <div class="ppl-node"><strong>$PPL=e^H$</strong>低いほどよい</div>
         </div>
-        <div class="ppl-node" style="border-color:#27ae60;background:#effaf4;max-width:520px;margin:auto;">
-            <strong>例：PPL = 4</strong>
-            <div class="ppl-choice"><span>猫</span><span>犬</span><span>鳥</span><span>魚</span></div>
-            <small>平均的に「同程度にありそうな4候補」で迷うイメージ</small>
+        <div class="ppl-example">
+            <div><strong>$PPL=1$</strong>正解に毎回確率1<br>理想的で迷いなし</div>
+            <div><strong>$PPL=4$</strong>実効的に4択で迷う<br>一様4択なら各確率$1/4$</div>
+            <div><strong>一様な$V$語彙</strong>各トークンが$1/V$なら<br>$PPL=V$</div>
         </div>
-        <p><strong>試験の罠：</strong>PPLは正解率ではありません。同じデータ・同じトークン化条件で比較し、原則として<strong>小さい方が良い</strong>と判断します。</p>
+
+        <h4>■ 計算は「何が与えられたか」で4通り</h4>
+        <table>
+            <tr><th>与えられるもの</th><th>使う式</th><th>例</th></tr>
+            <tr>
+                <td>平均損失 $H$（nat）</td>
+                <td>$PPL=e^H$</td>
+                <td>$H=\\ln5\\Rightarrow PPL=5$</td>
+            </tr>
+            <tr>
+                <td>平均損失 $H_2$（bit）</td>
+                <td>$PPL=2^{H_2}$</td>
+                <td>$H_2=3\\Rightarrow PPL=8$</td>
+            </tr>
+            <tr>
+                <td>合計NLL $L$ とトークン数 $N$</td>
+                <td>$PPL=e^{L/N}$</td>
+                <td>$L=8,N=4\\Rightarrow e^2\\approx7.39$</td>
+            </tr>
+            <tr>
+                <td>各正解トークンの確率 $p_t$</td>
+                <td>確率の<strong>幾何平均の逆数</strong></td>
+                <td>$p=(1/2,1/4)\\Rightarrow PPL=\\sqrt{8}\\approx2.83$</td>
+            </tr>
+        </table>
+        <p><strong>確率から解く3手：</strong>①正解トークンの確率を掛ける $1/2\\times1/4=1/8$ → ②$N$乗根で幾何平均にする $\\sqrt{1/8}$ → ③逆数にして $PPL=\\sqrt8\\approx2.83$。合計確率の逆数8をそのまま答えないことが重要です。</p>
+
+        <h4>■ 評価時の重要ルール</h4>
+        <ul>
+            <li><strong>Teacher Forcing：</strong>通常の自己回帰モデル評価では、生成した過去ではなく<strong>正解の過去トークン</strong>を条件として各$p_t$を求める。</li>
+            <li><strong>長さで正規化：</strong>コーパス全体の合計NLLを、評価対象の総トークン数で割ってから指数を取る。文ごとのPPLを単純平均しない。</li>
+            <li><strong>マスク：</strong>paddingや評価対象外のプロンプト部分は、指定に応じて$N$と損失の合計から除外する。</li>
+            <li><strong>比較条件：</strong>同じテストデータ、トークナイザ、前処理、単位（token/word）でのみ素直に比較できる。</li>
+            <li><strong>Masked LM：</strong>BERTは左から右への系列確率を直接因数分解しないため、通常のPPLはそのまま定義できない。疑似PPLなどは別物。</li>
+        </ul>
+        <div class="ppl-warn"><strong>試験の罠：</strong>PPLは正解率でも、文章品質・事実性・安全性の保証でもありません。同条件なら小さい方が次トークンへ高い確率を付けていますが、下流タスク性能やハルシネーションの少なさまで必ず優れるとは限りません。</div>
+        <p><strong>差の読み方：</strong>平均損失が$\\ln2$だけ下がると、$PPL$は$e^{\\ln2}=2$分の1になります。損失の小さな差が指数変換でPPLの比になる点も計算問題になり得ます。</p>
     `,
 
     questions: [
@@ -516,7 +564,7 @@ window.quizData = {
             explanation: "しきい値を下げるとPositive判定が増え、正例を拾いやすくなるためRecallは通常上がります。一方でFPも増えやすいためPrecisionは下がる傾向があります。有限データではPrecisionが局所的に上下することがあります。"
         },
         // ---------------------------------------------------------
-        // 【パープレキシティ】 Q33 - Q35
+        // 【パープレキシティ】 Q33 - Q45
         // ---------------------------------------------------------
         {
             id: "metric-perplexity-meaning",
@@ -541,6 +589,111 @@ window.quizData = {
             options: ["モデルB", "モデルA", "必ず同等", "PPLは大きいほど良いのでA"],
             answer: 0,
             explanation: "同条件ならPPLが低いモデルBの方が、正解系列へ高い確率を割り当てています。トークナイザやデータが違うPPLは単純比較できません。"
+        },
+        {
+            id: "metric-perplexity-formula",
+            category: "パープレキシティ（式）",
+            kind: "数式理解",
+            difficulty: "必須",
+            question: "正解トークンへ割り当てた条件付き確率を$p_1,\\ldots,p_N$とする。自然対数を用いたPPLの式として正しいものはどれか。",
+            options: [
+                "$\\exp\\left(\\frac{1}{N}\\sum_{t=1}^{N}\\ln p_t\\right)$",
+                "$-\\frac{1}{N}\\sum_{t=1}^{N}p_t$",
+                "$\\exp\\left(-\\frac{1}{N}\\sum_{t=1}^{N}\\ln p_t\\right)$",
+                "$\\prod_{t=1}^{N}p_t$"
+            ],
+            answer: 2,
+            explanation: "平均クロスエントロピーは$H=-\\frac1N\\sum_t\\ln p_t$で、$PPL=\\exp(H)$です。したがって正解は$\\exp(-\\frac1N\\sum_t\\ln p_t)$です。"
+        },
+        {
+            id: "metric-perplexity-prob-product-calc",
+            category: "パープレキシティ（確率計算）",
+            kind: "手計算",
+            difficulty: "本試験型",
+            question: "2トークンの正解系列に対し、モデルが正解トークンへ順に$0.5$、$0.25$の確率を割り当てた。PPLはいくつか。",
+            options: ["8", "$\\sqrt8\\approx2.83$", "4", "$1/8$"],
+            answer: 1,
+            explanation: "$PPL=(1/(0.5\\times0.25))^{1/2}=(1/0.125)^{1/2}=\\sqrt8\\approx2.83$です。系列確率$0.125$の逆数8を、そのまま答えないよう注意します。"
+        },
+        {
+            id: "metric-perplexity-total-nll-calc",
+            category: "パープレキシティ（NLL計算）",
+            kind: "手計算",
+            difficulty: "本試験型",
+            question: "4トークンに対する負の対数尤度（NLL）の合計が8 natだった。1トークン当たりの平均を用いたPPLはいくつか。",
+            options: ["$e^8$", "2", "8", "$e^{8/4}=e^2\\approx7.39$"],
+            answer: 3,
+            explanation: "まず平均NLLを求め、$H=8/4=2$。次に$PPL=e^H=e^2\\approx7.39$です。合計NLLをそのまま指数へ入れないことがポイントです。"
+        },
+        {
+            id: "metric-perplexity-bits-calc",
+            category: "パープレキシティ（対数の底）",
+            kind: "手計算",
+            difficulty: "標準",
+            question: "クロスエントロピーを底2の対数で計算したところ、1トークン当たり3 bitだった。PPLはいくつか。",
+            options: ["$2^3=8$", "$e^3\\approx20.1$", "3", "$\\log_2 3$"],
+            answer: 0,
+            explanation: "損失の対数が底2なら$PPL=2^{H_2}$なので、$2^3=8$です。自然対数なら$e^H$を使います。"
+        },
+        {
+            id: "metric-perplexity-uniform-vocab",
+            category: "パープレキシティ（直感）",
+            kind: "数式理解",
+            difficulty: "標準",
+            question: "語彙数500の言語モデルが、毎回すべての語へ一様に$1/500$の確率を割り当てる。このモデルのPPLはいくつか。",
+            options: ["1", "$\\sqrt{500}$", "500", "$1/500$"],
+            answer: 2,
+            explanation: "各正解トークンの確率が常に$1/V$なら、$H=-\\ln(1/V)=\\ln V$、$PPL=e^{\\ln V}=V$です。したがって500です。"
+        },
+        {
+            id: "metric-perplexity-loss-delta",
+            category: "パープレキシティ（比の計算）",
+            kind: "手計算",
+            difficulty: "発展",
+            question: "モデルBの平均クロスエントロピーが、モデルAより$\\ln2$だけ小さい。両者を同条件で評価したとき、PPLの関係として正しいものはどれか。",
+            options: ["BのPPLはAの2倍", "BのPPLはAの$1/2$", "両者のPPLは同じ", "情報不足で比は求められない"],
+            answer: 1,
+            explanation: "$PPL_B/PPL_A=e^{H_B-H_A}=e^{-\\ln2}=1/2$です。損失の差は、指数変換するとPPLの比になります。"
+        },
+        {
+            id: "metric-perplexity-corpus-aggregation",
+            category: "パープレキシティ（集計）",
+            kind: "手計算",
+            difficulty: "発展",
+            question: "文Aは2トークンで合計NLLが2、文Bは6トークンで合計NLLが9だった。コーパス全体のPPLとして適切な式はどれか。",
+            options: ["$(e^{2/2}+e^{9/6})/2$", "$e^{(2+9)/2}$", "$e^{(2/2+9/6)}$", "$e^{(2+9)/(2+6)}=e^{11/8}$"],
+            answer: 3,
+            explanation: "コーパス全体では合計NLLを評価対象の総トークン数で割ります。平均NLLは$(2+9)/(2+6)=11/8$なので、$PPL=e^{11/8}$です。文ごとのPPLの単純平均ではありません。"
+        },
+        {
+            id: "metric-perplexity-teacher-forcing",
+            category: "パープレキシティ（評価方法）",
+            kind: "仕組み",
+            difficulty: "標準",
+            question: "自己回帰型言語モデルのテストデータ上のPPLを通常計算するとき、各次トークン確率の条件として用いるものはどれか。",
+            options: ["テストデータの正解の過去トークン", "モデルが自由生成した過去トークンだけ", "未来の正解トークン", "語彙全体の平均ベクトル"],
+            answer: 0,
+            explanation: "通常はTeacher Forcingにより、正解の過去トークン$w_{&lt;t}$を条件に$p(w_t\\mid w_{&lt;t})$を評価します。paddingなど評価対象外の位置は損失とトークン数から除外します。"
+        },
+        {
+            id: "metric-perplexity-mlm-limit",
+            category: "パープレキシティ（モデル差）",
+            kind: "概念",
+            difficulty: "発展",
+            question: "BERTのようなMasked Language Modelに、GPTと同じ標準的なPPLをそのまま適用しにくい主な理由はどれか。",
+            options: ["BERTには語彙が存在しないから", "BERTは確率を出力しないから", "左から右への系列確率として直接因数分解するモデルではないから", "BERTの損失は常に0だから"],
+            answer: 2,
+            explanation: "標準PPLは系列確率を$\\prod_t p(w_t\\mid w_{&lt;t})$と因数分解する自己回帰モデルに自然です。Masked LMでは同じ因数分解を直接使えず、疑似PPLなど別の定義が必要です。"
+        },
+        {
+            id: "metric-perplexity-quality-limit",
+            category: "パープレキシティ（解釈）",
+            kind: "概念",
+            difficulty: "必須",
+            question: "同じデータとトークナイザでモデルAのPPLがモデルBより低かった。この結果から必ず言えることはどれか。",
+            options: ["Aは事実誤認を必ず起こさない", "Aはすべての下流タスクで必ず高精度", "Aの生成文は人間評価でも必ず高品質", "Aはその評価系列の正解トークンへ、平均的により高い確率を割り当てた"],
+            answer: 3,
+            explanation: "PPLが低いことから直接言えるのは、評価系列への平均負の対数尤度が小さいことです。文章品質、事実性、安全性、下流タスク性能まで自動的に保証する指標ではありません。"
         }
     ]
 };

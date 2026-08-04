@@ -30,7 +30,7 @@ const menuConfig = [
     {
         id: "02_ml_basics_2",
         title: "2-（１）機械学習の基礎：検証・性能指標",
-        desc: "交差検証 / Accuracy / Precision / Recall・TPR / 特異度・FPR / ROC・AUC / PR曲線・AP / パープレキシティ",
+        desc: "交差検証 / Accuracy / Precision / Recall・TPR / 特異度・FPR / ROC・AUC / PR曲線・AP / パープレキシティ・NLL",
         isActive: true
     },
 
