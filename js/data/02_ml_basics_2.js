@@ -121,6 +121,81 @@ window.quizData = {
             <li><strong>軸の順番：</strong>座標は $(x,y)=(FPR,TPR)$。TPRを先に書かないよう注意。</li>
         </ul>
 
+        <h3>■ PR曲線 / AP：正例を拾う力と、予測の信頼性</h3>
+        <p>PR曲線（Precision-Recall Curve）は、しきい値を動かしたときの<strong>再現率と適合率の組</strong>を結びます。正例が少ない不均衡データでは、誤検知FPが性能へ直接表れるため、ROC曲線より実態を捉えやすいことがあります。</p>
+        <table>
+            <tr><th>曲線</th><th>横軸 $x$</th><th>縦軸 $y$</th><th>特に見たい場面</th></tr>
+            <tr>
+                <td><strong>ROC曲線</strong></td>
+                <td>$FPR=\\frac{FP}{FP+TN}$</td>
+                <td>$TPR=Recall=\\frac{TP}{TP+FN}$</td>
+                <td>正例と負例を含む識別・順位付け能力を見たい</td>
+            </tr>
+            <tr>
+                <td><strong>PR曲線</strong></td>
+                <td>$Recall=\\frac{TP}{TP+FN}$</td>
+                <td>$Precision=\\frac{TP}{TP+FP}$</td>
+                <td><strong>正例が少ない</strong>状況で、見逃しと誤検知を見たい</td>
+            </tr>
+        </table>
+        <style>
+            .pr-wrap { background:#fffaf2; border:1px solid #e7d4ad; border-radius:14px; padding:12px; margin:14px 0; }
+            .pr-chart-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+            .pr-svg { display:block; width:min(100%,720px); height:auto; margin:auto; }
+            .pr-axis { stroke:#24364b; stroke-width:2.5; }
+            .pr-grid { stroke:#d8d1c2; stroke-width:1; }
+            .pr-area { fill:#ffe6b8; opacity:.82; }
+            .pr-line { fill:none; stroke:#d66a1f; stroke-width:6; stroke-linecap:round; stroke-linejoin:round; }
+            .pr-baseline { fill:none; stroke:#8a96a3; stroke-width:2.5; stroke-dasharray:9 7; }
+            .pr-dot { fill:#1769aa; stroke:white; stroke-width:3; }
+            .pr-svg text { fill:#24364b; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif; font-size:16px; }
+            .pr-svg .pr-small { font-size:14px; }
+            .pr-svg .pr-strong { font-weight:700; }
+            .pr-steps { display:grid; grid-template-columns:repeat(2,minmax(220px,1fr)); gap:8px; margin-top:12px; }
+            .pr-steps div { background:white; border:1px solid #e7d4ad; border-radius:9px; padding:10px; }
+            .pr-steps strong { display:block; color:#a94d12; }
+            @media(max-width:680px) { .pr-steps { grid-template-columns:1fr; } .pr-svg { width:600px; max-width:none; margin:0; } .pr-svg text { font-size:15px; } }
+        </style>
+        <div class="pr-wrap">
+            <div class="pr-chart-scroll" aria-label="PR曲線の図。画面が狭い場合は横にスクロールできます。">
+                <svg class="pr-svg" viewBox="0 0 700 430" role="img" aria-labelledby="pr-title pr-desc">
+                    <title id="pr-title">PR曲線とAPの模式図</title>
+                    <desc id="pr-desc">横軸が再現率Recall、縦軸が適合率Precision。しきい値を下げると一般に右へ進み、適合率は下がりやすい。曲線下の領域がAPまたはAUPRC。</desc>
+                    <line class="pr-grid" x1="70" y1="195" x2="630" y2="195"></line>
+                    <line class="pr-grid" x1="350" y1="40" x2="350" y2="350"></line>
+                    <line class="pr-axis" x1="70" y1="350" x2="642" y2="350"></line>
+                    <line class="pr-axis" x1="70" y1="362" x2="70" y2="30"></line>
+                    <path class="pr-area" d="M70 40 L130 50 L220 70 L350 84 L518 74 L590 145 L630 265 L630 350 L70 350 Z"></path>
+                    <path class="pr-baseline" d="M70 319 L630 319"></path>
+                    <path class="pr-line" d="M70 40 L130 50 L220 70 L350 84 L518 74 L590 145 L630 265"></path>
+                    <circle class="pr-dot" cx="130" cy="50" r="7"></circle>
+                    <circle class="pr-dot" cx="350" cy="84" r="7"></circle>
+                    <circle class="pr-dot" cx="518" cy="74" r="8"></circle>
+                    <circle class="pr-dot" cx="590" cy="145" r="7"></circle>
+                    <text x="142" y="46" class="pr-small">しきい値：高</text>
+                    <text x="535" y="67" class="pr-small pr-strong">例 (0.8, 0.889)</text>
+                    <text x="520" y="139" class="pr-small">低</text>
+                    <text x="360" y="245" class="pr-strong">曲線の下側 = AP / AUPRC</text>
+                    <text x="380" y="312" class="pr-small">ランダム基準 = 正例率 0.10</text>
+                    <text x="58" y="372">0</text><text x="622" y="372">1</text>
+                    <text x="44" y="355">0</text><text x="44" y="47">1</text>
+                    <text x="260" y="408" class="pr-strong">Recall = TP / (TP + FN)</text>
+                    <text x="19" y="275" transform="rotate(-90 19 275)" class="pr-strong">Precision = TP / (TP + FP)</text>
+                </svg>
+            </div>
+            <div class="pr-steps">
+                <div><strong>① 横軸 Recall</strong>$40/(40+10)=0.8$</div>
+                <div><strong>② 縦軸 Precision</strong>$40/(40+5)=8/9\\approx0.889$</div>
+            </div>
+        </div>
+        <p><strong>したがってPR曲線上の点は $(Recall,Precision)=(0.8,0.889)$。</strong>ROC曲線とは横軸も縦軸も違うため、座標の順番に注意します。</p>
+        <ul>
+            <li><strong>しきい値を下げる：</strong>Positive判定が増えてRecallは通常上がり、FPも増えるためPrecisionは下がりやすい。ただし有限データでは上下に揺れることがあります。</li>
+            <li><strong>ランダム分類の基準：</strong>Precisionはおおむね<strong>正例率</strong>。正例10%なら基準は0.10であり、ROC-AUCの基準0.5とは異なります。</li>
+            <li><strong>AP / AUPRC：</strong>PR曲線を1つの値にまとめた指標で、大きいほどよい。問題で区間ごとのPrecisionが与えられたら、$AP=\\sum_i (R_i-R_{i-1})P_i$ として計算することがあります。</li>
+        </ul>
+        <p><strong>APの簡単な計算例：</strong>Recallが $0\\rightarrow0.5$ の区間でPrecisionが0.8、$0.5\\rightarrow1.0$ の区間で0.6なら、$AP=(0.5-0)\\times0.8+(1.0-0.5)\\times0.6=0.7$ です。補間方法が指定されている場合は、その定義に従います。</p>
+
         <h3>■ その他の重要指標</h3>
         <table>
             <tr><th>名称</th><th>内容・特徴</th></tr>
@@ -305,7 +380,7 @@ window.quizData = {
             question: "ROC曲線ではなく「PR曲線（Precision-Recall Curve）」を使うべき場面はどのような時か。",
             options: ["陽性（Positive）と陰性（Negative）のバランスがとれている時", "陰性（Negative）が圧倒的に多く、陽性（Positive）の検出に注目したい不均衡データの場合", "回帰問題を解いている時", "データ数が非常に少ない時"],
             answer: 1,
-            explanation: "ROC曲線はTN（大量の陰性）の影響を受けにくいため、不均衡データでは過大評価されることがあります。その場合、TNを使わないPR曲線の方が実態を表します。"
+            explanation: "負例が非常に多いと、FPRの分母$FP+TN$も大きいためROC曲線ではFPRが小さく見えることがあります。TNを使わず、FPをPrecisionへ直接反映するPR曲線の方が、少数の正例を見つける性能を把握しやすくなります。"
         },
         {
             category: "交差検証(応用)",
@@ -377,6 +452,72 @@ window.quizData = {
             answer: 1,
             explanation: "AUCは正例と陰性を1件ずつ無作為に選んだとき、正例のスコアを陰性より高く順位付けできる確率として解釈できます。特定のしきい値1点ではなく、しきい値全体での識別能力です。"
         },
+        // ---------------------------------------------------------
+        // 【PR曲線・AP 計算演習】 Q27 - Q32
+        // ---------------------------------------------------------
+        {
+            id: "metric-pr-axes",
+            category: "PR曲線（軸）",
+            kind: "基礎",
+            difficulty: "必須",
+            question: "PR曲線の横軸$x$と縦軸$y$の組み合わせとして正しいものはどれか。",
+            options: ["$(x,y)=(Recall,Precision)$", "$(x,y)=(Precision,Recall)$", "$(x,y)=(FPR,TPR)$", "$(x,y)=(Specificity,Precision)$"],
+            answer: 0,
+            explanation: "PR曲線は横軸がRecall（再現率）、縦軸がPrecision（適合率）です。ROC曲線の$(FPR,TPR)$と混同しないよう、曲線名の後半から前半へ並ぶと覚えるより、横軸Recall・縦軸Precisionを式と一緒に確認しましょう。"
+        },
+        {
+            id: "metric-pr-precision-calc",
+            category: "PR曲線（計算）",
+            kind: "手計算",
+            difficulty: "必須",
+            question: "混同行列が $TP=40, FN=10, FP=5, TN=45$ のとき、Precisionはいくつか。",
+            options: ["$40/45\\approx0.889$", "$40/50=0.8$", "$45/50=0.9$", "$5/50=0.1$"],
+            answer: 0,
+            explanation: "$Precision=TP/(TP+FP)=40/(40+5)=40/45=8/9\\approx0.889$です。分母はPositiveと予測した件数なので、FNやTNは使いません。"
+        },
+        {
+            id: "metric-pr-point-calc",
+            category: "PR座標（計算）",
+            kind: "手計算",
+            difficulty: "本試験型",
+            question: "混同行列が $TP=40, FN=10, FP=5, TN=45$ のとき、このしきい値がPR曲線上に作る点 $(x,y)$ はどれか。",
+            options: ["$(0.8,0.889)$", "$(0.889,0.8)$", "$(0.1,0.8)$", "$(0.8,0.9)$"],
+            answer: 0,
+            explanation: "横軸は$Recall=40/(40+10)=0.8$、縦軸は$Precision=40/(40+5)\\approx0.889$です。したがって$(x,y)=(Recall,Precision)=(0.8,0.889)$です。"
+        },
+        {
+            id: "metric-pr-baseline-calc",
+            category: "PR曲線（基準値）",
+            kind: "手計算",
+            difficulty: "標準",
+            question: "全200件のうち正例が20件であるデータに対し、ランダムに陽性判定する分類器を考える。PR曲線におけるPrecisionの基準値はおよそいくつか。",
+            options: ["0.1", "0.5", "0.9", "1.0"],
+            answer: 0,
+            explanation: "ランダム分類のPrecisionの期待値は正例率です。$20/200=0.1$なので基準は約0.1です。ROC-AUCのランダム基準0.5と混同しないよう注意します。"
+        },
+        {
+            id: "metric-pr-ap-calc",
+            category: "AP（計算）",
+            kind: "手計算",
+            difficulty: "本試験型",
+            question: "ステップ状のPR曲線で、Recallが$0\\rightarrow0.5$の区間のPrecisionが0.8、$0.5\\rightarrow1.0$の区間が0.6だった。$AP=\\sum_i(R_i-R_{i-1})P_i$で計算したAPはいくつか。",
+            options: ["0.7", "0.6", "0.8", "1.4"],
+            answer: 0,
+            explanation: "$AP=(0.5-0)\\times0.8+(1.0-0.5)\\times0.6=0.4+0.3=0.7$です。補間方法が別途指定されている問題では、その定義を優先します。"
+        },
+        {
+            id: "metric-pr-threshold",
+            category: "PR曲線としきい値",
+            kind: "仕組み",
+            difficulty: "標準",
+            question: "陽性と判定するスコアのしきい値を下げたとき、PR曲線では一般にRecallとPrecisionはどう変化しやすいか。",
+            options: ["Recallは上がり、Precisionは下がりやすい", "Recallは下がり、Precisionは上がりやすい", "RecallもPrecisionも必ず上がる", "どちらも必ず一定になる"],
+            answer: 0,
+            explanation: "しきい値を下げるとPositive判定が増え、正例を拾いやすくなるためRecallは通常上がります。一方でFPも増えやすいためPrecisionは下がる傾向があります。有限データではPrecisionが局所的に上下することがあります。"
+        },
+        // ---------------------------------------------------------
+        // 【パープレキシティ】 Q33 - Q35
+        // ---------------------------------------------------------
         {
             id: "metric-perplexity-meaning",
             category: "パープレキシティ",
