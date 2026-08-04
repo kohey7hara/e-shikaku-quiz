@@ -224,19 +224,64 @@ window.quizData = {
             .ppl-arrow { font-size:1.3em; color:#777; font-weight:bold; }
             .ppl-formula { background:#f7fbff; border:1px solid #cbd9e8; border-radius:12px; padding:12px; margin:14px 0; text-align:center; overflow-x:auto; }
             .ppl-formula strong { display:block; color:#1769aa; }
+            .ppl-first { background:#effaf4; border-left:5px solid #27ae60; padding:12px 14px; margin:14px 0; }
+            .ppl-first strong { display:block; color:#167247; font-size:1.08em; }
+            .ppl-story { display:grid; grid-template-columns:repeat(2,minmax(220px,1fr)); gap:9px; margin:14px 0; }
+            .ppl-story div { border:1px solid #cbd9e8; border-radius:10px; padding:11px; background:#fff; }
+            .ppl-story span { display:inline-block; margin-bottom:5px; color:#1769aa; font-weight:800; }
+            .ppl-story strong { display:block; }
+            .ppl-calc-steps { display:grid; grid-template-columns:repeat(3,minmax(150px,1fr)); gap:8px; margin:14px 0; }
+            .ppl-calc-steps div { border:1px solid #cbd9e8; border-radius:9px; padding:10px; background:#f7fbff; }
+            .ppl-calc-steps strong { display:block; color:#1769aa; }
             .ppl-example { display:grid; grid-template-columns:repeat(3,minmax(155px,1fr)); gap:8px; margin:14px 0; }
             .ppl-example div { border:1px solid #cbd9e8; border-radius:9px; padding:10px; text-align:center; background:white; }
             .ppl-example strong { display:block; color:#1769aa; }
+            .ppl-rule { border-bottom:1px solid #dce3ed; padding:10px 0; }
+            .ppl-rule:last-child { border-bottom:0; }
+            .ppl-rule strong { display:block; color:#1769aa; }
             .ppl-warn { border-left:5px solid #e2a02b; background:#fff8e8; padding:12px; margin:14px 0; }
-            @media(max-width:680px) { .ppl-example { grid-template-columns:1fr; } }
+            @media(max-width:680px) { .ppl-story,.ppl-calc-steps,.ppl-example { grid-template-columns:1fr; } }
         </style>
-        <p>自己回帰型言語モデルは、各位置で<strong>正解の次トークン</strong>へ条件付き確率 $p_t=P(w_t\\mid w_{&lt;t})$ を割り当てます。パープレキシティ（Perplexity; PPL）は、その確率の低さを系列全体でまとめた指標です。</p>
+        <div class="ppl-first">
+            <strong>最初にこれだけ覚える</strong>
+            言語モデルへ「次のトークンは何？」という問題を何問も出し、<strong>正解にどれだけ高い確率を付けたか</strong>を測ります。迷いが少ないほどPPLは小さくなり、<strong>1が理想値</strong>です。PPL=4は「平均すると、同じくらいありそうな4択で迷っている」というイメージです。
+        </div>
+        <p>トークンとは、モデルが文章を扱う単位です。単語そのものの場合もあれば、単語をさらに分けた文字列の場合もあります。</p>
+
+        <h4>■ まずは「2問の次トークンクイズ」で考える</h4>
+        <p>正解文の一部を順番に見せて、次の正解トークンへ付けた確率を採点します。</p>
+        <div class="ppl-story">
+            <div>
+                <span>第1問</span>
+                <strong>入力「私は」 → 正解「猫」</strong>
+                モデルが「猫」に付けた確率：$1/2$
+            </div>
+            <div>
+                <span>第2問</span>
+                <strong>入力「私は 猫 が」 → 正解「好き」</strong>
+                モデルが「好き」に付けた確率：$1/4$
+            </div>
+        </div>
+        <p>$1/2$は比較的自信があり、$1/4$は4択程度に迷った状態です。この<strong>複数回の迷いを、1問当たりの値へまとめたもの</strong>がPPLです。</p>
+
+        <h4>■ 記号は「採点表」だと思えばよい</h4>
+        <table>
+            <tr><th>記号・用語</th><th>初心者向けの意味</th></tr>
+            <tr><td><strong>$p_t$</strong></td><td>$t$問目で、モデルが<strong>正解トークン</strong>に付けた確率</td></tr>
+            <tr><td><strong>$-\\ln p_t$</strong></td><td>1問分の「驚き・ペナルティ」。正解確率が低いほど大きくなる</td></tr>
+            <tr><td><strong>NLL $L$</strong></td><td>全問題のペナルティを足した合計。Negative Log-Likelihood（負の対数尤度）</td></tr>
+            <tr><td><strong>トークン数 $N$</strong></td><td>実際に採点した問題数。paddingなどは通常数えない</td></tr>
+            <tr><td><strong>平均損失 $H=L/N$</strong></td><td>1問当たりの平均ペナルティ。クロスエントロピーと呼ばれる</td></tr>
+            <tr><td><strong>PPL</strong></td><td>平均ペナルティを「実効的な選択肢数」の感覚へ戻した値</td></tr>
+        </table>
+        <p><strong>全体の流れ：</strong>正解確率 $p_t$ → 驚き $-\\ln p_t$ → 全部足してNLL $L$ → $N$で割って平均損失 $H$ → 指数を取ってPPL、です。</p>
+
         <div class="ppl-formula">
-            <strong>同じ内容を表す3つの式（自然対数の場合）</strong>
+            <strong>上の採点手順を数式で1行にしたもの</strong>
             $$H=-\\frac{1}{N}\\sum_{t=1}^{N}\\ln p_t$$
             $$PPL=\\exp(H)=\\exp\\left(-\\frac{1}{N}\\sum_{t=1}^{N}\\ln p_t\\right)
             =\\left(\\prod_{t=1}^{N}\\frac{1}{p_t}\\right)^{1/N}$$
-            <small>$H$は1トークン当たりのクロスエントロピー／負の対数尤度、$N$は評価対象トークン数</small>
+            <small>式を丸暗記する前に「確率 → ペナルティ → 1問平均 → 元の尺度へ戻す」と理解すれば十分です。</small>
         </div>
         <div class="ppl-flow">
             <div class="ppl-node"><strong>正解トークンの確率 $p_t$</strong>高いほどよい</div>
@@ -245,46 +290,71 @@ window.quizData = {
             <div class="ppl-arrow">→</div>
             <div class="ppl-node"><strong>$PPL=e^H$</strong>低いほどよい</div>
         </div>
+
+        <h4>■ 上の2問を実際に計算する</h4>
+        <div class="ppl-calc-steps">
+            <div><strong>① 確率を掛ける</strong>$1/2\\times1/4=1/8$</div>
+            <div><strong>② 2問平均にする</strong>$\\sqrt{1/8}\\approx0.354$<br><small>確率は掛け算なので幾何平均</small></div>
+            <div><strong>③ 逆数にする</strong>$PPL=1/0.354\\approx2.83$</div>
+        </div>
+        <p><strong>なぜ平方根？</strong>2問分の確率を掛けたので、2乗根を取ると「1問当たり」の確率へ戻せるからです。$N$問なら$N$乗根です。合計確率$1/8$の逆数8をそのまま答えると、文章の長さを考慮していないため誤りです。</p>
+
         <div class="ppl-example">
             <div><strong>$PPL=1$</strong>正解に毎回確率1<br>理想的で迷いなし</div>
             <div><strong>$PPL=4$</strong>実効的に4択で迷う<br>一様4択なら各確率$1/4$</div>
             <div><strong>一様な$V$語彙</strong>各トークンが$1/V$なら<br>$PPL=V$</div>
         </div>
 
-        <h4>■ 計算は「何が与えられたか」で4通り</h4>
+        <h4>■ 4通りに見えるが、同じPPLを別の入口から求めている</h4>
+        <p>試験では、確率からではなく途中計算済みの$H$や$L$が与えられることがあります。<strong>別の指標ではなく、どこから計算を始めるかが違うだけ</strong>です。</p>
         <table>
-            <tr><th>与えられるもの</th><th>使う式</th><th>例</th></tr>
+            <tr><th>問題で与えられるもの</th><th>考え方・使う式</th><th>例</th></tr>
             <tr>
                 <td>平均損失 $H$（nat）</td>
-                <td>$PPL=e^H$</td>
+                <td>すでに1問平均まで済んでいるので、$PPL=e^H$</td>
                 <td>$H=\\ln5\\Rightarrow PPL=5$</td>
             </tr>
             <tr>
                 <td>平均損失 $H_2$（bit）</td>
-                <td>$PPL=2^{H_2}$</td>
+                <td>底2の対数で採点済みなので、$PPL=2^{H_2}$</td>
                 <td>$H_2=3\\Rightarrow PPL=8$</td>
             </tr>
             <tr>
                 <td>合計NLL $L$ とトークン数 $N$</td>
-                <td>$PPL=e^{L/N}$</td>
+                <td>先に$H=L/N$で1問平均にし、$PPL=e^H$</td>
                 <td>$L=8,N=4\\Rightarrow e^2\\approx7.39$</td>
             </tr>
             <tr>
                 <td>各正解トークンの確率 $p_t$</td>
-                <td>確率の<strong>幾何平均の逆数</strong></td>
+                <td>確率の<strong>幾何平均を求め、その逆数</strong></td>
                 <td>$p=(1/2,1/4)\\Rightarrow PPL=\\sqrt{8}\\approx2.83$</td>
             </tr>
         </table>
-        <p><strong>確率から解く3手：</strong>①正解トークンの確率を掛ける $1/2\\times1/4=1/8$ → ②$N$乗根で幾何平均にする $\\sqrt{1/8}$ → ③逆数にして $PPL=\\sqrt8\\approx2.83$。合計確率の逆数8をそのまま答えないことが重要です。</p>
+        <p><strong>natとbitの違い：</strong>長さをcmとinchのどちらで表すかに似た「単位の違い」です。$\\ln$（自然対数）で計算したnatなら$e^H$、$\\log_2$で計算したbitなら$2^{H_2}$を使います。</p>
 
-        <h4>■ 評価時の重要ルール</h4>
-        <ul>
-            <li><strong>Teacher Forcing：</strong>通常の自己回帰モデル評価では、生成した過去ではなく<strong>正解の過去トークン</strong>を条件として各$p_t$を求める。</li>
-            <li><strong>長さで正規化：</strong>コーパス全体の合計NLLを、評価対象の総トークン数で割ってから指数を取る。文ごとのPPLを単純平均しない。</li>
-            <li><strong>マスク：</strong>paddingや評価対象外のプロンプト部分は、指定に応じて$N$と損失の合計から除外する。</li>
-            <li><strong>比較条件：</strong>同じテストデータ、トークナイザ、前処理、単位（token/word）でのみ素直に比較できる。</li>
-            <li><strong>Masked LM：</strong>BERTは左から右への系列確率を直接因数分解しないため、通常のPPLはそのまま定義できない。疑似PPLなどは別物。</li>
-        </ul>
+        <h4>■ 評価時の重要ルールを、理由から理解する</h4>
+        <div>
+            <div class="ppl-rule">
+                <strong>Teacher Forcing＝「前問の正解」を渡して次を採点</strong>
+                第1問でモデルが「猫」ではなく「犬」を最有力にしても、第2問では正解文の「私は 猫 が」を入力します。最初の間違いを後の全問題へ連鎖させず、各位置の予測力を公平に測るためです。
+            </div>
+            <div class="ppl-rule">
+                <strong>長さで正規化＝合計点ではなく1問平均で比べる</strong>
+                20トークンの文は2トークンの文よりNLLが大きくなりやすいため、合計NLLを総トークン数$N$で割ります。複数文では「全NLLの合計÷全トークン数」を使い、文ごとのPPLを単純平均しません。
+            </div>
+            <div class="ppl-rule">
+                <strong>マスク＝ダミーの空欄は採点しない</strong>
+                paddingは文の長さを揃えるために追加したダミートークンです。本物の次トークン問題ではないため、通常は損失の合計にも$N$にも含めません。
+            </div>
+            <div class="ppl-rule">
+                <strong>比較条件＝同じ問題集・同じ採点単位で比べる</strong>
+                トークナイザが違うと、同じ文章でも分割数と問題内容が変わります。そのため、同じテストデータ、トークナイザ、前処理、token/word単位で計算したPPL同士を比較します。
+            </div>
+            <div class="ppl-rule">
+                <strong>Masked LM＝BERTは「次を当てるクイズ」ではない</strong>
+                GPTは左から右へ次トークンを当てます。一方、BERTは文章の一部を隠し、左右の文脈から穴埋めします。そのため同じ系列確率の式を直接使えず、疑似PPLなどは別の評価方法です。
+            </div>
+        </div>
         <div class="ppl-warn"><strong>試験の罠：</strong>PPLは正解率でも、文章品質・事実性・安全性の保証でもありません。同条件なら小さい方が次トークンへ高い確率を付けていますが、下流タスク性能やハルシネーションの少なさまで必ず優れるとは限りません。</div>
         <p><strong>差の読み方：</strong>平均損失が$\\ln2$だけ下がると、$PPL$は$e^{\\ln2}=2$分の1になります。損失の小さな差が指数変換でPPLの比になる点も計算問題になり得ます。</p>
     `,
