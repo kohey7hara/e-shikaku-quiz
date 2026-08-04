@@ -22,7 +22,7 @@ window.quizData = {
             </tr>
         </table>
 
-        <h3>■ Precision vs Recall：永遠のトレードオフ</h3>
+        <h3>■ 分類指標：分母を見れば意味が分かる</h3>
         <p>「何を減らしたいか」で使い分けます。両立は困難です。</p>
         <table>
             <tr><th>指標</th><th>数式・意味</th><th>脳内イメージ・重視する場面</th></tr>
@@ -32,9 +32,19 @@ window.quizData = {
                 <td><strong>「オオカミ少年にならない」</strong><br>・<strong>誤検知(FP)</strong> を減らしたい。<br>・例：スパムフィルタ（大事なメールを消したくない）</td>
             </tr>
             <tr>
-                <td><strong>再現率</strong><br>(Recall)</td>
+                <td><strong>再現率／真陽性率</strong><br>(Recall / TPR)</td>
                 <td>$\\frac{TP}{TP + \\mathbf{FN}}$<br>取りこぼしなく拾えたか？</td>
                 <td><strong>「怪しい奴は全員拾う」</strong><br>・<strong>見逃し(FN)</strong> を減らしたい。<br>・例：がん検診（病気の人を見逃したくない）</td>
+            </tr>
+            <tr>
+                <td><strong>特異度</strong><br>(Specificity / TNR)</td>
+                <td>$\\frac{TN}{TN + \\mathbf{FP}}$<br>実際の陰性を、正しく陰性と判定できたか？</td>
+                <td><strong>「無実の人を巻き込まない」</strong><br>・<strong>誤検知(FP)</strong> を減らしたい。<br>・陰性側の正解率。</td>
+            </tr>
+            <tr>
+                <td><strong>偽陽性率</strong><br>(FPR)</td>
+                <td>$\\frac{FP}{FP + TN}=1-\\text{Specificity}$<br>実際は陰性なのに陽性と誤判定した割合。</td>
+                <td><strong>「誤警報の割合」</strong><br>・小さいほどよい。<br>・ROC曲線の<strong>横軸</strong>。</td>
             </tr>
             <tr>
                 <td><strong>F値</strong><br>(F-measure)</td>
@@ -48,17 +58,69 @@ window.quizData = {
             </tr>
         </table>
 
+        <h3>■ ROC曲線 / AUC：しきい値を動かした軌跡</h3>
+        <style>
+            .roc-wrap { background:#f7fbff; border:1px solid #cbd9e8; border-radius:14px; padding:12px; margin:14px 0; }
+            .roc-svg { display:block; width:min(100%,720px); height:auto; margin:auto; }
+            .roc-axis { stroke:#24364b; stroke-width:2.5; }
+            .roc-grid { stroke:#c9d5e2; stroke-width:1; }
+            .roc-area { fill:#d9edff; opacity:.9; }
+            .roc-line { fill:none; stroke:#1769aa; stroke-width:6; stroke-linecap:round; stroke-linejoin:round; }
+            .roc-random { fill:none; stroke:#8a96a3; stroke-width:2.5; stroke-dasharray:9 7; }
+            .roc-dot { fill:#e67e22; stroke:white; stroke-width:3; }
+            .roc-ideal { fill:#27ae60; stroke:white; stroke-width:3; }
+            .roc-svg text { fill:#24364b; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif; font-size:16px; }
+            .roc-svg .roc-small { font-size:14px; }
+            .roc-svg .roc-strong { font-weight:700; }
+            .roc-calc { display:grid; grid-template-columns:repeat(4,minmax(135px,1fr)); gap:8px; margin-top:12px; }
+            .roc-calc div { background:white; border:1px solid #cbd9e8; border-radius:9px; padding:9px; text-align:center; }
+            .roc-calc strong { display:block; color:#1769aa; }
+            @media(max-width:680px) { .roc-calc { grid-template-columns:repeat(2,minmax(125px,1fr)); } .roc-svg text { font-size:14px; } }
+        </style>
+        <p>分類スコアの<strong>しきい値</strong>を高い値から低い値へ動かし、そのたびに得られる $(FPR,TPR)$ を結んだ曲線です。左上へ膨らむほど、誤警報を抑えながら正例を多く拾えます。</p>
+        <div class="roc-wrap">
+            <svg class="roc-svg" viewBox="0 0 700 430" role="img" aria-labelledby="roc-title roc-desc">
+                <title id="roc-title">ROC曲線とAUCの模式図</title>
+                <desc id="roc-desc">横軸が偽陽性率FPR、縦軸が真陽性率TPR。ランダム分類は対角線、性能の良いモデルは左上へ膨らむ。曲線下の青い領域がAUC。</desc>
+                <line class="roc-grid" x1="70" y1="195" x2="630" y2="195"></line>
+                <line class="roc-grid" x1="350" y1="40" x2="350" y2="350"></line>
+                <line class="roc-axis" x1="70" y1="350" x2="642" y2="350"></line>
+                <line class="roc-axis" x1="70" y1="362" x2="70" y2="30"></line>
+                <path class="roc-area" d="M70 350 L98 235 L160 145 L280 86 L430 58 L630 40 L630 350 Z"></path>
+                <path class="roc-random" d="M70 350 L630 40"></path>
+                <path class="roc-line" d="M70 350 L98 235 L160 145 L280 86 L430 58 L630 40"></path>
+                <circle class="roc-dot" cx="98" cy="235" r="7"></circle>
+                <circle class="roc-dot" cx="160" cy="145" r="7"></circle>
+                <circle class="roc-dot" cx="430" cy="58" r="7"></circle>
+                <circle class="roc-ideal" cx="70" cy="40" r="8"></circle>
+                <text x="77" y="55" class="roc-small roc-strong">理想点 (FPR=0, TPR=1)</text>
+                <text x="112" y="239" class="roc-small">しきい値：高</text>
+                <text x="174" y="139" class="roc-small">中</text>
+                <text x="443" y="54" class="roc-small">低</text>
+                <text x="372" y="230" class="roc-small">ランダム分類：AUC=0.5</text>
+                <text x="300" y="328" class="roc-strong">曲線の下の面積 = AUC</text>
+                <text x="58" y="372">0</text><text x="622" y="372">1</text>
+                <text x="44" y="355">0</text><text x="44" y="47">1</text>
+                <text x="255" y="408" class="roc-strong">FPR = FP / (FP + TN)</text>
+                <text x="19" y="260" transform="rotate(-90 19 260)" class="roc-strong">TPR = TP / (TP + FN)</text>
+            </svg>
+            <div class="roc-calc">
+                <div><strong>TP = 40</strong>正例を正しく検出</div>
+                <div><strong>FN = 10</strong>正例を見逃し</div>
+                <div><strong>FP = 5</strong>陰性を誤検知</div>
+                <div><strong>TN = 45</strong>陰性を正しく判定</div>
+            </div>
+        </div>
+        <p><strong>上の例：</strong>$TPR=40/(40+10)=0.8$、特異度 $=45/(45+5)=0.9$、$FPR=5/(5+45)=0.1$。したがってROC曲線上の点は <strong>$(FPR,TPR)=(0.1,0.8)$</strong> です。</p>
+        <ul>
+            <li><strong>しきい値を下げる：</strong>Positive判定が増えるため、通常はTPRもFPRも上がり、右上へ進む。</li>
+            <li><strong>AUC：</strong>ROC曲線の下の面積。1に近いほど識別能力が高く、0.5はランダム分類。</li>
+            <li><strong>軸の順番：</strong>座標は $(x,y)=(FPR,TPR)$。TPRを先に書かないよう注意。</li>
+        </ul>
+
         <h3>■ その他の重要指標</h3>
         <table>
             <tr><th>名称</th><th>内容・特徴</th></tr>
-            <tr>
-                <td><strong>ROC曲線 / AUC</strong></td>
-                <td>
-                    ・縦軸：TPR (Recall)<br>
-                    ・横軸：FPR (偽陽性率)<br>
-                    ・<strong>AUC</strong> (面積)：1.0に近いほど優秀。0.5はランダム（コイントス）と同じ。
-                </td>
-            </tr>
             <tr>
                 <td><strong>IoU</strong><br>(Intersection over Union)</td>
                 <td>
@@ -248,6 +310,69 @@ window.quizData = {
             options: ["計算コストが非常に高くなる", "バイアスが高くなる", "データが無駄になる", "評価結果の信頼性が下がる"],
             answer: 0,
             explanation: "学習と評価をデータ数分だけ繰り返すことになるため、計算時間が膨大になります。"
+        },
+        // ---------------------------------------------------------
+        // 【混同行列・ROC 計算演習】 Q21 - Q26
+        // ---------------------------------------------------------
+        {
+            id: "metric-specificity-calc",
+            category: "特異度（計算）",
+            kind: "手計算",
+            difficulty: "必須",
+            question: "混同行列が $TP=40, FN=10, FP=5, TN=45$ のとき、特異度（Specificity）はいくつか。",
+            options: ["0.8", "0.9", "0.1", "0.5"],
+            answer: 1,
+            explanation: "特異度は実際の陰性$TN+FP$を分母にします。$Specificity=TN/(TN+FP)=45/(45+5)=45/50=0.9$です。陰性50件のうち45件を正しく陰性と判定できました。"
+        },
+        {
+            id: "metric-tpr-calc",
+            category: "TPR（計算）",
+            kind: "手計算",
+            difficulty: "必須",
+            question: "混同行列が $TP=40, FN=10, FP=5, TN=45$ のとき、TPR（真陽性率）はいくつか。",
+            options: ["0.1", "0.9", "0.8", "0.45"],
+            answer: 2,
+            explanation: "$TPR=TP/(TP+FN)=40/(40+10)=40/50=0.8$です。TPRはRecall（再現率）と同じで、実際の正例をどれだけ拾えたかを表します。"
+        },
+        {
+            id: "metric-fpr-calc",
+            category: "FPR（計算）",
+            kind: "手計算",
+            difficulty: "必須",
+            question: "混同行列が $TP=40, FN=10, FP=5, TN=45$ のとき、FPR（偽陽性率）はいくつか。",
+            options: ["0.8", "0.9", "0.5", "0.1"],
+            answer: 3,
+            explanation: "$FPR=FP/(FP+TN)=5/(5+45)=5/50=0.1$です。また、$FPR=1-Specificity=1-0.9=0.1$としても求められます。"
+        },
+        {
+            id: "metric-roc-point-calc",
+            category: "ROC座標（計算）",
+            kind: "手計算",
+            difficulty: "本試験型",
+            question: "混同行列が $TP=40, FN=10, FP=5, TN=45$ のとき、このしきい値がROC曲線上に作る点 $(x,y)$ はどれか。",
+            options: ["$(0.1,0.8)$", "$(0.8,0.1)$", "$(0.9,0.8)$", "$(0.1,0.9)$"],
+            answer: 0,
+            explanation: "ROC曲線の横軸$x$はFPR、縦軸$y$はTPRです。$FPR=0.1$、$TPR=0.8$なので$(x,y)=(0.1,0.8)$です。特異度0.9を横軸へ置かないことが試験の注意点です。"
+        },
+        {
+            id: "metric-roc-threshold",
+            category: "ROCとしきい値",
+            kind: "仕組み",
+            difficulty: "標準",
+            question: "陽性と判定するスコアのしきい値を下げたとき、一般にTPRとFPRはどのように変化するか。",
+            options: ["TPRは下がり、FPRは上がる", "TPRは上がり、FPRは下がる", "TPRもFPRも上がる", "TPRもFPRも必ず0になる"],
+            answer: 2,
+            explanation: "しきい値を下げるとPositive判定が増えます。正例を拾いやすくなってTPRは上がりますが、陰性も誤ってPositiveにしやすくなるためFPRも上がります。ROC曲線では右上方向へ進みます。"
+        },
+        {
+            id: "metric-auc-ranking",
+            category: "AUC（意味）",
+            kind: "理解",
+            difficulty: "標準",
+            question: "AUCの確率的な解釈として最も適切なものはどれか。",
+            options: ["モデルの正解率が必ずAUCと同じになる", "ランダムに選んだ正例へ、ランダムに選んだ陰性より高いスコアを付ける確率と解釈できる", "陽性の割合そのものを表す", "最適なしきい値を一意に決める値である"],
+            answer: 1,
+            explanation: "AUCは正例と陰性を1件ずつ無作為に選んだとき、正例のスコアを陰性より高く順位付けできる確率として解釈できます。特定のしきい値1点ではなく、しきい値全体での識別能力です。"
         },
         {
             id: "metric-perplexity-meaning",
