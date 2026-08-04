@@ -61,6 +61,7 @@ window.quizData = {
         <h3>■ ROC曲線 / AUC：しきい値を動かした軌跡</h3>
         <style>
             .roc-wrap { background:#f7fbff; border:1px solid #cbd9e8; border-radius:14px; padding:12px; margin:14px 0; }
+            .roc-chart-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
             .roc-svg { display:block; width:min(100%,720px); height:auto; margin:auto; }
             .roc-axis { stroke:#24364b; stroke-width:2.5; }
             .roc-grid { stroke:#c9d5e2; stroke-width:1; }
@@ -75,10 +76,11 @@ window.quizData = {
             .roc-calc { display:grid; grid-template-columns:repeat(4,minmax(135px,1fr)); gap:8px; margin-top:12px; }
             .roc-calc div { background:white; border:1px solid #cbd9e8; border-radius:9px; padding:9px; text-align:center; }
             .roc-calc strong { display:block; color:#1769aa; }
-            @media(max-width:680px) { .roc-calc { grid-template-columns:repeat(2,minmax(125px,1fr)); } .roc-svg text { font-size:14px; } }
+            @media(max-width:680px) { .roc-calc { grid-template-columns:repeat(2,minmax(125px,1fr)); } .roc-svg { width:600px; max-width:none; margin:0; } .roc-svg text { font-size:15px; } }
         </style>
         <p>分類スコアの<strong>しきい値</strong>を高い値から低い値へ動かし、そのたびに得られる $(FPR,TPR)$ を結んだ曲線です。左上へ膨らむほど、誤警報を抑えながら正例を多く拾えます。</p>
         <div class="roc-wrap">
+            <div class="roc-chart-scroll" aria-label="ROC曲線の図。画面が狭い場合は横にスクロールできます。">
             <svg class="roc-svg" viewBox="0 0 700 430" role="img" aria-labelledby="roc-title roc-desc">
                 <title id="roc-title">ROC曲線とAUCの模式図</title>
                 <desc id="roc-desc">横軸が偽陽性率FPR、縦軸が真陽性率TPR。ランダム分類は対角線、性能の良いモデルは左上へ膨らむ。曲線下の青い領域がAUC。</desc>
@@ -104,6 +106,7 @@ window.quizData = {
                 <text x="255" y="408" class="roc-strong">FPR = FP / (FP + TN)</text>
                 <text x="19" y="260" transform="rotate(-90 19 260)" class="roc-strong">TPR = TP / (TP + FN)</text>
             </svg>
+            </div>
             <div class="roc-calc">
                 <div><strong>TP = 40</strong>正例を正しく検出</div>
                 <div><strong>FN = 10</strong>正例を見逃し</div>
