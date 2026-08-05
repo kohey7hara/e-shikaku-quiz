@@ -1,3 +1,59 @@
+const optimizationExplanationFigures = {
+    pathologicalCurvature: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">PATHOLOGICAL CURVATURE：方向によって傾きが極端に違う</span>
+            <div class="diagram-row">
+                <div class="diagram-column">
+                    <div class="diagram-node warn">横方向：急</div>
+                    <div class="diagram-label">勾配が大きく左右へ振動</div>
+                </div>
+                <div class="diagram-arrow">＋</div>
+                <div class="diagram-column">
+                    <div class="diagram-node">谷方向：緩い</div>
+                    <div class="diagram-label">勾配が小さく前進が遅い</div>
+                </div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node primary">SGDはジグザグ</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node accent">Momentumで平均化</div>
+            </div>
+        </div>`,
+    chainRule: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">逆伝播は「上流の勾配 × この演算の局所微分」</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">上流の勾配<br><b>2</b></div>
+                <div class="diagram-arrow">×</div>
+                <div class="diagram-node accent">局所微分<br><b>3</b></div>
+                <div class="diagram-arrow">＝</div>
+                <div class="diagram-node warn">下流へ渡す勾配<br><b>6</b></div>
+            </div>
+            <p class="figure-caption">同じ変数から複数経路へ分岐した場合、戻ってきた勾配は足し合わせます。</p>
+        </div>`,
+    adamBiasCorrection: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">ADAMの初回：0から始めた移動平均を補正する</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">$m_0=0$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node">$m_1=(1-β_1)g$</div>
+                <div class="diagram-arrow">÷ $(1-β_1)$</div>
+                <div class="diagram-node accent">補正後 $m_1=g$</div>
+            </div>
+            <p class="figure-caption">補正しないと、学習初期の移動平均が0側へ小さく偏ります。</p>
+        </div>`,
+    initializationVariance: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">分散と標準偏差を区別する</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">Heの分散<br>2 / fan-in</div>
+                <div class="diagram-arrow">平方根</div>
+                <div class="diagram-node accent">Heの標準偏差<br>√(2 / fan-in)</div>
+            </div>
+            <p class="figure-caption">問題が「分散」を聞いているか「標準偏差」を聞いているかを最初に確認します。</p>
+        </div>`
+};
+
 window.quizData = {
     title: "3-（２）深層モデルのための最適化",
     
@@ -11,7 +67,15 @@ window.quizData = {
             .loop-arrow { border-top: 2px dashed #999; width: 100%; text-align: center; margin-top: 5px; font-size: 0.8em; color: #777; }
             .opt-icon { width: 80px; height: 50px; background: #fff; margin: auto; border: 1px solid #eee; }
             .path-line { fill: none; stroke-width: 3; stroke-linecap: round; }
+            .core-strip { margin: 12px 0 18px; padding: 12px 14px; border-left: 5px solid #2780b8; border-radius: 8px; background: #eef7fb; line-height: 1.8; }
+            .formula-table code { color: #123f68; font-weight: 800; white-space: nowrap; }
         </style>
+
+        <h3>■ 2026シラバスの本線</h3>
+        <div class="core-strip">
+            <strong>① SGD・ミニバッチ・学習率 → ② Momentum・NAG → ③ 誤差逆伝播・自動微分 → ④ AdaGrad・RMSProp・Adam → ⑤ Xavier・He初期化</strong><br>
+            Adadelta、AdamWなどは比較用の発展項目です。まず上の本線を優先します。
+        </div>
 
         <h3>■ 学習の全体タイムライン：初期化はどこ？</h3>
         <p>「初期化」は学習ループに入る前の<strong>準備段階（Step 0）</strong>で行われます。<br>ここでの設定（He/Xavier）が、その後の学習効率を決定づけます。</p>
@@ -45,8 +109,32 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ オプティマイザ図鑑 (E資格 完全版)</h3>
-        <p>基本の5つに加え、試験に出る派生形2つを追加しました。</p>
+        <h3>■ 計算問題の更新式</h3>
+        <table class="formula-table">
+            <tr><th>手法</th><th>状態の更新</th><th>見分け方</th></tr>
+            <tr><td><strong>SGD</strong></td><td><code>w ← w - ηg</code></td><td>現在の勾配だけ</td></tr>
+            <tr><td><strong>Momentum</strong></td><td><code>v ← αv + g</code><br><code>w ← w - ηv</code></td><td>過去の方向を残す</td></tr>
+            <tr><td><strong>AdaGrad</strong></td><td><code>G ← G + g²</code><br><code>w ← w - ηg/(√G+ε)</code></td><td>二乗和を全て累積</td></tr>
+            <tr><td><strong>RMSProp</strong></td><td><code>v ← ρv+(1-ρ)g²</code><br><code>w ← w - ηg/(√v+ε)</code></td><td>古い二乗勾配を忘れる</td></tr>
+            <tr><td><strong>Adam</strong></td><td><code>m：勾配の移動平均</code><br><code>v：二乗勾配の移動平均</code></td><td>Momentum＋RMSProp<br>初期バイアス補正あり</td></tr>
+        </table>
+        <p><strong>ε（イプシロン）</strong>は、分母が0になることと数値不安定を防ぐ小さな定数です。</p>
+
+        <h3>■ Pathological Curvature：細長い谷</h3>
+        <div class="core-strip">
+            方向ごとの曲率が大きく異なると、SGDは<strong>急な方向へ左右に振動</strong>し、緩い谷方向には少ししか進めません。Momentumは過去の方向を平均化し、振動を打ち消しながら谷方向へ加速します。
+        </div>
+
+        <h3>■ 誤差逆伝播・自動微分の3ルール</h3>
+        <table>
+            <tr><th>場面</th><th>ルール</th></tr>
+            <tr><td>直列の演算</td><td><strong>上流の勾配 × 局所微分</strong>（連鎖律）</td></tr>
+            <tr><td>同じ変数から分岐</td><td>各経路から戻る勾配を<strong>加算</strong></td></tr>
+            <tr><td>損失1個・パラメータ多数</td><td>出力から戻る<strong>逆モード自動微分</strong>が効率的</td></tr>
+        </table>
+
+        <h3>■ オプティマイザ図鑑（主要手法＋比較用参考）</h3>
+        <p>2026シラバスの主要手法は、SGD、Momentum/NAG、AdaGrad、RMSProp、Adamです。</p>
         <table>
             <tr><th>名称</th><th>軌跡イメージ</th><th>特徴・試験のツボ</th></tr>
             <tr>
@@ -118,7 +206,7 @@ window.quizData = {
                 </td>
             </tr>
             <tr>
-                <td><strong>Adadelta</strong><br>(アダデルタ)</td>
+                <td><strong>Adadelta</strong><br>(アダデルタ)<br><small>比較用参考</small></td>
                 <td>
                     <svg class="opt-icon" viewBox="0 0 80 50">
                         <ellipse cx="70" cy="25" rx="5" ry="5" fill="#16a085" />
@@ -141,6 +229,7 @@ window.quizData = {
                 <td>
                     <strong>「全部入り」</strong><br>
                     Momentum + RMSProp。<br>
+                    学習初期は移動平均を<strong>バイアス補正</strong>。<br>
                     今のデファクトスタンダード。
                 </td>
             </tr>
@@ -153,12 +242,20 @@ window.quizData = {
             <tr>
                 <td><strong>Xavier (Glorot)</strong></td>
                 <td><strong>Sigmoid, Tanh</strong><br>(S字・対称)</td>
-                <td>分散 $\\frac{1}{n}$。<br>左右対称な関数で、信号の強さを保つ。</td>
+                <td>
+                    正規分布の分散：<code>2/(fan-in+fan-out)</code><br>
+                    一様分布の範囲：<code>±√(6/(fan-in+fan-out))</code><br>
+                    <small>fan-in=fan-out=nなら分散1/n。</small>
+                </td>
             </tr>
             <tr>
                 <td><strong>He (Kaiming)</strong></td>
                 <td><strong>ReLU</strong><br>(折れ線・非対称)</td>
-                <td>分散 $\\frac{2}{n}$。<br>ReLUを通すと半分消えるので、<strong>2倍</strong>にして補う。</td>
+                <td>
+                    正規分布の分散：<code>2/fan-in</code><br>
+                    標準偏差：<code>√(2/fan-in)</code><br>
+                    一様分布の範囲：<code>±√(6/fan-in)</code>
+                </td>
             </tr>
         </table>
     `,
@@ -179,7 +276,7 @@ window.quizData = {
             question: "活性化関数に「Sigmoid」または「Tanh」を用いる場合、最も適切な重みの初期値はどれか。",
             options: ["Heの初期値", "Xavier (Glorot) の初期値", "一様分布", "全ての重みを1にする"],
             answer: 1,
-            explanation: "S字型の関数にはXavier（グロロット）の初期値が適しています。前層のノード数 $n$ に対して分散 $1/n$ の分布を使います。"
+            explanation: "S字型の関数にはXavier（Glorot）の初期値が適しています。正規分布では分散 $2/(fan_{in}+fan_{out})$ を使い、入出力数が同じ $n$ なら $1/n$ になります。"
         },
         {
             category: "SGD",
@@ -365,7 +462,7 @@ window.quizData = {
             question: "Adamの改良版である「AdamW」は、通常のAdamと何が違うか。",
             options: ["Weight Decay（重み減衰）を、勾配の更新とは独立して（Decoupled）適用する", "学習率を固定する", "Momentumを使わない", "L1正則化を使う"],
             answer: 0,
-            explanation: "Adamの実装上のバグ（L2正則化とWeight Decayの混同）を修正し、正しくWeight Decayを効かせることで汎化性能を向上させた手法です。"
+            explanation: "Adamでは勾配へ加えたL2項も適応的学習率で拡大・縮小されるため、単純なL2正則化とWeight Decayが等価になりません。AdamWは重み減衰を勾配更新から分離して適用します。"
         },
         {
             category: "Lookahead",
@@ -388,6 +485,123 @@ window.quizData = {
         {id:"opt-adam-first",category:"Adam(計算)",question:"Adamの一次モーメント$m_t=0.9m_{t-1}+0.1g_t$で、$m_{t-1}=0,g_t=5$なら$m_t$はどれか。",options:["0.5","5","4.5","0.1"],answer:0,explanation:"$0.9×0+0.1×5=0.5$です。実際は初期バイアス補正も行います。"},
         {id:"opt-chain-rule-calc",category:"連鎖律(計算)",question:"$y=x^2,z=3y$のとき$x=2$での$dz/dx$はいくつか。",options:["12","6","4","3"],answer:0,explanation:"$dz/dx=(dz/dy)(dy/dx)=3×2x=3×4=12$です。"},
         {id:"opt-xavier-var",category:"Xavier初期化(計算)",question:"単純化したXavier初期化で分散を$1/n_{in}$とすると、$n_{in}=100$での分散はどれか。",options:["0.01","0.1","1","100"],answer:0,explanation:"$1/100=0.01$です。tanh等で信号分散を保つ狙いがあります。"},
-        {id:"opt-he-var",category:"He初期化(計算)",question:"He初期化で分散を$2/n_{in}$とすると、$n_{in}=100$での分散はどれか。",options:["0.02","0.01","0.2","2"],answer:0,explanation:"$2/100=0.02$です。ReLUで負側が消える影響を補います。"}
+        {id:"opt-he-var",category:"He初期化(計算)",question:"He初期化で分散を$2/n_{in}$とすると、$n_{in}=100$での分散はどれか。",options:["0.02","0.01","0.2","2"],answer:0,explanation:"$2/100=0.02$です。ReLUで負側が消える影響を補います。"},
+
+        // ---------------------------------------------------------
+        // 【2026シラバス補強】病的曲率・逆伝播・Adam・初期化
+        // ---------------------------------------------------------
+        {
+            id: "opt-pathological-curvature",
+            category: "Pathological Curvature（重要）",
+            difficulty: "標準",
+            question: "損失面が細長い谷になり、方向によって曲率が大きく異なるPathological Curvatureで、通常のSGDに起こりやすい動きはどれか。",
+            options: ["急な方向へ左右に振動し、緩い谷方向への進行が遅くなる", "全ての方向で同じ速さで一直線に進む", "勾配が必ず無限大になる", "1回の更新で大域的最適解へ到達する"],
+            answer: 0,
+            explanation: "急な方向では勾配が大きいため谷を横切って振動し、緩い方向では勾配が小さいため前進が遅くなります。Momentumは振動方向を相殺し、谷方向の速度を蓄積します。",
+            explanationFigure: optimizationExplanationFigures.pathologicalCurvature
+        },
+        {
+            id: "opt-minibatch-update-count",
+            category: "ミニバッチ・更新回数（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "訓練データ1,000件をバッチサイズ100で学習する。1エポックで全データを1回ずつ使い、3エポック学習したとき、パラメータ更新は合計何回か。",
+            options: ["3回", "10回", "30回", "300回"],
+            answer: 2,
+            explanation: "1エポックの更新回数は $1000÷100=10$回です。3エポックなので $10×3=30$回更新します。",
+            trap: "エポック数は全データを何周するか、バッチサイズは1回の更新に使う件数です。"
+        },
+        {
+            id: "opt-backprop-affine-square",
+            category: "誤差逆伝播・デルタ（計算）",
+            kind: "計算",
+            difficulty: "応用",
+            question: "$a=wx+b$、$L=a²$ とする。$w=3, x=2, b=1$ のとき、$∂L/∂w$ はいくつか。",
+            options: ["7", "14", "28", "49"],
+            answer: 2,
+            explanation: "順伝播で $a=3×2+1=7$。局所微分は $∂L/∂a=2a=14$ と $∂a/∂w=x=2$ です。連鎖律より $∂L/∂w=14×2=28$ です。",
+            explanationFigure: optimizationExplanationFigures.chainRule
+        },
+        {
+            id: "opt-branch-gradient-sum",
+            category: "計算グラフ・分岐（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "計算グラフで変数 $x$ が2つの経路へ分岐し、逆伝播で各経路から $∂L/∂x=2$ と $3$ が戻ってきた。$x$ に対する合計勾配はいくつか。",
+            options: ["1", "5", "6", "9"],
+            answer: 1,
+            explanation: "同じ変数から分岐した経路の寄与は加算するため、$2+3=5$ です。直列では微分を掛け、分岐の合流では勾配を足します。",
+            explanationFigure: optimizationExplanationFigures.chainRule
+        },
+        {
+            id: "opt-reverse-mode-autodiff",
+            category: "自動微分・逆モード",
+            difficulty: "応用",
+            question: "1個のスカラー損失から数百万個のパラメータ勾配を求める深層学習で、逆モード自動微分が適する主な理由はどれか。",
+            options: ["1回の逆向き計算で、多数の入力パラメータに対する勾配をまとめて求めやすい", "微分公式を一切使わない", "順伝播が不要になる", "数値微分より常にメモリを使わない"],
+            answer: 0,
+            explanation: "出力が1個で入力パラメータが多数という形では、出力側から計算グラフを逆にたどると全パラメータの勾配を効率よく計算できます。これが通常のbackwardの基礎です。"
+        },
+        {
+            id: "opt-adam-bias-correction",
+            category: "Adam・バイアス補正（計算）",
+            kind: "計算",
+            difficulty: "応用",
+            question: "Adamの一次モーメントを $m_1=β_1m_0+(1-β_1)g_1$ とする。$m_0=0, β_1=0.9, g_1=4$ のとき、補正後 $m_1/(1-β_1)$ はいくつか。",
+            options: ["0.4", "3.6", "4", "40"],
+            answer: 2,
+            explanation: "まず $m_1=0.9×0+0.1×4=0.4$。初回の補正は $0.4/(1-0.9)=0.4/0.1=4$ です。",
+            explanationFigure: optimizationExplanationFigures.adamBiasCorrection
+        },
+        {
+            id: "opt-adaptive-epsilon",
+            category: "適応的学習率・ε",
+            difficulty: "標準",
+            question: "AdaGrad、RMSProp、Adamの更新式で、分母の平方根に加える小さな定数 $ε$ の主な役割はどれか。",
+            options: ["0除算と数値不安定を防ぐ", "Momentumを発生させる", "勾配の符号を反転する", "バッチサイズを自動決定する"],
+            answer: 0,
+            explanation: "二乗勾配の蓄積値が0または非常に小さいと分母が不安定になります。$ε$ はその分母を安全に保つための小さな定数です。"
+        },
+        {
+            id: "opt-glorot-full-variance",
+            category: "Xavier・Glorot（計算）",
+            kind: "計算",
+            difficulty: "応用",
+            question: "Glorot正規初期化の分散を $2/(fan_{in}+fan_{out})$ とする。$fan_{in}=100, fan_{out}=50$ のとき分散はどれか。",
+            options: ["1/150", "1/100", "1/75", "2/50"],
+            answer: 2,
+            explanation: "$2/(100+50)=2/150=1/75≈0.0133$ です。$1/n$ はfan-inとfan-outが等しい場合の簡略形です。"
+        },
+        {
+            id: "opt-he-standard-deviation",
+            category: "He初期化・標準偏差（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "He正規初期化で分散が $2/fan_{in}$ のとき、$fan_{in}=200$ における標準偏差はいくつか。",
+            options: ["0.01", "0.1", "1", "10"],
+            answer: 1,
+            explanation: "分散は $2/200=0.01$。標準偏差はその平方根なので $√0.01=0.1$ です。",
+            explanationFigure: optimizationExplanationFigures.initializationVariance,
+            trap: "分散0.01をそのまま標準偏差と答えないようにします。"
+        },
+        {
+            id: "opt-zero-bias-initialization",
+            category: "初期化・対称性（識別）",
+            difficulty: "標準",
+            question: "全結合層の初期化として、一般に問題がない組み合わせはどれか。",
+            options: ["重みはXavierやHeでランダム、バイアスは0", "重みもバイアスも全て同じ0", "重みもバイアスも全て同じ1", "全ニューロンの重みを同じ乱数ベクトルにする"],
+            answer: 0,
+            explanation: "ニューロン間の対称性を破る主役は重みです。重みが異なる乱数なら、バイアスを0で始めても各ニューロンは異なる勾配を受けられます。"
+        },
+        {
+            id: "opt-vanishing-chain-calc",
+            category: "勾配消失（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "逆伝播で局所微分0.5を4回連続して掛ける。上流の勾配が1なら、入力側へ届く勾配はいくつか。",
+            options: ["0.0625", "0.125", "0.25", "2"],
+            answer: 0,
+            explanation: "$1×0.5⁴=1/16=0.0625$ です。1より小さい微分を深い層で繰り返し掛けると、入力側の勾配が急速に小さくなります。"
+        }
     ]
 };
