@@ -1,3 +1,171 @@
+const ffExplanationFigures = {
+    relu: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">RELUは「負を止め、正をそのまま通す」</span>
+            <div class="diagram-row">
+                <div class="diagram-node warn">入力 $x=-2$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node">$\\max(0,x)$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node warn">出力 $0$</div>
+                <div class="diagram-label">負なら0</div>
+            </div>
+            <div class="diagram-row figure-subrow">
+                <div class="diagram-node primary">入力 $x=3$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node">$\\max(0,x)$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node accent">出力 $3$</div>
+                <div class="diagram-label">正ならそのまま</div>
+            </div>
+        </div>`,
+    sigmoidRange: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">SIGMOIDはどんな入力も0と1の間へ押し込む</span>
+            <div class="diagram-row">
+                <div class="diagram-node warn">$x=-10$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node primary">Sigmoid</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-column"><div class="diagram-node warn">$0$に近い</div><div class="diagram-label">ただし0にはならない</div></div>
+            </div>
+            <div class="diagram-row figure-subrow">
+                <div class="diagram-node accent">$x=10$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node primary">Sigmoid</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-column"><div class="diagram-node accent">$1$に近い</div><div class="diagram-label">ただし1にはならない</div></div>
+            </div>
+            <p class="figure-caption">したがって値域は $0&lt;y&lt;1$ です。</p>
+        </div>`,
+    vanishingGradient: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">小さい微分を何度も掛けると、勾配が消える</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">勾配 $1$</div>
+                <div class="diagram-arrow">$\\times0.2$ →</div>
+                <div class="diagram-node">$0.2$</div>
+                <div class="diagram-arrow">$\\times0.2$ →</div>
+                <div class="diagram-node warn">$0.04$</div>
+                <div class="diagram-arrow">$\\times0.2$ →</div>
+                <div class="diagram-node warn">$0.008$</div>
+            </div>
+            <p class="figure-caption">入力層へ戻るほど0に近づき、重みをほとんど更新できなくなります。</p>
+        </div>`,
+    affine: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">全結合層は「重み付き入力＋バイアス」</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">入力 $x$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-column"><div class="diagram-node accent">$Wx$</div><div class="diagram-label">重みを掛ける</div></div>
+                <div class="diagram-arrow">＋</div>
+                <div class="diagram-column"><div class="diagram-node warn">$b$</div><div class="diagram-label">位置をずらす</div></div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node primary">$y=Wx+b$</div>
+            </div>
+        </div>`,
+    parameterCount: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">全結合層のパラメータを2つに分けて数える</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">入力<br><b>10個</b></div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node accent">すべて接続</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node primary">出力<br><b>5個</b></div>
+            </div>
+            <div class="diagram-row figure-subrow">
+                <div class="diagram-column">
+                    <div class="diagram-node accent">重み $W$<br><b>$10\\times5=50$個</b></div>
+                    <div class="diagram-label">出力5個それぞれに、入力10個分</div>
+                </div>
+                <div class="diagram-arrow">＋</div>
+                <div class="diagram-column">
+                    <div class="diagram-node warn">バイアス $b$<br><b>$5$個</b></div>
+                    <div class="diagram-label">出力1個につき1個</div>
+                </div>
+                <div class="diagram-arrow">＝</div>
+                <div class="diagram-node primary">合計<br><b>$55$個</b></div>
+            </div>
+            <p class="figure-caption">覚え方：全結合層のパラメータ数 ＝ 入力数×出力数 ＋ 出力数。</p>
+        </div>`,
+    multilabel: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">複数の答えを、それぞれ独立に判定する</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">1枚の画像</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-column">
+                    <div class="diagram-node accent">犬：$0.90$ ✓</div>
+                    <div class="diagram-node accent">屋外：$0.80$ ✓</div>
+                    <div class="diagram-node">走る：$0.20$</div>
+                </div>
+                <div class="diagram-label">各出力にSigmoid<br>合計は1でなくてよい</div>
+            </div>
+        </div>`,
+    sigmoidDerivative: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">SIGMOIDの微分は中央でも最大0.25</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">$f(x)=0.5$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node accent">$f'(x)=f(x)(1-f(x))$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node warn">$0.5\\times0.5=0.25$</div>
+            </div>
+            <p class="figure-caption">0や1に近い場所では、掛け算の片方が0に近づくため微分はさらに小さくなります。</p>
+        </div>`,
+    dyingRelu: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">負の領域に固定されると、更新の合図が届かない</span>
+            <div class="diagram-row">
+                <div class="diagram-node warn">入力が常に負</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node">ReLU出力 $0$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node warn">勾配 $0$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node warn">重みを更新できない</div>
+            </div>
+            <p class="figure-caption">Leaky ReLUは負側にも小さな傾きを残し、更新の合図を通します。</p>
+        </div>`,
+    multitask: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">出力を目的ごとに分けて足す</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">共通の特徴</div>
+                <div class="diagram-arrow">↗</div>
+                <div class="diagram-column">
+                    <div class="diagram-node accent">分類：犬・猫・鳥<br><b>3個</b></div>
+                    <div class="diagram-node warn">座標：$x,y$<br><b>2個</b></div>
+                </div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node primary">$3+2=5$個</div>
+            </div>
+        </div>`,
+    zeroInitialization: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">全て0で始めると、ニューロンの個性が生まれない</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">同じ入力</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-column">
+                    <div class="diagram-node warn">ニューロンA<br>$W=0$</div>
+                    <div class="diagram-node warn">ニューロンB<br>$W=0$</div>
+                </div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-column">
+                    <div class="diagram-node">同じ出力</div>
+                    <div class="diagram-node">同じ勾配</div>
+                </div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node warn">ずっと同じ働き</div>
+            </div>
+            <p class="figure-caption">ランダムな初期値で対称性を破ると、各ニューロンが異なる特徴を学べます。</p>
+        </div>`
+};
+
 window.quizData = {
     title: "3-（１）順伝播型ネットワーク：MLP・活性化関数",
     
@@ -205,14 +373,16 @@ window.quizData = {
             question: "現在、中間層（隠れ層）の活性化関数として最も標準的に使われている、入力が負なら0、正ならそのまま出力する関数はどれか。",
             options: ["Sigmoid", "Tanh", "ReLU", "Step関数"],
             answer: 2,
-            explanation: "ReLU (Rectified Linear Unit) です。勾配消失が起きにくく、計算も高速なため標準的に使われます。"
+            explanation: "ReLU (Rectified Linear Unit) です。勾配消失が起きにくく、計算も高速なため標準的に使われます。",
+            explanationFigure: ffExplanationFigures.relu
         },
         {
             category: "Sigmoid関数",
             question: "シグモイド関数 $\\sigma(x)$ の出力値の範囲（値域）として正しいものはどれか。",
             options: ["$0 \\le y \\le 1$", "$0 < y < 1$", "$-1 < y < 1$", "$0 \\le y < \\infty$"],
             answer: 1,
-            explanation: "シグモイド関数は $0$ と $1$ に漸近しますが、厳密には到達しません。確率は $0$ より大きく $1$ より小さい範囲になります（極限を除く）。"
+            explanation: "シグモイド関数は $0$ と $1$ に漸近しますが、厳密には到達しません。確率は $0$ より大きく $1$ より小さい範囲になります（極限を除く）。",
+            explanationFigure: ffExplanationFigures.sigmoidRange
         },
         {
             category: "One-hotベクトル",
@@ -226,7 +396,8 @@ window.quizData = {
             question: "多層パーセプトロンにおいて、層を深くしすぎると入力層に近い側の勾配が小さくなり、学習が進まなくなる現象を何と呼ぶか。",
             options: ["勾配消失問題 (Vanishing Gradient)", "勾配爆発問題 (Exploding Gradient)", "過学習 (Overfitting)", "次元の呪い"],
             answer: 0,
-            explanation: "誤差逆伝播法では微分値を掛け算していくため、1より小さい値（シグモイドの微分など）が続くと勾配が0に近づいてしまいます。"
+            explanation: "誤差逆伝播法では微分値を掛け算していくため、1より小さい値（シグモイドの微分など）が続くと勾配が0に近づいてしまいます。",
+            explanationFigure: ffExplanationFigures.vanishingGradient
         },
         {
             category: "回帰問題",
@@ -247,7 +418,8 @@ window.quizData = {
             question: "全結合層（Affine層）の計算式として正しいものはどれか。（入力: $x$, 重み: $W$, バイアス: $b$）",
             options: ["$y = Wx + b$", "$y = Wx$", "$y = x + b$", "$y = W(x+b)$"],
             answer: 0,
-            explanation: "線形変換 $Wx$ にバイアス $b$ を加算するのが全結合層の基本計算です。"
+            explanation: "線形変換 $Wx$ にバイアス $b$ を加算するのが全結合層の基本計算です。",
+            explanationFigure: ffExplanationFigures.affine
         },
         {
             category: "ソフトマックス関数",
@@ -265,28 +437,32 @@ window.quizData = {
             question: "入力層のノード数が $10$、出力層のノード数が $5$ の全結合層において、学習すべきパラメータ（重み $W$ とバイアス $b$）の総数はいくつか。",
             options: ["15個", "50個", "55個", "60個"],
             answer: 2,
-            explanation: "重みは $10 \\times 5 = 50$個。バイアスは出力ノードごとに1つ付くので $5$個。合計 $50 + 5 = 55$個です。バイアスを忘れないように注意！"
+            explanation: "重みは $10 \\times 5 = 50$個。バイアスは出力ノードごとに1つ付くので $5$個。合計 $50 + 5 = 55$個です。バイアスを忘れないように注意！",
+            explanationFigure: ffExplanationFigures.parameterCount
         },
         {
             category: "マルチラベル分類(応用)",
             question: "1つの画像に「犬」「屋外」「走る」など複数のタグを付与する「マルチラベル分類」を行う場合、出力層の活性化関数は何を使うべきか。",
             options: ["ソフトマックス関数", "シグモイド関数", "ReLU", "恒等関数"],
             answer: 1,
-            explanation: "ソフトマックスは「どれか1つ」を選ぶ関数です。複数正解がある場合は、各ノードで独立して確率を出せる「シグモイド関数」を使います。"
+            explanation: "ソフトマックスは「どれか1つ」を選ぶ関数です。複数正解がある場合は、各ノードで独立して確率を出せる「シグモイド関数」を使います。",
+            explanationFigure: ffExplanationFigures.multilabel
         },
         {
             category: "活性化関数の微分(応用)",
             question: "シグモイド関数 $f(x)$ の導関数（微分） $f'(x)$ は、元の関数 $f(x)$ を使ってどのように表せるか。",
             options: ["$f(x)(1 - f(x))$", "$1 - f(x)$", "$f(x)^2$", "$e^{-x}$"],
             answer: 0,
-            explanation: "シグモイド関数の微分は $y(1-y)$ と書けます。この形は計算グラフでの実装時によく使われます。最大値が $0.5 \\times 0.5 = 0.25$ になることもここから分かります。"
+            explanation: "シグモイド関数の微分は $y(1-y)$ と書けます。この形は計算グラフでの実装時によく使われます。最大値が $0.5 \\times 0.5 = 0.25$ になることもここから分かります。",
+            explanationFigure: ffExplanationFigures.sigmoidDerivative
         },
         {
             category: "ReLUの弱点(応用)",
             question: "ReLUにおいて、学習中に特定ニューロンの入力が常に負になり、勾配が常に0になって学習が進まなくなる現象を何と呼ぶか。",
             options: ["Dying ReLU (死んだReLU)", "Exploding ReLU", "Vanishing ReLU", "Leaky ReLU"],
             answer: 0,
-            explanation: "一度重みが更新されて「常に入力が負」の状態に陥ると、勾配が0になり二度と復活しなくなる現象です。これを防ぐのがLeaky ReLUなどです。"
+            explanation: "一度重みが更新されて「常に入力が負」の状態に陥ると、勾配が0になり二度と復活しなくなる現象です。これを防ぐのがLeaky ReLUなどです。",
+            explanationFigure: ffExplanationFigures.dyingRelu
         },
         {
             category: "損失関数の使い分け(応用)",
@@ -321,14 +497,16 @@ window.quizData = {
             question: "ある画像が「犬」「猫」「鳥」のいずれか（3クラス）であり、かつその「座標(x, y)」も予測したい場合、出力層のノード数は最低いくつ必要か。",
             options: ["3個", "2個", "5個", "6個"],
             answer: 2,
-            explanation: "クラス分類用の確率3つ（Softmax）＋座標回帰用の数値2つ（恒等関数）＝合計5つの出力ノードが必要です。この場合、マルチタスク学習となります。"
+            explanation: "クラス分類用の確率3つ（Softmax）＋座標回帰用の数値2つ（恒等関数）＝合計5つの出力ノードが必要です。この場合、マルチタスク学習となります。",
+            explanationFigure: ffExplanationFigures.multitask
         },
         {
             category: "勾配消失の対策(応用)",
             question: "勾配消失問題への対策として、**不適切なもの**はどれか。",
             options: ["活性化関数をSigmoidからReLUに変更する", "Batch Normalizationを導入する", "層の数を減らす（浅くする）", "重みの初期値を全て0にする"],
             answer: 3,
-            explanation: "重みを全て0にすると、全てのニューロンが同じ計算をしてしまい（対称性の破れがない）、学習が正しく進みません。これは勾配消失以前の問題です。"
+            explanation: "重みを全て0にすると、全てのニューロンが同じ計算をしてしまい（対称性の破れがない）、学習が正しく進みません。これは勾配消失以前の問題です。",
+            explanationFigure: ffExplanationFigures.zeroInitialization
         },
         {
             id: "ff-bce-calc",

@@ -51,7 +51,7 @@ function saveAnswer(q, isCorrect) {
 
 if (quizId) {
     const script = document.createElement('script');
-    script.src = `js/data/${quizId}.js?v=20260805-threshold-simple`;
+    script.src = `js/data/${quizId}.js?v=20260805-ff-explanation-diagrams`;
     script.onload = () => window.quizData ? (currentQuizData = window.quizData, initApp()) : showError('問題データの形式が正しくありません。');
     script.onerror = () => showError('指定された問題データが見つかりません。');
     document.body.appendChild(script);
@@ -163,7 +163,7 @@ window.checkAnswer = function(originalIndex, btn) {
     result.className = `result ${isCorrect ? 'correct' : 'incorrect'}`;
     result.innerHTML = `
         <div class="result-title">${isCorrect ? '正解' : '不正解'} <span>${isCorrect ? '判断は合っています。根拠まで固定しましょう。' : `正解：${q.options[q.answer]}`}</span></div>
-        <div class="explanation"><strong>なぜそうなるか</strong>${q.explanation}</div>
+        <div class="explanation"><strong>なぜそうなるか</strong>${q.explanation}${q.explanationFigure || ''}</div>
         ${q.trap ? `<div class="trap"><strong>試験の罠</strong>${q.trap}</div>` : ''}
         <button class="next-btn" onclick="nextQuestion()">${currentIndex + 1 === sessionQuestions.length ? '結果を見る' : '次の問題へ'}</button>`;
     updateHeader();
