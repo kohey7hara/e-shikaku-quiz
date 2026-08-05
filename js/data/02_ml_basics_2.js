@@ -196,6 +196,86 @@ window.quizData = {
         </ul>
         <p><strong>APの簡単な計算例：</strong>Recallが $0\\rightarrow0.5$ の区間でPrecisionが0.8、$0.5\\rightarrow1.0$ の区間で0.6なら、$AP=(0.5-0)\\times0.8+(1.0-0.5)\\times0.6=0.7$ です。補間方法が指定されている場合は、その定義に従います。</p>
 
+        <h3>■ しきい値を下げたときの「矢印フレームワーク」</h3>
+        <style>
+            .threshold-memory { background:#f2f8ff; border:1px solid #c9daee; border-radius:14px; padding:14px; margin:14px 0; }
+            .threshold-flow { display:grid; grid-template-columns:1fr auto 1fr auto 1.5fr; gap:8px; align-items:stretch; }
+            .threshold-box { display:flex; flex-direction:column; justify-content:center; border:2px solid #7da4c7; border-radius:10px; padding:10px; background:white; text-align:center; }
+            .threshold-box strong { display:block; color:#1769aa; }
+            .threshold-box.start { border-color:#e2a02b; background:#fff8e8; }
+            .threshold-box.branch { display:grid; grid-template-columns:1fr 1fr; gap:8px; border:0; padding:0; background:transparent; }
+            .threshold-box.branch div { border:2px solid #7da4c7; border-radius:10px; padding:10px; background:white; }
+            .threshold-arrow { display:grid; place-items:center; color:#397399; font-size:1.5rem; font-weight:900; }
+            .threshold-mantra { border-left:5px solid #27ae60; background:#effaf4; padding:12px 14px; margin:14px 0; }
+            .threshold-mantra strong { display:block; color:#167247; }
+            @media(max-width:680px) {
+                .threshold-flow { grid-template-columns:1fr; }
+                .threshold-arrow { transform:rotate(90deg); }
+                .threshold-box.branch { grid-template-columns:1fr; }
+            }
+        </style>
+        <p>迷ったら、指標の式から考え始めず、必ず<strong>「しきい値を下げる＝Positive判定の網を広げる」</strong>から矢印をたどります。</p>
+        <div class="threshold-memory">
+            <div class="threshold-flow">
+                <div class="threshold-box start">
+                    <strong>① しきい値 ↓</strong>
+                    陽性判定の合格ラインを下げる
+                </div>
+                <div class="threshold-arrow">→</div>
+                <div class="threshold-box">
+                    <strong>② Positive判定 ↑</strong>
+                    今までNegativeだったものも拾う
+                </div>
+                <div class="threshold-arrow">→</div>
+                <div class="threshold-box branch">
+                    <div><strong>③-A TP ↑</strong>本当の陽性を<br>追加で拾う</div>
+                    <div><strong>③-B FP ↑</strong>本当は陰性も<br>巻き込む</div>
+                </div>
+            </div>
+        </div>
+
+        <h4>■ TPとFPから、指標の矢印を決める</h4>
+        <table>
+            <tr><th>増えるもの</th><th>影響する指標</th><th>なぜそうなるか</th></tr>
+            <tr>
+                <td><strong>TP ↑</strong><br>本物を多く拾う</td>
+                <td><strong>TPR / Recall ↑</strong></td>
+                <td>$\\frac{TP}{TP+FN}$。実際の陽性のうち、拾えた割合が増える</td>
+            </tr>
+            <tr>
+                <td><strong>FP ↑</strong><br>陰性も巻き込む</td>
+                <td><strong>FPR ↑</strong></td>
+                <td>$\\frac{FP}{FP+TN}$。実際の陰性のうち、誤警報にした割合が増える</td>
+            </tr>
+            <tr>
+                <td><strong>FP ↑</strong><br>予測Positiveへ誤りが混ざる</td>
+                <td><strong>Precision ↓傾向</strong></td>
+                <td>$\\frac{TP}{TP+FP}$。Positiveと予測した集団の純度が下がりやすい</td>
+            </tr>
+        </table>
+        <p><strong>厳密には：</strong>しきい値を下げても、データのスコアを1件もまたがなければ値は変わりません。固定データではTPとFPは「増えるか同じ」で、Recall・TPR・FPRも「上がるか同じ」です。Precisionだけは、新しく拾ったデータが正例か負例かにより上がることもありますが、一般にはFPが混ざって下がりやすくなります。</p>
+
+        <h4>■ 最後に、グラフの軸へ当てはめる</h4>
+        <table>
+            <tr><th>曲線</th><th>横軸 $x$</th><th>縦軸 $y$</th><th>しきい値を下げたとき</th></tr>
+            <tr>
+                <td><strong>ROC曲線</strong></td>
+                <td>$FPR$ ↑</td>
+                <td>$TPR$ ↑</td>
+                <td><strong>右へ、かつ上へ</strong></td>
+            </tr>
+            <tr>
+                <td><strong>PR曲線</strong></td>
+                <td>$Recall$ ↑</td>
+                <td>$Precision$ ↓傾向</td>
+                <td><strong>右へ進み、下がりやすい</strong><br><small>Precisionは上下に揺れることがある</small></td>
+            </tr>
+        </table>
+        <div class="threshold-mantra">
+            <strong>試験直前の暗記フレーズ</strong>
+            しきい値↓ → 網を広げる → TP↑でRecall・TPR↑ ／ FP↑でFPR↑・Precision↓傾向 → ROCは右上、PRは右へ進んで下がりやすい。
+        </div>
+
         <h3>■ その他の重要指標</h3>
         <table>
             <tr><th>名称</th><th>内容・特徴</th></tr>
