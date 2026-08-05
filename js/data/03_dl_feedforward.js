@@ -163,6 +163,44 @@ const ffExplanationFigures = {
                 <div class="diagram-node warn">ずっと同じ働き</div>
             </div>
             <p class="figure-caption">ランダムな初期値で対称性を破ると、各ニューロンが異なる特徴を学べます。</p>
+        </div>`,
+    linearCollapse: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">活性化関数がないと、2層でも1つの式にまとまる</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">$x$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node">$W_1x+b_1$</div>
+                <div class="diagram-arrow">→</div>
+                <div class="diagram-node">$W_2(・)+b_2$</div>
+                <div class="diagram-arrow">＝</div>
+                <div class="diagram-node warn">1つの $Wx+b$</div>
+            </div>
+            <p class="figure-caption">途中にReLUなどを挟むことで、1本の直線では表せない境界を学べます。</p>
+        </div>`,
+    ordinalRegression: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">順序回帰は「どの境界を越えたか」を判定する</span>
+            <div class="diagram-row">
+                <div class="diagram-node">軽症</div>
+                <div class="diagram-arrow">境界1 →</div>
+                <div class="diagram-node warn">中等症</div>
+                <div class="diagram-arrow">境界2 →</div>
+                <div class="diagram-node accent">重症</div>
+            </div>
+            <p class="figure-caption">順番は重要ですが、「軽症→中等症」と「中等症→重症」の間隔が同じとは限りません。</p>
+        </div>`,
+    sigmoidTemperature: `
+        <div class="exam-figure answer-figure">
+            <span class="figure-title">温度Tが大きいほど、0.5付近へならされる</span>
+            <div class="diagram-row">
+                <div class="diagram-node primary">ロジット $z$</div>
+                <div class="diagram-arrow">÷ 大きな $T$</div>
+                <div class="diagram-node">$z/T$ は0に近づく</div>
+                <div class="diagram-arrow">→ Sigmoid →</div>
+                <div class="diagram-node accent">$0.5$に近づく</div>
+            </div>
+            <p class="figure-caption">ゲイン $a$ を使う Sigmoid($az$) では逆で、$a$ が大きいほど急になります（$a=1/T$）。</p>
         </div>`
 };
 
@@ -184,6 +222,8 @@ window.quizData = {
             .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; font-size: 0.9em; }
             .numer { border-bottom: 1px solid #000; padding: 0 2px; }
             .denom { padding: 0 2px; }
+            .quick-formula { margin: 12px 0 16px; padding: 12px 14px; border-left: 5px solid #2780b8; border-radius: 8px; background: #eef7fb; line-height: 1.8; }
+            .quick-formula code { color: #123f68; font-weight: 800; }
         </style>
 
         <h3>■ 順伝播の流れ：①計算 → ②変換</h3>
@@ -208,6 +248,12 @@ window.quizData = {
                 <strong>出力 <i>y</i></strong>
             </div>
         </div>
+        <div class="quick-formula">
+            <strong>MLP計算の型</strong><br>
+            ① <code>z = Wx + b</code> → ② <code>y = f(z)</code><br>
+            1層のパラメータ数：<code>入力数 × 出力数 ＋ 出力数</code><br>
+            ※活性化関数を挟まない多層のAffine層は、1層のAffine層にまとめられます。
+        </div>
 
         <h3>■ 【重要】タスク別・出力層の鉄板セット</h3>
         <p>活性化関数を使う理由:複雑なカーブ（非線形）を描けるようにするため<br>中間層での役割: 直線をねじ曲げて、複雑な表現力を持たせること。<br>出力層での役割: 計算結果を、確率などの人間が欲しい形式に変換すること。<br>最終段（出力層）では、タスクに応じて<strong>②活性化関数</strong>を使い分けます。<br>①全結合層は、必要な出力数（クラス数など）に合わせるために必ず存在します。</p>
@@ -231,6 +277,20 @@ window.quizData = {
                 <td><strong>Softmax</strong><br><small>※出力の合計を 1.0 (100%) にする</small></td>
                 <td><strong>交差エントロピー</strong><br>(Cross Entropy)</td>
             </tr>
+            <tr>
+                <td><strong>順序回帰</strong><br><small>例：軽症・中等症・重症</small></td>
+                <td><strong>代表：境界を判定</strong><br><small>※K段階ならK-1個の境界</small></td>
+                <td><strong>代表：境界ごとのBCE</strong></td>
+            </tr>
+        </table>
+        <p><strong>順序回帰のポイント：</strong>クラスに順番はありますが、段階間の距離が同じとは限りません。通常の多クラス分類は順番を使わず、単純な回帰は段階間を等間隔の数値として扱いやすい点が違います。</p>
+
+        <h3>■ 計算問題で使う損失関数</h3>
+        <table>
+            <tr><th>場面</th><th>式</th><th>見る場所</th></tr>
+            <tr><td>回帰</td><td><code>MSE = Σ(y-ŷ)²/N</code><br><code>MAE = Σ|y-ŷ|/N</code></td><td>二乗か絶対値か</td></tr>
+            <tr><td>2値・マルチラベル</td><td><code>BCE = -[y ln p+(1-y)ln(1-p)]</code></td><td>y=1なら -ln p<br>y=0なら -ln(1-p)</td></tr>
+            <tr><td>多クラス</td><td><code>CE = -ln p(正解クラス)</code></td><td>正解クラスの確率だけ</td></tr>
         </table>
 
         <h3>■ 活性化関数図鑑 (E資格 必須セット)</h3>
@@ -248,6 +308,7 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「今の主役」</strong><br>
+                    ・<code>f(x)=max(0,x)</code><br>
                     ・<i>x</i> > 0 で微分値が <strong>1.0</strong>（勾配消失しない）。<br>
                     ・<i>x</i> &le; 0 で微分値 0。<br>
                     ・計算が超高速。
@@ -264,6 +325,7 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「死んだReLU対策」</strong><br>
+                    ・<code>f(x)=max(x, αx)</code><br>
                     ・<i>x</i> < 0 でもわずかに傾き（&alpha;=0.01等）を持つ。<br>
                     ・学習が止まる現象(Dying ReLU)を防ぐ。
                 </td>
@@ -279,8 +341,26 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「確率 (0〜1) に変換」</strong><br>
+                    ・<code>σ(x)=1/(1+e<sup>-x</sup>)</code>、<code>σ'(x)=σ(x)(1-σ(x))</code><br>
+                    ・<code>σ(0)=0.5</code>。温度 <i>T</i> が大きいほど平坦。<br>
                     ・2値分類の出力層で使う。<br>
                     ・中間層で使うと<strong>勾配消失</strong>の原因になる（最大微分値0.25）。
+                </td>
+            </tr>
+            <tr>
+                <td><strong>GELU</strong><br>(Gaussian Error Linear Unit)</td>
+                <td>
+                    <svg class="graph-icon" viewBox="0 0 60 40">
+                        <line x1="0" y1="30" x2="60" y2="30" class="axis" />
+                        <line x1="30" y1="0" x2="30" y2="40" class="axis" />
+                        <path d="M5,31 C18,32 24,34 30,29 C38,18 45,9 55,4" class="graph-line" />
+                    </svg>
+                </td>
+                <td>
+                    <strong>「滑らかなReLU」</strong><br>
+                    ・<code>f(x)=xΦ(x)</code><br>
+                    ・負側もわずかに通し、0付近も滑らか。<br>
+                    ・Transformerでよく使う。
                 </td>
             </tr>
             <tr>
@@ -294,6 +374,8 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「ゼロ中心 (-1〜1)」</strong><br>
+                    ・<code>tanh(x)=(e<sup>x</sup>-e<sup>-x</sup>)/(e<sup>x</sup>+e<sup>-x</sup>)</code><br>
+                    ・微分は <code>1-tanh²(x)</code>、<code>tanh(0)=0</code>。<br>
                     ・Sigmoidより学習効率が良い。<br>
                     ・RNNなどでよく使われる。
                 </td>
@@ -488,7 +570,7 @@ window.quizData = {
             question: "シグモイド関数 $y = \\frac{1}{1+e^{-ax}}$ において、係数 $a$（ゲイン）を大きくすると関数の形状はどうなるか。",
             options: ["傾きが緩やかになり、線形に近づく", "傾きが急になり、ステップ関数に近づく", "最大値が大きくなる", "平行移動する"],
             answer: 1,
-            explanation: "$a$ を大きくすると $x=0$ 付近での変化が急激になり、0か1かのデジタルな動き（ステップ関数）に近づきます。これを「温度パラメータ」として扱うこともあります。"
+            explanation: "$a$ を大きくすると $x=0$ 付近での変化が急激になり、ステップ関数に近づきます。Sigmoid($x/T$) と書く場合は $a=1/T$ なので、ゲイン $a$ と温度 $T$ は逆の働きです。"
         },
         {
             category: "出力層のノード数(応用)",
@@ -537,6 +619,134 @@ window.quizData = {
             options: ["各クラス独立Sigmoid＋BCE", "全クラス一括Softmax＋必ず1クラス", "恒等関数＋MSEだけ", "Argmaxを学習中に微分する"],
             answer: 0,
             explanation: "複数ラベルが同時に1になれるため、各出力を独立なBernoulli確率として扱います。排他的な多クラス分類はSoftmax＋CEが典型です。"
+        },
+
+        // ---------------------------------------------------------
+        // 【2026シラバス補強】MLP・順序回帰・計算問題
+        // ---------------------------------------------------------
+        {
+            id: "ff-nonlinearity-collapse",
+            category: "MLP・非線形性（重要）",
+            difficulty: "標準",
+            question: "全結合層を何層も重ねても、層の間に活性化関数を入れなかった場合、モデルはどうなるか。",
+            options: ["全体を1つのAffine変換として表せ、複雑な非線形境界を作れない", "層数に比例して必ず非線形性が増す", "Softmaxと同じ確率分布になる", "全ての出力が必ず0になる"],
+            answer: 0,
+            explanation: "$W_2(W_1x+b_1)+b_2$ は、重みとバイアスをまとめれば別の $Wx+b$ になります。ReLUなどの非線形変換を途中に挟むことが、多層化の表現力につながります。",
+            explanationFigure: ffExplanationFigures.linearCollapse,
+            trap: "層を増やすだけでは不十分です。「Affine → 活性化関数」を1セットとして考えます。"
+        },
+        {
+            id: "ff-two-layer-parameter-count",
+            category: "多層MLP・パラメータ数（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "4入力→3隠れノード→2出力ノードの全結合MLPがある。2つの全結合層の重みとバイアスの総数はいくつか。",
+            options: ["18個", "20個", "23個", "26個"],
+            answer: 2,
+            explanation: "入力→隠れ層は $4×3+3=15$個、隠れ層→出力層は $3×2+2=8$個です。合計は $15+8=23$個です。",
+            trap: "各層で、出力ノード数と同じ個数のバイアスを足します。"
+        },
+        {
+            id: "ff-forward-relu-calc",
+            category: "順伝播（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "1ニューロンで $z=2x_1-x_2-2$、$y=ReLU(z)$ とする。$x_1=2, x_2=1$ のとき出力 $y$ はいくつか。",
+            options: ["-1", "0", "1", "3"],
+            answer: 2,
+            explanation: "まずAffine計算で $z=2×2-1-2=1$。次に $ReLU(1)=1$ なので、出力は1です。必ず「Affine→活性化関数」の順に計算します。"
+        },
+        {
+            id: "ff-batch-parameter-count",
+            category: "パラメータ数・バッチ（識別）",
+            difficulty: "標準",
+            question: "10入力→5出力の全結合層へ、32件のミニバッチを同時に入力する。学習対象のパラメータ総数はいくつか。",
+            options: ["55個", "320個", "1,600個", "1,760個"],
+            answer: 0,
+            explanation: "パラメータは重み $10×5=50$個とバイアス5個で、合計55個です。32は同じ重みを共有して処理するデータ件数なので、パラメータ数には掛けません。",
+            trap: "バッチサイズや中間出力の要素数は、学習する重み・バイアスの個数ではありません。"
+        },
+        {
+            id: "ff-ordinal-identification",
+            category: "順序回帰（識別）",
+            difficulty: "標準",
+            question: "順序回帰として扱うのが最も適切な例はどれか。",
+            options: ["病状を軽症・中等症・重症の3段階で予測する", "画像を犬・猫・鳥のいずれかに分類する", "住宅価格を円単位で予測する", "画像に犬と屋外のタグを同時に付ける"],
+            answer: 0,
+            explanation: "軽症＜中等症＜重症には順番がありますが、段階間の距離が同じとは限りません。このような順序付きカテゴリを扱うのが順序回帰です。",
+            explanationFigure: ffExplanationFigures.ordinalRegression,
+            trap: "数値ラベル1・2・3を付けても、単純な回帰の連続量と同じとは限りません。"
+        },
+        {
+            id: "ff-ordinal-threshold-count",
+            category: "順序回帰・出力数（計算）",
+            kind: "計算",
+            difficulty: "応用",
+            question: "5段階評価を、隣接する段階の境界を順に越えたか判定する累積型の順序回帰で扱う。典型的に必要な境界判定はいくつか。",
+            options: ["1個", "4個", "5個", "10個"],
+            answer: 1,
+            explanation: "K段階を分ける境界はK-1個です。5段階なら「段階1を越えたか」から「段階4を越えたか」までの4境界を判定します。"
+        },
+        {
+            id: "ff-mse-mae-calc",
+            category: "MSE・MAE（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "2件の予測誤差が1と3である。MSEとMAEの組み合わせとして正しいものはどれか。",
+            options: ["MSE=2、MAE=5", "MSE=4、MAE=2", "MSE=5、MAE=2", "MSE=10、MAE=4"],
+            answer: 2,
+            explanation: "MSEは $(1²+3²)/2=(1+9)/2=5$。MAEは $(|1|+|3|)/2=(1+3)/2=2$ です。"
+        },
+        {
+            id: "ff-softmax-from-logits-calc",
+            category: "Softmax（計算）",
+            kind: "計算",
+            difficulty: "応用",
+            question: "3クラスのロジットが [ln(4), ln(2), 0] のとき、Softmax出力はどれか。",
+            options: ["[4/7, 2/7, 1/7]", "[4/6, 2/6, 0]", "[1/3, 1/3, 1/3]", "[ln(4)/6, ln(2)/6, 0]"],
+            answer: 0,
+            explanation: "指数を取ると [4, 2, 1] です。合計7で割るため [4/7, 2/7, 1/7] になります。$e^0=1$ を忘れないことがポイントです。"
+        },
+        {
+            id: "ff-bce-negative-label-calc",
+            category: "BCE・負例（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "正解 $y=0$、予測確率 $p=0.2$ のBCE $-[y\\ln p+(1-y)\\ln(1-p)]$ はどれか。",
+            options: ["$-\\ln0.8$", "$-\\ln0.2$", "$\\ln0.8$", "$0$"],
+            answer: 0,
+            explanation: "$y=0$ では第1項が消え、$-\\ln(1-p)=-\\ln0.8≈0.223$ です。負例では「0である確率」$1-p$ を見ます。"
+        },
+        {
+            id: "ff-sigmoid-temperature",
+            category: "Sigmoid・温度パラメータ",
+            difficulty: "応用",
+            question: "温度付きSigmoid $Sigmoid(z/T)$ で、ロジット $z$ を固定したまま温度 $T$ を大きくすると、出力は一般にどうなるか。",
+            options: ["0.5に近づき、曲線は平坦になる", "0か1に近づき、曲線は急になる", "必ず0になる", "出力範囲が-1〜1になる"],
+            answer: 0,
+            explanation: "$T$ が大きいと $z/T$ は0に近づき、$Sigmoid(0)=0.5$ に近づきます。温度を上げるほど判断はsoftになります。",
+            explanationFigure: ffExplanationFigures.sigmoidTemperature,
+            trap: "ゲイン $a$ の式 $Sigmoid(az)$ では逆です。$a=1/T$ と整理すると混乱しません。"
+        },
+        {
+            id: "ff-tanh-derivative-zero",
+            category: "tanh・微分（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "$y=tanh(x)$ の微分が $dy/dx=1-y²$ であるとき、$x=0$ での微分値はいくつか。",
+            options: ["0", "0.25", "0.5", "1"],
+            answer: 3,
+            explanation: "$tanh(0)=0$ なので、微分値は $1-0²=1$ です。tanhの傾きは中央で最大になり、両端では0に近づきます。"
+        },
+        {
+            id: "ff-leaky-relu-calc",
+            category: "Leaky ReLU（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "Leaky ReLUを $f(x)=max(x, αx)$ とし、$α=0.01$ とする。$x=-4$ のとき出力はいくつか。",
+            options: ["-4", "-0.04", "0", "0.04"],
+            answer: 1,
+            explanation: "負の入力では $αx$ を使うため、$0.01×(-4)=-0.04$ です。ReLUと違い、負側を完全な0にしない点が重要です。"
         }
     ]
 };
