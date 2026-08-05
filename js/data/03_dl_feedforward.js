@@ -219,19 +219,17 @@ window.quizData = {
                 <td><strong>平均二乗誤差</strong><br>(MSE)</td>
             </tr>
             <tr>
-                <td><strong>2値分類</strong><br>(Yes/No)</td>
-                <td><strong>Sigmoid</strong><br><small>※出力を 0.0〜1.0 の確率にする</small></td>
-                <td><strong>バイナリ<br>クロスエントロピー</strong></td>
+                <td><strong>2値分類</strong><br><small>Yes/Noを1個出力</small></td>
+                <td rowspan="2"><strong>Sigmoid</strong><br><small>※各出力を独立して<br>0.0〜1.0にする</small></td>
+                <td rowspan="2"><strong>バイナリ<br>クロスエントロピー</strong><br><small>(BCE)</small></td>
+            </tr>
+            <tr>
+                <td><strong>マルチラベル</strong><br><small>Yes/Noを複数出力</small></td>
             </tr>
             <tr>
                 <td><strong>多クラス分類</strong><br>(どれか1つ)</td>
                 <td><strong>Softmax</strong><br><small>※出力の合計を 1.0 (100%) にする</small></td>
                 <td><strong>交差エントロピー</strong><br>(Cross Entropy)</td>
-            </tr>
-            <tr>
-                <td><strong>マルチラベル</strong><br>(複数OK)</td>
-                <td><strong>Sigmoid</strong><br><small>※各クラス独立して判定</small></td>
-                <td><strong>バイナリ<br>クロスエントロピー</strong></td>
             </tr>
         </table>
 
