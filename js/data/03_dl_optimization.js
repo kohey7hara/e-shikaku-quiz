@@ -68,7 +68,9 @@ window.quizData = {
             .opt-icon { width: 80px; height: 50px; background: #fff; margin: auto; border: 1px solid #eee; }
             .path-line { fill: none; stroke-width: 3; stroke-linecap: round; }
             .core-strip { margin: 12px 0 18px; padding: 12px 14px; border-left: 5px solid #2780b8; border-radius: 8px; background: #eef7fb; line-height: 1.8; }
-            .formula-table code { color: #123f68; font-weight: 800; white-space: nowrap; }
+            .optimizer-formula-table td:nth-child(3) { min-width: 480px; }
+            .optimizer-equation { margin: 6px 0; padding: 7px 10px; border-radius: 8px; background: #f3f7fb; color: #123f68; font-size: 1.02em; white-space: nowrap; }
+            .optimizer-equation mjx-container { margin: 0 !important; }
         </style>
 
         <h3>■ 2026シラバスの本線</h3>
@@ -109,17 +111,6 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ 計算問題の更新式</h3>
-        <table class="formula-table">
-            <tr><th>手法</th><th>状態の更新</th><th>見分け方</th></tr>
-            <tr><td><strong>SGD</strong></td><td><code>w ← w - ηg</code></td><td>現在の勾配だけ</td></tr>
-            <tr><td><strong>Momentum</strong></td><td><code>v ← αv + g</code><br><code>w ← w - ηv</code></td><td>過去の方向を残す</td></tr>
-            <tr><td><strong>AdaGrad</strong></td><td><code>G ← G + g²</code><br><code>w ← w - ηg/(√G+ε)</code></td><td>二乗和を全て累積</td></tr>
-            <tr><td><strong>RMSProp</strong></td><td><code>v ← ρv+(1-ρ)g²</code><br><code>w ← w - ηg/(√v+ε)</code></td><td>古い二乗勾配を忘れる</td></tr>
-            <tr><td><strong>Adam</strong></td><td><code>m：勾配の移動平均</code><br><code>v：二乗勾配の移動平均</code></td><td>Momentum＋RMSProp<br>初期バイアス補正あり</td></tr>
-        </table>
-        <p><strong>ε（イプシロン）</strong>は、分母が0になることと数値不安定を防ぐ小さな定数です。</p>
-
         <h3>■ Pathological Curvature：細長い谷</h3>
         <div class="core-strip">
             方向ごとの曲率が大きく異なると、SGDは<strong>急な方向へ左右に振動</strong>し、緩い谷方向には少ししか進めません。Momentumは過去の方向を平均化し、振動を打ち消しながら谷方向へ加速します。
@@ -134,9 +125,10 @@ window.quizData = {
         </table>
 
         <h3>■ オプティマイザ図鑑（主要手法＋比較用参考）</h3>
-        <p>2026シラバスの主要手法は、SGD、Momentum/NAG、AdaGrad、RMSProp、Adamです。</p>
-        <table>
-            <tr><th>名称</th><th>軌跡イメージ</th><th>特徴・試験のツボ</th></tr>
+        <p>2026シラバスの主要手法は、SGD、Momentum/NAG、AdaGrad、RMSProp、Adamです。式と特徴を同じ行で確認します。</p>
+        <p><strong>共通記号：</strong>$w_t$＝現在の重み、$g_t$＝勾配、$\\eta$＝学習率、$t$＝更新回数</p>
+        <table class="optimizer-formula-table">
+            <tr><th>名称</th><th>軌跡</th><th>更新式・特徴・試験のツボ</th></tr>
             <tr>
                 <td><strong>SGD</strong><br>(確率的勾配降下法)</td>
                 <td>
@@ -147,6 +139,8 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「千鳥足の酔っ払い」</strong><br>
+                    <div class="optimizer-equation">$\\displaystyle w_{t+1}=w_t-\\eta g_t$</div>
+                    現在の勾配だけで更新。<br>
                     <span style="color:red;">⚠ 弱点:</span> ジグザグして効率が悪い。
                 </td>
             </tr>
@@ -160,6 +154,8 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「重い鉄球 (慣性)」</strong><br>
+                    <div class="optimizer-equation">$\\displaystyle v_t=\\alpha v_{t-1}+g_t$</div>
+                    <div class="optimizer-equation">$\\displaystyle w_{t+1}=w_t-\\eta v_t$</div>
                     過去の速度を維持。<br>
                     <span style="color:red;">⚠ 弱点:</span> 行き過ぎる（オーバーシュート）。
                 </td>
@@ -174,6 +170,10 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「先読みするMomentum」</strong><br>
+                    <div class="optimizer-equation">$\\displaystyle w_{\\mathrm{lookahead}}=w_t+\\alpha\\,\\Delta w_{t-1}$</div>
+                    <div class="optimizer-equation">$\\displaystyle g_t=\\nabla L(w_{\\mathrm{lookahead}})$</div>
+                    <div class="optimizer-equation">$\\displaystyle \\Delta w_t=\\alpha\\,\\Delta w_{t-1}-\\eta g_t$</div>
+                    <div class="optimizer-equation">$\\displaystyle w_{t+1}=w_t+\\Delta w_t$</div>
                     「慣性で進んだ<strong>未来の位置</strong>」で勾配を計算して補正する。<br>
                     Momentumの行き過ぎブレーキ版。
                 </td>
@@ -189,6 +189,9 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「疲れるランナー」</strong><br>
+                    <div class="optimizer-equation">$\\displaystyle G_t=G_{t-1}+g_t^2$</div>
+                    <div class="optimizer-equation">$\\displaystyle w_{t+1}=w_t-\\frac{\\eta g_t}{\\sqrt{G_t}+\\varepsilon}$</div>
+                    過去の勾配二乗を全て累積。<br>
                     <span style="color:red;">⚠ 弱点:</span> 学習率が0になり<strong>止まる</strong>。
                 </td>
             </tr>
@@ -202,6 +205,8 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「忘れるAdaGrad」</strong><br>
+                    <div class="optimizer-equation">$\\displaystyle v_t=\\rho v_{t-1}+(1-\\rho)g_t^2$</div>
+                    <div class="optimizer-equation">$\\displaystyle w_{t+1}=w_t-\\frac{\\eta g_t}{\\sqrt{v_t}+\\varepsilon}$</div>
                     過去を徐々に忘れることで、学習を継続させる。
                 </td>
             </tr>
@@ -215,6 +220,8 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「学習率の設定不要」</strong><br>
+                    <div class="optimizer-equation">$\\displaystyle \\Delta w_t=-\\frac{\\mathrm{RMS}[\\Delta w]_{t-1}}{\\mathrm{RMS}[g]_t}\\,g_t$</div>
+                    <div class="optimizer-equation">$\\displaystyle w_{t+1}=w_t+\\Delta w_t$</div>
                     RMSPropと似ているが、<strong>学習率ハイパーパラメータが存在しない</strong>（単位を揃える工夫で自動化）。
                 </td>
             </tr>
@@ -228,12 +235,17 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「全部入り」</strong><br>
+                    <div class="optimizer-equation">$\\displaystyle m_t=\\beta_1m_{t-1}+(1-\\beta_1)g_t$</div>
+                    <div class="optimizer-equation">$\\displaystyle v_t=\\beta_2v_{t-1}+(1-\\beta_2)g_t^2$</div>
+                    <div class="optimizer-equation">$\\displaystyle \\hat{m}_t=\\frac{m_t}{1-\\beta_1^t},\\quad \\hat{v}_t=\\frac{v_t}{1-\\beta_2^t}$</div>
+                    <div class="optimizer-equation">$\\displaystyle w_{t+1}=w_t-\\frac{\\eta\\hat{m}_t}{\\sqrt{\\hat{v}_t}+\\varepsilon}$</div>
                     Momentum + RMSProp。<br>
                     学習初期は移動平均を<strong>バイアス補正</strong>。<br>
                     今のデファクトスタンダード。
                 </td>
             </tr>
         </table>
+        <p><strong>式の注意：</strong>$\\varepsilon$ は0除算と数値不安定を防ぐ小さな定数です。Momentum/NAGは速度の符号定義によって式の＋・－が変わりますが、<strong>過去の移動方向を残す／先で勾配を見る</strong>という意味は同じです。</p>
 
         <h3>■ 【暗記】初期化手法の鉄板セット</h3>
         <p>Step 0（準備段階）で、乱数の「広がり具合（分散）」をどう決めるかです。</p>
