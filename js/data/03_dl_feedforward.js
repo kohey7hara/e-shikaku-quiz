@@ -224,6 +224,10 @@ window.quizData = {
             .denom { padding: 0 2px; }
             .quick-formula { margin: 12px 0 16px; padding: 12px 14px; border-left: 5px solid #2780b8; border-radius: 8px; background: #eef7fb; line-height: 1.8; }
             .quick-formula code { color: #123f68; font-weight: 800; }
+            .loss-formula-table td:nth-child(2) { min-width: 390px; }
+            .loss-equation { margin: 5px 0; padding: 7px 10px; border-radius: 8px; background: #f3f7fb; color: #123f68; font-size: 1.04em; white-space: nowrap; }
+            .loss-equation mjx-container { margin: 0 !important; }
+            .loss-reading { color: #405a72; font-weight: 700; line-height: 1.7; }
         </style>
 
         <h3>■ 順伝播の流れ：①計算 → ②変換</h3>
@@ -286,11 +290,30 @@ window.quizData = {
         <p><strong>順序回帰のポイント：</strong>クラスに順番はありますが、段階間の距離が同じとは限りません。通常の多クラス分類は順番を使わず、単純な回帰は段階間を等間隔の数値として扱いやすい点が違います。</p>
 
         <h3>■ 計算問題で使う損失関数</h3>
-        <table>
-            <tr><th>場面</th><th>式</th><th>見る場所</th></tr>
-            <tr><td>回帰</td><td><code>MSE = Σ(y-ŷ)²/N</code><br><code>MAE = Σ|y-ŷ|/N</code></td><td>二乗か絶対値か</td></tr>
-            <tr><td>2値・マルチラベル</td><td><code>BCE = -[y ln p+(1-y)ln(1-p)]</code></td><td>y=1なら -ln p<br>y=0なら -ln(1-p)</td></tr>
-            <tr><td>多クラス</td><td><code>CE = -ln p(正解クラス)</code></td><td>正解クラスの確率だけ</td></tr>
+        <table class="loss-formula-table">
+            <tr><th>場面</th><th>計算式</th><th>試験での読み方</th></tr>
+            <tr>
+                <td><strong>回帰</strong></td>
+                <td>
+                    <div class="loss-equation">$\\displaystyle \\mathrm{MSE}=\\frac{1}{N}\\sum_{i=1}^{N}(y_i-\\hat{y}_i)^2$</div>
+                    <div class="loss-equation">$\\displaystyle \\mathrm{MAE}=\\frac{1}{N}\\sum_{i=1}^{N}|y_i-\\hat{y}_i|$</div>
+                </td>
+                <td class="loss-reading">MSE：誤差を<strong>二乗</strong><br>MAE：誤差の<strong>絶対値</strong></td>
+            </tr>
+            <tr>
+                <td><strong>2値・<br>マルチラベル</strong></td>
+                <td>
+                    <div class="loss-equation">$\\displaystyle \\mathrm{BCE}=-\\{y\\ln p+(1-y)\\ln(1-p)\\}$</div>
+                </td>
+                <td class="loss-reading">$y=1$ → $-\\ln p$<br>$y=0$ → $-\\ln(1-p)$</td>
+            </tr>
+            <tr>
+                <td><strong>多クラス</strong></td>
+                <td>
+                    <div class="loss-equation">$\\displaystyle \\mathrm{CE}=-\\ln p_{\\mathrm{正解クラス}}$</div>
+                </td>
+                <td class="loss-reading"><strong>正解クラスの確率</strong>だけを見る</td>
+            </tr>
         </table>
 
         <h3>■ 活性化関数図鑑 (E資格 必須セット)</h3>

@@ -51,7 +51,7 @@ function saveAnswer(q, isCorrect) {
 
 if (quizId) {
     const script = document.createElement('script');
-    script.src = `js/data/${quizId}.js?v=20260805-opt-2026-syllabus`;
+    script.src = `js/data/${quizId}.js?v=20260807-loss-formulas`;
     script.onload = () => window.quizData ? (currentQuizData = window.quizData, initApp()) : showError('問題データの形式が正しくありません。');
     script.onerror = () => showError('指定された問題データが見つかりません。');
     document.body.appendChild(script);
