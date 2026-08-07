@@ -228,6 +228,9 @@ window.quizData = {
             .loss-equation { margin: 5px 0; padding: 7px 10px; border-radius: 8px; background: #f3f7fb; color: #123f68; font-size: 1.04em; white-space: nowrap; }
             .loss-equation mjx-container { margin: 0 !important; }
             .loss-reading { color: #405a72; font-weight: 700; line-height: 1.7; }
+            .activation-formula-table td:nth-child(3) { min-width: 460px; }
+            .activation-equation { margin: 6px 0; padding: 7px 10px; border-radius: 8px; background: #f3f7fb; color: #123f68; font-size: 1.03em; white-space: nowrap; }
+            .activation-equation mjx-container { margin: 0 !important; }
         </style>
 
         <h3>■ 順伝播の流れ：①計算 → ②変換</h3>
@@ -318,8 +321,8 @@ window.quizData = {
 
         <h3>■ 活性化関数図鑑 (E資格 必須セット)</h3>
         <p>形状と「微分の性質」が問われます。</p>
-        <table>
-            <tr><th>関数名</th><th>形状 (イメージ)</th><th>特徴・試験のツボ</th></tr>
+        <table class="activation-formula-table">
+            <tr><th>関数名</th><th>形状 (イメージ)</th><th>式・特徴・試験のツボ</th></tr>
             <tr>
                 <td><strong>ReLU</strong><br>(Rectified Linear Unit)</td>
                 <td>
@@ -331,7 +334,7 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「今の主役」</strong><br>
-                    ・<code>f(x)=max(0,x)</code><br>
+                    <div class="activation-equation">$\\displaystyle f(x)=\\max(0,x)$</div>
                     ・<i>x</i> > 0 で微分値が <strong>1.0</strong>（勾配消失しない）。<br>
                     ・<i>x</i> &le; 0 で微分値 0。<br>
                     ・計算が超高速。
@@ -348,7 +351,7 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「死んだReLU対策」</strong><br>
-                    ・<code>f(x)=max(x, αx)</code><br>
+                    <div class="activation-equation">$\\displaystyle f(x)=\\max(x,\\alpha x)$</div>
                     ・<i>x</i> < 0 でもわずかに傾き（&alpha;=0.01等）を持つ。<br>
                     ・学習が止まる現象(Dying ReLU)を防ぐ。
                 </td>
@@ -364,8 +367,9 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「確率 (0〜1) に変換」</strong><br>
-                    ・<code>σ(x)=1/(1+e<sup>-x</sup>)</code>、<code>σ'(x)=σ(x)(1-σ(x))</code><br>
-                    ・<code>σ(0)=0.5</code>。温度 <i>T</i> が大きいほど平坦。<br>
+                    <div class="activation-equation">$\\displaystyle \\sigma(x)=\\frac{1}{1+e^{-x}}$</div>
+                    <div class="activation-equation">$\\displaystyle \\sigma'(x)=\\sigma(x)\\{1-\\sigma(x)\\}$</div>
+                    ・$\\sigma(0)=0.5$。温度 <i>T</i> が大きいほど平坦。<br>
                     ・2値分類の出力層で使う。<br>
                     ・中間層で使うと<strong>勾配消失</strong>の原因になる（最大微分値0.25）。
                 </td>
@@ -381,7 +385,7 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「滑らかなReLU」</strong><br>
-                    ・<code>f(x)=xΦ(x)</code><br>
+                    <div class="activation-equation">$\\displaystyle f(x)=x\\Phi(x)$</div>
                     ・負側もわずかに通し、0付近も滑らか。<br>
                     ・Transformerでよく使う。
                 </td>
@@ -397,8 +401,9 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「ゼロ中心 (-1〜1)」</strong><br>
-                    ・<code>tanh(x)=(e<sup>x</sup>-e<sup>-x</sup>)/(e<sup>x</sup>+e<sup>-x</sup>)</code><br>
-                    ・微分は <code>1-tanh²(x)</code>、<code>tanh(0)=0</code>。<br>
+                    <div class="activation-equation">$\\displaystyle \\tanh(x)=\\frac{e^x-e^{-x}}{e^x+e^{-x}}$</div>
+                    <div class="activation-equation">$\\displaystyle \\frac{d}{dx}\\tanh(x)=1-\\tanh^2(x)$</div>
+                    ・$\\tanh(0)=0$。<br>
                     ・Sigmoidより学習効率が良い。<br>
                     ・RNNなどでよく使われる。
                 </td>
@@ -414,6 +419,7 @@ window.quizData = {
                 </td>
                 <td>
                     <strong>「元祖・パーセプトロン」</strong><br>
+                    <div class="activation-equation">$\\displaystyle f(x)=\\begin{cases}0 & (x<0) \\\\ 1 & (x\\ge 0)\\end{cases}$</div>
                     ・0か1か。<br>
                     ・<i>x</i>=0 で不連続、他は傾き0のため、<strong>誤差逆伝播法が使えない</strong>。
                 </td>
