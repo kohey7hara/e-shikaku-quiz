@@ -68,9 +68,9 @@ window.quizData = {
             .opt-icon { width: 80px; height: 50px; background: #fff; margin: auto; border: 1px solid #eee; }
             .path-line { fill: none; stroke-width: 3; stroke-linecap: round; }
             .core-strip { margin: 12px 0 18px; padding: 12px 14px; border-left: 5px solid #2780b8; border-radius: 8px; background: #eef7fb; line-height: 1.8; }
-            .optimizer-formula-table td:nth-child(3) { min-width: 480px; }
-            .optimizer-equation { margin: 6px 0; padding: 7px 10px; border-radius: 8px; background: #f3f7fb; color: #123f68; font-size: 1.02em; white-space: nowrap; }
-            .optimizer-equation mjx-container { margin: 0 !important; }
+            .optimizer-formula-table td:nth-child(3), .initialization-formula-table td:nth-child(3) { min-width: 480px; }
+            .optimizer-equation, .initialization-equation { margin: 6px 0; padding: 7px 10px; border-radius: 8px; background: #f3f7fb; color: #123f68; font-size: 1.02em; white-space: nowrap; }
+            .optimizer-equation mjx-container, .initialization-equation mjx-container { margin: 0 !important; }
         </style>
 
         <h3>■ 2026シラバスの本線</h3>
@@ -249,27 +249,36 @@ window.quizData = {
 
         <h3>■ 【暗記】初期化手法の鉄板セット</h3>
         <p>Step 0（準備段階）で、乱数の「広がり具合（分散）」をどう決めるかです。</p>
-        <table>
-            <tr><th>初期化手法</th><th>相性の良い関数</th><th>特徴</th></tr>
+        <p><strong>共通記号：</strong>$fan_{in}$＝入力数、$fan_{out}$＝出力数、$\\mathrm{Var}(w)$＝分散、$\\sigma$＝標準偏差</p>
+        <table class="initialization-formula-table">
+            <tr><th>初期化手法</th><th>相性の良い関数</th><th>式・特徴</th></tr>
             <tr>
                 <td><strong>Xavier (Glorot)</strong></td>
                 <td><strong>Sigmoid, Tanh</strong><br>(S字・対称)</td>
                 <td>
-                    正規分布の分散：<code>2/(fan-in+fan-out)</code><br>
-                    一様分布の範囲：<code>±√(6/(fan-in+fan-out))</code><br>
-                    <small>fan-in=fan-out=nなら分散1/n。</small>
+                    <strong>正規分布</strong>
+                    <div class="initialization-equation">$\\displaystyle \\mathrm{Var}(w)=\\frac{2}{fan_{in}+fan_{out}}$</div>
+                    <div class="initialization-equation">$\\displaystyle \\sigma=\\sqrt{\\frac{2}{fan_{in}+fan_{out}}}$</div>
+                    <strong>一様分布</strong>
+                    <div class="initialization-equation">$\\displaystyle a=\\sqrt{\\frac{6}{fan_{in}+fan_{out}}}$</div>
+                    <div class="initialization-equation">$\\displaystyle w\\sim U(-a,a)$</div>
+                    <small>$fan_{in}=fan_{out}=n$ なら、分散は $1/n$、標準偏差は $1/\\sqrt{n}$。</small>
                 </td>
             </tr>
             <tr>
                 <td><strong>He (Kaiming)</strong></td>
                 <td><strong>ReLU</strong><br>(折れ線・非対称)</td>
                 <td>
-                    正規分布の分散：<code>2/fan-in</code><br>
-                    標準偏差：<code>√(2/fan-in)</code><br>
-                    一様分布の範囲：<code>±√(6/fan-in)</code>
+                    <strong>正規分布</strong>
+                    <div class="initialization-equation">$\\displaystyle \\mathrm{Var}(w)=\\frac{2}{fan_{in}}$</div>
+                    <div class="initialization-equation">$\\displaystyle \\sigma=\\sqrt{\\frac{2}{fan_{in}}}$</div>
+                    <strong>一様分布</strong>
+                    <div class="initialization-equation">$\\displaystyle a=\\sqrt{\\frac{6}{fan_{in}}}$</div>
+                    <div class="initialization-equation">$\\displaystyle w\\sim U(-a,a)$</div>
                 </td>
             </tr>
         </table>
+        <p><strong>試験の確認順：</strong>① XavierかHeか → ② 正規分布か一様分布か → ③ 問われているのは<strong>分散</strong>か<strong>標準偏差</strong>か。</p>
     `,
 
     questions: [
