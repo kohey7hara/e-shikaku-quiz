@@ -24,6 +24,16 @@ window.quizData = {
             .calc-card { padding: 12px; border: 1px solid #d7e2ec; border-radius: 9px; background: #fff; }
             .calc-card strong { color: #123f68; }
             .answer-strip { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #f39c12; border-radius: 7px; background: #fff8e7; line-height: 1.7; }
+            .worked-example { margin: 12px 0 20px; padding: 16px; border: 2px solid #f39c12; border-radius: 12px; background: #fffaf0; }
+            .worked-given { margin-bottom: 12px; }
+            .worked-symbols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-top: 9px; }
+            .worked-symbol { padding: 7px 9px; border: 1px solid #ead7aa; border-radius: 7px; background: #fff; text-align: center; }
+            .worked-step { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; margin-top: 10px; padding: 11px; border: 1px solid #e5eaf0; border-radius: 9px; background: #fff; line-height: 1.65; }
+            .worked-step-number { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: #167f92; color: #fff; font-weight: 800; }
+            .worked-step strong { color: #123f68; }
+            .worked-step .formula-box { white-space: normal; overflow-x: auto; }
+            .worked-result { margin-top: 12px; padding: 11px 13px; border-left: 5px solid #27ae60; border-radius: 7px; background: #eafaf1; line-height: 1.7; }
+            .worked-trap { margin-top: 10px; padding: 10px 12px; border-left: 5px solid #e74c3c; border-radius: 7px; background: #fff3f1; line-height: 1.7; }
             .comparison-table td:nth-child(3) { min-width: 330px; }
             .cnn-concept-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0 20px; }
             .cnn-concept-card { padding: 12px; border: 1px solid #d7e2ec; border-radius: 10px; background: #fff; text-align: center; }
@@ -34,6 +44,7 @@ window.quizData = {
             .cnn-svg-note { font-size: 9px; fill: #627d98; }
             @media (max-width: 760px) {
                 .calc-steps { grid-template-columns: 1fr; }
+                .worked-symbols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
                 .cnn-concept-grid { grid-template-columns: 1fr; }
             }
         </style>
@@ -134,9 +145,65 @@ window.quizData = {
                 $+1$ は出力チャネルごとのバイアス。無視なら外す。
             </div>
         </div>
-        <div class="answer-strip">
-            <strong>例：</strong>入力 $32\\times32\\times3$、$3\\times3$、$P=1,S=1$、フィルタ64個<br>
-            → 出力は $32\\times32\\times64$、パラメータは $(3\\times3\\times3+1)\\times64=1,792$。
+        <h3>■ 計算例：どの数字をどこへ入れる？</h3>
+        <div class="worked-example">
+            <div class="worked-given">
+                <strong>問題：</strong>入力 $32\\times32\\times3$ に、$3\\times3$ のフィルタを64個適用する。Padding $P=1$、Stride $S=1$ のとき、出力の形とパラメータ数を求める。
+                <div class="worked-symbols">
+                    <div class="worked-symbol">高さ・幅<br><strong>$H=W=32$</strong></div>
+                    <div class="worked-symbol">入力チャネル<br><strong>$C_{in}=3$</strong></div>
+                    <div class="worked-symbol">カーネル<br><strong>$K_h=K_w=3$</strong></div>
+                    <div class="worked-symbol">Padding<br><strong>$P=1$</strong></div>
+                    <div class="worked-symbol">Stride<br><strong>$S=1$</strong></div>
+                    <div class="worked-symbol">フィルタ数<br><strong>$C_{out}=64$</strong></div>
+                </div>
+            </div>
+
+            <div class="worked-step">
+                <span class="worked-step-number">1</span>
+                <div>
+                    <strong>実効カーネルを求める</strong><br>
+                    Dilationの指定がない通常畳み込みなので $D=1$。
+                    <div class="formula-box">$\\displaystyle K_{eff}=D(K-1)+1=1\\times(3-1)+1=3$</div>
+                    したがって、実際に見る範囲は通常どおり $3\\times3$。
+                </div>
+            </div>
+
+            <div class="worked-step">
+                <span class="worked-step-number">2</span>
+                <div>
+                    <strong>出力の高さと幅を求める</strong>
+                    <div class="formula-box">$\\displaystyle H_{out}=\\left\\lfloor\\frac{32+2\\times1-3}{1}\\right\\rfloor+1=31+1=32$</div>
+                    幅も同じ計算なので $W_{out}=32$。Paddingで $32+2=34$ に広げ、そこへ幅3のフィルタを1マスずつ動かすため、出力は元と同じ $32\\times32$ になる。
+                </div>
+            </div>
+
+            <div class="worked-step">
+                <span class="worked-step-number">3</span>
+                <div>
+                    <strong>出力チャネル数を決める</strong><br>
+                    1個のフィルタが1枚の特徴マップを作る。フィルタが64個なので、
+                    <div class="formula-box">$\\displaystyle C_{out}=64$</div>
+                    よって出力の形は <strong>$32\\times32\\times64$</strong>。
+                </div>
+            </div>
+
+            <div class="worked-step">
+                <span class="worked-step-number">4</span>
+                <div>
+                    <strong>学習するパラメータ数を求める</strong><br>
+                    1個のフィルタは、RGBの3チャネルすべてを見る。そのため重みは $3\\times3\\times3=27$ 個。さらにフィルタごとにバイアスが1個ある。
+                    <div class="formula-box">$\\displaystyle \\underbrace{(3\\times3\\times3+1)}_{\\text{1フィルタ分 }28}\\times\\underbrace{64}_{\\text{フィルタ数}}=1,792$</div>
+                    内訳は、重み $3\\times3\\times3\\times64=1,728$ 個、バイアス $64$ 個。合計 $1,728+64=1,792$ 個。
+                </div>
+            </div>
+
+            <div class="worked-result">
+                <strong>答え：</strong>出力の形は $32\\times32\\times64$、学習するパラメータ数は <strong>1,792個</strong>。
+            </div>
+            <div class="worked-trap">
+                <strong>試験の注意：</strong>パラメータ数に $32\\times32$ は掛けない。同じフィルタの重みを全位置で繰り返し使う<strong>重み共有</strong>だから。出力要素数を聞かれた場合は $32\\times32\\times64=65,536$ と計算する。
+            </div>
         </div>
 
         <h3>■ 図でわかる「形・数」の頻出4点</h3>
