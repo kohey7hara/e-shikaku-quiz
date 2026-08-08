@@ -21,7 +21,41 @@ window.quizData = {
 
             .table-wrap { overflow-x: auto; }
             .term-map { border: 1px dashed #666; padding: 10px; background: #fff; border-radius: 5px; margin-top: 20px; }
+            .rnn-exam-core { margin: 12px 0 20px; padding: 14px 16px; border-left: 5px solid #2780b8; border-radius: 8px; background: #eef7fb; line-height: 1.8; }
+            .rnn-formula { margin: 7px 0; padding: 9px 11px; border: 1px solid #c8dbee; border-radius: 8px; background: #f3f8fd; color: #123f68; text-align: center; overflow-x: auto; }
+            .rnn-formula mjx-container { margin: 0 !important; }
+            .rnn-concept-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0 20px; }
+            .rnn-concept-card { padding: 12px; border: 1px solid #d7e2ec; border-radius: 10px; background: #fff; text-align: center; }
+            .rnn-concept-card > strong { display: block; color: #123f68; }
+            .rnn-concept-svg { display: block; width: 100%; max-width: 320px; height: 125px; margin: 5px auto 8px; }
+            .rnn-concept-caption { font-size: 0.86em; line-height: 1.55; color: #334e68; }
+            .rnn-svg-label { font-size: 11px; fill: #334e68; font-weight: 700; }
+            .rnn-svg-note { font-size: 9px; fill: #627d98; }
+            .rnn-answer { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #27ae60; border-radius: 7px; background: #eafaf1; line-height: 1.7; }
+            .rnn-warning { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #e74c3c; border-radius: 7px; background: #fff3f1; line-height: 1.7; }
+            .rnn-comparison td:nth-child(3) { min-width: 300px; }
+            .exam-badge { display: inline-block; margin-right: 5px; padding: 2px 7px; border-radius: 999px; background: #e74c3c; color: #fff; font-size: 0.75em; font-weight: 800; }
+            @media (max-width: 760px) {
+                .rnn-concept-grid { grid-template-columns: 1fr; }
+                .lstm-box { display: block; width: auto; margin: 8px 0; }
+            }
         </style>
+
+        <h3>■ 2026シラバス：まずこの3本</h3>
+        <div class="rnn-exam-core">
+            <strong>① RNN本体：</strong>現在の入力と前の隠れ状態から $h_t$ を計算し、時間方向へ重みを共有する。<br>
+            <strong>② 長期記憶：</strong>BPTTの勾配消失・爆発を理解し、LSTMとGRUのゲートを見分ける。<br>
+            <strong>③ 系列変換：</strong>Encoder–Decoder、Seq2Seq、Attentionの情報の流れを追う。<br>
+            <strong>解く順：</strong>「何が入力か」→「どの状態を引き継ぐか」→「どのゲート・重みで更新するか」。
+        </div>
+        <div class="table-wrap">
+            <table class="rnn-comparison">
+                <tr><th>出題軸</th><th>必須キーワード</th><th>一言で見分ける</th></tr>
+                <tr><td><span class="exam-badge">最重要</span>計算</td><td>順伝播・BPTT</td><td>前向きは状態更新、逆向きは時間を遡ってヤコビアンを連続で掛ける。</td></tr>
+                <tr><td><span class="exam-badge">最重要</span>構造</td><td>双方向RNN・LSTM・GRU</td><td>双方向は未来も参照。LSTMはセル＋3ゲート、GRUは隠れ状態＋2ゲート。</td></tr>
+                <tr><td><span class="exam-badge">最重要</span>系列変換</td><td>Encoder–Decoder・Seq2Seq・Attention</td><td>入力を符号化して出力を生成。Attentionは毎時刻、入力側の重要箇所を重み付き平均。</td></tr>
+            </table>
+        </div>
 
         <h3>■ RNNの仕組み：時間を展開する</h3>
         <p>RNNは、自身へのループ構造を持つネットワークです。<br>学習時は時間を遡って誤差を伝えます (<strong>BPTT</strong>)。</p>
@@ -47,15 +81,104 @@ window.quizData = {
             <strong>「過去の記憶を引き継ぐ」</strong>仕組みです。
         </p>
 
+        <h3>■ 順伝播：1時刻の計算式</h3>
+        <div class="rnn-formula">$\\displaystyle a_t=W_{xh}x_t+W_{hh}h_{t-1}+b_h$</div>
+        <div class="rnn-formula">$\\displaystyle h_t=\\tanh(a_t),\\qquad \\hat y_t=\\mathrm{softmax}(W_{hy}h_t+b_y)$</div>
+        <p><strong>意味：</strong>$W_{xh}x_t$ は「現在の入力」、$W_{hh}h_{t-1}$ は「過去の記憶」。両方を足して新しい隠れ状態を作ります。</p>
+        <div class="rnn-answer">
+            <strong>小さな計算例：</strong>$x_t=2,h_{t-1}=1,W_{xh}=0.5,W_{hh}=0.2,b_h=0$ なら、<br>
+            $a_t=0.5\\times2+0.2\\times1=1.2$、したがって $h_t=\\tanh(1.2)\\approx0.834$。
+        </div>
+
+        <div class="rnn-concept-grid">
+            <div class="rnn-concept-card">
+                <strong>時間が違っても同じ重み</strong>
+                <svg class="rnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="RNNは各時刻で同じ重みを共有する">
+                    <g fill="#eafaf1" stroke="#27ae60" stroke-width="2"><rect x="18" y="42" width="54" height="36" rx="6"/><rect x="103" y="42" width="54" height="36" rx="6"/><rect x="188" y="42" width="54" height="36" rx="6"/></g>
+                    <g class="rnn-svg-label"><text x="35" y="64">h₁</text><text x="120" y="64">h₂</text><text x="205" y="64">h₃</text></g>
+                    <path d="M73 60 H100 M158 60 H185" stroke="#627d98" stroke-width="2"/>
+                    <g fill="#627d98"><path d="M100 60 l-7 -5 v10 z"/><path d="M185 60 l-7 -5 v10 z"/></g>
+                    <g fill="#eef7fb" stroke="#2780b8"><circle cx="45" cy="18" r="13"/><circle cx="130" cy="18" r="13"/><circle cx="215" cy="18" r="13"/></g>
+                    <g class="rnn-svg-note"><text x="39" y="21">x₁</text><text x="124" y="21">x₂</text><text x="209" y="21">x₃</text></g>
+                    <path d="M45 31 V40 M130 31 V40 M215 31 V40" stroke="#2780b8"/>
+                    <text x="38" y="98" class="rnn-svg-note">同じ Wxh・Whh を全時刻で再利用</text>
+                    <path d="M55 87 H205" stroke="#f39c12" stroke-width="3" stroke-dasharray="5,3"/>
+                </svg>
+                <div class="rnn-concept-caption">系列が長くなっても、<strong>時刻ごとに別の重みは作らない</strong>。</div>
+            </div>
+            <div class="rnn-concept-card">
+                <strong>BPTT：掛け算が続く</strong>
+                <svg class="rnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="BPTTでは勾配倍率が時間方向に繰り返し掛かり消失または爆発する">
+                    <text x="15" y="16" class="rnn-svg-label">消失：0.5を4回</text>
+                    <g fill="#2780b8"><circle cx="25" cy="42" r="7"/><circle cx="65" cy="42" r="5"/><circle cx="105" cy="42" r="4"/><circle cx="145" cy="42" r="3"/><circle cx="185" cy="42" r="2"/></g>
+                    <text x="203" y="45" class="rnn-svg-note">0.5⁴=0.0625</text>
+                    <path d="M33 42 H57 M72 42 H98 M111 42 H139 M150 42 H180" stroke="#627d98"/>
+                    <text x="15" y="76" class="rnn-svg-label">爆発：1.5を4回</text>
+                    <g fill="#e74c3c"><circle cx="25" cy="102" r="3"/><circle cx="65" cy="102" r="4"/><circle cx="105" cy="102" r="6"/><circle cx="145" cy="102" r="9"/><circle cx="190" cy="102" r="14"/></g>
+                    <text x="210" y="106" class="rnn-svg-note">1.5⁴≈5.06</text>
+                </svg>
+                <div class="rnn-concept-caption">小さい積は<strong>勾配消失</strong>、大きい積は<strong>勾配爆発</strong>。爆発には勾配クリッピング。</div>
+            </div>
+        </div>
+
+        <h3>■ パラメータ数：時間長は掛けない</h3>
+        <div class="table-wrap">
+            <table class="rnn-comparison">
+                <tr><th>セル</th><th>再帰部分のパラメータ数</th><th>理由</th></tr>
+                <tr><td>単純RNN</td><td>$H(D+H+1)$</td><td>入力 $HD$ ＋ 再帰 $H^2$ ＋ バイアス $H$。</td></tr>
+                <tr><td>LSTM</td><td>$4H(D+H+1)$</td><td>忘却・入力・出力・候補セルの4組。</td></tr>
+                <tr><td>GRU</td><td>$3H(D+H+1)$</td><td>更新・リセット・候補状態の3組。</td></tr>
+            </table>
+        </div>
+        <p style="font-size:0.82em;">※上式は各変換にバイアス1組とする試験の標準形。実装や問題文でバイアスを分けて定義する場合は、その指定に従います。</p>
+        <div class="rnn-warning">
+            <strong>試験の罠：</strong>系列長 $T$ はパラメータ数に掛けない。同じ重みを全時刻で共有するため。出力層まで数える問題では、さらに $OH+O$ を加える。
+        </div>
+
+        <h3>■ 入出力パターンはタスクで見分ける</h3>
+        <div class="table-wrap">
+            <table class="rnn-comparison">
+                <tr><th>型</th><th>代表例</th><th>イメージ</th></tr>
+                <tr><td><strong>Many-to-One</strong></td><td>感情分析・系列分類</td><td>単語列を最後に1つのラベルへまとめる。</td></tr>
+                <tr><td><strong>One-to-Many</strong></td><td>画像キャプション</td><td>1つの入力から文章を順番に生成する。</td></tr>
+                <tr><td><strong>Many-to-Many（同じ長さ）</strong></td><td>品詞推定・系列ラベリング</td><td>各入力時刻に対応する出力を返す。</td></tr>
+                <tr><td><strong>Seq2Seq（長さが異なる）</strong></td><td>翻訳・要約</td><td>Encoderで読んでからDecoderが別の系列を生成する。</td></tr>
+            </table>
+        </div>
+
+        <h3>■ 自然言語をRNNへ入れるまで</h3>
+        <div class="rnn-concept-card">
+            <svg class="rnn-concept-svg" viewBox="0 0 300 125" role="img" aria-label="文章をトークン化してIDと埋め込みベクトルへ変換しRNNへ入力する流れ">
+                <rect x="5" y="42" width="50" height="35" rx="5" fill="#fff8e7" stroke="#f39c12"/><text x="15" y="63" class="rnn-svg-label">文章</text>
+                <path d="M57 60 H78" stroke="#627d98" stroke-width="2"/><path d="M78 60 l-6 -4 v8 z" fill="#627d98"/>
+                <rect x="81" y="36" width="60" height="47" rx="5" fill="#eef7fb" stroke="#2780b8"/><text x="89" y="55" class="rnn-svg-note">Tokenize</text><text x="92" y="70" class="rnn-svg-note">[私, は, 猫]</text>
+                <path d="M143 60 H163" stroke="#627d98" stroke-width="2"/><path d="M163 60 l-6 -4 v8 z" fill="#627d98"/>
+                <rect x="166" y="36" width="54" height="47" rx="5" fill="#f4ecf7" stroke="#8e44ad"/><text x="177" y="55" class="rnn-svg-note">Embedding</text><text x="176" y="70" class="rnn-svg-note">密なベクトル</text>
+                <path d="M222 60 H242" stroke="#627d98" stroke-width="2"/><path d="M242 60 l-6 -4 v8 z" fill="#627d98"/>
+                <rect x="245" y="36" width="48" height="47" rx="5" fill="#eafaf1" stroke="#27ae60"/><text x="258" y="63" class="rnn-svg-label">RNN</text>
+                <text x="75" y="107" class="rnn-svg-note">可変長はPaddingし、損失ではMaskして無視</text>
+            </svg>
+            <div class="rnn-concept-caption">RNNへ文字列を直接入れない。<strong>トークンID → 埋め込みベクトル</strong>へ変換する。</div>
+        </div>
+        <div class="table-wrap">
+            <table class="rnn-comparison">
+                <tr><th>項目</th><th>役割</th><th>試験のツボ</th></tr>
+                <tr><td><strong>One-hot</strong></td><td>語彙中の1箇所だけ1</td><td>高次元・疎。単語間の類似度を直接表さない。</td></tr>
+                <tr><td><strong>Embedding</strong></td><td>単語IDを低次元の密ベクトルへ変換</td><td>語彙数 $V$、埋め込み次元 $E$ ならパラメータ数は $VE$。</td></tr>
+                <tr><td><strong>Padding / Mask</strong></td><td>系列長をそろえ、ダミー部分を無視</td><td>Padding部分を損失・Attentionの計算対象から除外する。</td></tr>
+                <tr><td><strong>次トークン予測</strong></td><td>過去のトークンから次を予測</td><td>入力と正解を1トークンずらす。</td></tr>
+            </table>
+        </div>
+
         <h3>■ LSTM vs GRU (記憶の保持)</h3>
-        <p>単純なRNNは「勾配消失」で長期間の記憶ができません。<br>これを解決したのがLSTMです。</p>
+        <p>単純RNNは長い系列で勾配消失・爆発が起きやすい。LSTMとGRUは、ゲートで「残す・忘れる・書く」を制御して長期依存を扱いやすくします。</p>
         <div style="text-align:center;">
             <div class="lstm-box">
                 <strong>LSTM</strong><br>
                 <span style="font-size:0.8em; color:#3498db;">セル (Cell) + 3つのゲート</span>
                 <hr style="border:0; border-top:1px solid #abd2ef; margin:5px 0;">
                 <div style="text-align:left; font-size:0.8em;">
-                    <span class="gate-icon">C</span> <strong>CEC</strong>: 記憶のベルトコンベア（勾配が消えない）<br>
+                    <span class="gate-icon">C</span> <strong>セル状態</strong>: 記憶のベルトコンベア（勾配を保ちやすい）<br>
                     <span class="gate-icon">F</span> <strong>忘却</strong>: いらない記憶を消す<br>
                     <span class="gate-icon">I</span> <strong>入力</strong>: 新しい情報を足す<br>
                     <span class="gate-icon">O</span> <strong>出力</strong>: 次に伝える情報を選ぶ
@@ -73,6 +196,24 @@ window.quizData = {
                     ※パラメータが少なく計算が速い
                 </div>
             </div>
+        </div>
+
+        <h4>LSTMの更新式：過去を残して、新情報を足す</h4>
+        <div class="rnn-formula">$\\displaystyle c_t=\\underbrace{f_t\\odot c_{t-1}}_{\\text{過去を残す}}+\\underbrace{i_t\\odot\\tilde c_t}_{\\text{新情報を書く}}$</div>
+        <div class="rnn-formula">$\\displaystyle h_t=o_t\\odot\\tanh(c_t)$</div>
+        <p>ゲート $f_t,i_t,o_t$ はシグモイドで $0$〜$1$。候補 $\\tilde c_t$ は通常tanhです。セル状態は<strong>加算型</strong>で更新されるため、単純RNNより勾配を長く伝えやすくなります。</p>
+        <div class="rnn-answer">
+            <strong>計算例：</strong>$f_t=0.8,c_{t-1}=2,i_t=0.5,\\tilde c_t=0.4$ なら、<br>
+            $c_t=0.8\\times2+0.5\\times0.4=1.6+0.2=1.8$。
+        </div>
+        <div class="table-wrap">
+            <table class="rnn-comparison">
+                <tr><th>比較</th><th>LSTM</th><th>GRU</th></tr>
+                <tr><td>状態</td><td>$c_t$ と $h_t$</td><td>$h_t$ のみ</td></tr>
+                <tr><td>ゲート</td><td>忘却・入力・出力の3つ</td><td>更新・リセットの2つ</td></tr>
+                <tr><td>パラメータ</td><td>多い（4組の変換）</td><td>少ない（3組の変換）</td></tr>
+                <tr><td>見分け方</td><td>セル状態の横の流れがある</td><td>独立セルがなく、更新ゲートで新旧を混ぜる</td></tr>
+            </table>
         </div>
 
         <h3>■ Seq2Seq と Attention (翻訳モデル)</h3>
@@ -100,53 +241,82 @@ window.quizData = {
             </div>
             <p style="font-size:0.8em; margin-top:5px;">
                 Decoderが単語を生成するたびに、Encoderの<strong>「どの単語を見るべきか」</strong>を計算して、必要な情報を直接つまみ食いする仕組み。<br>
-                → 長い文章でも精度が落ちない。
+                → 固定長ベクトルだけに圧縮する場合より、長い文章の情報を保ちやすい。
             </p>
         </div>
 
-        <h3>■ 用語マップ：どこで使われる？</h3>
-        <div class="term-map">
-            <p><strong>1. Encoder (入力側)</strong></p>
-            <ul>
-                <li><strong>Bidirectional RNN</strong>: 過去と未来の両方向から読む。</li>
-                <li><strong>CEC</strong>: LSTM内部で記憶を保持する。</li>
-            </ul>
-            
-            <p><strong>2. Attention (中間)</strong></p>
-            <ul>
-                <li><strong>Attention</strong>: Encoderの隠れ状態とDecoderの隠れ状態を照らし合わせる。</li>
-            </ul>
-
-            <p><strong>3. Decoder (出力側)</strong></p>
-            <ul>
-                <li><strong>Teacher Forcing</strong>: 学習時、正解を入力する（カンニング）。</li>
-                <li><strong>Exposure Bias</strong>: テスト時、自分の予測を入力するため、学習時と条件がズレる問題。</li>
-            </ul>
-
-            <p><strong>4. 学習・評価全体</strong></p>
-            <ul>
-                <li><strong>BPTT</strong>: 時間を遡る誤差逆伝播法（学習アルゴリズム）。</li>
-                <li><strong>勾配クリッピング</strong>: 勾配爆発を防ぐ（学習テクニック）。</li>
-                <li><strong>Bleu Score</strong>: 翻訳の精度を測る（評価指標）。</li>
-            </ul>
+        <h4>Attentionの3手順</h4>
+        <div class="rnn-formula">$\\displaystyle e_{t,s}=\\mathrm{score}(s_{t-1},h_s)$</div>
+        <div class="rnn-formula">$\\displaystyle \\alpha_{t,s}=\\mathrm{softmax}(e_{t,s}),\\qquad c_t=\\sum_s\\alpha_{t,s}h_s$</div>
+        <div class="table-wrap">
+            <table class="rnn-comparison">
+                <tr><th>手順</th><th>すること</th><th>試験で見る点</th></tr>
+                <tr><td>① Score</td><td>Decoder状態と各Encoder状態の相性を計算</td><td>内積・加法など。まだ確率ではない。</td></tr>
+                <tr><td>② Softmax</td><td>スコアを注目度 $\\alpha$ へ変換</td><td>$\\alpha$ は非負で、入力方向の合計が1。</td></tr>
+                <tr><td>③ Weighted Sum</td><td>Encoder状態の重み付き和 $c_t$ を作る</td><td>生成する単語ごとに文脈ベクトルが変わる。</td></tr>
+            </table>
+        </div>
+        <div class="rnn-answer">
+            <strong>計算例：</strong>$\\alpha=(0.25,0.75)$、$h_1=(2,0),h_2=(0,4)$ なら、<br>
+            $c=0.25(2,0)+0.75(0,4)=(0.5,3)$。
         </div>
 
-        <h3>■ 重要用語まとめ</h3>
+        <h3>■ 学習時と推論時：ここが混乱ポイント</h3>
         <div class="table-wrap">
-            <table>
-                <tr><th>用語</th><th>内容</th></tr>
-                <tr><td><strong>BPTT</strong></td><td>Backpropagation Through Time。時間を遡って勾配を計算する。</td></tr>
-                <tr><td><strong>CEC</strong></td><td>Constant Error Carousel。LSTMの中心部。「記憶をそのまま保持」し、勾配を1.0で伝えるため<strong>勾配消失しない</strong>。</td></tr>
-                <tr><td><strong>勾配クリッピング</strong></td><td>勾配が閾値を超えたらノルムをカットする。<strong>勾配爆発</strong>対策。</td></tr>
-                <tr><td><strong>Teacher Forcing</strong></td><td>学習時、前の時刻の「予測」ではなく「正解」を入力するテクニック。学習が安定・高速化する。</td></tr>
-                <tr><td><strong>Bidirectional RNN</strong></td><td>過去から未来（順方向）と、未来から過去（逆方向）の両方から学習する。</td></tr>
+            <table class="rnn-comparison">
+                <tr><th>場面</th><th>Decoderへ入れる前トークン</th><th>結果</th></tr>
+                <tr><td><strong>学習時：Teacher Forcing</strong></td><td>正解トークン</td><td>学習が安定しやすい。</td></tr>
+                <tr><td><strong>推論時：自己回帰生成</strong></td><td>モデル自身が直前に予測したトークン</td><td>誤りが次の入力へ入り、連鎖しうる。</td></tr>
+                <tr><td><strong>Exposure Bias</strong></td><td>学習と推論の入力条件が異なる</td><td>Teacher Forcingの副作用として問われる。</td></tr>
+            </table>
+        </div>
+
+        <h3>■ 双方向RNN：未来も使えるが、未来待ち</h3>
+        <div class="rnn-concept-grid">
+            <div class="rnn-concept-card">
+                <strong>順方向＋逆方向を結合</strong>
+                <svg class="rnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="双方向RNNは順方向と逆方向の隠れ状態を結合する">
+                    <g fill="#eef7fb" stroke="#2780b8"><circle cx="35" cy="30" r="13"/><circle cx="100" cy="30" r="13"/><circle cx="165" cy="30" r="13"/><circle cx="230" cy="30" r="13"/></g>
+                    <path d="M49 30 H85 M114 30 H150 M179 30 H215" stroke="#2780b8" stroke-width="2"/>
+                    <g fill="#fceceb" stroke="#e74c3c"><circle cx="35" cy="90" r="13"/><circle cx="100" cy="90" r="13"/><circle cx="165" cy="90" r="13"/><circle cx="230" cy="90" r="13"/></g>
+                    <path d="M216 90 H180 M151 90 H115 M86 90 H50" stroke="#e74c3c" stroke-width="2"/>
+                    <text x="13" y="12" class="rnn-svg-note">過去 → 未来</text><text x="192" y="118" class="rnn-svg-note">未来 → 過去</text>
+                    <path d="M100 44 V72 M165 44 V72" stroke="#627d98" stroke-dasharray="3,2"/>
+                    <text x="114" y="63" class="rnn-svg-label">結合</text>
+                </svg>
+                <div class="rnn-concept-caption">各時刻で $[\\overrightarrow h_t;\\overleftarrow h_t]$ を使う。各方向が $H$ 次元なら結合後は通常 $2H$ 次元。</div>
+            </div>
+            <div class="rnn-concept-card">
+                <strong>向く場面・向かない場面</strong>
+                <div class="table-wrap">
+                    <table>
+                        <tr><th>向く</th><th>向かない</th></tr>
+                        <tr><td>文章分類<br>系列ラベリング<br>音声認識</td><td>未来入力がまだない<br>リアルタイム生成</td></tr>
+                    </table>
+                </div>
+                <div class="rnn-concept-caption">未来側の系列が必要なので、<strong>純粋なオンライン処理では待ち時間</strong>が生じる。</div>
+            </div>
+        </div>
+
+        <h3>■ 最後の暗記表</h3>
+        <div class="table-wrap">
+            <table class="rnn-comparison">
+                <tr><th>用語</th><th>一言</th><th>セットで覚える</th></tr>
+                <tr><td><strong>BPTT</strong></td><td>時間を遡る逆伝播</td><td>長い連鎖 → 勾配消失・爆発。</td></tr>
+                <tr><td><strong>Truncated BPTT</strong></td><td>一定時刻で逆伝播を打ち切る</td><td>計算・メモリ削減。ただし長期依存は学びにくくなる。</td></tr>
+                <tr><td><strong>勾配クリッピング</strong></td><td>勾配ノルムを閾値以下へ縮小</td><td>勾配<strong>爆発</strong>対策。消失対策ではない。</td></tr>
+                <tr><td><strong>LSTM</strong></td><td>セル＋忘却・入力・出力ゲート</td><td>加算型のセル更新で長期依存を扱いやすい。</td></tr>
+                <tr><td><strong>GRU</strong></td><td>更新・リセットゲート</td><td>独立セルなし。LSTMより軽量。</td></tr>
+                <tr><td><strong>Bidirectional RNN</strong></td><td>前後の文脈を結合</td><td>未来が必要なのでオンライン生成には不向き。</td></tr>
+                <tr><td><strong>Seq2Seq</strong></td><td>Encoderで読み、Decoderで生成</td><td>Attentionなしは固定長ベクトルがボトルネック。</td></tr>
+                <tr><td><strong>Attention</strong></td><td>入力状態の重み付き和</td><td>Score → Softmax → Weighted Sum。</td></tr>
             </table>
         </div>
     `,
 
     questions: [
         // ---------------------------------------------------------
-        // 【基礎編】 Q1 - Q15
+        // 【基礎編】 Q1 - Q10
         // ---------------------------------------------------------
         {
             category: "BPTT",
@@ -160,7 +330,7 @@ window.quizData = {
             question: "LSTMにおいて、勾配消失問題を防ぐために中心的な役割を果たしている、勾配を減衰させずに保持する機構はどれか。",
             options: ["CEC (Constant Error Carousel)", "忘却ゲート (Forget Gate)", "出力ゲート (Output Gate)", "覗き穴結合 (Peephole Connection)"],
             answer: 0,
-            explanation: "CEC（セル）は、記憶を保持し続けるベルトコンベアのような役割を持ち、誤差逆伝播時の勾配係数が「1」になるため、勾配が消失しません。"
+            explanation: "LSTMのセル状態は加算型の経路を持ち、忘却ゲートが1に近ければ勾配を長く保ちやすくなります。必ず消失しないという意味ではありません。"
         },
         {
             category: "勾配爆発",
@@ -206,7 +376,7 @@ window.quizData = {
         },
         {
             category: "RNNの入力",
-            question: "RNNで自然言語処理を行う際、単語を数値ベクトルに変換する処理を何と呼ぶか。",
+            question: "RNNで自然言語処理を行う際、単語IDを学習可能な低次元の密ベクトルへ変換する処理を何と呼ぶか。",
             options: ["単語埋め込み (Word Embedding)", "One-hot Encoding", "正規化", "プーリング"],
             answer: 0,
             explanation: "One-hotベクトルは次元数が大きすぎるため、Word2VecなどのEmbedding層を使って密なベクトル（分散表現）に変換するのが一般的です。"
@@ -327,6 +497,9 @@ window.quizData = {
             answer: 0,
             explanation: "ReLUは最大値に制限がないため、ループするたびに値が大きくなり続け、数値的に不安定（発散・爆発）になりやすいです。そのため、適切な初期化やクリッピングが必要です。"
         },
+        // ---------------------------------------------------------
+        // 【計算・シラバス補強】 Q26 - Q48
+        // ---------------------------------------------------------
         {
             id: "rnn-lstm-cell-calc",
             category: "LSTM（計算）",
@@ -339,7 +512,7 @@ window.quizData = {
             id: "rnn-lstm-output-gate",
             category: "LSTM（内部構造）",
             question: "LSTMの出力ゲート $o_t$ が直接制御するものはどれか。",
-            options: ["セル状態から隠れ状態 $h_t=o_t\\odot tanh(c_t)$ として外へ見せる量", "過去セルを消す量だけ", "候補セルへ書き込む量だけ", "系列長"],
+            options: ["セル状態から隠れ状態 $h_t=o_t\\odot\\tanh(c_t)$ として外へ見せる量", "過去セルを消す量だけ", "候補セルへ書き込む量だけ", "系列長"],
             answer: 0,
             explanation: "忘却ゲートfは保持、入力ゲートiは書込み、出力ゲートoはセル内容の公開を制御します。図問題ではセル状態の横方向と隠れ状態への分岐を追います。"
         },
@@ -358,6 +531,158 @@ window.quizData = {
             options: ["$0.5^4=0.0625$", "$0.5\\times4=2$", "$4/0.5=8$", "$1-0.5^4$"],
             answer: 0,
             explanation: "BPTTでは時刻をまたぐたびヤコビアンが連鎖的に掛かります。絶対値1未満が続くと指数的に小さくなり、勾配消失になります。"
+        },
+        {
+            id: "rnn-forward-numeric",
+            category: "RNN順伝播（計算）",
+            question: "単純RNNで $h_t=\\tanh(W_{xh}x_t+W_{hh}h_{t-1}+b)$ とする。$x_t=2,h_{t-1}=1,W_{xh}=0.5,W_{hh}=0.2,b=0$ のとき、$h_t$ に最も近い値はどれか。",
+            options: ["$\\tanh(1.2)\\approx0.834$", "$\\tanh(0.7)\\approx0.604$", "$1.2$", "$2.2$"],
+            answer: 0,
+            explanation: "活性化前は $0.5\\times2+0.2\\times1=1.2$。最後にtanhを適用して約0.834です。重み付き和だけで計算を止めないことが重要です。"
+        },
+        {
+            id: "rnn-weight-sharing",
+            category: "RNN重み共有",
+            question: "同じRNNセルを系列長10で展開したとき、時刻ごとの再帰重み $W_{hh}$ はどう扱われるか。",
+            options: ["全10時刻で同じ $W_{hh}$ を共有する", "時刻ごとに別の $W_{hh}$ を10個学習する", "最初の時刻だけ $W_{hh}$ を使う", "逆伝播時だけ共有する"],
+            answer: 0,
+            explanation: "RNNは時間方向に同じセルと重みを再利用します。そのため系列長はパラメータ数に掛けません。"
+        },
+        {
+            id: "rnn-parameter-numeric",
+            category: "RNNパラメータ数（計算）",
+            question: "入力次元 $D=3$、隠れ次元 $H=4$ の単純RNNについて、再帰部分のパラメータ数はいくつか。バイアスを含み、出力層は含めない。",
+            options: ["$4(3+4+1)=32$", "$3\\times4=12$", "$4^2=16$", "$4(3+4)=28$"],
+            answer: 0,
+            explanation: "入力重み $HD=12$、再帰重み $H^2=16$、バイアス $H=4$ の合計で32です。"
+        },
+        {
+            id: "rnn-gated-parameter-numeric",
+            category: "LSTM・GRUパラメータ数",
+            question: "入力次元 $D=5$、隠れ次元 $H=4$ のとき、標準的なLSTMとGRUの再帰部分のパラメータ数の組として正しいものはどれか。",
+            options: ["LSTM: $4\\times4(5+4+1)=160$、GRU: $3\\times4(5+4+1)=120$", "LSTM: 40、GRU: 40", "LSTM: 120、GRU: 160", "LSTM: 80、GRU: 40"],
+            answer: 0,
+            explanation: "LSTMは4組（忘却・入力・出力・候補）、GRUは3組（更新・リセット・候補）の変換を持つと数えます。"
+        },
+        {
+            id: "rnn-many-to-one",
+            category: "系列入出力",
+            question: "レビュー文を単語列として入力し、最後に「肯定／否定」を1つ出力する感情分析はどの型か。",
+            options: ["Many-to-One", "One-to-Many", "Many-to-Many（同じ長さ）", "One-to-One"],
+            answer: 0,
+            explanation: "複数時刻の入力系列を1つの分類結果へまとめるためMany-to-Oneです。"
+        },
+        {
+            id: "rnn-aligned-many-to-many",
+            category: "系列入出力",
+            question: "各単語に対して1つずつ品詞ラベルを付ける系列ラベリングは、どの入出力型か。",
+            options: ["入力と出力が時刻対応するMany-to-Many", "Many-to-One", "One-to-Many", "長さの異なるSeq2Seqだけ"],
+            answer: 0,
+            explanation: "各入力単語に対応する出力ラベルがあるため、同じ長さのMany-to-Manyです。翻訳のような長さの異なるSeq2Seqと区別します。"
+        },
+        {
+            id: "rnn-bidirectional-dimension",
+            category: "双方向RNN（計算）",
+            question: "双方向RNNで順方向と逆方向の隠れ状態がそれぞれ8次元で、両者を結合する場合、各時刻の出力次元は通常いくつか。",
+            options: ["16次元", "8次元", "64次元", "4次元"],
+            answer: 0,
+            explanation: "順方向8次元と逆方向8次元を連結するので $8+8=16$ 次元です。"
+        },
+        {
+            id: "rnn-bidirectional-online",
+            category: "双方向RNN（識別）",
+            question: "双方向RNNが純粋なリアルタイム次トークン生成に向きにくい主な理由はどれか。",
+            options: ["逆方向の計算には、まだ到着していない未来側の入力が必要だから", "勾配を計算できないから", "隠れ状態を持たないから", "必ずCNNと組み合わせる必要があるから"],
+            answer: 0,
+            explanation: "双方向RNNは系列の後ろ側も参照します。全系列がそろう分類やラベリングでは有効ですが、未来が未確定のオンライン生成ではそのまま使いにくいです。"
+        },
+        {
+            id: "rnn-truncated-bptt",
+            category: "Truncated BPTT",
+            question: "Truncated BPTTの説明として正しいものはどれか。",
+            options: ["逆伝播する時間範囲を一定長で打ち切り、計算量とメモリを抑える", "順伝播だけを途中で止める", "勾配を常に0へ切り捨てる", "系列を逆順に並べ替える"],
+            answer: 0,
+            explanation: "長い系列全体へ逆伝播せず、一定区間だけ遡ります。効率は上がりますが、区間を越える長期依存は学びにくくなります。"
+        },
+        {
+            id: "rnn-gradient-clipping-numeric",
+            category: "勾配クリッピング（計算）",
+            question: "勾配ベクトルのノルムが12、クリッピング閾値が3のとき、ノルムクリッピングでは勾配全体を何倍にするか。",
+            options: ["$3/12=0.25$倍", "4倍", "9倍", "0倍"],
+            answer: 0,
+            explanation: "方向は保ったまま、ノルムが3になるよう $g\\leftarrow(3/12)g$ と縮小します。勾配爆発への対策です。"
+        },
+        {
+            id: "rnn-attention-weight-sum",
+            category: "Attention（基本）",
+            question: "AttentionスコアへSoftmaxを適用して得る重み $\\alpha_{t,s}$ の性質として正しいものはどれか。",
+            options: ["各重みは非負で、参照する入力時刻方向の合計が1になる", "各重みは必ず0か1になる", "合計は系列長になる", "負の重みだけを使う"],
+            answer: 0,
+            explanation: "Softmaxにより重みを確率のように正規化します。Hard Attentionと異なり、通常のSoft Attentionは連続値の重みです。"
+        },
+        {
+            id: "rnn-attention-context-numeric",
+            category: "Attention（計算）",
+            question: "Attention重みが $\\alpha=(0.25,0.75)$、Encoder状態が $h_1=(2,0),h_2=(0,4)$ のとき、文脈ベクトル $c=\\sum_s\\alpha_s h_s$ はどれか。",
+            options: ["$(0.5,3)$", "$(2,4)$", "$(1,2)$", "$(0.25,0.75)$"],
+            answer: 0,
+            explanation: "$0.25(2,0)+0.75(0,4)=(0.5,0)+(0,3)=(0.5,3)$ です。"
+        },
+        {
+            id: "rnn-attention-score-vs-weight",
+            category: "Attention（識別）",
+            question: "Attentionにおけるscoreと重み $\\alpha$ の関係として正しいものはどれか。",
+            options: ["scoreは相性を表す正規化前の値で、Softmax後の $\\alpha$ が重みになる", "scoreと $\\alpha$ は常に同じ", "$\\alpha$ を計算してからscoreを求める", "scoreは必ず合計1になる"],
+            answer: 0,
+            explanation: "まずDecoder状態と各Encoder状態のscoreを求め、次にSoftmaxで合計1のAttention重みへ変換します。"
+        },
+        {
+            id: "rnn-seq2seq-bottleneck",
+            category: "Seq2Seq（識別）",
+            question: "Attentionなしの初期Seq2Seqで、長い入力ほど性能が落ちやすかった主因はどれか。",
+            options: ["入力系列全体を固定長の文脈ベクトル1つへ圧縮するボトルネック", "Encoderが入力を一切読まないため", "Decoderが学習できないため", "出力系列の長さを固定できないため"],
+            answer: 0,
+            explanation: "Encoderの最終状態だけに全情報を詰め込むのが難しいためです。Attentionは各Encoder状態を生成時に直接参照します。"
+        },
+        {
+            id: "rnn-gru-reset-role",
+            category: "GRUゲート",
+            question: "GRUのリセットゲート $r_t$ の主な役割はどれか。",
+            options: ["候補状態を作る際に、過去の隠れ状態をどの程度参照するかを調整する", "出力確率の合計を1にする", "系列長を短くする", "未来方向の状態を作る"],
+            answer: 0,
+            explanation: "リセットゲートが小さいと候補状態を作るとき過去を弱く参照し、文脈を切り替えやすくなります。"
+        },
+        {
+            id: "rnn-lstm-hidden-numeric",
+            category: "LSTM（計算）",
+            question: "LSTMでセル状態 $c_t=1.8$、出力ゲート $o_t=0.5$ とする。$\\tanh(1.8)\\approx0.947$ のとき、隠れ状態 $h_t=o_t\\tanh(c_t)$ はいくつか。",
+            options: ["約0.474", "約0.947", "1.8", "2.3"],
+            answer: 0,
+            explanation: "$h_t=0.5\\times0.947=0.4735$ なので約0.474です。出力ゲートはセル内容を外へ見せる割合を制御します。"
+        },
+        {
+            id: "rnn-embedding-parameters",
+            category: "Embedding（計算）",
+            question: "語彙数 $V=10,000$、埋め込み次元 $E=128$ のEmbedding層のパラメータ数はいくつか。バイアスはないものとする。",
+            options: ["$10,000\\times128=1,280,000$", "$10,000+128=10,128$", "$128^2=16,384$", "$10,000$"],
+            answer: 0,
+            explanation: "各語彙IDに128次元のベクトルを1本ずつ持つため、Embedding行列の形は $V\\times E$ です。"
+        },
+        {
+            id: "rnn-padding-mask",
+            category: "Padding・Mask",
+            question: "長さの異なる文を同じミニバッチで扱うためPaddingしたとき、Maskを使う主な理由はどれか。",
+            options: ["Padding部分を損失や状態集約の有効データとして数えないため", "語彙数を増やすため", "勾配を必ず大きくするため", "双方向RNNを単方向にするため"],
+            answer: 0,
+            explanation: "Paddingは長さ合わせ用のダミー値です。Maskで無視しないと、ダミー部分まで正解データのように学習してしまいます。"
+        },
+        {
+            id: "rnn-next-token-shift",
+            category: "次トークン予測",
+            question: "RNN言語モデルで入力が「[私, は, 猫]」のとき、次トークン予測用の正解系列として適切なものはどれか。",
+            options: ["「[は, 猫, です]」のように1トークン先へずらした系列", "入力と同じ「[私, は, 猫]」", "逆順の「[猫, は, 私]」", "すべてPadding"],
+            answer: 0,
+            explanation: "各時刻で「次のトークン」を正解にします。入力と教師系列を1つずらすのが基本です。"
         }
     ]
 };
