@@ -44,6 +44,9 @@ window.quizData = {
             .concept-caption { font-size: 0.86em; line-height: 1.55; color: #334e68; }
             .svg-label { font-size: 11px; fill: #334e68; font-weight: 700; }
             .svg-note { font-size: 9px; fill: #627d98; }
+            .comparison-table.method-image-table td:nth-child(3) { width: 150px; min-width: 150px; padding: 8px; }
+            .comparison-table.method-image-table td:nth-child(4) { min-width: 340px; }
+            .method-mini-svg { display: block; width: 130px; height: 68px; margin: auto; }
             @media (max-width: 760px) {
                 .visual-grid { grid-template-columns: 1fr; }
                 .concept-grid { grid-template-columns: 1fr; }
@@ -448,15 +451,100 @@ window.quizData = {
                 <div class="concept-caption">評価が高価なら、過去の結果を使うBayesian Optimizationが有力。</div>
             </div>
         </div>
-        <table class="comparison-table">
-            <tr><th>分類</th><th>手法</th><th>一言で見分ける</th></tr>
-            <tr><td rowspan="4"><strong>アンサンブル</strong></td><td>Bagging</td><td>独立・並列に学習して平均/多数決。分散を下げる。</td></tr>
-            <tr><td>Boosting</td><td>前の誤りを次が重点的に学ぶ。逐次的。</td></tr>
-            <tr><td>Bootstrap</td><td>元データから<strong>復元抽出</strong>して複数データ集合を作る。</td></tr>
-            <tr><td>Stacking</td><td>複数モデルの予測をメタモデルへ入力する。</td></tr>
-            <tr><td rowspan="3"><strong>探索</strong></td><td>Grid Search</td><td>候補の全組合せ。低次元・小さい探索空間向き。</td></tr>
-            <tr><td>Random Search</td><td>組合せを無作為抽出。重要な軸が少ない高次元探索に強い。</td></tr>
-            <tr><td>Bayesian Optimization</td><td>過去の結果から次に試す候補を選ぶ。1回の評価が高価な場合に有効。</td></tr>
+        <table class="comparison-table method-image-table">
+            <tr><th>分類</th><th>手法</th><th>イメージ</th><th>一言で見分ける</th></tr>
+            <tr>
+                <td rowspan="4"><strong>アンサンブル</strong></td><td>Bagging</td>
+                <td>
+                    <svg class="method-mini-svg" viewBox="0 0 130 68" role="img" aria-label="複数モデルを並列に学習して平均または多数決">
+                        <g fill="#eef7fb" stroke="#2780b8"><rect x="3" y="3" width="33" height="16" rx="3"/><rect x="3" y="26" width="33" height="16" rx="3"/><rect x="3" y="49" width="33" height="16" rx="3"/></g>
+                        <g class="svg-note"><text x="13" y="14">M1</text><text x="13" y="37">M2</text><text x="13" y="60">M3</text></g>
+                        <path d="M39 11 L82 28 M39 34 L82 34 M39 57 L82 40" fill="none" stroke="#627d98" stroke-width="1.5"/>
+                        <rect x="84" y="21" width="42" height="27" rx="5" fill="#f4ecf7" stroke="#8e44ad"/>
+                        <text x="105" y="32" text-anchor="middle" class="svg-note">平均・投票</text><text x="105" y="43" text-anchor="middle" class="svg-note">まとめる</text>
+                    </svg>
+                </td>
+                <td>独立・並列に学習して平均/多数決。分散を下げる。</td>
+            </tr>
+            <tr>
+                <td>Boosting</td>
+                <td>
+                    <svg class="method-mini-svg" viewBox="0 0 130 68" role="img" aria-label="前のモデルの誤りを次のモデルが順番に学習">
+                        <g fill="#eef7fb" stroke="#2780b8"><rect x="2" y="22" width="30" height="24" rx="4"/><rect x="50" y="22" width="30" height="24" rx="4"/><rect x="98" y="22" width="30" height="24" rx="4"/></g>
+                        <g class="svg-note"><text x="11" y="37">M1</text><text x="59" y="37">M2</text><text x="107" y="37">M3</text></g>
+                        <g fill="none" stroke="#e67e22" stroke-width="2"><path d="M33 34 H47"/><path d="M81 34 H95"/></g>
+                        <g fill="#e67e22"><path d="M47 34 l-5 -4 v8 z"/><path d="M95 34 l-5 -4 v8 z"/></g>
+                        <text x="35" y="17" class="svg-note">誤り</text><text x="83" y="17" class="svg-note">誤り</text>
+                        <circle cx="43" cy="22" r="3" fill="#e74c3c"/><circle cx="91" cy="22" r="3" fill="#e74c3c"/>
+                    </svg>
+                </td>
+                <td>前の誤りを次が重点的に学ぶ。逐次的。</td>
+            </tr>
+            <tr>
+                <td>Bootstrap</td>
+                <td>
+                    <svg class="method-mini-svg" viewBox="0 0 130 68" role="img" aria-label="元データから同じ要素を重複して選べる復元抽出">
+                        <text x="4" y="11" class="svg-note">元データ</text>
+                        <g><circle cx="10" cy="25" r="6" fill="#2780b8"/><circle cx="26" cy="25" r="6" fill="#27ae60"/><circle cx="42" cy="25" r="6" fill="#f39c12"/><circle cx="58" cy="25" r="6" fill="#8e44ad"/></g>
+                        <path d="M66 25 H82" stroke="#627d98" stroke-width="2"/><path d="M82 25 l-5 -4 v8 z" fill="#627d98"/>
+                        <rect x="85" y="7" width="42" height="54" rx="6" fill="#f8fafc" stroke="#b8c7d6"/>
+                        <text x="91" y="17" class="svg-note">抽出後</text>
+                        <g><circle cx="96" cy="31" r="6" fill="#2780b8"/><circle cx="113" cy="31" r="6" fill="#2780b8"/><circle cx="96" cy="48" r="6" fill="#f39c12"/><circle cx="113" cy="48" r="6" fill="#27ae60"/></g>
+                        <text x="4" y="48" class="svg-note">同じ青を</text><text x="4" y="59" class="svg-note">再び選べる</text>
+                    </svg>
+                </td>
+                <td>元データから<strong>復元抽出</strong>して複数データ集合を作る。</td>
+            </tr>
+            <tr>
+                <td>Stacking</td>
+                <td>
+                    <svg class="method-mini-svg" viewBox="0 0 130 68" role="img" aria-label="複数モデルの予測をメタモデルに入力">
+                        <g fill="#eef7fb" stroke="#2780b8"><rect x="3" y="3" width="33" height="16" rx="3"/><rect x="3" y="26" width="33" height="16" rx="3"/><rect x="3" y="49" width="33" height="16" rx="3"/></g>
+                        <g class="svg-note"><text x="13" y="14">M1</text><text x="13" y="37">M2</text><text x="13" y="60">M3</text></g>
+                        <path d="M39 11 L82 28 M39 34 L82 34 M39 57 L82 40" fill="none" stroke="#627d98" stroke-width="1.5"/>
+                        <rect x="84" y="21" width="42" height="27" rx="5" fill="#fff8e7" stroke="#f39c12"/>
+                        <text x="91" y="33" class="svg-note">Meta</text><text x="88" y="43" class="svg-note">再び学習</text>
+                    </svg>
+                </td>
+                <td>複数モデルの予測をメタモデルへ入力する。</td>
+            </tr>
+            <tr>
+                <td rowspan="3"><strong>探索</strong></td><td>Grid Search</td>
+                <td>
+                    <svg class="method-mini-svg" viewBox="0 0 130 68" role="img" aria-label="格子状にすべての候補を調べるグリッドサーチ">
+                        <path d="M20 8 V60 M45 8 V60 M70 8 V60 M95 8 V60 M8 15 H108 M8 30 H108 M8 45 H108 M8 60 H108" stroke="#d7e2ec"/>
+                        <g fill="#2780b8"><circle cx="20" cy="15" r="4"/><circle cx="45" cy="15" r="4"/><circle cx="70" cy="15" r="4"/><circle cx="95" cy="15" r="4"/><circle cx="20" cy="30" r="4"/><circle cx="45" cy="30" r="4"/><circle cx="70" cy="30" r="4"/><circle cx="95" cy="30" r="4"/><circle cx="20" cy="45" r="4"/><circle cx="45" cy="45" r="4"/><circle cx="70" cy="45" r="4"/><circle cx="95" cy="45" r="4"/><circle cx="20" cy="60" r="4"/><circle cx="45" cy="60" r="4"/><circle cx="70" cy="60" r="4"/><circle cx="95" cy="60" r="4"/></g>
+                        <text x="111" y="35" class="svg-note">全部</text>
+                    </svg>
+                </td>
+                <td>候補の全組合せ。低次元・小さい探索空間向き。</td>
+            </tr>
+            <tr>
+                <td>Random Search</td>
+                <td>
+                    <svg class="method-mini-svg" viewBox="0 0 130 68" role="img" aria-label="探索空間から候補をランダムに選ぶランダムサーチ">
+                        <rect x="8" y="6" width="99" height="56" rx="4" fill="#f8fafc" stroke="#d7e2ec"/>
+                        <g fill="#27ae60"><circle cx="18" cy="49" r="4"/><circle cx="29" cy="18" r="4"/><circle cx="45" cy="40" r="4"/><circle cx="59" cy="12" r="4"/><circle cx="72" cy="53" r="4"/><circle cx="87" cy="29" r="4"/><circle cx="99" cy="45" r="4"/></g>
+                        <rect x="76" y="7" width="29" height="24" rx="3" fill="#fff" opacity="0.9"/>
+                        <text x="102" y="17" text-anchor="end" class="svg-note">無作為</text><text x="102" y="28" text-anchor="end" class="svg-note">に選ぶ</text>
+                    </svg>
+                </td>
+                <td>組合せを無作為抽出。重要な軸が少ない高次元探索に強い。</td>
+            </tr>
+            <tr>
+                <td>Bayesian Optimization</td>
+                <td>
+                    <svg class="method-mini-svg" viewBox="0 0 130 68" role="img" aria-label="過去の評価結果から有望な次の候補を選ぶベイズ最適化">
+                        <path d="M7 58 H123 M10 60 V7" fill="none" stroke="#b8c7d6"/>
+                        <path d="M11 51 Q28 42 41 46 T69 24 T102 35 T121 12" fill="none" stroke="#8e44ad" stroke-width="2"/>
+                        <g fill="#8e44ad"><circle cx="22" cy="45" r="3.5"/><circle cx="47" cy="42" r="3.5"/><circle cx="74" cy="24" r="3.5"/></g>
+                        <path d="M77 21 Q91 6 103 28" fill="none" stroke="#f39c12" stroke-width="1.5" stroke-dasharray="3,2"/>
+                        <circle cx="103" cy="34" r="5" fill="#f39c12"/>
+                        <text x="79" y="10" class="svg-note">次はここ</text>
+                    </svg>
+                </td>
+                <td>過去の結果から次に試す候補を選ぶ。1回の評価が高価な場合に有効。</td>
+            </tr>
         </table>
         <p><strong>データ分割の鉄則：</strong>調整は検証データ、テストデータは最後の性能確認にだけ使います。</p>
     `,
