@@ -37,8 +37,16 @@ window.quizData = {
             .bn-result { margin-top: 10px; padding: 10px 12px; border-left: 5px solid #f39c12; border-radius: 7px; background: #fff8e7; line-height: 1.7; }
             .compact-note { margin: 8px 0 16px; padding: 10px 12px; border-radius: 8px; background: #fff6f2; line-height: 1.7; }
             .comparison-table td:nth-child(3) { min-width: 330px; }
+            .concept-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0 18px; }
+            .concept-card { padding: 12px; border: 1px solid #d7e2ec; border-radius: 10px; background: #fff; text-align: center; }
+            .concept-card strong { display: block; margin-bottom: 5px; color: #123f68; }
+            .concept-svg { display: block; width: 100%; max-width: 320px; height: 130px; margin: 4px auto 8px; }
+            .concept-caption { font-size: 0.86em; line-height: 1.55; color: #334e68; }
+            .svg-label { font-size: 11px; fill: #334e68; font-weight: 700; }
+            .svg-note { font-size: 9px; fill: #627d98; }
             @media (max-width: 760px) {
                 .visual-grid { grid-template-columns: 1fr; }
+                .concept-grid { grid-template-columns: 1fr; }
                 .bn-step { width: 100%; box-sizing: border-box; }
                 .bn-arrow { width: 100%; text-align: center; transform: rotate(90deg); }
             }
@@ -206,6 +214,70 @@ window.quizData = {
         </div>
 
         <h3>■ 4つの正規化：どの方向をそろえる？</h3>
+        <div class="concept-grid">
+            <div class="concept-card">
+                <strong>Batch Norm：縦に集める</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="複数サンプルの同じ特徴を縦方向に集計">
+                    <text x="8" y="24" class="svg-note">sample 1</text><text x="8" y="49" class="svg-note">sample 2</text>
+                    <text x="8" y="74" class="svg-note">sample 3</text><text x="8" y="99" class="svg-note">sample 4</text>
+                    <g stroke="#cbd5e1">
+                        <rect x="62" y="10" width="28" height="20" fill="#f8fafc"/><rect x="94" y="10" width="28" height="20" fill="#63c5da"/><rect x="126" y="10" width="28" height="20" fill="#f8fafc"/><rect x="158" y="10" width="28" height="20" fill="#f8fafc"/>
+                        <rect x="62" y="35" width="28" height="20" fill="#f8fafc"/><rect x="94" y="35" width="28" height="20" fill="#63c5da"/><rect x="126" y="35" width="28" height="20" fill="#f8fafc"/><rect x="158" y="35" width="28" height="20" fill="#f8fafc"/>
+                        <rect x="62" y="60" width="28" height="20" fill="#f8fafc"/><rect x="94" y="60" width="28" height="20" fill="#63c5da"/><rect x="126" y="60" width="28" height="20" fill="#f8fafc"/><rect x="158" y="60" width="28" height="20" fill="#f8fafc"/>
+                        <rect x="62" y="85" width="28" height="20" fill="#f8fafc"/><rect x="94" y="85" width="28" height="20" fill="#63c5da"/><rect x="126" y="85" width="28" height="20" fill="#f8fafc"/><rect x="158" y="85" width="28" height="20" fill="#f8fafc"/>
+                    </g>
+                    <path d="M108 112 L108 18" stroke="#167f92" stroke-width="2" marker-end="url(#bnArrow)"/>
+                    <defs><marker id="bnArrow" markerWidth="7" markerHeight="7" refX="4" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#167f92"/></marker></defs>
+                    <text x="194" y="60" class="svg-label">同じ特徴</text><text x="194" y="75" class="svg-label">を集計</text>
+                </svg>
+                <div class="concept-caption">バッチをまたいで、同じ特徴・チャネルの統計を取る。</div>
+            </div>
+            <div class="concept-card">
+                <strong>Layer Norm：横に集める</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="1サンプル内の特徴を横方向に集計">
+                    <text x="8" y="24" class="svg-note">sample 1</text><text x="8" y="49" class="svg-note">sample 2</text>
+                    <text x="8" y="74" class="svg-note">sample 3</text><text x="8" y="99" class="svg-note">sample 4</text>
+                    <g stroke="#cbd5e1">
+                        <rect x="62" y="10" width="28" height="20" fill="#f8fafc"/><rect x="94" y="10" width="28" height="20" fill="#f8fafc"/><rect x="126" y="10" width="28" height="20" fill="#f8fafc"/><rect x="158" y="10" width="28" height="20" fill="#f8fafc"/>
+                        <rect x="62" y="35" width="28" height="20" fill="#8dd3a8"/><rect x="94" y="35" width="28" height="20" fill="#8dd3a8"/><rect x="126" y="35" width="28" height="20" fill="#8dd3a8"/><rect x="158" y="35" width="28" height="20" fill="#8dd3a8"/>
+                        <rect x="62" y="60" width="28" height="20" fill="#f8fafc"/><rect x="94" y="60" width="28" height="20" fill="#f8fafc"/><rect x="126" y="60" width="28" height="20" fill="#f8fafc"/><rect x="158" y="60" width="28" height="20" fill="#f8fafc"/>
+                        <rect x="62" y="85" width="28" height="20" fill="#f8fafc"/><rect x="94" y="85" width="28" height="20" fill="#f8fafc"/><rect x="126" y="85" width="28" height="20" fill="#f8fafc"/><rect x="158" y="85" width="28" height="20" fill="#f8fafc"/>
+                    </g>
+                    <path d="M66 45 L180 45" stroke="#267a47" stroke-width="2" marker-end="url(#lnArrow)"/>
+                    <defs><marker id="lnArrow" markerWidth="7" markerHeight="7" refX="4" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#267a47"/></marker></defs>
+                    <text x="78" y="122" class="svg-label">1サンプル内の特徴</text>
+                </svg>
+                <div class="concept-caption">1サンプルの中で完結。バッチサイズに依存しない。</div>
+            </div>
+            <div class="concept-card">
+                <strong>Instance Norm：画像1枚・チャネル1枚</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="1画像1チャネルの空間全体を集計">
+                    <text x="12" y="20" class="svg-label">1 image / 1 channel</text>
+                    <g stroke="#9fb3c8" fill="#d9c2f0">
+                        <rect x="55" y="28" width="28" height="22"/><rect x="85" y="28" width="28" height="22"/><rect x="115" y="28" width="28" height="22"/><rect x="145" y="28" width="28" height="22"/>
+                        <rect x="55" y="52" width="28" height="22"/><rect x="85" y="52" width="28" height="22"/><rect x="115" y="52" width="28" height="22"/><rect x="145" y="52" width="28" height="22"/>
+                        <rect x="55" y="76" width="28" height="22"/><rect x="85" y="76" width="28" height="22"/><rect x="115" y="76" width="28" height="22"/><rect x="145" y="76" width="28" height="22"/>
+                    </g>
+                    <path d="M42 25 L42 103 L184 103" fill="none" stroke="#7a4ba3" stroke-width="2"/>
+                    <text x="77" y="119" class="svg-label">空間 H×W を集計</text>
+                </svg>
+                <div class="concept-caption">画像ごとのコントラストをそろえるイメージ。</div>
+            </div>
+            <div class="concept-card">
+                <strong>Group Norm：チャネルを束にする</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="チャネルを複数グループに分けて集計">
+                    <text x="26" y="20" class="svg-label">Group 1</text><text x="144" y="20" class="svg-label">Group 2</text>
+                    <g stroke="#fff" stroke-width="2">
+                        <rect x="28" y="30" width="22" height="72" rx="3" fill="#63c5da"/><rect x="52" y="30" width="22" height="72" rx="3" fill="#63c5da"/>
+                        <rect x="76" y="30" width="22" height="72" rx="3" fill="#63c5da"/><rect x="100" y="30" width="22" height="72" rx="3" fill="#63c5da"/>
+                        <rect x="140" y="30" width="22" height="72" rx="3" fill="#f3b36a"/><rect x="164" y="30" width="22" height="72" rx="3" fill="#f3b36a"/>
+                        <rect x="188" y="30" width="22" height="72" rx="3" fill="#f3b36a"/><rect x="212" y="30" width="18" height="72" rx="3" fill="#f3b36a"/>
+                    </g>
+                    <text x="49" y="119" class="svg-note">channels</text><text x="165" y="119" class="svg-note">channels</text>
+                </svg>
+                <div class="concept-caption">1サンプル内でチャネルを数グループに分ける。</div>
+            </div>
+        </div>
         <table class="comparison-table">
             <tr><th>手法</th><th>統計を取る単位</th><th>向く場面・見分け方</th></tr>
             <tr><td><strong>Batch Norm</strong></td><td>同じ特徴・チャネルを<strong>バッチ方向</strong>に集計</td><td>CNNで定番。学習/推論で統計が異なり、小バッチに弱い。</td></tr>
@@ -215,6 +287,58 @@ window.quizData = {
         </table>
 
         <h3>■ Dropout・Early Stopping・陰的正則化</h3>
+        <div class="concept-grid">
+            <div class="concept-card">
+                <strong>Dropout：毎回ちがう部分ネットワーク</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="一部のニューロンをランダムに無効化">
+                    <g stroke="#9fb3c8" stroke-width="1.5">
+                        <line x1="45" y1="30" x2="115" y2="22"/><line x1="45" y1="30" x2="115" y2="65"/><line x1="45" y1="95" x2="115" y2="65"/>
+                        <line x1="45" y1="95" x2="115" y2="108"/><line x1="115" y1="22" x2="195" y2="65"/><line x1="115" y1="65" x2="195" y2="65"/><line x1="115" y1="108" x2="195" y2="65"/>
+                    </g>
+                    <g fill="#167f92"><circle cx="45" cy="30" r="9"/><circle cx="45" cy="95" r="9"/><circle cx="115" cy="22" r="9"/><circle cx="115" cy="108" r="9"/><circle cx="195" cy="65" r="10"/></g>
+                    <circle cx="115" cy="65" r="10" fill="#e2e8f0"/>
+                    <path d="M107 57 L123 73 M123 57 L107 73" stroke="#e74c3c" stroke-width="4"/>
+                    <text x="82" y="125" class="svg-label">学習ごとにランダムOFF</text>
+                </svg>
+                <div class="concept-caption">特定ニューロンへの依存を減らし、多数のモデルを平均する効果。</div>
+            </div>
+            <div class="concept-card">
+                <strong>Early Stopping：谷の底で保存</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="検証損失が最小になる位置で早期終了">
+                    <line x1="30" y1="105" x2="220" y2="105" stroke="#627d98"/><line x1="30" y1="105" x2="30" y2="15" stroke="#627d98"/>
+                    <path d="M35 24 C70 48,120 75,215 94" fill="none" stroke="#2780b8" stroke-width="3"/>
+                    <path d="M35 35 C75 70,112 91,140 67 C165 47,190 38,215 30" fill="none" stroke="#e05d5d" stroke-width="3"/>
+                    <line x1="137" y1="18" x2="137" y2="105" stroke="#f39c12" stroke-width="2" stroke-dasharray="5,4"/>
+                    <circle cx="137" cy="69" r="5" fill="#f39c12"/>
+                    <text x="145" y="64" class="svg-label">best</text><text x="154" y="120" class="svg-note">epoch</text>
+                    <text x="45" y="20" class="svg-note" fill="#2780b8">train</text><text x="178" y="25" class="svg-note" fill="#e05d5d">validation</text>
+                </svg>
+                <div class="concept-caption">検証損失の最小地点を保存。最後の重みではない。</div>
+            </div>
+            <div class="concept-card">
+                <strong>バッチサイズ：揺れがノイズになる</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="小バッチは揺れながら進み大バッチは滑らかに進む">
+                    <path d="M20 108 Q70 15 120 108 Q170 15 220 108" fill="none" stroke="#d9e2ec" stroke-width="2"/>
+                    <path d="M28 100 L55 73 L77 84 L101 51 L124 62 L150 38 L176 47 L205 25" fill="none" stroke="#e67e22" stroke-width="3"/>
+                    <path d="M28 110 C82 90,135 55,205 28" fill="none" stroke="#2780b8" stroke-width="3"/>
+                    <circle cx="205" cy="25" r="5" fill="#e67e22"/><circle cx="205" cy="28" r="4" fill="#2780b8"/>
+                    <text x="28" y="20" class="svg-note">小バッチ：揺れる</text><text x="28" y="35" class="svg-note">大バッチ：滑らか</text>
+                </svg>
+                <div class="concept-caption">適度な揺れは汎化に役立つ場合がある。小さすぎると不安定。</div>
+            </div>
+            <div class="concept-card">
+                <strong>学習率：1歩の大きさ</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="学習率が小さいと短い歩幅、大きいと長い歩幅">
+                    <line x1="20" y1="88" x2="220" y2="88" stroke="#d9e2ec" stroke-width="3"/>
+                    <g fill="#2780b8"><circle cx="30" cy="55" r="5"/><circle cx="55" cy="55" r="5"/><circle cx="80" cy="55" r="5"/><circle cx="105" cy="55" r="5"/></g>
+                    <g stroke="#2780b8" stroke-width="2"><line x1="35" y1="55" x2="50" y2="55"/><line x1="60" y1="55" x2="75" y2="55"/><line x1="85" y1="55" x2="100" y2="55"/></g>
+                    <g fill="#e67e22"><circle cx="30" cy="102" r="5"/><circle cx="100" cy="102" r="5"/><circle cx="190" cy="102" r="5"/></g>
+                    <g stroke="#e67e22" stroke-width="3"><line x1="35" y1="102" x2="95" y2="102"/><line x1="105" y1="102" x2="185" y2="102"/></g>
+                    <text x="125" y="58" class="svg-label">小さい η</text><text x="125" y="105" class="svg-label">大きい η</text>
+                </svg>
+                <div class="concept-caption">大きすぎれば飛び越えて発散、小さすぎれば進まない。</div>
+            </div>
+        </div>
         <table class="comparison-table">
             <tr><th>手法</th><th>学習時</th><th>試験のツボ</th></tr>
             <tr>
@@ -231,6 +355,56 @@ window.quizData = {
         </table>
 
         <h3>■ データ拡張：媒体ごとの必須セット</h3>
+        <div class="concept-grid">
+            <div class="concept-card">
+                <strong>画像：見た目を変えても正解は保つ</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="画像を反転・消去・切り抜きして増やす">
+                    <rect x="12" y="25" width="58" height="72" rx="5" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/>
+                    <circle cx="41" cy="50" r="12" fill="#f3b36a"/><path d="M22 90 L40 68 L55 82 L68 64" fill="none" stroke="#2780b8" stroke-width="3"/>
+                    <path d="M77 61 L99 61" stroke="#627d98" stroke-width="2"/><path d="M94 55 L101 61 L94 67" fill="none" stroke="#627d98" stroke-width="2"/>
+                    <g transform="translate(108,15)">
+                        <rect x="0" y="0" width="48" height="48" rx="4" fill="#eafaf1" stroke="#27ae60"/><circle cx="30" cy="17" r="8" fill="#f3b36a"/><text x="9" y="43" class="svg-note">Flip</text>
+                        <rect x="56" y="0" width="48" height="48" rx="4" fill="#eafaf1" stroke="#27ae60"/><rect x="70" y="12" width="20" height="18" fill="#627d98"/><text x="65" y="43" class="svg-note">Erase</text>
+                        <rect x="28" y="58" width="48" height="48" rx="4" fill="#eafaf1" stroke="#27ae60"/><rect x="39" y="68" width="26" height="24" fill="none" stroke="#e67e22" stroke-width="2"/><text x="38" y="101" class="svg-note">Crop</text>
+                    </g>
+                </svg>
+                <div class="concept-caption">向き・明るさ・一部欠損が変わっても、ラベルの意味は変えない。</div>
+            </div>
+            <div class="concept-card">
+                <strong>自然言語：意味を保って言い換える</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="文章の同義語置換や削除でデータ拡張">
+                    <rect x="20" y="20" width="88" height="34" rx="17" fill="#eef7fb" stroke="#2780b8"/><text x="39" y="42" class="svg-label">猫が走る</text>
+                    <path d="M112 37 L138 37" stroke="#627d98" stroke-width="2"/><path d="M132 31 L139 37 L132 43" fill="none" stroke="#627d98" stroke-width="2"/>
+                    <rect x="144" y="20" width="82" height="34" rx="17" fill="#eafaf1" stroke="#27ae60"/><text x="158" y="42" class="svg-label">ネコが走る</text>
+                    <rect x="35" y="76" width="70" height="30" rx="15" fill="#fff8e7" stroke="#f39c12"/><text x="49" y="96" class="svg-note">置換・挿入</text>
+                    <rect x="125" y="76" width="70" height="30" rx="15" fill="#fff8e7" stroke="#f39c12"/><text x="139" y="96" class="svg-note">交換・削除</text>
+                </svg>
+                <div class="concept-caption">EDAは単語操作。文章の意味や正解ラベルを壊さない。</div>
+            </div>
+            <div class="concept-card">
+                <strong>音声：波形・時間・周波数を変える</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="音声波形へのノイズ付与とスペクトログラムのマスク">
+                    <path d="M12 43 L25 43 L32 20 L42 68 L53 31 L64 56 L75 43 L100 43" fill="none" stroke="#2780b8" stroke-width="3"/>
+                    <text x="16" y="82" class="svg-note">noise / volume / pitch</text>
+                    <rect x="122" y="15" width="105" height="92" rx="5" fill="#eef2f7" stroke="#9fb3c8"/>
+                    <g stroke="#d9e2ec"><line x1="122" y1="38" x2="227" y2="38"/><line x1="122" y1="61" x2="227" y2="61"/><line x1="122" y1="84" x2="227" y2="84"/></g>
+                    <rect x="148" y="15" width="18" height="92" fill="#e05d5d" opacity="0.7"/><rect x="122" y="62" width="105" height="18" fill="#f3b36a" opacity="0.8"/>
+                    <text x="142" y="123" class="svg-label">SpecAugment</text>
+                </svg>
+                <div class="concept-caption">SpecAugmentは時間帯・周波数帯を帯状に隠す。</div>
+            </div>
+            <div class="concept-card">
+                <strong>MixUp：入力もラベルも同じ比率で混ぜる</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="2つの入力とラベルを同じ比率で混合">
+                    <circle cx="45" cy="50" r="25" fill="#63c5da" opacity="0.85"/><text x="37" y="55" class="svg-label">A</text>
+                    <circle cx="115" cy="50" r="25" fill="#e05d5d" opacity="0.85"/><text x="107" y="55" class="svg-label">B</text>
+                    <text x="74" y="55" class="svg-label">＋</text><path d="M145 50 L172 50" stroke="#627d98" stroke-width="2"/><path d="M166 44 L173 50 L166 56" fill="none" stroke="#627d98" stroke-width="2"/>
+                    <circle cx="202" cy="50" r="25" fill="#8f8fd3"/><text x="186" y="55" class="svg-label">A+B</text>
+                    <text x="36" y="96" class="svg-note">λxA + (1-λ)xB</text><text x="135" y="111" class="svg-note">ラベルも同じ比率</text>
+                </svg>
+                <div class="concept-caption">境界を滑らかに学ぶ。画像だけでなく自然言語・音声にも登場。</div>
+            </div>
+        </div>
         <table class="comparison-table">
             <tr><th>媒体</th><th>主な手法</th><th>注意点</th></tr>
             <tr><td><strong>画像</strong></td><td>Flip / Erase / Crop / Contrast / Brightness / Rotate、RandAugment、MixUp</td><td>ラベルの意味を壊さない。RandAugmentは変換数と強度で探索を簡略化。</td></tr>
@@ -239,6 +413,41 @@ window.quizData = {
         </table>
 
         <h3>■ アンサンブルとハイパーパラメータ探索</h3>
+        <div class="concept-grid">
+            <div class="concept-card">
+                <strong>アンサンブル：複数の判断をまとめる</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="3つのモデルの予測を多数決で統合">
+                    <rect x="15" y="12" width="62" height="27" rx="5" fill="#eef7fb" stroke="#2780b8"/><text x="28" y="30" class="svg-label">Model A</text>
+                    <rect x="15" y="51" width="62" height="27" rx="5" fill="#eafaf1" stroke="#27ae60"/><text x="28" y="69" class="svg-label">Model B</text>
+                    <rect x="15" y="90" width="62" height="27" rx="5" fill="#fff8e7" stroke="#f39c12"/><text x="28" y="108" class="svg-label">Model C</text>
+                    <path d="M82 26 L151 60 M82 65 L151 65 M82 103 L151 70" stroke="#627d98" stroke-width="2"/>
+                    <rect x="153" y="45" width="72" height="42" rx="8" fill="#f4ecf7" stroke="#8e44ad" stroke-width="2"/>
+                    <text x="169" y="63" class="svg-label">平均・多数決</text><text x="176" y="78" class="svg-note">meta model</text>
+                </svg>
+                <div class="concept-caption">Baggingは並列、Boostingは逐次、Stackingはメタモデル。</div>
+            </div>
+            <div class="concept-card">
+                <strong>探索：次にどこを試す？</strong>
+                <svg class="concept-svg" viewBox="0 0 240 130" role="img" aria-label="グリッド探索・ランダム探索・ベイズ最適化の違い">
+                    <g transform="translate(8,22)">
+                        <text x="12" y="-6" class="svg-label">Grid</text>
+                        <g fill="#2780b8"><circle cx="10" cy="10" r="3"/><circle cx="30" cy="10" r="3"/><circle cx="50" cy="10" r="3"/><circle cx="10" cy="30" r="3"/><circle cx="30" cy="30" r="3"/><circle cx="50" cy="30" r="3"/><circle cx="10" cy="50" r="3"/><circle cx="30" cy="50" r="3"/><circle cx="50" cy="50" r="3"/></g>
+                    </g>
+                    <g transform="translate(84,22)">
+                        <text x="5" y="-6" class="svg-label">Random</text>
+                        <g fill="#27ae60"><circle cx="8" cy="42" r="4"/><circle cx="23" cy="15" r="4"/><circle cx="42" cy="53" r="4"/><circle cx="57" cy="26" r="4"/><circle cx="33" cy="34" r="4"/></g>
+                    </g>
+                    <g transform="translate(164,22)">
+                        <text x="8" y="-6" class="svg-label">Bayes</text>
+                        <path d="M4 55 Q20 12 35 45 T66 18" fill="none" stroke="#8e44ad" stroke-width="2"/>
+                        <circle cx="35" cy="45" r="4" fill="#8e44ad"/><circle cx="66" cy="18" r="5" fill="#f39c12"/>
+                        <path d="M38 39 L60 23" stroke="#f39c12" stroke-width="2" stroke-dasharray="3,2"/>
+                    </g>
+                    <text x="23" y="116" class="svg-note">全組合せ</text><text x="92" y="116" class="svg-note">無作為</text><text x="166" y="116" class="svg-note">履歴から次候補</text>
+                </svg>
+                <div class="concept-caption">評価が高価なら、過去の結果を使うBayesian Optimizationが有力。</div>
+            </div>
+        </div>
         <table class="comparison-table">
             <tr><th>分類</th><th>手法</th><th>一言で見分ける</th></tr>
             <tr><td rowspan="4"><strong>アンサンブル</strong></td><td>Bagging</td><td>独立・並列に学習して平均/多数決。分散を下げる。</td></tr>
