@@ -25,7 +25,33 @@ window.quizData = {
             .l1-shape { fill: rgba(231, 76, 60, 0.2); stroke: #e74c3c; stroke-width: 2; }
             .l2-shape { fill: rgba(52, 152, 219, 0.2); stroke: #3498db; stroke-width: 2; }
             .contour { fill: none; stroke: #999; stroke-width: 1; stroke-dasharray: 2,2; }
+            .syllabus-core { margin: 12px 0 20px; padding: 14px 16px; border-left: 5px solid #2780b8; border-radius: 8px; background: #eef7fb; line-height: 1.8; }
+            .formula-box { margin: 6px 0; padding: 8px 10px; border-radius: 8px; background: #f3f7fb; color: #123f68; font-size: 1.02em; white-space: nowrap; }
+            .formula-box mjx-container { margin: 0 !important; }
+            .bn-guide { margin: 14px 0 20px; padding: 16px; border: 2px solid #3aa6b9; border-radius: 12px; background: #f3fbfc; }
+            .bn-flow { display: flex; align-items: stretch; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+            .bn-step { width: 170px; min-height: 118px; padding: 12px; border: 1px solid #bddde3; border-radius: 10px; background: #fff; text-align: center; }
+            .bn-step-number { display: inline-block; min-width: 26px; margin-bottom: 6px; padding: 2px 7px; border-radius: 999px; background: #167f92; color: #fff; font-weight: 800; }
+            .bn-step strong { display: block; margin-bottom: 5px; color: #123f68; }
+            .bn-arrow { align-self: center; color: #167f92; font-size: 1.5em; font-weight: 900; }
+            .bn-result { margin-top: 10px; padding: 10px 12px; border-left: 5px solid #f39c12; border-radius: 7px; background: #fff8e7; line-height: 1.7; }
+            .compact-note { margin: 8px 0 16px; padding: 10px 12px; border-radius: 8px; background: #fff6f2; line-height: 1.7; }
+            .comparison-table td:nth-child(3) { min-width: 330px; }
+            @media (max-width: 760px) {
+                .visual-grid { grid-template-columns: 1fr; }
+                .bn-step { width: 100%; box-sizing: border-box; }
+                .bn-arrow { width: 100%; text-align: center; transform: rotate(90deg); }
+            }
         </style>
+
+        <h3>■ 2026シラバスの出題本線</h3>
+        <div class="syllabus-core">
+            <strong>① 重みを抑える：</strong>L1・L2・weight decay<br>
+            <strong>② ランダム性を入れる：</strong>Dropout・DropConnect・データ拡張<br>
+            <strong>③ 学習を制御する：</strong>Early Stopping・バッチサイズ・学習率<br>
+            <strong>④ 分布を整える：</strong>Batch / Layer / Instance / Group Normalization<br>
+            <strong>⑤ 複数モデルと探索：</strong>アンサンブル・ハイパーパラメータ最適化
+        </div>
 
         <h3>■ 正則化マップ：どこで効く？</h3>
         <p>過学習を防ぐための「罠」や「工夫」を仕掛ける場所は4箇所あります。</p>
@@ -106,49 +132,124 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ その他の汎化テクニック図鑑</h3>
-        <table>
-            <tr><th>名称</th><th>イメージ</th><th>仕組み・効果</th></tr>
+        <h3>■ L1・L2・weight decay：式で見分ける</h3>
+        <table class="comparison-table">
+            <tr><th>手法</th><th>損失・更新式</th><th>試験のツボ</th></tr>
             <tr>
-                <td><strong>Dropout</strong><br>(ドロップアウト)</td>
-                <td>
-                    <svg width="40" height="30">
-                        <circle cx="10" cy="10" r="3" fill="#333" />
-                        <circle cx="20" cy="10" r="3" fill="#ddd" stroke="#ddd" /> <circle cx="30" cy="10" r="3" fill="#333" />
-                        <circle cx="10" cy="20" r="3" fill="#ddd" stroke="#ddd" /> <circle cx="20" cy="20" r="3" fill="#333" />
-                        <circle cx="30" cy="20" r="3" fill="#333" />
-                    </svg>
-                </td>
-                <td>
-                    学習時にランダムにニューロンを消す。<br>
-                    ・<strong>アンサンブル学習</strong>と同等の効果。<br>
-                    ・推論時は出力をスケーリングする。
-                </td>
+                <td><strong>L1</strong></td>
+                <td><div class="formula-box">$\\displaystyle L=L_{data}+\\lambda\\sum_i|w_i|$</div></td>
+                <td>絶対値。重みを<strong>ちょうど0</strong>にしやすく、スパース表現・特徴選択へ。</td>
             </tr>
             <tr>
-                <td><strong>Early Stopping</strong><br>(早期終了)</td>
-                <td>
-                    <svg width="40" height="30" viewBox="0 0 40 30">
-                        <path d="M5,5 Q10,25 35,28" stroke="blue" fill="none" stroke-width="1"/> <path d="M5,10 Q15,20 35,15" stroke="red" fill="none" stroke-width="1"/> <line x1="20" y1="0" x2="20" y2="30" stroke="#333" stroke-dasharray="2,1" />
-                    </svg>
-                </td>
-                <td>
-                    検証誤差(赤)が下がらなくなったら止める。<br>
-                    ・それ以上やると過学習(U字カーブの右側)になるため。
-                </td>
+                <td><strong>L2</strong></td>
+                <td><div class="formula-box">$\\displaystyle L=L_{data}+\\frac{\\lambda}{2}\\sum_iw_i^2$</div></td>
+                <td>二乗。大きな重みを強く罰し、全体を滑らかに小さくする。</td>
             </tr>
             <tr>
-                <td><strong>Batch Norm</strong><br>(バッチ正規化)</td>
+                <td><strong>Weight decay</strong></td>
                 <td>
-                    $[x_1, x_2] \to \mathcal{N}(0, 1)$
+                    <div class="formula-box">$\\displaystyle g=\\nabla L_{data}$</div>
+                    <div class="formula-box">$\\displaystyle w\\leftarrow(1-\\eta\\lambda)w-\\eta g$</div>
                 </td>
-                <td>
-                    各層の入力を「平均0, 分散1」に強制変換。<br>
-                    ・<strong>学習速度UP</strong>。<br>
-                    ・初期値依存の低減。
-                </td>
+                <td>SGDではL2正則化と同じ形。適応的手法ではAdamWのような<strong>分離型</strong>と区別。</td>
             </tr>
         </table>
+
+        <h3>■ Batch Norm：何をしている？</h3>
+        <div class="bn-guide">
+            <p><strong>まず結論：</strong>同じ特徴の値を、ミニバッチ内で「中心0・ばらつき1」にそろえた後、学習可能な $\\gamma,\\beta$ で使いやすい尺度へ戻します。<strong>データ全体を正規分布に変える処理ではありません。</strong></p>
+            <p><strong>例：</strong>ある1つの特徴について、ミニバッチの値が $x=[1,3]$ だった場合</p>
+            <div class="bn-flow">
+                <div class="bn-step">
+                    <span class="bn-step-number">1</span>
+                    <strong>平均を求める</strong>
+                    $(1+3)/2$
+                    <div class="formula-box">$\\mu_B=2$</div>
+                </div>
+                <div class="bn-arrow">→</div>
+                <div class="bn-step">
+                    <span class="bn-step-number">2</span>
+                    <strong>分散を求める</strong>
+                    <div class="formula-box">$\\sigma_B^2=1$</div>
+                    平均からの距離は $-1,+1$
+                </div>
+                <div class="bn-arrow">→</div>
+                <div class="bn-step">
+                    <span class="bn-step-number">3</span>
+                    <strong>標準化する</strong>
+                    <div class="formula-box">$\\hat{x}=\\frac{x-\\mu_B}{\\sqrt{\\sigma_B^2+\\varepsilon}}$</div>
+                    $\\hat{x}\\approx[-1,1]$
+                </div>
+                <div class="bn-arrow">→</div>
+                <div class="bn-step">
+                    <span class="bn-step-number">4</span>
+                    <strong>尺度を学び直す</strong>
+                    <div class="formula-box">$y=\\gamma\\hat{x}+\\beta$</div>
+                    $\\gamma,\\beta$ は学習対象
+                </div>
+            </div>
+            <div class="bn-result">
+                たとえば $\\gamma=2,\\beta=0.5$ なら、$[-1,1]\\to[-1.5,2.5]$。<br>
+                <strong>「いったん整える → 必要な幅と位置はモデル自身に学ばせる」</strong>と覚えます。
+            </div>
+        </div>
+
+        <h3>■ Batch Norm：学習時と推論時</h3>
+        <table>
+            <tr><th>場面</th><th>使う平均・分散</th><th>理由</th></tr>
+            <tr><td><strong>学習時</strong></td><td>現在のミニバッチの平均・分散</td><td>各バッチを正規化し、同時に移動平均を保存する。</td></tr>
+            <tr><td><strong>推論時</strong></td><td>学習中に保存した移動平均</td><td>1件入力でも結果を安定させ、同じ入力から同じ出力を得る。</td></tr>
+        </table>
+        <div class="compact-note">
+            <strong>CNNでは：</strong>チャネルごとに $N,H,W$ 方向で平均・分散を計算します。<br>
+            <strong>注意：</strong>正規化直後は平均0・分散1ですが、$\\gamma,\\beta$ 適用後の出力は必ずしも平均0・分散1ではありません。小バッチでは統計が不安定になりやすいため、Group Normが候補です。
+        </div>
+
+        <h3>■ 4つの正規化：どの方向をそろえる？</h3>
+        <table class="comparison-table">
+            <tr><th>手法</th><th>統計を取る単位</th><th>向く場面・見分け方</th></tr>
+            <tr><td><strong>Batch Norm</strong></td><td>同じ特徴・チャネルを<strong>バッチ方向</strong>に集計</td><td>CNNで定番。学習/推論で統計が異なり、小バッチに弱い。</td></tr>
+            <tr><td><strong>Layer Norm</strong></td><td>1サンプル内の<strong>特徴方向</strong></td><td>バッチサイズ非依存。Transformer・RNNで定番。</td></tr>
+            <tr><td><strong>Instance Norm</strong></td><td>1画像・1チャネル内の<strong>空間方向</strong></td><td>画像ごとのコントラストを除きやすく、スタイル変換で有効。</td></tr>
+            <tr><td><strong>Group Norm</strong></td><td>1画像内でチャネルを<strong>複数グループ</strong>に分割</td><td>小バッチの画像認識でも安定。</td></tr>
+        </table>
+
+        <h3>■ Dropout・Early Stopping・陰的正則化</h3>
+        <table class="comparison-table">
+            <tr><th>手法</th><th>学習時</th><th>試験のツボ</th></tr>
+            <tr>
+                <td><strong>Inverted Dropout</strong></td>
+                <td>
+                    <div class="formula-box">$\\displaystyle m\\sim\\mathrm{Bernoulli}(1-p)$</div>
+                    <div class="formula-box">$\\displaystyle y=\\frac{m}{1-p}x$</div>
+                </td>
+                <td>生き残った出力を $1/(1-p)$ 倍。推論時は何もしない。</td>
+            </tr>
+            <tr><td><strong>Early Stopping</strong></td><td>検証指標が改善しない期間を監視</td><td>最後ではなく<strong>検証性能が最良だった重み</strong>を復元する。</td></tr>
+            <tr><td><strong>小さめのバッチ</strong></td><td>勾配に適度なノイズが入る</td><td>汎化に有利な場合があるが、小さすぎるとBNや学習が不安定。</td></tr>
+            <tr><td><strong>学習率</strong></td><td>安定範囲内で更新幅を調整</td><td>大きすぎれば発散、小さすぎれば停滞。陰的正則化にも関係。</td></tr>
+        </table>
+
+        <h3>■ データ拡張：媒体ごとの必須セット</h3>
+        <table class="comparison-table">
+            <tr><th>媒体</th><th>主な手法</th><th>注意点</th></tr>
+            <tr><td><strong>画像</strong></td><td>Flip / Erase / Crop / Contrast / Brightness / Rotate、RandAugment、MixUp</td><td>ラベルの意味を壊さない。RandAugmentは変換数と強度で探索を簡略化。</td></tr>
+            <tr><td><strong>自然言語</strong></td><td>EDA（同義語置換・挿入・交換・削除）、MixUp</td><td>文の意味やラベルを保つ範囲で行う。</td></tr>
+            <tr><td><strong>音声</strong></td><td>ノイズ、音量、ピッチシフト、MixUp、SpecAugment</td><td>SpecAugmentは時間帯・周波数帯をマスクする。</td></tr>
+        </table>
+
+        <h3>■ アンサンブルとハイパーパラメータ探索</h3>
+        <table class="comparison-table">
+            <tr><th>分類</th><th>手法</th><th>一言で見分ける</th></tr>
+            <tr><td rowspan="4"><strong>アンサンブル</strong></td><td>Bagging</td><td>独立・並列に学習して平均/多数決。分散を下げる。</td></tr>
+            <tr><td>Boosting</td><td>前の誤りを次が重点的に学ぶ。逐次的。</td></tr>
+            <tr><td>Bootstrap</td><td>元データから<strong>復元抽出</strong>して複数データ集合を作る。</td></tr>
+            <tr><td>Stacking</td><td>複数モデルの予測をメタモデルへ入力する。</td></tr>
+            <tr><td rowspan="3"><strong>探索</strong></td><td>Grid Search</td><td>候補の全組合せ。低次元・小さい探索空間向き。</td></tr>
+            <tr><td>Random Search</td><td>組合せを無作為抽出。重要な軸が少ない高次元探索に強い。</td></tr>
+            <tr><td>Bayesian Optimization</td><td>過去の結果から次に試す候補を選ぶ。1回の評価が高価な場合に有効。</td></tr>
+        </table>
+        <p><strong>データ分割の鉄則：</strong>調整は検証データ、テストデータは最後の性能確認にだけ使います。</p>
     `,
 
     questions: [
@@ -186,9 +287,9 @@ window.quizData = {
         {
             category: "バッチ正規化",
             question: "Batch Normalization（バッチ正規化）を行う主なメリットはどれか。",
-            options: ["学習が安定し、収束速度が劇的に速くなる（大きな学習率を使える）", "モデルのパラメータ数が減る", "計算コストが下がる", "過学習が完全に起きなくなる"],
+            options: ["各層の値の尺度を整えて学習を安定させ、比較的大きな学習率も使いやすくする", "モデルのパラメータ数が減る", "計算コストが必ず下がる", "過学習が完全に起きなくなる"],
             answer: 0,
-            explanation: "内部共変量シフト（層ごとの分布のズレ）を抑えることで、学習係数を大きくしても発散しにくくなり、初期値への依存性も下がります。"
+            explanation: "ミニバッチ統計で中間表現の尺度を整えることで最適化が安定します。古典的には「内部共変量シフトの低減」と説明されますが、試験では「学習の安定化・高速化」を押さえれば十分です。"
         },
         {
             category: "バッチ正規化の場所",
@@ -202,7 +303,7 @@ window.quizData = {
             question: "Early Stopping（早期終了）を行う際、学習をストップさせる基準となる指標はどれか。",
             options: ["検証データ（Validation Data）に対する誤差", "訓練データ（Training Data）に対する誤差", "テストデータ（Test Data）に対する誤差", "学習率の大きさ"],
             answer: 0,
-            explanation: "訓練誤差は下がり続けますが、検証誤差はある時点から上がり始めます（過学習の開始）。この「上がり始めた瞬間」を見極めるために検証データを使います。"
+            explanation: "訓練誤差ではなく検証誤差などの検証指標を監視します。偶然の上下ですぐ止めず、一定期間改善しない状態を待つ patience を設定し、最良時点の重みを保存します。"
         },
         {
             category: "データ拡張",
@@ -326,6 +427,247 @@ window.quizData = {
             options: ["学習データの分布がテストデータの分布から乖離しすぎて、逆に精度が落ちる（Underfitting）", "過学習しやすくなる", "モデルが小さくなる", "計算が速くなる"],
             answer: 0,
             explanation: "例えば数字認識で「回転」をさせすぎると、6と9の区別がつかなくなり、学習が収束しなくなります（多様性と正解保持のトレードオフ）。"
+        },
+        {
+            id: "reg-bn-mean-variance",
+            category: "Batch Norm・平均と分散（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "Batch Normalizationで、ある特徴のミニバッチ値が $x=[1,3]$ である。分散をバッチ要素数2で割って求めるとき、平均 $\\mu_B$ と分散 $\\sigma_B^2$ の組合せはどれか。",
+            options: ["$\\mu_B=1,\\ \\sigma_B^2=2$", "$\\mu_B=2,\\ \\sigma_B^2=1$", "$\\mu_B=2,\\ \\sigma_B^2=2$", "$\\mu_B=3,\\ \\sigma_B^2=1$"],
+            answer: 1,
+            explanation: "平均は $(1+3)/2=2$。分散は $\\{(1-2)^2+(3-2)^2\\}/2=(1+1)/2=1$ です。最初に平均、その後に平均との差の二乗平均を求めます。"
+        },
+        {
+            id: "reg-bn-normalize-calc",
+            category: "Batch Norm・標準化（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "前問の $x=[1,3],\\mu_B=2,\\sigma_B^2=1$ について、$\\varepsilon=0$ とする。$\\hat{x}=(x-\\mu_B)/\\sqrt{\\sigma_B^2+\\varepsilon}$ はどれか。",
+            options: ["$[0,1]$", "$[1,3]$", "$[-1,1]$", "$[-2,2]$"],
+            answer: 2,
+            explanation: "各値から平均2を引くと $[-1,1]$。標準偏差 $\\sqrt{1}=1$ で割るため、そのまま $[-1,1]$ です。"
+        },
+        {
+            id: "reg-bn-gamma-beta-calc",
+            category: "Batch Norm・スケール変換（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "$\\hat{x}=[-1,1]$ に対し、$y=\\gamma\\hat{x}+\\beta$、$\\gamma=2,\\beta=0.5$ とする。出力 $y$ はどれか。",
+            options: ["$[-2,2]$", "$[-0.5,1.5]$", "$[1.5,2.5]$", "$[-1.5,2.5]$"],
+            answer: 3,
+            explanation: "$2[-1,1]+0.5=[-2,2]+[0.5,0.5]=[-1.5,2.5]$ です。$\\gamma$ で幅、$\\beta$ で中心を調整します。"
+        },
+        {
+            id: "reg-bn-gamma-beta-role",
+            category: "Batch Norm・γとβ",
+            difficulty: "標準",
+            question: "Batch Normalizationの学習可能パラメータ $\\gamma$ と $\\beta$ の役割として正しいものはどれか。",
+            options: ["正規化後の尺度と位置を、モデルに適した値へ学び直す", "バッチサイズを自動決定する", "平均と分散を常に0にする", "重みをスパースにする"],
+            answer: 0,
+            explanation: "$\\gamma$ はスケール、$\\beta$ はシフトです。標準化で一度そろえた後、必要な表現力を回復します。"
+        },
+        {
+            id: "reg-bn-after-affine",
+            category: "Batch Norm・出力分布",
+            difficulty: "応用",
+            question: "Batch Normalizationで標準化後に $y=\\gamma\\hat{x}+\\beta$ を適用した。$y$ の平均と分散について正しいものはどれか。",
+            options: ["常に平均0・分散1", "常に平均1・分散0", "$\\gamma,\\beta$ により、平均0・分散1とは限らない", "バッチサイズだけで決まる"],
+            answer: 2,
+            explanation: "$\\hat{x}$ はおおむね平均0・分散1ですが、その後に学習可能な拡大縮小と平行移動を行うため、最終出力 $y$ は平均0・分散1に固定されません。"
+        },
+        {
+            id: "reg-bn-cnn-axes",
+            category: "Batch Norm・CNN",
+            difficulty: "応用",
+            question: "入力テンソルの形が $(N,C,H,W)$ のCNN用Batch Normalizationで、平均・分散をチャネルごとに求める主な集計方向はどれか。",
+            options: ["$C$ 方向だけ", "$N,H,W$ 方向", "$N,C$ 方向", "$H$ 方向だけ"],
+            answer: 1,
+            explanation: "各チャネル $C$ を別々に扱い、そのチャネル内のバッチ $N$ と空間 $H,W$ の値を集めて平均・分散を計算します。"
+        },
+        {
+            id: "reg-bn-train-inference",
+            category: "Batch Norm・学習時と推論時",
+            difficulty: "標準",
+            question: "Batch Normalizationの統計量の使い分けとして正しいものはどれか。",
+            options: ["学習時も推論時も現在の1件から計算", "学習時も推論時も平均0・分散1を固定", "学習時はミニバッチ統計、推論時は学習中に保存した移動平均", "学習時は移動平均、推論時はテストバッチ統計"],
+            answer: 2,
+            explanation: "学習時は現在のバッチから統計を計算し、同時に移動平均を更新します。推論時は保存済み統計を使い、入力件数に依存しない安定した出力を得ます。"
+        },
+        {
+            id: "reg-group-norm-small-batch",
+            category: "Group Norm",
+            difficulty: "標準",
+            question: "物体検出などでGPUメモリ制約によりバッチサイズが1〜2しか取れない。正規化手法の有力候補はどれか。",
+            options: ["Batch Normだけ", "Dropout", "Weight decay", "Group Norm"],
+            answer: 3,
+            explanation: "Group Normは各サンプル内でチャネルをグループ分けして統計を取るため、バッチサイズに依存しません。"
+        },
+        {
+            id: "reg-layer-norm-transformer",
+            category: "Layer Norm",
+            difficulty: "標準",
+            question: "TransformerでLayer Normalizationが使いやすい主な理由はどれか。",
+            options: ["各サンプル・トークンの特徴方向で正規化し、バッチサイズに依存しない", "画像の空間方向だけを正規化する", "推論時だけ動作する", "重みを0にする"],
+            answer: 0,
+            explanation: "Layer Normは同一サンプル内の隠れ次元で統計を取ります。バッチ統計が不要なので、系列モデルと相性が良い手法です。"
+        },
+        {
+            id: "reg-instance-norm",
+            category: "Instance Norm",
+            difficulty: "標準",
+            question: "Instance Normalizationの説明として正しいものはどれか。",
+            options: ["バッチ全体の同じチャネルを正規化する", "各画像・各チャネルの空間方向を正規化し、スタイル変換などで使われる", "全チャネルを1つのグループに固定する", "損失関数を正規化する"],
+            answer: 1,
+            explanation: "画像1枚ごと、さらにチャネルごとに $H,W$ 方向の統計を取ります。画像固有のコントラスト情報を除きやすい特徴があります。"
+        },
+        {
+            id: "reg-l1-penalty-calc",
+            category: "L1正則化（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "重みが $w=[-2,1]$、L1正則化係数が $\\lambda=0.1$ のとき、ペナルティ $\\lambda\\sum_i|w_i|$ はいくつか。",
+            options: ["0.1", "0.2", "0.3", "0.5"],
+            answer: 2,
+            explanation: "$0.1\\times(|-2|+|1|)=0.1\\times3=0.3$ です。L1では符号に関係なく絶対値を足します。"
+        },
+        {
+            id: "reg-l2-penalty-calc",
+            category: "L2正則化（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "重みが $w=[-2,1]$、$\\lambda=0.1$ のとき、L2ペナルティ $\\frac{\\lambda}{2}\\sum_iw_i^2$ はいくつか。",
+            options: ["0.05", "0.1", "0.2", "0.25"],
+            answer: 3,
+            explanation: "$\\frac{0.1}{2}\\{(-2)^2+1^2\\}=0.05\\times5=0.25$ です。二乗してから合計します。"
+        },
+        {
+            id: "reg-weight-decay-calc",
+            category: "Weight decay（計算）",
+            kind: "計算",
+            difficulty: "応用",
+            question: "データ損失の勾配を0とし、$w=2,\\eta=0.1,\\lambda=0.5$ とする。$w\\leftarrow(1-\\eta\\lambda)w$ による1回後の重みはどれか。",
+            options: ["1.9", "1.5", "1.0", "2.1"],
+            answer: 0,
+            explanation: "$(1-0.1\\times0.5)\\times2=0.95\\times2=1.9$ です。weight decayは更新ごとに重みを少し縮めます。"
+        },
+        {
+            id: "reg-inverted-dropout-calc",
+            category: "Inverted Dropout（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "Inverted Dropoutでドロップ率 $p=0.25$、活性値 $x=4$ が生き残った。学習時の出力 $x/(1-p)$ はどれか。",
+            options: ["3", "$16/3\\approx5.33$", "4", "16"],
+            answer: 1,
+            explanation: "$4/(1-0.25)=4/0.75=16/3\\approx5.33$。消えなかった値を拡大し、期待値を学習時と推論時でそろえます。"
+        },
+        {
+            id: "reg-batch-size-implicit",
+            category: "陰的正則化・バッチサイズ",
+            difficulty: "応用",
+            question: "バッチサイズと汎化の関係について、最も適切な説明はどれか。",
+            options: ["小さいほど必ず高精度", "大きいほど必ず高精度", "小さめのバッチは勾配ノイズが汎化に役立つ場合があるが、小さすぎると学習やBNが不安定", "バッチサイズは汎化に無関係"],
+            answer: 2,
+            explanation: "ミニバッチ勾配の揺らぎが陰的正則化として働く場合があります。ただし極端に小さいバッチは推定ノイズやBN統計の不安定化を招きます。"
+        },
+        {
+            id: "reg-learning-rate-implicit",
+            category: "陰的正則化・学習率",
+            difficulty: "応用",
+            question: "学習率を汎化性能の観点で調整するときの説明として正しいものはどれか。",
+            options: ["大きいほど常に良い", "小さいほど常に良い", "0にすれば最適", "安定範囲内の大きめの学習率が平坦な解を促す場合があるが、大きすぎると発散する"],
+            answer: 3,
+            explanation: "学習率は最適化だけでなく陰的正則化にも関係します。ただし効果はデータやモデルに依存し、最終的には検証データで選びます。"
+        },
+        {
+            id: "reg-randaugment",
+            category: "画像データ拡張・RandAugment",
+            difficulty: "標準",
+            question: "RandAugmentの特徴として正しいものはどれか。",
+            options: ["適用する変換数と強度という少数の設定で、画像変換をランダムに組み合わせる", "画像を必ず左右反転するだけ", "特徴量を平均0にする", "複数モデルを直列に学習する"],
+            answer: 0,
+            explanation: "複雑な方策探索を簡略化し、何種類の変換をどれくらい強く適用するかを主に調整します。"
+        },
+        {
+            id: "reg-random-erasing",
+            category: "画像データ拡張・Random Erasing",
+            difficulty: "標準",
+            question: "Random Erasingの狙いとして最も適切なものはどれか。",
+            options: ["画像全体を削除する", "画像の一部領域を隠し、遮蔽に頑健な特徴を学ばせる", "クラスラベルを削除する", "解像度を必ず2倍にする"],
+            answer: 1,
+            explanation: "ランダムな矩形領域を消すことで、特定の局所部分だけに依存しない認識を促します。"
+        },
+        {
+            id: "reg-eda",
+            category: "自然言語データ拡張・EDA",
+            difficulty: "標準",
+            question: "自然言語のEDA（Easy Data Augmentation）に含まれる代表的な操作はどれか。",
+            options: ["時間・周波数マスク", "画像のランダムクロップ", "同義語置換・ランダム挿入・交換・削除", "バッチ統計による正規化"],
+            answer: 2,
+            explanation: "EDAは文の意味をなるべく保ちながら、単語レベルの簡単な操作で訓練文を増やします。"
+        },
+        {
+            id: "reg-specaugment",
+            category: "音声データ拡張・SpecAugment",
+            difficulty: "標準",
+            question: "SpecAugmentが主に行う処理はどれか。",
+            options: ["音声をテキストへ変換する", "重みをランダムに削除する", "複数モデルを平均する", "スペクトログラムの時間帯や周波数帯をマスクする"],
+            answer: 3,
+            explanation: "時間マスキングや周波数マスキングにより、一部が欠けても認識できる頑健な音声モデルを学習します。"
+        },
+        {
+            id: "reg-bootstrap",
+            category: "アンサンブル・Bootstrap",
+            difficulty: "標準",
+            question: "Bootstrap標本の作り方として正しいものはどれか。",
+            options: ["元データから重複を許して復元抽出する", "元データを重複なしで1回ずつ使う", "テストデータを訓練へ混ぜる", "特徴量を全て0にする"],
+            answer: 0,
+            explanation: "選んだデータを母集団へ戻して再び選べるため、同じサンプルが複数回入り、選ばれないサンプルも生じます。"
+        },
+        {
+            id: "reg-bagging-boosting",
+            category: "BaggingとBoosting",
+            difficulty: "標準",
+            question: "BaggingとBoostingの違いとして正しいものはどれか。",
+            options: ["両方とも必ず1モデルだけ使う", "Baggingは独立・並列、Boostingは前段の誤りを受けて逐次的に学習", "Baggingは逐次、Boostingは独立・並列", "両方ともデータ拡張ではないので学習しない"],
+            answer: 1,
+            explanation: "Baggingは複数モデルの平均で主に分散を下げます。Boostingは弱学習器を順につなぎ、前の誤りを補います。"
+        },
+        {
+            id: "reg-stacking",
+            category: "アンサンブル・Stacking",
+            difficulty: "標準",
+            question: "Stackingの説明として正しいものはどれか。",
+            options: ["データを縦に連結する", "同じモデルの重みを0にする", "複数のベースモデルの予測を、別のメタモデルの入力にする", "学習率を段階的に下げる"],
+            answer: 2,
+            explanation: "異なるモデルの得意・不得意を、上位のメタモデルが組み合わせます。メタモデル用データのリーク防止も重要です。"
+        },
+        {
+            id: "reg-random-search",
+            category: "ハイパーパラメータ・Random Search",
+            difficulty: "応用",
+            question: "高次元の探索で、実際に重要なハイパーパラメータが一部だけの場合、Grid SearchよりRandom Searchが有利になりやすい理由はどれか。",
+            options: ["同じ組合せだけを繰り返すから", "勾配を厳密計算するから", "必ず最適解を証明できるから", "限られた試行回数で各重要軸の多様な値を試しやすいから"],
+            answer: 3,
+            explanation: "Grid Searchは重要でない軸の組合せに試行を使いがちです。Random Searchは各軸の値を広く試せます。"
+        },
+        {
+            id: "reg-bayesian-optimization",
+            category: "ハイパーパラメータ・ベイズ最適化",
+            difficulty: "応用",
+            question: "ベイズ最適化が特に向く状況はどれか。",
+            options: ["1回の学習評価が高価で、過去の結果から有望な次候補を選びたい", "評価が無料で全組合せを試せる", "ハイパーパラメータが存在しない", "訓練データを増やしたいだけ"],
+            answer: 0,
+            explanation: "代理モデルで性能を予測し、獲得関数で探索と活用を両立させながら次の候補を選びます。"
+        },
+        {
+            id: "reg-hyperparameter-data-split",
+            category: "ハイパーパラメータ・データ分割",
+            difficulty: "標準",
+            question: "ハイパーパラメータを選ぶときのデータの使い方として正しいものはどれか。",
+            options: ["テストデータで何度も調整する", "検証データで調整し、テストデータは最終評価にだけ使う", "訓練データを使わない", "検証データを最終学習の正解ラベルとして混ぜる"],
+            answer: 1,
+            explanation: "テストデータを繰り返し見て調整すると、テストデータへ過学習して公正な最終評価ではなくなります。"
         }
     ]
 };
