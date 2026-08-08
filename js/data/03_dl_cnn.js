@@ -25,8 +25,16 @@ window.quizData = {
             .calc-card strong { color: #123f68; }
             .answer-strip { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #f39c12; border-radius: 7px; background: #fff8e7; line-height: 1.7; }
             .comparison-table td:nth-child(3) { min-width: 330px; }
+            .cnn-concept-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0 20px; }
+            .cnn-concept-card { padding: 12px; border: 1px solid #d7e2ec; border-radius: 10px; background: #fff; text-align: center; }
+            .cnn-concept-card > strong { display: block; margin-bottom: 5px; color: #123f68; }
+            .cnn-concept-svg { display: block; width: 100%; max-width: 320px; height: 125px; margin: 4px auto 8px; }
+            .cnn-concept-caption { font-size: 0.86em; line-height: 1.55; color: #334e68; }
+            .cnn-svg-label { font-size: 11px; fill: #334e68; font-weight: 700; }
+            .cnn-svg-note { font-size: 9px; fill: #627d98; }
             @media (max-width: 760px) {
                 .calc-steps { grid-template-columns: 1fr; }
+                .cnn-concept-grid { grid-template-columns: 1fr; }
             }
         </style>
 
@@ -131,6 +139,71 @@ window.quizData = {
             → 出力は $32\\times32\\times64$、パラメータは $(3\\times3\\times3+1)\\times64=1,792$。
         </div>
 
+        <h3>■ 図でわかる「形・数」の頻出4点</h3>
+        <div class="cnn-concept-grid">
+            <div class="cnn-concept-card">
+                <strong>Padding と Stride</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="パディングは周囲を足し、ストライドはフィルタの移動幅を広げる">
+                    <text x="40" y="14" class="cnn-svg-label">Padding</text>
+                    <rect x="16" y="25" width="82" height="82" rx="4" fill="#eef7fb" stroke="#2780b8" stroke-width="2" stroke-dasharray="5,3"/>
+                    <rect x="28" y="37" width="58" height="58" fill="#fff" stroke="#627d98"/>
+                    <g stroke="#d7e2ec"><path d="M42 37 V95 M57 37 V95 M72 37 V95 M28 51 H86 M28 66 H86 M28 81 H86"/></g>
+                    <text x="33" y="118" class="cnn-svg-note">P=1：周囲を足す</text>
+                    <text x="164" y="14" class="cnn-svg-label">Stride</text>
+                    <path d="M132 66 H242" stroke="#d7e2ec" stroke-width="3"/>
+                    <g fill="#2780b8"><circle cx="142" cy="66" r="6"/><circle cx="182" cy="66" r="6"/><circle cx="222" cy="66" r="6"/></g>
+                    <g fill="#2780b8"><path d="M174 66 l-7 -5 v10 z"/><path d="M214 66 l-7 -5 v10 z"/></g>
+                    <text x="160" y="53" class="cnn-svg-note">2マス</text><text x="200" y="53" class="cnn-svg-note">2マス</text>
+                    <text x="157" y="91" class="cnn-svg-note">S=2：飛ばして動く</text>
+                </svg>
+                <div class="cnn-concept-caption"><strong>Paddingは形を保つ</strong>、Strideは<strong>出力を小さくする</strong>。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>フィルタ数 ＝ 出力チャネル数</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="入力3チャネルに64個のフィルタを適用すると出力は64チャネル">
+                    <g fill="#eef7fb" stroke="#2780b8"><rect x="12" y="32" width="62" height="62"/><rect x="18" y="26" width="62" height="62"/><rect x="24" y="20" width="62" height="62"/></g>
+                    <text x="25" y="108" class="cnn-svg-note">入力 C=3</text>
+                    <path d="M92 56 H123" stroke="#627d98" stroke-width="2"/><path d="M123 56 l-7 -5 v10 z" fill="#627d98"/>
+                    <g fill="#fff8e7" stroke="#f39c12"><rect x="130" y="28" width="28" height="28"/><rect x="136" y="34" width="28" height="28"/><rect x="142" y="40" width="28" height="28"/></g>
+                    <text x="127" y="83" class="cnn-svg-note">フィルタ64個</text>
+                    <path d="M176 56 H201" stroke="#627d98" stroke-width="2"/><path d="M201 56 l-7 -5 v10 z" fill="#627d98"/>
+                    <g fill="#eafaf1" stroke="#27ae60"><rect x="205" y="35" width="42" height="42"/><rect x="209" y="31" width="42" height="42"/><rect x="213" y="27" width="42" height="42"/></g>
+                    <text x="205" y="92" class="cnn-svg-note">出力 C=64</text>
+                </svg>
+                <div class="cnn-concept-caption">1個のフィルタが<strong>1枚の特徴マップ</strong>を作る。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>受容野：深いほど広く見る</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="層が深くなるほど出力1点が参照する入力範囲が広がる">
+                    <g transform="translate(15,24)"><rect width="64" height="64" fill="#f8fafc" stroke="#b8c7d6"/><rect x="22" y="22" width="20" height="20" fill="#fceceb" stroke="#e74c3c" stroke-width="2"/><text x="19" y="82" class="cnn-svg-note">浅い層</text></g>
+                    <path d="M86 55 H112" stroke="#627d98" stroke-width="2"/><path d="M112 55 l-7 -5 v10 z" fill="#627d98"/>
+                    <g transform="translate(119,24)"><rect width="64" height="64" fill="#f8fafc" stroke="#b8c7d6"/><rect x="13" y="13" width="38" height="38" fill="#fff8e7" stroke="#f39c12" stroke-width="2"/><text x="19" y="82" class="cnn-svg-note">中間層</text></g>
+                    <path d="M190 55 H212" stroke="#627d98" stroke-width="2"/><path d="M212 55 l-7 -5 v10 z" fill="#627d98"/>
+                    <g transform="translate(217,24)"><rect width="38" height="64" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/><text x="3" y="82" class="cnn-svg-note">深い層</text></g>
+                    <text x="75" y="118" class="cnn-svg-note">局所 → 模様 → 物体全体</text>
+                </svg>
+                <div class="cnn-concept-caption">小さなカーネルを重ねても、見える入力範囲は広がる。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>im2col：パッチを行に並べる</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="画像の局所パッチを行列へ展開して行列積で畳み込みを計算">
+                    <rect x="10" y="22" width="72" height="72" fill="#fff" stroke="#627d98"/>
+                    <g stroke="#d7e2ec"><path d="M28 22 V94 M46 22 V94 M64 22 V94 M10 40 H82 M10 58 H82 M10 76 H82"/></g>
+                    <rect x="10" y="22" width="36" height="36" fill="#fceceb" fill-opacity="0.7" stroke="#e74c3c" stroke-width="2"/>
+                    <rect x="46" y="58" width="36" height="36" fill="#eef7fb" fill-opacity="0.7" stroke="#2780b8" stroke-width="2"/>
+                    <path d="M88 57 H115" stroke="#627d98" stroke-width="2"/><path d="M115 57 l-7 -5 v10 z" fill="#627d98"/>
+                    <rect x="122" y="22" width="75" height="72" fill="#f8fafc" stroke="#627d98"/>
+                    <g stroke="#d7e2ec"><path d="M122 46 H197 M122 70 H197 M141 22 V94 M160 22 V94 M179 22 V94"/></g>
+                    <rect x="122" y="22" width="75" height="24" fill="#fceceb" fill-opacity="0.7"/>
+                    <rect x="122" y="70" width="75" height="24" fill="#eef7fb" fill-opacity="0.7"/>
+                    <text x="132" y="112" class="cnn-svg-note">各パッチ＝1行</text>
+                    <text x="205" y="61" class="cnn-svg-label">× W</text>
+                    <text x="223" y="81" class="cnn-svg-note">行列積</text>
+                </svg>
+                <div class="cnn-concept-caption"><strong>計算は高速化</strong>するが、重複展開で<strong>メモリは増える</strong>。</div>
+            </div>
+        </div>
+
         <h3>■ 積和演算：1マスの作り方</h3>
         <p>入力の小領域とカーネルを<strong>同じ位置どうしで掛け、全部足す</strong>だけです。</p>
         <div class="formula-box">
@@ -153,6 +226,74 @@ window.quizData = {
             <tr><td><strong>単純型 / 複雑型細胞</strong></td><td>特徴抽出 / 位置ずれ吸収</td><td>畳み込み / プーリングの生物学的イメージ。</td></tr>
         </table>
 
+        <h3>■ 図で見分ける「特殊な畳み込み」</h3>
+        <div class="cnn-concept-grid">
+            <div class="cnn-concept-card">
+                <strong>Depthwise Separable</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="チャネル別のDepthwise畳み込みの後に1かける1畳み込みでチャネルを混ぜる">
+                    <text x="14" y="14" class="cnn-svg-label">Depthwise</text>
+                    <g fill="#eef7fb" stroke="#2780b8"><rect x="13" y="27" width="35" height="22"/><rect x="13" y="55" width="35" height="22"/><rect x="13" y="83" width="35" height="22"/></g>
+                    <g fill="#eafaf1" stroke="#27ae60"><rect x="76" y="27" width="35" height="22"/><rect x="76" y="55" width="35" height="22"/><rect x="76" y="83" width="35" height="22"/></g>
+                    <path d="M50 38 H73 M50 66 H73 M50 94 H73" stroke="#627d98" stroke-width="1.5"/>
+                    <text x="17" y="119" class="cnn-svg-note">別々に空間処理</text>
+                    <path d="M116 66 H150" stroke="#627d98" stroke-width="2"/><path d="M150 66 l-7 -5 v10 z" fill="#627d98"/>
+                    <rect x="155" y="42" width="42" height="48" rx="5" fill="#fff8e7" stroke="#f39c12"/>
+                    <text x="166" y="62" class="cnn-svg-label">1×1</text><text x="160" y="78" class="cnn-svg-note">Pointwise</text>
+                    <path d="M201 66 H221" stroke="#627d98" stroke-width="2"/><path d="M221 66 l-7 -5 v10 z" fill="#627d98"/>
+                    <rect x="225" y="38" width="28" height="56" fill="#f4ecf7" stroke="#8e44ad"/>
+                    <text x="210" y="115" class="cnn-svg-note">混ぜる</text>
+                </svg>
+                <div class="cnn-concept-caption"><strong>チャネル別の空間処理 → 1×1で混合</strong>。軽量化の定番。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>Pointwise と Grouped</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="Pointwise畳み込みは同じ位置のチャネルを混ぜ、Grouped畳み込みはチャネル群を分けて処理">
+                    <text x="35" y="14" class="cnn-svg-label">Pointwise 1×1</text>
+                    <g fill="#eef7fb" stroke="#2780b8"><circle cx="28" cy="38" r="9"/><circle cx="28" cy="63" r="9"/><circle cx="28" cy="88" r="9"/></g>
+                    <path d="M39 38 L91 55 M39 63 H91 M39 88 L91 71" stroke="#627d98" stroke-width="1.5"/>
+                    <rect x="94" y="48" width="28" height="30" rx="4" fill="#fff8e7" stroke="#f39c12"/>
+                    <text x="99" y="66" class="cnn-svg-note">混合</text>
+                    <path d="M132 20 V106" stroke="#d7e2ec"/>
+                    <text x="164" y="14" class="cnn-svg-label">Grouped</text>
+                    <g fill="#fceceb" stroke="#e74c3c"><circle cx="153" cy="42" r="8"/><circle cx="153" cy="62" r="8"/></g>
+                    <g fill="#eef7fb" stroke="#2780b8"><circle cx="153" cy="82" r="8"/><circle cx="153" cy="102" r="8"/></g>
+                    <path d="M163 42 H207 M163 62 H207 M163 82 H207 M163 102 H207" stroke="#627d98"/>
+                    <rect x="210" y="31" width="35" height="38" rx="4" fill="#fceceb" stroke="#e74c3c"/><rect x="210" y="75" width="35" height="38" rx="4" fill="#eef7fb" stroke="#2780b8"/>
+                    <text x="215" y="52" class="cnn-svg-note">Group1</text><text x="215" y="97" class="cnn-svg-note">Group2</text>
+                </svg>
+                <div class="cnn-concept-caption">1×1は<strong>同じ位置のチャネルを混ぜる</strong>。Groupedは<strong>群を分離</strong>。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>Dilated：間を空けて広く見る</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="Dilated畳み込みはカーネル要素の間隔を空けて受容野を広げる">
+                    <g transform="translate(25,16)">
+                        <rect width="92" height="92" fill="#f8fafc" stroke="#b8c7d6"/>
+                        <g stroke="#e4ebf1"><path d="M18 0 V92 M36 0 V92 M55 0 V92 M73 0 V92 M0 18 H92 M0 36 H92 M0 55 H92 M0 73 H92"/></g>
+                        <g fill="#8e44ad"><circle cx="9" cy="9" r="5"/><circle cx="46" cy="9" r="5"/><circle cx="83" cy="9" r="5"/><circle cx="9" cy="46" r="5"/><circle cx="46" cy="46" r="5"/><circle cx="83" cy="46" r="5"/><circle cx="9" cy="83" r="5"/><circle cx="46" cy="83" r="5"/><circle cx="83" cy="83" r="5"/></g>
+                    </g>
+                    <path d="M131 62 H167" stroke="#627d98" stroke-width="2"/><path d="M167 62 l-7 -5 v10 z" fill="#627d98"/>
+                    <rect x="175" y="24" width="66" height="76" rx="6" fill="#f4ecf7" stroke="#8e44ad" stroke-width="2"/>
+                    <text x="189" y="54" class="cnn-svg-label">3×3重み</text><text x="186" y="72" class="cnn-svg-note">見える範囲は</text><text x="196" y="86" class="cnn-svg-label">5×5</text>
+                    <text x="45" y="122" class="cnn-svg-note">D=2：9個の重みはそのまま</text>
+                </svg>
+                <div class="cnn-concept-caption"><strong>パラメータを増やさず受容野を拡大</strong>する。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>Transposed：学習して拡大</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="転置畳み込みは小さい特徴マップを学習可能な処理で大きくする">
+                    <text x="12" y="14" class="cnn-svg-note">小さい特徴マップ</text>
+                    <rect x="24" y="32" width="60" height="60" fill="#eef7fb" stroke="#2780b8" stroke-width="2"/>
+                    <path d="M54 32 V92 M24 62 H84" stroke="#2780b8"/>
+                    <path d="M95 62 H155" stroke="#f39c12" stroke-width="3"/><path d="M155 62 l-8 -6 v12 z" fill="#f39c12"/>
+                    <text x="102" y="50" class="cnn-svg-note">学習可能な</text><text x="109" y="82" class="cnn-svg-note">拡大</text>
+                    <rect x="166" y="18" width="78" height="88" fill="#fff8e7" stroke="#f39c12" stroke-width="2"/>
+                    <g stroke="#ead7aa"><path d="M186 18 V106 M205 18 V106 M225 18 V106 M166 40 H244 M166 62 H244 M166 84 H244"/></g>
+                    <text x="178" y="121" class="cnn-svg-note">大きい出力</text>
+                </svg>
+                <div class="cnn-concept-caption">セグメンテーション等で使用。<strong>数学的な逆畳み込みではない</strong>。</div>
+            </div>
+        </div>
+
         <h3>■ 特別な畳み込み：何を分ける？</h3>
         <table class="comparison-table">
             <tr><th>手法</th><th>何をするか</th><th>暗記ワード</th></tr>
@@ -172,6 +313,38 @@ window.quizData = {
             <tr><td><strong>Lp Pooling</strong></td><td>$\\left(\\sum_i|x_i|^p\\right)^{1/p}$</td><td>$p\\to\\infty$ でMaxに近づく。</td></tr>
             <tr><td><strong>Global Average Pooling</strong></td><td>各チャネル全体の平均</td><td>$H\\times W\\times C\\to1\\times1\\times C$。</td></tr>
         </table>
+        <div class="cnn-concept-grid">
+            <div class="cnn-concept-card">
+                <strong>GAP：各チャネルを1個に要約</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="Global Average Poolingは各特徴マップ全体の平均を1つずつ出力する">
+                    <g transform="translate(14,19)"><rect width="62" height="62" fill="#fceceb" stroke="#e74c3c"/><g stroke="#efb7b0"><path d="M20 0 V62 M41 0 V62 M0 20 H62 M0 41 H62"/></g><text x="20" y="80" class="cnn-svg-note">Map 1</text></g>
+                    <g transform="translate(43,30)"><rect width="62" height="62" fill="#eef7fb" stroke="#2780b8"/><g stroke="#b9d8e9"><path d="M20 0 V62 M41 0 V62 M0 20 H62 M0 41 H62"/></g><text x="20" y="80" class="cnn-svg-note">Map 2</text></g>
+                    <g transform="translate(72,41)"><rect width="62" height="62" fill="#eafaf1" stroke="#27ae60"/><g stroke="#bce8cf"><path d="M20 0 V62 M41 0 V62 M0 20 H62 M0 41 H62"/></g><text x="20" y="80" class="cnn-svg-note">Map C</text></g>
+                    <path d="M142 63 H183" stroke="#627d98" stroke-width="2"/><path d="M183 63 l-7 -5 v10 z" fill="#627d98"/>
+                    <text x="145" y="51" class="cnn-svg-note">全体平均</text>
+                    <g><circle cx="199" cy="42" r="11" fill="#fceceb" stroke="#e74c3c"/><circle cx="220" cy="63" r="11" fill="#eef7fb" stroke="#2780b8"/><circle cx="241" cy="84" r="11" fill="#eafaf1" stroke="#27ae60"/></g>
+                    <text x="186" y="115" class="cnn-svg-note">1×1×C</text>
+                </svg>
+                <div class="cnn-concept-caption">Flattenせず、<strong>特徴マップ1枚につき平均1個</strong>を残す。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>等変性 と 不変性</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 260 125" role="img" aria-label="畳み込みでは入力が移動すると反応も移動し、プーリングでは要約値が変わりにくい">
+                    <text x="23" y="14" class="cnn-svg-label">Conv：等変</text>
+                    <rect x="12" y="25" width="92" height="48" rx="4" fill="#f8fafc" stroke="#b8c7d6"/>
+                    <rect x="22" y="39" width="17" height="17" fill="#e74c3c"/><path d="M45 48 H67" stroke="#627d98"/><path d="M67 48 l-6 -4 v8 z" fill="#627d98"/><rect x="75" y="39" width="17" height="17" fill="#e74c3c"/>
+                    <text x="14" y="88" class="cnn-svg-note">入力が動く → 反応も動く</text>
+                    <path d="M124 15 V110" stroke="#d7e2ec"/>
+                    <text x="147" y="14" class="cnn-svg-label">Pool：不変に近づく</text>
+                    <rect x="138" y="25" width="104" height="48" rx="4" fill="#f8fafc" stroke="#b8c7d6"/>
+                    <rect x="148" y="39" width="17" height="17" fill="#2780b8"/><rect x="181" y="39" width="17" height="17" fill="#2780b8"/>
+                    <path d="M169 48 H177" stroke="#627d98"/>
+                    <text x="204" y="53" class="cnn-svg-label">→ 9</text>
+                    <text x="139" y="88" class="cnn-svg-note">位置がずれても要約値は同じ</text>
+                </svg>
+                <div class="cnn-concept-caption">畳み込みは<strong>反応位置も動く</strong>。Pooling/GAPが<strong>位置ずれを吸収</strong>。</div>
+            </div>
+        </div>
         <p><strong>最後の整理：</strong>畳み込みは移動に対して<strong>同じように位置が動く（equivariance）</strong>。プーリングやGAPが位置ずれへの<strong>不変性</strong>を強めます。</p>
     `,
 
