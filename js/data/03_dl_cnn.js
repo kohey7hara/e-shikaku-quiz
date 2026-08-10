@@ -824,7 +824,7 @@ window.quizData = {
             question: "$7\\times7\\times256$ の特徴マップにGlobal Average Poolingを適用した出力形状はどれか。",
             options: ["$1\\times1\\times256$", "$7\\times7\\times1$", "$1\\times1\\times1$", "$256\\times256\\times1$"],
             answer: 0,
-            explanation: "各チャネルの7×7を1つの平均値へまとめるため、チャネル数を保った $1\\times1\\times256$ になります。"
+            explanation: "まず $7\\times7\\times256$ を「高さ $H=7$・幅 $W=7$・チャネル数 $C=256$」と読みます。GAPはチャネル $c$ ごとに、$z_c=\\frac{1}{7\\times7}\\sum_{i=1}^{7}\\sum_{j=1}^{7}x_{i,j,c}$ を計算します。つまり、1チャネルにある $7\\times7=49$ 個の値を1個の平均値へまとめます。この処理を256チャネルそれぞれに行うため、高さと幅は $1\\times1$ になりますが、チャネル数256は変わりません。したがって出力は $1\\times1\\times256$ です。チャネル同士を平均して1チャネルにする処理ではないため、$7\\times7\\times1$ や $1\\times1\\times1$ にはなりません。"
         },
         {
             id: "cnn-receptive-field-stride",
