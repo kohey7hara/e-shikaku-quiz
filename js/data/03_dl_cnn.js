@@ -42,6 +42,14 @@ window.quizData = {
             .cnn-concept-caption { font-size: 0.86em; line-height: 1.55; color: #334e68; }
             .cnn-svg-label { font-size: 11px; fill: #334e68; font-weight: 700; }
             .cnn-svg-note { font-size: 9px; fill: #627d98; }
+            .cnn-table-wrap { overflow-x: auto; margin-bottom: 18px; }
+            .cnn-model-table { min-width: 820px; }
+            .cnn-model-table td:nth-child(4) { min-width: 290px; }
+            .cnn-model-timeline { display: flex; gap: 8px; margin: 12px 0 20px; padding: 4px 2px 10px; overflow-x: auto; }
+            .cnn-model-year { flex: 0 0 126px; padding: 10px 8px; border-top: 5px solid #2780b8; border-radius: 8px; background: #eef7fb; text-align: center; }
+            .cnn-model-year strong { display: block; margin: 2px 0 5px; color: #123f68; }
+            .cnn-model-year small { display: block; line-height: 1.45; color: #526d82; }
+            .cnn-model-key { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #8e44ad; border-radius: 7px; background: #f7f1fa; line-height: 1.7; }
             @media (max-width: 760px) {
                 .calc-steps { grid-template-columns: 1fr; }
                 .worked-symbols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -413,6 +421,142 @@ window.quizData = {
             </div>
         </div>
         <p><strong>最後の整理：</strong>畳み込みは移動に対して<strong>同じように位置が動く（equivariance）</strong>。プーリングやGAPが位置ずれへの<strong>不変性</strong>を強めます。</p>
+
+        <h3>■ CNNモデル史：試験は「何を新しく導入したか」</h3>
+        <div class="cnn-model-timeline" aria-label="代表的CNNモデルの歴史">
+            <div class="cnn-model-year"><small>1998</small><strong>LeNet-5</strong><small>Conv＋Poolの原型</small></div>
+            <div class="cnn-model-year"><small>2012</small><strong>AlexNet</strong><small>ReLU・GPU・Dropout</small></div>
+            <div class="cnn-model-year"><small>2014</small><strong>VGG</strong><small>小さい3×3を積層</small></div>
+            <div class="cnn-model-year"><small>2014</small><strong>GoogLeNet</strong><small>Inceptionで並列処理</small></div>
+            <div class="cnn-model-year"><small>2015</small><strong>ResNet</strong><small>Residual / Skip</small></div>
+            <div class="cnn-model-year"><small>2017</small><strong>ResNeXt</strong><small>Cardinality</small></div>
+            <div class="cnn-model-year"><small>2017</small><strong>DenseNet</strong><small>特徴をConcat</small></div>
+            <div class="cnn-model-year"><small>2017</small><strong>MobileNet</strong><small>Depthwise Separable</small></div>
+            <div class="cnn-model-year"><small>2019</small><strong>EfficientNet</strong><small>複合スケーリング</small></div>
+        </div>
+        <div class="cnn-model-key">
+            <strong>歴史問題の解き方：</strong>「深くする」だけでなく、<strong>AlexNet＝学習を成立</strong>、<strong>VGG＝小さいカーネル</strong>、<strong>GoogLeNet＝並列</strong>、<strong>ResNet＝足し算</strong>、<strong>ResNeXt＝分岐数</strong>、<strong>DenseNet＝連結</strong>で区別する。
+        </div>
+
+        <div class="cnn-table-wrap">
+            <table class="comparison-table cnn-model-table">
+                <tr><th>モデル</th><th>代表構造</th><th>一言暗記</th><th>試験で問われる設計意図</th></tr>
+                <tr><td><strong>LeNet-5</strong></td><td>Conv → Pool → FC</td><td>CNNの原型</td><td>手書き数字認識。畳み込みとサブサンプリングを組み合わせた初期モデル。</td></tr>
+                <tr><td><strong>AlexNet</strong></td><td>Conv 5層＋FC 3層</td><td>ReLU・Dropout・GPU</td><td>勾配飽和を抑えるReLU、Data Augmentation、FC層のDropout。Grouped Convは当初2GPUへ分割する都合。</td></tr>
+                <tr><td><strong>VGG-16/19</strong></td><td>3×3 Convを反復</td><td>小さく深く</td><td>大きいカーネルを小さい3×3の積層へ置換し、非線形性を増やしながらパラメータを抑える。</td></tr>
+                <tr><td><strong>GoogLeNet</strong></td><td>Inception Module</td><td>並列＋1×1圧縮</td><td>1×1・3×3・5×5・Poolingを並列化。高価な畳み込みの前に1×1でチャネルを削減。</td></tr>
+                <tr><td><strong>ResNet</strong></td><td>$y=F(x)+x$</td><td>残差を足す</td><td>深層化で訓練誤差まで悪化する劣化問題を軽減。恒等写像をShortcutで確保する。</td></tr>
+                <tr><td><strong>ResNeXt</strong></td><td>Split–Transform–Merge</td><td>Cardinality</td><td>同形の変換を複数分岐で行い加算。Grouped Convで効率よく実装する。</td></tr>
+                <tr><td><strong>DenseNet</strong></td><td>$[x_0,x_1,\ldots]$</td><td>足さずにConcat</td><td>前層の特徴を後続層へすべて連結し、特徴再利用と勾配伝播を促す。</td></tr>
+                <tr><td><strong>MobileNet</strong></td><td>Depthwise → 1×1</td><td>空間とチャネルを分離</td><td>通常畳み込みを分解して端末向けに計算量を削減。V2はInverted ResidualとLinear Bottleneck。</td></tr>
+                <tr><td><strong>EfficientNet</strong></td><td>Compound Scaling</td><td>深さ・幅・解像度を同時調整</td><td>depthだけを増やさず、width・depth・resolutionを一定則でバランスよく拡大。</td></tr>
+            </table>
+        </div>
+
+        <h3>■ モデル構造を図で見分ける</h3>
+        <div class="cnn-concept-grid">
+            <div class="cnn-concept-card">
+                <strong>AlexNet：深層CNNを実用化</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 320 125" role="img" aria-label="AlexNetは5つの畳み込み層と3つの全結合層で構成される">
+                    <rect x="5" y="43" width="38" height="34" rx="4" fill="#eef7fb" stroke="#2780b8"/><text x="13" y="64" class="cnn-svg-note">Input</text>
+                    <path d="M45 60 H61" stroke="#627d98"/><path d="M61 60 l-5 -4 v8 z" fill="#627d98"/>
+                    <g fill="#eafaf1" stroke="#27ae60"><rect x="65" y="25" width="26" height="70"/><rect x="76" y="31" width="26" height="64"/><rect x="87" y="37" width="26" height="58"/><rect x="98" y="43" width="26" height="52"/><rect x="109" y="49" width="26" height="46"/></g>
+                    <text x="76" y="112" class="cnn-svg-note">Conv × 5</text>
+                    <path d="M139 60 H162" stroke="#627d98"/><path d="M162 60 l-5 -4 v8 z" fill="#627d98"/>
+                    <g fill="#fff8e7" stroke="#f39c12"><rect x="166" y="31" width="36" height="58"/><rect x="205" y="31" width="36" height="58"/><rect x="244" y="31" width="36" height="58"/></g>
+                    <text x="184" y="112" class="cnn-svg-note">FC × 3</text>
+                    <text x="73" y="16" class="cnn-svg-note">ReLU・Pool・LRN</text><text x="196" y="16" class="cnn-svg-note">Dropout</text>
+                    <path d="M283 60 H310" stroke="#627d98"/><path d="M310 60 l-5 -4 v8 z" fill="#627d98"/>
+                </svg>
+                <div class="cnn-concept-caption">最初は大きな<strong>11×11・stride 4</strong>。Grouped Convは当初<strong>2GPUへの分割</strong>が理由。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>VGG：3×3を重ねる</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 320 125" role="img" aria-label="VGGでは5かける5畳み込み1層の代わりに3かける3畳み込みを2層重ねる">
+                    <text x="38" y="17" class="cnn-svg-label">5×5 Conv × 1</text>
+                    <rect x="37" y="31" width="74" height="74" fill="#fceceb" stroke="#e74c3c" stroke-width="2"/><text x="56" y="72" class="cnn-svg-label">RF 5×5</text>
+                    <text x="139" y="70" class="cnn-svg-label">≈</text>
+                    <text x="190" y="17" class="cnn-svg-label">3×3 Conv × 2</text>
+                    <rect x="181" y="39" width="58" height="58" fill="#eef7fb" stroke="#2780b8" stroke-width="2"/><rect x="225" y="31" width="58" height="74" fill="#eafaf1" fill-opacity="0.8" stroke="#27ae60" stroke-width="2"/>
+                    <text x="203" y="70" class="cnn-svg-label">RF 5×5</text>
+                    <text x="174" y="119" class="cnn-svg-note">非線形性が2回・重みも少ない</text>
+                </svg>
+                <div class="cnn-concept-caption">同じチャネル数なら重みは $25C^2$ に対し $18C^2$。受容野は同じ5×5。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>GoogLeNet：Inceptionで並列</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 320 125" role="img" aria-label="Inceptionモジュールは1かける1、3かける3、5かける5、プーリングを並列に処理して連結する">
+                    <rect x="5" y="45" width="44" height="32" rx="4" fill="#eef7fb" stroke="#2780b8"/><text x="15" y="64" class="cnn-svg-note">Input</text>
+                    <path d="M51 61 L82 17 M51 61 L82 46 M51 61 L82 75 M51 61 L82 104" stroke="#627d98"/>
+                    <g fill="#fff8e7" stroke="#f39c12"><rect x="84" y="5" width="68" height="24" rx="4"/><rect x="84" y="35" width="68" height="24" rx="4"/><rect x="84" y="65" width="68" height="24" rx="4"/><rect x="84" y="95" width="68" height="24" rx="4"/></g>
+                    <g class="cnn-svg-note"><text x="104" y="21">1×1</text><text x="104" y="51">3×3</text><text x="104" y="81">5×5</text><text x="99" y="111">Pooling</text></g>
+                    <path d="M154 17 L196 51 M154 47 L196 57 M154 77 L196 65 M154 107 L196 71" stroke="#627d98"/>
+                    <rect x="199" y="43" width="69" height="39" rx="4" fill="#eafaf1" stroke="#27ae60"/><text x="216" y="60" class="cnn-svg-label">Concat</text><text x="211" y="74" class="cnn-svg-note">channel方向</text>
+                    <path d="M270 62 H310" stroke="#627d98"/><path d="M310 62 l-5 -4 v8 z" fill="#627d98"/>
+                </svg>
+                <div class="cnn-concept-caption">異なる受容野を同時に取得。3×3・5×5の前の<strong>1×1でチャネル圧縮</strong>。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>ResNet：入力をShortcutで足す</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 320 125" role="img" aria-label="ResNetのResidual Blockは変換F(x)へ入力xをショートカットして加算する">
+                    <rect x="9" y="46" width="39" height="31" rx="4" fill="#eef7fb" stroke="#2780b8"/><text x="23" y="66" class="cnn-svg-label">x</text>
+                    <path d="M50 61 H78" stroke="#627d98" stroke-width="2"/><path d="M78 61 l-6 -4 v8 z" fill="#627d98"/>
+                    <rect x="82" y="39" width="91" height="45" rx="5" fill="#fff8e7" stroke="#f39c12"/><text x="104" y="58" class="cnn-svg-label">F(x)</text><text x="91" y="74" class="cnn-svg-note">Conv → Conv</text>
+                    <path d="M175 61 H225" stroke="#627d98" stroke-width="2"/>
+                    <path d="M29 44 V17 H205 V48" fill="none" stroke="#27ae60" stroke-width="3"/><text x="92" y="13" class="cnn-svg-note">Identity Shortcut</text>
+                    <circle cx="225" cy="61" r="17" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/><text x="219" y="67" class="cnn-svg-label">＋</text>
+                    <path d="M244 61 H306" stroke="#627d98" stroke-width="2"/><path d="M306 61 l-6 -4 v8 z" fill="#627d98"/>
+                    <text x="255" y="49" class="cnn-svg-note">y=F(x)+x</text>
+                    <text x="52" y="113" class="cnn-svg-note">形が違うときはShortcut側を1×1 Convで合わせる</text>
+                </svg>
+                <div class="cnn-concept-caption">学ぶのは目的写像 $H(x)$ そのものではなく<strong>残差 $F(x)=H(x)-x$</strong>。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>ResNeXt：同じ変換を複数分岐</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 320 125" role="img" aria-label="ResNeXtは入力を複数の同形変換へ分岐し結果を集約する">
+                    <rect x="5" y="45" width="42" height="32" rx="4" fill="#eef7fb" stroke="#2780b8"/><text x="20" y="65" class="cnn-svg-label">x</text>
+                    <path d="M49 61 L79 18 M49 61 L79 47 M49 61 L79 76 M49 61 L79 105" stroke="#627d98"/>
+                    <g fill="#f4ecf7" stroke="#8e44ad"><rect x="82" y="5" width="92" height="24" rx="4"/><rect x="82" y="35" width="92" height="24" rx="4"/><rect x="82" y="65" width="92" height="24" rx="4"/><rect x="82" y="95" width="92" height="24" rx="4"/></g>
+                    <g class="cnn-svg-note"><text x="105" y="21">Transform 1</text><text x="105" y="51">Transform 2</text><text x="105" y="81">Transform 3</text><text x="105" y="111">Transform C</text></g>
+                    <path d="M176 17 L218 51 M176 47 L218 57 M176 77 L218 65 M176 107 L218 71" stroke="#627d98"/>
+                    <circle cx="225" cy="61" r="17" fill="#eafaf1" stroke="#27ae60"/><text x="219" y="67" class="cnn-svg-label">Σ</text>
+                    <path d="M244 61 H308" stroke="#627d98" stroke-width="2"/><path d="M308 61 l-6 -4 v8 z" fill="#627d98"/>
+                </svg>
+                <div class="cnn-concept-caption">分岐数を<strong>cardinality</strong>と呼ぶ。Grouped Convで一括実装できる。</div>
+            </div>
+            <div class="cnn-concept-card">
+                <strong>AddとConcatを混同しない</strong>
+                <svg class="cnn-concept-svg" viewBox="0 0 320 125" role="img" aria-label="ResNetとResNeXtは特徴を加算しDenseNetはチャネル方向へ連結する">
+                    <text x="28" y="16" class="cnn-svg-label">ResNet / ResNeXt</text>
+                    <g fill="#eef7fb" stroke="#2780b8"><rect x="17" y="28" width="55" height="27"/><rect x="17" y="66" width="55" height="27"/></g><path d="M74 42 L108 58 M74 80 L108 64" stroke="#627d98"/><circle cx="121" cy="61" r="15" fill="#eafaf1" stroke="#27ae60"/><text x="115" y="67" class="cnn-svg-label">＋</text><text x="32" y="111" class="cnn-svg-note">要素ごとに加算</text>
+                    <path d="M160 13 V112" stroke="#d7e2ec"/>
+                    <text x="213" y="16" class="cnn-svg-label">DenseNet</text>
+                    <g fill="#fff8e7" stroke="#f39c12"><rect x="178" y="28" width="55" height="27"/><rect x="178" y="66" width="55" height="27"/></g><path d="M235 42 L264 53 M235 80 L264 69" stroke="#627d98"/><rect x="267" y="42" width="43" height="40" rx="4" fill="#f4ecf7" stroke="#8e44ad"/><text x="274" y="66" class="cnn-svg-note">Concat</text><text x="200" y="111" class="cnn-svg-note">チャネル方向に連結</text>
+                </svg>
+                <div class="cnn-concept-caption"><strong>ResNet/ResNeXt＝加算</strong>、<strong>DenseNet＝連結</strong>。頻出の引っかけ。</div>
+            </div>
+        </div>
+
+        <h3>■ ResNetはここまで覚える</h3>
+        <div class="cnn-table-wrap">
+            <table class="comparison-table cnn-model-table">
+                <tr><th>論点</th><th>答え</th><th>見分け方</th></tr>
+                <tr><td><strong>劣化問題</strong></td><td>深くしただけで訓練誤差まで悪化</td><td>テスト誤差だけ悪化する過学習とは異なる。</td></tr>
+                <tr><td><strong>Residual学習</strong></td><td>$F(x)=H(x)-x$ を学び、$H(x)=F(x)+x$</td><td>最適写像が恒等写像なら $F(x)=0$ にすればよい。</td></tr>
+                <tr><td><strong>Identity Shortcut</strong></td><td>入力 $x$ をそのまま加算</td><td>入出力の空間サイズとチャネル数が同じ。</td></tr>
+                <tr><td><strong>Projection Shortcut</strong></td><td>$1×1$ Convなどで形を合わせて加算</td><td>strideやチャネル数が変わるとき。</td></tr>
+                <tr><td><strong>Basic Block</strong></td><td>$3×3 → 3×3$</td><td>主にResNet-18/34。</td></tr>
+                <tr><td><strong>Bottleneck Block</strong></td><td>$1×1 → 3×3 → 1×1$</td><td>主にResNet-50/101/152。圧縮→処理→復元。</td></tr>
+            </table>
+        </div>
+
+        <h3>■ 最終暗記：モデル名から1語を返す</h3>
+        <div class="cnn-table-wrap">
+            <table class="comparison-table cnn-model-table">
+                <tr><th>AlexNet</th><th>VGG</th><th>GoogLeNet</th><th>ResNet</th><th>ResNeXt</th><th>DenseNet</th></tr>
+                <tr><td>ReLU・Dropout</td><td>3×3積層</td><td>Inception</td><td>Residual Add</td><td>Cardinality</td><td>Dense Concat</td></tr>
+            </table>
+        </div>
     `,
 
     questions: [
@@ -757,6 +901,192 @@ window.quizData = {
             options: ["$(8,16,32,32)$", "$(8,3,30,30)$", "$(16,8,32,32)$", "$(8,32,32,16)$"],
             answer: 0,
             explanation: "NCHWは（画像の枚数・チャネル数・高さ・幅）の順です。① $N=8$：畳み込みでは画像の枚数は変わりません。② $C=C_{out}=16$：出力フィルタ16個が16枚の特徴マップを作ります。③ $H,W$：出力サイズの式 $\\lfloor(H+2P-K)/S\\rfloor+1$ を使い、$\\lfloor(32+2\\times1-3)/1\\rfloor+1=32$。したがってNCHW順に並べると $(8,16,32,32)$ です。"
+        },
+
+        // ---------------------------------------------------------
+        // 【代表CNNモデル対策】 Q41 - Q60
+        // ---------------------------------------------------------
+        {
+            id: "cnn-alexnet-layer-count",
+            category: "AlexNet（構造）",
+            difficulty: "標準",
+            question: "AlexNetの基本構成として正しいものはどれか。",
+            options: ["畳み込み5層と全結合3層", "畳み込み16層のみ", "Residual Blockを50層", "Inception Moduleを22個"],
+            answer: 0,
+            explanation: "AlexNetは学習可能な層としてConv 5層＋FC 3層の8層構成です。ResNetのSkip ConnectionやGoogLeNetのInceptionはまだ使いません。"
+        },
+        {
+            id: "cnn-alexnet-techniques",
+            category: "AlexNet（技術）",
+            difficulty: "標準",
+            question: "AlexNetで画像認識性能の向上に寄与した技術の組合せとして最も適切なものはどれか。",
+            options: ["Sigmoid・Layer Norm・Self-Attention", "ReLU・Data Augmentation・Dropout・GPU学習", "LSTM・Teacher Forcing・CTC", "Residual Connection・Dense Connection"],
+            answer: 1,
+            explanation: "AlexNetはReLUで学習を高速化し、Data AugmentationとFC層のDropoutで過学習を抑え、大規模なGPU学習を成功させました。"
+        },
+        {
+            id: "cnn-alexnet-first-conv",
+            category: "AlexNet（構造）",
+            difficulty: "応用",
+            question: "AlexNetの最初の畳み込み層として代表的な設定はどれか。",
+            options: ["$3×3$、stride 1", "$1×1$、stride 1", "$11×11$、stride 4", "$7×7$、stride 7"],
+            answer: 2,
+            explanation: "AlexNetの先頭は大きな$11×11$カーネルをstride 4で適用し、早い段階で空間サイズを縮小します。後年のVGGは小さな3×3の積層を重視しました。"
+        },
+        {
+            id: "cnn-alexnet-group-origin",
+            category: "AlexNet（Grouped Conv）",
+            difficulty: "応用",
+            question: "AlexNetでGrouped Convolutionが導入された当初の主な理由はどれか。",
+            options: ["異なる大きさのカーネルを並列化するため", "未来の特徴をマスクするため", "画像を時系列として処理するため", "モデルを2台のGPUへ分割してメモリ制約に対応するため"],
+            answer: 3,
+            explanation: "当初はネットワークを2GPUへ分ける実装上の理由でした。後のResNeXtではGrouped Convを、cardinalityを増やす設計として積極的に利用します。"
+        },
+        {
+            id: "cnn-vgg-design",
+            category: "VGG（設計）",
+            difficulty: "標準",
+            question: "VGGNetの設計思想として最も適切なものはどれか。",
+            options: ["小さな$3×3$畳み込みを繰り返して深層化する", "複数分岐をcardinalityとして集約する", "全畳み込みをDepthwise Convへ置き換える", "再帰結合で系列を処理する"],
+            answer: 0,
+            explanation: "VGG-16/19はほぼ一様な3×3 Convを積み重ねる単純な設計です。「小さいカーネルを深く」が合言葉です。"
+        },
+        {
+            id: "cnn-vgg-receptive-field",
+            category: "VGG（受容野計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "stride 1の$3×3$畳み込みを2層重ねたときの受容野は、1層のどのカーネルと同じか。",
+            options: ["$3×3$", "$5×5$", "$6×6$", "$9×9$"],
+            answer: 1,
+            explanation: "1層目で3、2層目で左右へ1ずつ広がるため$3+2=5$です。VGGは大きなカーネルを小さな3×3の積層で置き換えます。"
+        },
+        {
+            id: "cnn-vgg-parameter-comparison",
+            category: "VGG（パラメータ計算）",
+            kind: "計算",
+            difficulty: "応用",
+            question: "入出力チャネル数をともに$C$、バイアスなしとする。$5×5$ Conv 1層と$3×3$ Conv 2層の重み数はそれぞれどれか。",
+            options: ["$5C^2$ と $6C^2$", "$25C$ と $18C$", "$25C^2$ と $18C^2$", "どちらも$25C^2$"],
+            answer: 2,
+            explanation: "$5×5$は$25C^2$。$3×3$を2層なら$2×9C^2=18C^2$です。同じ5×5受容野で重みを減らし、活性化を2回入れられます。"
+        },
+        {
+            id: "cnn-inception-parallel",
+            category: "GoogLeNet（Inception）",
+            difficulty: "標準",
+            question: "GoogLeNetのInception Moduleの特徴はどれか。",
+            options: ["入力と出力を必ず要素ごとに加算する", "全チャネルを独立に畳み込む", "1種類の11×11畳み込みだけを使う", "1×1・3×3・5×5畳み込みやPoolingを並列に行い、出力を連結する"],
+            answer: 3,
+            explanation: "異なるサイズの受容野を持つ分岐を並列処理し、結果をチャネル方向へConcatします。"
+        },
+        {
+            id: "cnn-inception-one-by-one",
+            category: "GoogLeNet（1×1 Conv）",
+            difficulty: "応用",
+            question: "Inception Moduleで高価な3×3・5×5畳み込みの前に1×1畳み込みを置く主な目的はどれか。",
+            options: ["入力チャネルを減らして後続の計算量を抑える", "空間サイズを必ず2倍にする", "Residual加算の形を合わせるだけ", "時系列方向の情報を混ぜる"],
+            answer: 0,
+            explanation: "1×1 Convで$C_{in}$を圧縮してから大きいカーネルを適用すると、空間サイズを保ちながらパラメータ数と演算量を削減できます。"
+        },
+        {
+            id: "cnn-googlenet-auxiliary",
+            category: "GoogLeNet（Auxiliary Classifier）",
+            difficulty: "応用",
+            question: "元のGoogLeNetで中間層にAuxiliary Classifierを置いた主な狙いはどれか。",
+            options: ["推論時に必ず3モデルの多数決を行う", "学習時に中間層へ勾配を届けやすくし、正則化も促す", "入力画像を3倍に増やす", "Grouped Convのグループ数を決める"],
+            answer: 1,
+            explanation: "中間出力にも補助損失を与え、深いネットワークの学習を助けます。通常、推論時の主出力は最終分類器を使います。"
+        },
+        {
+            id: "cnn-resnet-equation",
+            category: "ResNet（残差式）",
+            difficulty: "標準",
+            question: "Residual Blockの基本式として正しいものはどれか。",
+            options: ["$y=F(x)×x$", "$y=F(x)-x$", "$y=F(x)+x$", "$y=\\mathrm{softmax}(x)$"],
+            answer: 2,
+            explanation: "変換経路$F(x)$にShortcut経路の入力$x$を要素ごとに加えます。目的写像$H(x)$に対して、残差$F(x)=H(x)-x$を学びます。"
+        },
+        {
+            id: "cnn-resnet-degradation",
+            category: "ResNet（劣化問題）",
+            difficulty: "応用",
+            question: "ResNetが主に解決した「劣化問題」の説明として正しいものはどれか。",
+            options: ["訓練誤差は下がるがテスト誤差だけ上がる", "入力画像の解像度が低下する", "畳み込みで端の画素が失われる", "層を深くしただけで、テスト誤差だけでなく訓練誤差まで悪化する"],
+            answer: 3,
+            explanation: "訓練誤差まで悪化する点が過学習との違いです。Shortcutにより少なくとも恒等写像を表現しやすくします。"
+        },
+        {
+            id: "cnn-resnet-identity-shortcut",
+            category: "ResNet（Identity Shortcut）",
+            difficulty: "標準",
+            question: "ResNetで入力$x$を変換せず、そのまま$F(x)$へ加えられる条件はどれか。",
+            options: ["$x$と$F(x)$の形状が一致する", "バッチサイズが1である", "カーネルが必ず1×1である", "チャネル数が1である"],
+            answer: 0,
+            explanation: "要素ごとの加算には高さ・幅・チャネル数が一致する必要があります。一致すればパラメータを持たないIdentity Shortcutを使えます。"
+        },
+        {
+            id: "cnn-resnet-projection-shortcut",
+            category: "ResNet（Projection Shortcut）",
+            difficulty: "応用",
+            question: "Residual Blockでstrideにより空間サイズが変わり、チャネル数も増える。Shortcut側の代表的な処理はどれか。",
+            options: ["Global Average Poolingで1値にする", "stride付き1×1 Convで形状を合わせる", "Softmaxで確率にする", "入力をそのまま無条件に加える"],
+            answer: 1,
+            explanation: "Projection Shortcutでは1×1 Convを使い、高さ・幅とチャネル数を$F(x)$側に合わせてから加算します。"
+        },
+        {
+            id: "cnn-resnet-block-types",
+            category: "ResNet（Block比較）",
+            difficulty: "応用",
+            question: "ResNetのBasic BlockとBottleneck Blockの対応として正しいものはどれか。",
+            options: ["Basicは1×1だけ、Bottleneckは5×5だけ", "BasicはInception、BottleneckはDense接続", "Basicは3×3→3×3、Bottleneckは1×1→3×3→1×1", "両方ともDepthwise→Pointwise"],
+            answer: 2,
+            explanation: "Basic Blockは主にResNet-18/34、Bottleneckは主にResNet-50/101/152で使われます。Bottleneckの1×1はチャネル圧縮と復元を担当します。"
+        },
+        {
+            id: "cnn-resnext-cardinality",
+            category: "ResNeXt（Cardinality）",
+            difficulty: "標準",
+            question: "ResNeXtにおけるcardinalityが表すものはどれか。",
+            options: ["ネットワークの総層数", "入力画像の解像度", "クラス数", "並列な変換経路またはグループの数"],
+            answer: 3,
+            explanation: "ResNeXtは幅や深さだけでなく、同形の変換を何本並列にするかというcardinalityを性能向上の軸にしました。"
+        },
+        {
+            id: "cnn-resnext-pattern",
+            category: "ResNeXt（構造）",
+            difficulty: "応用",
+            question: "ResNeXtの基本的な設計を表す言葉はどれか。",
+            options: ["Split–Transform–Merge", "Encode–Attend–Decode", "Depthwise–Pointwise–Softmax", "Mask–Predict–Pool"],
+            answer: 0,
+            explanation: "入力を複数経路へ分け、同形の変換を行い、結果を集約します。Grouped Convolutionにより効率よく表現できます。"
+        },
+        {
+            id: "cnn-densenet-concat",
+            category: "DenseNet（接続）",
+            difficulty: "標準",
+            question: "DenseNetとResNetの接続方法の違いとして正しいものはどれか。",
+            options: ["DenseNetはAddし、ResNetはConcatする", "DenseNetはチャネル方向にConcatし、ResNetは要素ごとにAddする", "両方とも必ず掛け算する", "両方とも接続を持たない"],
+            answer: 1,
+            explanation: "DenseNetは過去の特徴マップを連結して再利用するためチャネル数が増えます。ResNetは同じ形状の特徴を足すため、加算自体ではチャネル数は増えません。"
+        },
+        {
+            id: "cnn-mobilenet-v2",
+            category: "MobileNetV2",
+            difficulty: "応用",
+            question: "MobileNetV2の代表的な構成要素はどれか。",
+            options: ["Inception ModuleとAuxiliary Classifier", "Dense ConnectionとGrowth Rate", "Inverted ResidualとLinear Bottleneck", "11×11 ConvとLRN"],
+            answer: 2,
+            explanation: "低次元入力を1×1で拡張し、Depthwise Convで処理して、線形な1×1で低次元へ戻します。狭い層同士をShortcutで接続します。"
+        },
+        {
+            id: "cnn-efficientnet-scaling",
+            category: "EfficientNet",
+            difficulty: "標準",
+            question: "EfficientNetのCompound Scalingで同時に調整する3要素はどれか。",
+            options: ["学習率・バッチサイズ・エポック数", "カーネル・パディング・ストライド", "Precision・Recall・F値", "ネットワークの深さ・幅・入力解像度"],
+            answer: 3,
+            explanation: "depth・width・resolutionを一定の複合係数に基づいてバランスよく拡大します。どれか1つだけを増やす設計ではありません。"
         }
     ]
 };
