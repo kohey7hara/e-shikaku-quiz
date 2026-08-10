@@ -785,7 +785,7 @@ window.quizData = {
             question: "$K=3,C_{in}=32,C_{out}=64$。通常畳み込みとDepthwise Separable Convolutionの重み数の組合せはどれか。バイアスは無視する。",
             options: ["通常18,432、分離2,336", "通常2,336、分離18,432", "どちらも18,432", "通常2,048、分離288"],
             answer: 0,
-            explanation: "通常は $9\\times32\\times64=18,432$。分離はDepthwise $9\\times32=288$ とPointwise $32\\times64=2,048$ の合計2,336です。"
+            explanation: "通常畳み込みでは、1個の出力フィルタが $3\\times3$ の空間と入力32チャネルのすべてを見るため、1フィルタの重みは $3\\times3\\times32$ 個です。これを出力64チャネル分持つので、一般式 $K^2C_{in}C_{out}$ に代入して $3^2\\times32\\times64=18,432$ 個です。Depthwise Separable Convolutionはこれを2段階へ分けます。①Depthwise：入力チャネルごとに $3\\times3$ フィルタを1個使うため $3^2\\times32=288$ 個。この段階ではチャネル同士を混ぜません。②Pointwise：$1\\times1$ 畳み込みで32チャネルを混ぜて64チャネルへ変換するため $1^2\\times32\\times64=2,048$ 個。合計は $288+2,048=2,336$ 個です。したがって正解は「通常18,432、分離2,336」。空間処理とチャネル混合を分離することで、重み数は約87%削減されます。"
         },
         {
             id: "cnn-group-conv-parameter",
