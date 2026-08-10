@@ -34,7 +34,13 @@ window.quizData = {
             .rnn-answer { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #27ae60; border-radius: 7px; background: #eafaf1; line-height: 1.7; }
             .rnn-warning { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #e74c3c; border-radius: 7px; background: #fff3f1; line-height: 1.7; }
             .rnn-comparison td:nth-child(3) { min-width: 300px; }
-            .exam-badge { display: inline-block; margin-right: 5px; padding: 2px 7px; border-radius: 999px; background: #e74c3c; color: #fff; font-size: 0.75em; font-weight: 800; }
+            .rnn-model-table { min-width: 840px; }
+            .rnn-model-table td:nth-child(4) { min-width: 290px; }
+            .rnn-model-timeline { display: flex; gap: 8px; margin: 12px 0 20px; padding: 4px 2px 10px; overflow-x: auto; }
+            .rnn-model-year { flex: 0 0 128px; padding: 10px 8px; border-top: 5px solid #8e44ad; border-radius: 8px; background: #f7f1fa; text-align: center; }
+            .rnn-model-year strong { display: block; margin: 2px 0 5px; color: #50305e; }
+            .rnn-model-year small { display: block; line-height: 1.45; color: #627d98; }
+            .rnn-model-key { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #8e44ad; border-radius: 7px; background: #f7f1fa; line-height: 1.7; }
             @media (max-width: 760px) {
                 .rnn-concept-grid { grid-template-columns: 1fr; }
                 .lstm-box { display: block; width: auto; margin: 8px 0; }
@@ -50,10 +56,10 @@ window.quizData = {
         </div>
         <div class="table-wrap">
             <table class="rnn-comparison">
-                <tr><th>出題軸</th><th>必須キーワード</th><th>一言で見分ける</th></tr>
-                <tr><td><span class="exam-badge">最重要</span>計算</td><td>順伝播・BPTT</td><td>前向きは状態更新、逆向きは時間を遡ってヤコビアンを連続で掛ける。</td></tr>
-                <tr><td><span class="exam-badge">最重要</span>構造</td><td>双方向RNN・LSTM・GRU</td><td>双方向は未来も参照。LSTMはセル＋3ゲート、GRUは隠れ状態＋2ゲート。</td></tr>
-                <tr><td><span class="exam-badge">最重要</span>系列変換</td><td>Encoder–Decoder・Seq2Seq・Attention</td><td>入力を符号化して出力を生成。Attentionは毎時刻、入力側の重要箇所を重み付き平均。</td></tr>
+                <tr><th>学習項目</th><th>必須キーワード</th><th>一言で見分ける</th></tr>
+                <tr><td>計算</td><td>順伝播・BPTT</td><td>前向きは状態更新、逆向きは時間を遡ってヤコビアンを連続で掛ける。</td></tr>
+                <tr><td>構造</td><td>双方向RNN・LSTM・GRU</td><td>双方向は未来も参照。LSTMはセル＋3ゲート、GRUは隠れ状態＋2ゲート。</td></tr>
+                <tr><td>系列変換</td><td>Encoder–Decoder・Seq2Seq・Attention</td><td>入力を符号化して出力を生成。Attentionは毎時刻、入力側の重要箇所を重み付き平均。</td></tr>
             </table>
         </div>
 
@@ -310,6 +316,141 @@ window.quizData = {
                 <tr><td><strong>Bidirectional RNN</strong></td><td>前後の文脈を結合</td><td>未来が必要なのでオンライン生成には不向き。</td></tr>
                 <tr><td><strong>Seq2Seq</strong></td><td>Encoderで読み、Decoderで生成</td><td>Attentionなしは固定長ベクトルがボトルネック。</td></tr>
                 <tr><td><strong>Attention</strong></td><td>入力状態の重み付き和</td><td>Score → Softmax → Weighted Sum。</td></tr>
+            </table>
+        </div>
+
+        <h3>■ RNNモデル史：何をフィードバックし、何を記憶するか</h3>
+        <div class="rnn-model-timeline" aria-label="代表的RNNモデルの歴史">
+            <div class="rnn-model-year"><small>1986</small><strong>Jordan</strong><small>出力を戻す</small></div>
+            <div class="rnn-model-year"><small>1990</small><strong>Elman</strong><small>隠れ状態を戻す</small></div>
+            <div class="rnn-model-year"><small>1997</small><strong>BiRNN</strong><small>過去＋未来</small></div>
+            <div class="rnn-model-year"><small>1997</small><strong>LSTM</strong><small>セル状態＋ゲート</small></div>
+            <div class="rnn-model-year"><small>2001</small><strong>ESN</strong><small>固定Reservoir</small></div>
+            <div class="rnn-model-year"><small>2006</small><strong>CTC</strong><small>位置合わせ不要</small></div>
+            <div class="rnn-model-year"><small>2014</small><strong>GRU</strong><small>軽量ゲート</small></div>
+            <div class="rnn-model-year"><small>2014</small><strong>Seq2Seq</strong><small>Encoder–Decoder</small></div>
+            <div class="rnn-model-year"><small>2014</small><strong>Attention</strong><small>入力を直接参照</small></div>
+            <div class="rnn-model-year"><small>2015</small><strong>ConvLSTM</strong><small>空間＋時間</small></div>
+        </div>
+        <div class="rnn-model-key">
+            <strong>モデル問題の見分け方：</strong><strong>Elman＝隠れ状態</strong>、<strong>Jordan＝出力</strong>、<strong>LSTM＝セル</strong>、<strong>GRU＝2ゲート</strong>、<strong>ESN＝内部を固定</strong>、<strong>CTC＝blank</strong>を最初に探す。
+        </div>
+
+        <div class="table-wrap">
+            <table class="rnn-comparison rnn-model-table">
+                <tr><th>モデル</th><th>状態・接続</th><th>一言暗記</th><th>設計意図・用途</th></tr>
+                <tr><td><strong>Elman Network</strong></td><td>$h_{t-1}\to h_t$</td><td>隠れ状態をContextへ</td><td>直前の内部表現を現在の計算へ戻す、基本的なSimple RNN。</td></tr>
+                <tr><td><strong>Jordan Network</strong></td><td>$y_{t-1}\to h_t$</td><td>出力をContextへ</td><td>直前の出力をフィードバックし、過去の出力系列を次の状態へ反映。</td></tr>
+                <tr><td><strong>Stacked RNN</strong></td><td>$h_t^{(l-1)}\to h_t^{(l)}$</td><td>時間＋層の深さ</td><td>同じ時刻で下層から上層へ渡し、より抽象的な系列特徴を学ぶ。</td></tr>
+                <tr><td><strong>Bidirectional RNN</strong></td><td>$[\overrightarrow h_t;\overleftarrow h_t]$</td><td>過去＋未来</td><td>全系列が使える分類・ラベリング向け。未来未確定のオンライン生成には不向き。</td></tr>
+                <tr><td><strong>LSTM</strong></td><td>$c_t$と$h_t$、3ゲート</td><td>加算型セル更新</td><td>勾配を長く伝えやすくし、長期依存を扱う。忘却・入力・出力ゲート。</td></tr>
+                <tr><td><strong>GRU</strong></td><td>$h_t$、2ゲート</td><td>セルなしで軽量</td><td>更新・リセットゲートで新旧情報を調整。LSTMよりパラメータが少ない。</td></tr>
+                <tr><td><strong>Echo State Network</strong></td><td>固定Reservoir＋学習する出力</td><td>内部重みを学習しない</td><td>ランダムな再帰層で豊かな動的特徴を作り、通常は出力重みだけ学習。</td></tr>
+                <tr><td><strong>Seq2Seq</strong></td><td>Encoder → Decoder</td><td>系列から系列へ</td><td>翻訳など長さの異なる系列を変換。Attentionなしでは固定長文脈がボトルネック。</td></tr>
+                <tr><td><strong>CTC</strong></td><td>blankを含む全alignment</td><td>位置合わせなし学習</td><td>音声と文字のように入出力の対応時刻が未知でも、可能な経路の確率を合計。</td></tr>
+                <tr><td><strong>ConvLSTM</strong></td><td>ゲート内部を畳み込み</td><td>空間構造を保つLSTM</td><td>動画・降水予測など、画像系列の空間情報と時間変化を同時に扱う。</td></tr>
+                <tr><td><strong>BiLSTM–CRF</strong></td><td>BiLSTM特徴＋CRF遷移</td><td>ラベル間依存も考慮</td><td>固有表現抽出などで、前後文脈と隣接ラベルの整合性を使う。</td></tr>
+            </table>
+        </div>
+
+        <h3>■ モデル構造を図で見分ける</h3>
+        <div class="rnn-concept-grid">
+            <div class="rnn-concept-card">
+                <strong>Elman：隠れ状態を戻す</strong>
+                <svg class="rnn-concept-svg" viewBox="0 0 300 125" role="img" aria-label="Elman Networkは直前の隠れ状態をContext Unit経由で現在の隠れ層へ戻す">
+                    <rect x="9" y="45" width="45" height="32" rx="5" fill="#eef7fb" stroke="#2780b8"/><text x="24" y="65" class="rnn-svg-label">xₜ</text>
+                    <path d="M56 61 H93" stroke="#627d98" stroke-width="2"/><path d="M93 61 l-6 -4 v8 z" fill="#627d98"/>
+                    <rect x="97" y="38" width="66" height="46" rx="5" fill="#eafaf1" stroke="#27ae60"/><text x="119" y="58" class="rnn-svg-label">hₜ</text><text x="106" y="74" class="rnn-svg-note">Hidden</text>
+                    <path d="M165 61 H207" stroke="#627d98" stroke-width="2"/><path d="M207 61 l-6 -4 v8 z" fill="#627d98"/>
+                    <rect x="211" y="45" width="44" height="32" rx="5" fill="#fff8e7" stroke="#f39c12"/><text x="225" y="65" class="rnn-svg-label">yₜ</text>
+                    <path d="M130 36 V14 H72 V43" fill="none" stroke="#8e44ad" stroke-width="3"/><rect x="53" y="4" width="78" height="24" rx="4" fill="#f7f1fa" stroke="#8e44ad"/><text x="60" y="20" class="rnn-svg-note">Context hₜ₋₁</text>
+                    <text x="75" y="111" class="rnn-svg-note">戻るのは出力yではなく内部状態h</text>
+                </svg>
+                <div class="rnn-concept-caption">基本式は $h_t=f(W_xx_t+W_hh_{t-1}+b)$。</div>
+            </div>
+            <div class="rnn-concept-card">
+                <strong>Jordan：出力を戻す</strong>
+                <svg class="rnn-concept-svg" viewBox="0 0 300 125" role="img" aria-label="Jordan Networkは直前の出力をContext Unit経由で現在の隠れ層へ戻す">
+                    <rect x="9" y="45" width="45" height="32" rx="5" fill="#eef7fb" stroke="#2780b8"/><text x="24" y="65" class="rnn-svg-label">xₜ</text>
+                    <path d="M56 61 H93" stroke="#627d98" stroke-width="2"/><path d="M93 61 l-6 -4 v8 z" fill="#627d98"/>
+                    <rect x="97" y="38" width="66" height="46" rx="5" fill="#eafaf1" stroke="#27ae60"/><text x="119" y="58" class="rnn-svg-label">hₜ</text><text x="106" y="74" class="rnn-svg-note">Hidden</text>
+                    <path d="M165 61 H207" stroke="#627d98" stroke-width="2"/><path d="M207 61 l-6 -4 v8 z" fill="#627d98"/>
+                    <rect x="211" y="45" width="44" height="32" rx="5" fill="#fff8e7" stroke="#f39c12"/><text x="225" y="65" class="rnn-svg-label">yₜ</text>
+                    <path d="M233 43 V14 H72 V43" fill="none" stroke="#e74c3c" stroke-width="3"/><rect x="53" y="4" width="78" height="24" rx="4" fill="#fff3f1" stroke="#e74c3c"/><text x="60" y="20" class="rnn-svg-note">Context yₜ₋₁</text>
+                    <text x="81" y="111" class="rnn-svg-note">直前に何を出力したかを次へ戻す</text>
+                </svg>
+                <div class="rnn-concept-caption"><strong>Elman＝Hidden</strong>、<strong>Jordan＝Output</strong>で区別。</div>
+            </div>
+            <div class="rnn-concept-card">
+                <strong>Echo State Network：Reservoirを固定</strong>
+                <svg class="rnn-concept-svg" viewBox="0 0 300 125" role="img" aria-label="Echo State Networkは入力を固定されたランダムReservoirへ入れ出力重みだけを学習する">
+                    <rect x="7" y="46" width="45" height="32" rx="5" fill="#eef7fb" stroke="#2780b8"/><text x="20" y="66" class="rnn-svg-label">Input</text>
+                    <path d="M54 62 H83" stroke="#627d98" stroke-width="2"/><path d="M83 62 l-6 -4 v8 z" fill="#627d98"/>
+                    <circle cx="143" cy="62" r="49" fill="#f7f1fa" stroke="#8e44ad" stroke-width="2"/>
+                    <g fill="#8e44ad"><circle cx="116" cy="39" r="5"/><circle cx="144" cy="28" r="5"/><circle cx="166" cy="45" r="5"/><circle cx="120" cy="70" r="5"/><circle cx="151" cy="62" r="5"/><circle cx="171" cy="79" r="5"/><circle cx="139" cy="91" r="5"/></g>
+                    <g stroke="#a887b6"><path d="M116 39 L151 62 L139 91 L120 70 L166 45 L171 79 L144 28 L116 39"/><path d="M120 70 L171 79 M144 28 L139 91"/></g>
+                    <text x="117" y="118" class="rnn-svg-note">固定・ランダム</text>
+                    <path d="M194 62 H224" stroke="#27ae60" stroke-width="3"/><path d="M224 62 l-6 -4 v8 z" fill="#27ae60"/>
+                    <rect x="228" y="46" width="64" height="32" rx="5" fill="#eafaf1" stroke="#27ae60"/><text x="238" y="59" class="rnn-svg-note">Output</text><text x="236" y="72" class="rnn-svg-note">ここを学習</text>
+                </svg>
+                <div class="rnn-concept-caption">入力・再帰重みを通常は固定し、<strong>出力重みだけ</strong>を回帰などで学習。</div>
+            </div>
+            <div class="rnn-concept-card">
+                <strong>CTC：経路をまとめて正解文字列へ</strong>
+                <svg class="rnn-concept-svg" viewBox="0 0 300 125" role="img" aria-label="CTCはblankを含む時刻ごとの出力から連続重複とblankを除いて文字列を得る">
+                    <text x="8" y="18" class="rnn-svg-note">時刻ごとの経路</text>
+                    <g fill="#eef7fb" stroke="#2780b8"><rect x="8" y="30" width="35" height="30" rx="4"/><rect x="48" y="30" width="35" height="30" rx="4"/><rect x="88" y="30" width="35" height="30" rx="4"/><rect x="128" y="30" width="35" height="30" rx="4"/><rect x="168" y="30" width="35" height="30" rx="4"/><rect x="208" y="30" width="35" height="30" rx="4"/></g>
+                    <g class="rnn-svg-label"><text x="17" y="50">–</text><text x="61" y="50">A</text><text x="101" y="50">A</text><text x="137" y="50">–</text><text x="181" y="50">B</text><text x="221" y="50">B</text></g>
+                    <path d="M248 45 H276" stroke="#627d98" stroke-width="2"/><path d="M276 45 l-6 -4 v8 z" fill="#627d98"/>
+                    <text x="279" y="50" class="rnn-svg-label">AB</text>
+                    <text x="31" y="87" class="rnn-svg-note">①連続重複をまとめる　②blank（–）を除く</text>
+                    <text x="38" y="106" class="rnn-svg-note">正確なフレーム位置の教師ラベルは不要</text>
+                </svg>
+                <div class="rnn-concept-caption">blankを挟めば同じ文字の連続も表現可能。全alignment経路の確率を合計する。</div>
+            </div>
+            <div class="rnn-concept-card">
+                <strong>ConvLSTM：行列積を畳み込みへ</strong>
+                <svg class="rnn-concept-svg" viewBox="0 0 300 125" role="img" aria-label="ConvLSTMは画像系列を入力しLSTMゲート内部で畳み込みを使って空間形状を保つ">
+                    <g fill="#eef7fb" stroke="#2780b8"><rect x="8" y="37" width="48" height="48"/><rect x="14" y="31" width="48" height="48"/></g><text x="15" y="103" class="rnn-svg-note">画像 xₜ</text>
+                    <path d="M68 60 H100" stroke="#627d98" stroke-width="2"/><path d="M100 60 l-6 -4 v8 z" fill="#627d98"/>
+                    <rect x="104" y="27" width="91" height="66" rx="7" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/><text x="123" y="48" class="rnn-svg-label">ConvLSTM</text><text x="118" y="65" class="rnn-svg-note">Gate内で K＊X</text><text x="116" y="80" class="rnn-svg-note">空間H×Wを保持</text>
+                    <path d="M197 60 H229" stroke="#627d98" stroke-width="2"/><path d="M229 60 l-6 -4 v8 z" fill="#627d98"/>
+                    <g fill="#fff8e7" stroke="#f39c12"><rect x="233" y="37" width="48" height="48"/><rect x="239" y="31" width="48" height="48"/></g><text x="238" y="103" class="rnn-svg-note">状態 hₜ</text>
+                </svg>
+                <div class="rnn-concept-caption">ベクトル系列ではなく<strong>画像系列</strong>向け。動画・降水レーダーなど。</div>
+            </div>
+            <div class="rnn-concept-card">
+                <strong>BiLSTM–CRF：特徴＋ラベル遷移</strong>
+                <svg class="rnn-concept-svg" viewBox="0 0 300 125" role="img" aria-label="BiLSTM-CRFは単語列を双方向LSTMで表現しCRFでラベル系列全体を復号する">
+                    <g fill="#eef7fb" stroke="#2780b8"><rect x="6" y="77" width="47" height="28" rx="4"/><rect x="61" y="77" width="47" height="28" rx="4"/><rect x="116" y="77" width="47" height="28" rx="4"/></g><g class="rnn-svg-note"><text x="18" y="95">私</text><text x="73" y="95">は</text><text x="128" y="95">猫</text></g>
+                    <rect x="35" y="39" width="103" height="28" rx="4" fill="#f7f1fa" stroke="#8e44ad"/><text x="55" y="57" class="rnn-svg-label">BiLSTM</text>
+                    <path d="M30 76 L51 68 M84 76 V68 M139 76 L124 68" stroke="#627d98"/>
+                    <path d="M140 53 H178" stroke="#627d98" stroke-width="2"/><path d="M178 53 l-6 -4 v8 z" fill="#627d98"/>
+                    <rect x="182" y="39" width="62" height="28" rx="4" fill="#eafaf1" stroke="#27ae60"/><text x="200" y="57" class="rnn-svg-label">CRF</text>
+                    <path d="M245 53 H285" stroke="#627d98" stroke-width="2"/><path d="M285 53 l-6 -4 v8 z" fill="#627d98"/>
+                    <text x="247" y="33" class="rnn-svg-note">最適ラベル列</text><text x="174" y="91" class="rnn-svg-note">B-PERの次にI-PER等の遷移も評価</text>
+                </svg>
+                <div class="rnn-concept-caption">BiLSTMが前後文脈を抽出し、CRFが<strong>ラベル列全体の整合性</strong>を評価。</div>
+            </div>
+        </div>
+
+        <h3>■ Attentionと復号方法もモデル名で区別</h3>
+        <div class="table-wrap">
+            <table class="rnn-comparison rnn-model-table">
+                <tr><th>手法</th><th>すること</th><th>見分け方</th></tr>
+                <tr><td><strong>Bahdanau Attention</strong></td><td>小さなNNでscoreを計算</td><td>Additive Attention。Encoder状態とDecoder状態を変換して加算。</td></tr>
+                <tr><td><strong>Luong Attention</strong></td><td>内積・双線形でscoreを計算</td><td>Dot / General。計算が比較的単純。</td></tr>
+                <tr><td><strong>Greedy Search</strong></td><td>毎時刻の最大確率を1つ選ぶ</td><td>速いが、系列全体の最適解を逃しやすい。</td></tr>
+                <tr><td><strong>Beam Search</strong></td><td>上位$B$個の候補系列を保持</td><td>$B=1$ならGreedyと同じ。幅を増やすほど計算量も増える。</td></tr>
+                <tr><td><strong>Scheduled Sampling</strong></td><td>学習中に正解入力とモデル予測を混ぜる</td><td>Teacher Forcingと推論条件の差、Exposure Biasを緩和。</td></tr>
+            </table>
+        </div>
+
+        <h3>■ モデル名から一語を返す</h3>
+        <div class="table-wrap">
+            <table class="rnn-comparison rnn-model-table">
+                <tr><th>Elman</th><th>Jordan</th><th>LSTM</th><th>GRU</th><th>ESN</th><th>CTC</th></tr>
+                <tr><td>Hidden feedback</td><td>Output feedback</td><td>Cell＋3 gates</td><td>2 gates</td><td>Fixed reservoir</td><td>blank＋collapse</td></tr>
             </table>
         </div>
     `,
@@ -683,6 +824,192 @@ window.quizData = {
             options: ["「[は, 猫, です]」のように1トークン先へずらした系列", "入力と同じ「[私, は, 猫]」", "逆順の「[猫, は, 私]」", "すべてPadding"],
             answer: 0,
             explanation: "各時刻で「次のトークン」を正解にします。入力と教師系列を1つずらすのが基本です。"
+        },
+
+        // ---------------------------------------------------------
+        // 【代表RNNモデル対策】 Q49 - Q68
+        // ---------------------------------------------------------
+        {
+            id: "rnn-elman-feedback",
+            category: "Elman Network",
+            difficulty: "標準",
+            question: "Elman NetworkでContext Unitへコピーされ、次時刻の隠れ層へ戻されるものはどれか。",
+            options: ["直前の隠れ状態 $h_{t-1}$", "直前の出力 $y_{t-1}$", "未来の入力 $x_{t+1}$", "損失関数の値"],
+            answer: 0,
+            explanation: "Elman Networkは隠れ層の状態をContext Unitへ保存し、次時刻の隠れ層計算に使います。基本的なSimple RNNの形です。"
+        },
+        {
+            id: "rnn-jordan-feedback",
+            category: "Jordan Network",
+            difficulty: "標準",
+            question: "Jordan Networkの再帰接続として正しいものはどれか。",
+            options: ["未来の隠れ状態を入力へ戻す", "直前の出力 $y_{t-1}$ をContext Unit経由で隠れ層へ戻す", "セル状態だけを出力へ戻す", "入力を畳み込み層へ戻す"],
+            answer: 1,
+            explanation: "Jordanは出力フィードバックです。Elmanの隠れ状態フィードバックと対にして覚えます。"
+        },
+        {
+            id: "rnn-elman-jordan-compare",
+            category: "Elman・Jordan比較",
+            difficulty: "標準",
+            question: "Elman NetworkとJordan Networkの見分け方として正しいものはどれか。",
+            options: ["Elmanは出力、Jordanはセル状態を戻す", "両方とも未来入力を戻す", "Elmanは隠れ状態、Jordanは出力を戻す", "Elmanは双方向、Jordanは畳み込みを使う"],
+            answer: 2,
+            explanation: "合言葉はElman＝Hidden、Jordan＝Outputです。どの値がContext Unitへ保存されるかを確認します。"
+        },
+        {
+            id: "rnn-stacked-structure",
+            category: "Stacked RNN",
+            difficulty: "標準",
+            question: "Stacked RNN（多層RNN）の説明として正しいものはどれか。",
+            options: ["系列を必ず逆順にする", "全時刻で別々の重みを使う", "再帰接続を削除する", "各時刻で下位RNN層の出力を上位RNN層へ渡す"],
+            answer: 3,
+            explanation: "時間方向の再帰に加え、層方向にも深くします。同じ時刻$t$で$h_t^{(l-1)}$を上位層$h_t^{(l)}$へ渡します。"
+        },
+        {
+            id: "rnn-bidirectional-parameter-count",
+            category: "Bidirectional RNN（計算）",
+            kind: "計算",
+            difficulty: "応用",
+            question: "入力次元$D=5$、各方向の隠れ次元$H=4$の単純な双方向RNNについて、再帰部分の総パラメータ数はいくつか。各方向にバイアスを含み、出力層は除く。",
+            options: ["$2\\times4(5+4+1)=80$", "$4(5+4+1)=40$", "$5\\times4=20$", "$2\\times4^2=32$"],
+            answer: 0,
+            explanation: "1方向は$H(D+H+1)=4(5+4+1)=40$。順方向と逆方向は別々の重みを持つため$40\\times2=80$です。"
+        },
+        {
+            id: "rnn-esn-trained-weights",
+            category: "Echo State Network",
+            difficulty: "標準",
+            question: "標準的なEcho State Networkで通常学習する部分はどれか。",
+            options: ["Reservoir内部の全再帰重みだけ", "Reservoirから出力への重み", "入力系列そのもの", "全時刻の隠れ状態を個別パラメータとして学習"],
+            answer: 1,
+            explanation: "入力重みとReservoir内部の再帰重みは通常ランダムに初期化して固定し、出力重みだけを線形回帰などで学習します。"
+        },
+        {
+            id: "rnn-esn-reservoir-role",
+            category: "Reservoir Computing",
+            difficulty: "標準",
+            question: "Echo State NetworkのReservoirの役割として最も適切なものはどれか。",
+            options: ["正解ラベルを保存する", "未来入力を生成する", "入力系列を高次元の動的特徴へ写像する", "Softmaxの合計を1にする"],
+            answer: 2,
+            explanation: "固定された非線形・再帰ネットワークが入力履歴を豊かな状態表現へ変換し、学習する出力層がその特徴を利用します。"
+        },
+        {
+            id: "rnn-echo-state-property",
+            category: "Echo State Property",
+            difficulty: "応用",
+            question: "Echo State Propertyの直感的な説明として正しいものはどれか。",
+            options: ["初期状態の影響が永遠に増え続ける", "Reservoirが入力を無視する", "出力層を学習しなくても必ず正解する", "時間が進むと初期状態の影響が薄れ、状態が主に入力履歴で決まる"],
+            answer: 3,
+            explanation: "安定したReservoirでは初期状態の差が次第に消え、現在状態が入力履歴のechoとして決まります。スペクトル半径は安定性を調整する代表的な指標です。"
+        },
+        {
+            id: "rnn-ctc-blank-role",
+            category: "CTC",
+            difficulty: "標準",
+            question: "CTCで使用するblank記号の役割として正しいものはどれか。",
+            options: ["その時刻ではどの出力ラベルにも対応しないことを表す", "文末を必ず表す", "未知語だけを表す", "Paddingしたバッチだけを表す"],
+            answer: 0,
+            explanation: "blankはラベルを出さない時刻を表します。重複ラベルの統合とblank除去により、長い時刻列から短いラベル列を得ます。"
+        },
+        {
+            id: "rnn-ctc-collapse",
+            category: "CTC（経路計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "CTCで経路$[blank,A,A,blank,B,B]$を「連続重複の統合→blank除去」の順に変換したラベル列はどれか。",
+            options: ["AAB", "AB", "ABB", "blankAB"],
+            answer: 1,
+            explanation: "連続するAとBをそれぞれ1個へまとめると$[blank,A,blank,B]$。その後blankを除いて$AB$になります。"
+        },
+        {
+            id: "rnn-ctc-alignment",
+            category: "CTC（学習）",
+            difficulty: "応用",
+            question: "CTCが音声認識などで有効な理由として正しいものはどれか。",
+            options: ["入力と出力の長さを必ず同じにする", "各フレームの正解文字位置を人手で指定する", "正解ラベル列へ対応する複数のalignment経路の確率を合計できる", "Decoderが未来の正解を参照する"],
+            answer: 2,
+            explanation: "発話のどのフレームがどの文字かという位置合わせがなくても、同じ文字列へcollapseされる全経路を動的計画法で合計して学習できます。"
+        },
+        {
+            id: "rnn-convlstm-operation",
+            category: "ConvLSTM",
+            difficulty: "標準",
+            question: "ConvLSTMが通常のLSTMと異なる主な点はどれか。",
+            options: ["セル状態を持たない", "未来だけを入力する", "ゲートをすべて削除する", "ゲート内部のアフィン変換を畳み込みに置き換え、空間構造を保つ"],
+            answer: 3,
+            explanation: "入力と隠れ状態を画像状のテンソルとして扱い、行列積の代わりに畳み込みを使います。動画や降水予測などに向きます。"
+        },
+        {
+            id: "rnn-bilstm-crf-role",
+            category: "BiLSTM–CRF",
+            difficulty: "応用",
+            question: "固有表現抽出で使われるBiLSTM–CRFの役割分担として正しいものはどれか。",
+            options: ["BiLSTMが前後文脈を表現し、CRFがラベル間の遷移を含めて系列全体を復号する", "BiLSTMが画像を拡大し、CRFが畳み込む", "BiLSTMがblankを除き、CRFが単語埋め込みを作る", "両方とも各時刻を完全に独立分類する"],
+            answer: 0,
+            explanation: "BiLSTMは単語の前後文脈を特徴化し、CRFはB-PERの次にI-PERが続きやすい、といったラベル列の整合性を考えて最適系列を選びます。"
+        },
+        {
+            id: "rnn-scheduled-sampling",
+            category: "Scheduled Sampling",
+            difficulty: "標準",
+            question: "Scheduled Samplingの説明として正しいものはどれか。",
+            options: ["推論時も常に正解トークンだけを入力する", "学習中、正解トークンとモデル自身の予測を一定確率で混ぜて次入力にする", "Attention重みをランダムに0へする", "系列をすべて逆順にする"],
+            answer: 1,
+            explanation: "Teacher Forcingから自己予測入力へ徐々に近づけ、学習時と推論時の条件差によるExposure Biasを緩和します。"
+        },
+        {
+            id: "rnn-beam-search",
+            category: "Beam Search",
+            difficulty: "標準",
+            question: "Seq2SeqのBeam SearchがGreedy Searchと異なる点はどれか。",
+            options: ["各時刻で最小確率だけを選ぶ", "正解系列をDecoderへ入力する", "上位$B$個の候補系列を保持し、系列全体として良い候補を探索する", "出力語彙を1語に固定する"],
+            answer: 2,
+            explanation: "Greedyは各時刻の最大確率1個だけを残します。Beam Searchは複数候補を保持するため、局所的な選択ミスを回避できる場合があります。"
+        },
+        {
+            id: "rnn-beam-width-one",
+            category: "Beam Search（識別）",
+            difficulty: "標準",
+            question: "Beam Searchのbeam幅$B=1$は、どの復号方法と等価か。",
+            options: ["Sampling", "Teacher Forcing", "CTC", "Greedy Search"],
+            answer: 3,
+            explanation: "候補を1つしか残さないため、毎時刻で最良候補だけを選ぶGreedy Searchと同じです。"
+        },
+        {
+            id: "rnn-bahdanau-attention",
+            category: "Bahdanau Attention",
+            difficulty: "応用",
+            question: "Bahdanau Attentionのscore計算の特徴はどれか。",
+            options: ["Encoder状態とDecoder状態を変換・加算し、小さなNNでscoreを求めるAdditive Attention", "単純な内積だけを必ず使う", "blankを除去してscoreを作る", "Reservoir内部の重みを固定する"],
+            answer: 0,
+            explanation: "代表式は$v^T\\tanh(W_ss_{t-1}+W_hh_s)$です。LuongのDot/General型と区別します。"
+        },
+        {
+            id: "rnn-luong-attention",
+            category: "Luong Attention",
+            difficulty: "応用",
+            question: "Luong Attentionで使われる代表的なscoreはどれか。",
+            options: ["加法型NNだけ", "Dot積や$s_t^TW h_s$のような双線形形式", "CTCのblank確率", "GRUのリセットゲート"],
+            answer: 1,
+            explanation: "Luong Attentionにはdot、general、concatなどのscoreがあります。Dot/Generalは行列積として計算しやすい形式です。"
+        },
+        {
+            id: "rnn-attentional-seq2seq-context",
+            category: "Attention-based Seq2Seq",
+            difficulty: "標準",
+            question: "Attention付きSeq2Seqが、固定長ベクトルだけを使う初期Seq2Seqと異なる点はどれか。",
+            options: ["Encoderを使わない", "出力系列を入力と同じ長さに固定する", "Decoderの各生成時刻でEncoderの全状態から文脈ベクトルを作り直す", "必ず双方向Decoderを使う"],
+            answer: 2,
+            explanation: "生成する単語ごとにAttention重みが変わり、必要な入力位置を直接参照します。1個の固定長文脈へ全情報を詰め込む必要がありません。"
+        },
+        {
+            id: "rnn-model-history-order",
+            category: "RNNモデル史",
+            difficulty: "応用",
+            question: "提案時期が古いものから新しいものへの並びとして正しいものはどれか。",
+            options: ["GRU → LSTM → Elman → Jordan", "LSTM → Jordan → GRU → Elman", "Elman → Jordan → GRU → LSTM", "Jordan → Elman → LSTM → GRU"],
+            answer: 3,
+            explanation: "代表的な年代はJordan（1986）→Elman（1990）→LSTM（1997）→GRU（2014）です。"
         }
     ]
 };
