@@ -21,7 +21,6 @@ window.quizData = {
             .analogy-table { width: 100%; border-collapse: collapse; font-size: 0.9em; margin-top: 10px; }
             .analogy-table th { background: #eee; padding: 5px; border: 1px solid #ccc; }
             .analogy-table td { padding: 5px; border: 1px solid #ccc; }
-            .tr-exam-core { margin: 12px 0 20px; padding: 14px 16px; border-left: 5px solid #2780b8; border-radius: 8px; background: #eef7fb; line-height: 1.8; }
             .tr-formula { margin: 7px 0; padding: 9px 11px; border: 1px solid #c8dbee; border-radius: 8px; background: #f3f8fd; color: #123f68; text-align: center; overflow-x: auto; }
             .tr-formula mjx-container { margin: 0 !important; }
             .tr-table-wrap { overflow-x: auto; }
@@ -33,9 +32,20 @@ window.quizData = {
             .tr-concept-caption { font-size: 0.86em; line-height: 1.55; color: #334e68; }
             .tr-svg-label { font-size: 11px; fill: #334e68; font-weight: 700; }
             .tr-svg-note { font-size: 9px; fill: #627d98; }
+            .tr-zoom-wrap { margin: 12px 0 22px; overflow-x: auto; border: 1px solid #d7e2ec; border-radius: 12px; background: #fff; }
+            .tr-zoom-card { min-width: 860px; padding: 12px; }
+            .tr-wide-svg { display: block; width: 100%; min-width: 830px; height: auto; margin: 0 auto; }
+            .tr-wide-title { font-size: 15px; fill: #102a43; font-weight: 800; }
+            .tr-wide-label { font-size: 12px; fill: #243b53; font-weight: 750; }
+            .tr-wide-note { font-size: 10px; fill: #526d82; }
+            .tr-wide-mini { font-size: 9px; fill: #627d98; }
+            .tr-zoom-caption { padding: 0 15px 14px; line-height: 1.7; color: #334e68; }
+            .tr-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 8px 0 4px; font-size: 0.82em; color: #486581; }
+            .tr-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+            .tr-legend-swatch { width: 13px; height: 13px; border: 1px solid #9fb3c8; border-radius: 3px; }
+            .tr-address-table td:first-child { white-space: nowrap; font-weight: 750; }
             .tr-answer { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #27ae60; border-radius: 7px; background: #eafaf1; line-height: 1.7; }
             .tr-warning { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #e74c3c; border-radius: 7px; background: #fff3f1; line-height: 1.7; }
-            .tr-badge { display: inline-block; margin-right: 5px; padding: 2px 7px; border-radius: 999px; background: #e74c3c; color: #fff; font-size: 0.75em; font-weight: 800; }
             @media (max-width: 760px) {
                 .tr-concept-grid { grid-template-columns: 1fr; }
                 .concept-box { width: auto; min-width: 0; }
@@ -43,21 +53,152 @@ window.quizData = {
             }
         </style>
 
-        <h3>■ 2026シラバス：試験の6点セット</h3>
-        <div class="tr-exam-core">
-            <strong>① Self-Attention：</strong>同じ系列から $Q,K,V$ を作る。<br>
-            <strong>② Scaled Dot-Product：</strong>$QK^T$ → $\\sqrt{d_k}$ で割る → Mask → Softmax → $V$。<br>
-            <strong>③ Source–Target Attention：</strong>Decoderの $Q$ でEncoderの $K,V$ を検索する。<br>
-            <strong>④ Masked Attention：</strong>生成時に未来を見せない。Padding Maskとは目的が違う。<br>
-            <strong>⑤ Multi-Head：</strong>複数の部分空間でAttentionし、連結して $W^O$ で統合する。<br>
-            <strong>⑥ Positional Encoding：</strong>Attention単体にない順序情報を入力へ加える。
+        <h3>■ まずこれだけ：Transformer全体の流れ</h3>
+        <p>原Transformer（翻訳型）は、<strong>Encoderが入力文を理解</strong>し、その情報を受け取った<strong>Decoderが次の単語を1語ずつ生成</strong>します。</p>
+        <div class="tr-legend">
+            <span class="tr-legend-item"><span class="tr-legend-swatch" style="background:#eef7fb;border-color:#2780b8;"></span>Encoder側</span>
+            <span class="tr-legend-item"><span class="tr-legend-swatch" style="background:#fff8e7;border-color:#f39c12;"></span>Decoder側</span>
+            <span class="tr-legend-item"><span class="tr-legend-swatch" style="background:#f9e79f;border-color:#d4ac0d;"></span>Attention</span>
+            <span class="tr-legend-item"><span class="tr-legend-swatch" style="background:#eafaf1;border-color:#27ae60;"></span>変換・出力</span>
         </div>
+        <div class="tr-zoom-wrap">
+            <div class="tr-zoom-card">
+                <svg class="tr-wide-svg" viewBox="0 0 960 355" role="img" aria-label="入力文をEncoderが理解しDecoderがEncoder情報を参照して次トークンを生成するTransformer全体の流れ">
+                    <defs>
+                        <marker id="tr-arrow-flow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#627d98"/></marker>
+                        <marker id="tr-arrow-cross" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8e44ad"/></marker>
+                    </defs>
+                    <text x="18" y="25" class="tr-wide-title">上段：入力文を理解する Encoder</text>
+                    <rect x="18" y="50" width="105" height="58" rx="8" fill="#fff" stroke="#627d98"/><text x="36" y="73" class="tr-wide-label">入力文</text><text x="29" y="93" class="tr-wide-note">「私は猫です」</text>
+                    <path d="M125 79 H151" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="155" y="50" width="126" height="58" rx="8" fill="#f4ecf7" stroke="#8e44ad"/><text x="169" y="73" class="tr-wide-label">Token Embedding</text><text x="181" y="93" class="tr-wide-note">単語をベクトル化</text>
+                    <circle cx="309" cy="79" r="17" fill="#fff" stroke="#8e44ad" stroke-width="2"/><text x="303" y="85" class="tr-wide-label">＋</text>
+                    <rect x="246" y="6" width="126" height="31" rx="6" fill="#f7f1fa" stroke="#8e44ad"/><text x="257" y="26" class="tr-wide-note">Positional Encoding</text><path d="M309 39 V59" stroke="#8e44ad" stroke-width="2" marker-end="url(#tr-arrow-cross)"/>
+                    <path d="M327 79 H354" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="358" y="39" width="228" height="80" rx="10" fill="#eef7fb" stroke="#2780b8" stroke-width="2"/>
+                    <text x="418" y="58" class="tr-wide-label">Encoder Block × N</text>
+                    <rect x="373" y="69" width="94" height="34" rx="6" fill="#f9e79f" stroke="#d4ac0d"/><text x="385" y="83" class="tr-wide-note">Multi-Head</text><text x="383" y="96" class="tr-wide-note">Self-Attention</text>
+                    <path d="M470 86 H487" stroke="#627d98" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="491" y="69" width="77" height="34" rx="6" fill="#eafaf1" stroke="#27ae60"/><text x="516" y="90" class="tr-wide-label">FFN</text>
+                    <path d="M589 79 H618" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="622" y="50" width="148" height="58" rx="8" fill="#eef7fb" stroke="#2780b8" stroke-width="2"/><text x="644" y="72" class="tr-wide-label">Encoder Memory</text><text x="638" y="93" class="tr-wide-note">入力文の理解結果</text>
+
+                    <path d="M696 111 V191 H448 V233" fill="none" stroke="#8e44ad" stroke-width="3" marker-end="url(#tr-arrow-cross)"/>
+                    <rect x="585" y="146" width="170" height="35" rx="17" fill="#f7f1fa" stroke="#8e44ad"/><text x="596" y="168" class="tr-wide-note">K・Vの元としてDecoderへ渡す</text>
+
+                    <text x="18" y="184" class="tr-wide-title">下段：次の単語を生成する Decoder</text>
+                    <rect x="18" y="219" width="115" height="64" rx="8" fill="#fff" stroke="#627d98"/><text x="32" y="240" class="tr-wide-label">出力途中の列</text><text x="28" y="258" class="tr-wide-note">「&lt;BOS&gt; I am」</text><text x="26" y="274" class="tr-wide-mini">正解または直前の予測</text>
+                    <path d="M135 251 H158" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="162" y="222" width="118" height="58" rx="8" fill="#f4ecf7" stroke="#8e44ad"/><text x="175" y="244" class="tr-wide-label">Embedding ＋</text><text x="171" y="264" class="tr-wide-note">Positional Encoding</text>
+                    <path d="M282 251 H306" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="310" y="207" width="247" height="89" rx="10" fill="#fff8e7" stroke="#f39c12" stroke-width="2"/>
+                    <text x="381" y="226" class="tr-wide-label">Decoder Block × N</text>
+                    <rect x="322" y="237" width="72" height="43" rx="5" fill="#f9e79f" stroke="#d4ac0d"/><text x="333" y="251" class="tr-wide-mini">Masked</text><text x="329" y="264" class="tr-wide-mini">Self-Attn</text><text x="341" y="276" class="tr-wide-mini">未来×</text>
+                    <path d="M396 258 H410" stroke="#627d98" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="414" y="237" width="68" height="43" rx="5" fill="#f9e79f" stroke="#8e44ad"/><text x="424" y="253" class="tr-wide-mini">Cross</text><text x="420" y="267" class="tr-wide-mini">Attention</text>
+                    <path d="M484 258 H498" stroke="#627d98" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="502" y="237" width="43" height="43" rx="5" fill="#eafaf1" stroke="#27ae60"/><text x="512" y="263" class="tr-wide-note">FFN</text>
+                    <path d="M560 251 H589" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="593" y="222" width="72" height="58" rx="8" fill="#eafaf1" stroke="#27ae60"/><text x="611" y="255" class="tr-wide-label">Linear</text>
+                    <path d="M667 251 H691" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="695" y="222" width="82" height="58" rx="8" fill="#eafaf1" stroke="#27ae60"/><text x="709" y="255" class="tr-wide-label">Softmax</text>
+                    <path d="M779 251 H803" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-flow)"/>
+                    <rect x="807" y="215" width="126" height="72" rx="9" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/><text x="833" y="239" class="tr-wide-label">次トークン</text><text x="851" y="261" class="tr-wide-title">“a”</text><text x="823" y="278" class="tr-wide-mini">次の入力へ戻す</text>
+                    <path d="M870 290 V329 H76 V287" fill="none" stroke="#f39c12" stroke-width="2" stroke-dasharray="7,5" marker-end="url(#tr-arrow-flow)"/>
+                    <text x="351" y="346" class="tr-wide-note">推論時：生成した単語をDecoder入力へ戻し、次の1語を繰り返し生成</text>
+                </svg>
+            </div>
+            <div class="tr-zoom-caption"><strong>場所の確認：</strong>Positional Encodingは入口で加算。Self-AttentionはEncoderとDecoderの各ブロック内。Cross-AttentionはDecoderがEncoder Memoryを読む場所です。</div>
+        </div>
+
+        <h3>■ 拡大①：EncoderとDecoderの1ブロック</h3>
+        <p>「Encoder Block × N」「Decoder Block × N」と書かれた箱を1つだけ開くと、次の順番になっています。</p>
+        <div class="tr-zoom-wrap">
+            <div class="tr-zoom-card">
+                <svg class="tr-wide-svg" viewBox="0 0 960 375" role="img" aria-label="EncoderとDecoderそれぞれのブロック内部でAttention Add and Norm FFNが並ぶ">
+                    <defs>
+                        <marker id="tr-arrow-block" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#627d98"/></marker>
+                        <marker id="tr-arrow-purple" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8e44ad"/></marker>
+                    </defs>
+                    <rect x="8" y="8" width="944" height="154" rx="12" fill="#f7fbfe" stroke="#2780b8" stroke-width="2"/>
+                    <text x="25" y="32" class="tr-wide-title">Encoder Block：入力文の各単語が、入力文全体を見て理解を深める</text>
+                    <rect x="24" y="72" width="62" height="43" rx="6" fill="#fff" stroke="#627d98"/><text x="43" y="98" class="tr-wide-label">X</text>
+                    <path d="M88 94 H116" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="120" y="58" width="154" height="71" rx="8" fill="#f9e79f" stroke="#d4ac0d" stroke-width="2"/><text x="151" y="79" class="tr-wide-label">Multi-Head</text><text x="151" y="96" class="tr-wide-label">Self-Attention</text><text x="141" y="116" class="tr-wide-mini">Q・K・VはすべてXから</text>
+                    <path d="M276 94 H302" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="306" y="69" width="104" height="50" rx="8" fill="#f1f5f8" stroke="#829ab1"/><text x="321" y="91" class="tr-wide-label">Add &amp; Norm</text><text x="327" y="108" class="tr-wide-mini">残差＋正規化</text>
+                    <path d="M412 94 H442" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="446" y="69" width="112" height="50" rx="8" fill="#eafaf1" stroke="#27ae60"/><text x="468" y="91" class="tr-wide-label">Position-wise</text><text x="489" y="108" class="tr-wide-label">FFN</text>
+                    <path d="M560 94 H590" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="594" y="69" width="104" height="50" rx="8" fill="#f1f5f8" stroke="#829ab1"/><text x="609" y="91" class="tr-wide-label">Add &amp; Norm</text><text x="615" y="108" class="tr-wide-mini">残差＋正規化</text>
+                    <path d="M700 94 H730" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="734" y="72" width="116" height="43" rx="6" fill="#eef7fb" stroke="#2780b8"/><text x="751" y="98" class="tr-wide-label">Encoder出力</text>
+                    <path d="M55 70 V46 H358 V66" fill="none" stroke="#829ab1" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#tr-arrow-block)"/><text x="175" y="43" class="tr-wide-mini">入力Xを迂回させて加算</text>
+                    <path d="M358 122 V143 H646 V122" fill="none" stroke="#829ab1" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#tr-arrow-block)"/><text x="451" y="155" class="tr-wide-mini">Attention後の値を迂回させて加算</text>
+
+                    <rect x="8" y="182" width="944" height="185" rx="12" fill="#fffcf5" stroke="#f39c12" stroke-width="2"/>
+                    <text x="25" y="207" class="tr-wide-title">Decoder Block：生成済みの単語を見て、Encoderの理解結果を読み、次の表現を作る</text>
+                    <rect x="22" y="269" width="51" height="41" rx="6" fill="#fff" stroke="#627d98"/><text x="38" y="294" class="tr-wide-label">Y</text>
+                    <path d="M75 290 H95" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="99" y="248" width="129" height="83" rx="8" fill="#f9e79f" stroke="#d4ac0d" stroke-width="2"/><text x="124" y="267" class="tr-wide-note">Multi-Head</text><text x="111" y="284" class="tr-wide-label">Masked Self-Attn</text><text x="113" y="301" class="tr-wide-mini">Q/K/VはY・未来をMask</text><text x="130" y="318" class="tr-wide-mini">①生成側を見る</text>
+                    <path d="M230 290 H246" stroke="#627d98" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="250" y="263" width="89" height="54" rx="7" fill="#f1f5f8" stroke="#829ab1"/><text x="262" y="286" class="tr-wide-note">Add &amp; Norm</text><text x="268" y="303" class="tr-wide-mini">残差＋正規化</text>
+                    <path d="M341 290 H357" stroke="#627d98" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="361" y="248" width="129" height="83" rx="8" fill="#f9e79f" stroke="#8e44ad" stroke-width="2"/><text x="388" y="267" class="tr-wide-note">Multi-Head</text><text x="381" y="285" class="tr-wide-label">Cross-Attention</text><text x="373" y="302" class="tr-wide-mini">Q=Decoder・K/V=Encoder</text><text x="389" y="318" class="tr-wide-mini">②入力文を見る</text>
+                    <path d="M492 290 H508" stroke="#627d98" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="512" y="263" width="89" height="54" rx="7" fill="#f1f5f8" stroke="#829ab1"/><text x="524" y="286" class="tr-wide-note">Add &amp; Norm</text><text x="530" y="303" class="tr-wide-mini">残差＋正規化</text>
+                    <path d="M603 290 H619" stroke="#627d98" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="623" y="263" width="91" height="54" rx="7" fill="#eafaf1" stroke="#27ae60"/><text x="641" y="285" class="tr-wide-note">Position-wise</text><text x="657" y="303" class="tr-wide-label">FFN</text>
+                    <path d="M716 290 H732" stroke="#627d98" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="736" y="263" width="89" height="54" rx="7" fill="#f1f5f8" stroke="#829ab1"/><text x="748" y="286" class="tr-wide-note">Add &amp; Norm</text><text x="754" y="303" class="tr-wide-mini">残差＋正規化</text>
+                    <path d="M827 290 H847" stroke="#627d98" marker-end="url(#tr-arrow-block)"/>
+                    <rect x="851" y="269" width="88" height="41" rx="6" fill="#fff8e7" stroke="#f39c12"/><text x="863" y="294" class="tr-wide-label">Decoder出力</text>
+                    <rect x="363" y="211" width="126" height="27" rx="13" fill="#f7f1fa" stroke="#8e44ad"/><text x="374" y="229" class="tr-wide-note">Encoder Memory K・V</text><path d="M426 239 V245" stroke="#8e44ad" stroke-width="3" marker-end="url(#tr-arrow-purple)"/>
+                </svg>
+            </div>
+            <div class="tr-zoom-caption"><strong>Add &amp; Normの意味：</strong>AttentionやFFNの入力を迂回させ、処理結果へ足してから正規化します。FFNはAttentionではなく、各単語位置を同じ小さなMLPで個別変換する箱です。</div>
+        </div>
+
+        <h3>■ 拡大②：Attentionは「種類 → Multi-Head → 1 Headの計算」</h3>
+        <p>用語は同じ階層ではありません。<strong>Self／Masked／Crossは入力元の違い</strong>、<strong>Multi-Headは並列化</strong>、<strong>Scaled Dot-Productは各Head内部の計算法</strong>です。</p>
+        <div class="tr-zoom-wrap">
+            <div class="tr-zoom-card">
+                <svg class="tr-wide-svg" viewBox="0 0 960 425" role="img" aria-label="Attentionの種類がQKVの入力元を決めMulti-Head内の各HeadがScaled Dot-Product Attentionを計算する親子関係">
+                    <defs><marker id="tr-arrow-nest" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#627d98"/></marker></defs>
+                    <text x="20" y="27" class="tr-wide-title">① Attentionの種類を決める ＝ Q・K・Vをどこから作るか</text>
+                    <rect x="20" y="45" width="250" height="75" rx="9" fill="#eef7fb" stroke="#2780b8" stroke-width="2"/><text x="58" y="67" class="tr-wide-label">Encoder Self-Attention</text><text x="53" y="88" class="tr-wide-note">Q＝Encoder　K＝Encoder　V＝Encoder</text><text x="64" y="106" class="tr-wide-mini">入力文の中で単語同士を見る</text>
+                    <rect x="290" y="45" width="250" height="75" rx="9" fill="#fff8e7" stroke="#f39c12" stroke-width="2"/><text x="322" y="67" class="tr-wide-label">Masked Self-Attention</text><text x="323" y="88" class="tr-wide-note">Q＝Decoder　K＝Decoder　V＝Decoder</text><text x="335" y="106" class="tr-wide-mini">未来位置だけCausal Mask</text>
+                    <rect x="560" y="45" width="380" height="75" rx="9" fill="#f7f1fa" stroke="#8e44ad" stroke-width="2"/><text x="665" y="67" class="tr-wide-label">Cross-Attention</text><text x="640" y="88" class="tr-wide-note">Q＝Decoder　K＝Encoder　V＝Encoder</text><text x="642" y="106" class="tr-wide-mini">生成側が入力文の理解結果を検索</text>
+                    <path d="M145 123 V145 H455" fill="none" stroke="#627d98"/><path d="M415 123 V145" stroke="#627d98"/><path d="M750 123 V145 H455" fill="none" stroke="#627d98"/><path d="M455 145 V164" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-nest)"/>
+
+                    <text x="20" y="180" class="tr-wide-title">② どの種類も、実体はMulti-Head Attention</text>
+                    <rect x="80" y="195" width="800" height="203" rx="13" fill="#fffdf2" stroke="#d4ac0d" stroke-width="2"/>
+                    <text x="104" y="220" class="tr-wide-label">Multi-Head Attention：同じ計算を、異なる射影行列で複数並列に実行</text>
+                    <rect x="108" y="238" width="199" height="91" rx="8" fill="#fceceb" stroke="#e74c3c"/><text x="176" y="260" class="tr-wide-label">Head 1</text><text x="125" y="282" class="tr-wide-note">Q→W₁(Q)・K→W₁(K)・V→W₁(V)</text><rect x="132" y="294" width="151" height="24" rx="5" fill="#fff" stroke="#e74c3c"/><text x="146" y="310" class="tr-wide-mini">Scaled Dot-Product</text>
+                    <rect x="330" y="238" width="199" height="91" rx="8" fill="#eef7fb" stroke="#2780b8"/><text x="398" y="260" class="tr-wide-label">Head 2</text><text x="347" y="282" class="tr-wide-note">Q→W₂(Q)・K→W₂(K)・V→W₂(V)</text><rect x="354" y="294" width="151" height="24" rx="5" fill="#fff" stroke="#2780b8"/><text x="368" y="310" class="tr-wide-mini">Scaled Dot-Product</text>
+                    <rect x="552" y="238" width="199" height="91" rx="8" fill="#eafaf1" stroke="#27ae60"/><text x="620" y="260" class="tr-wide-label">Head h</text><text x="569" y="282" class="tr-wide-note">Q→Wₕ(Q)・K→Wₕ(K)・V→Wₕ(V)</text><rect x="576" y="294" width="151" height="24" rx="5" fill="#fff" stroke="#27ae60"/><text x="590" y="310" class="tr-wide-mini">Scaled Dot-Product</text>
+                    <text x="765" y="287" class="tr-wide-title">…</text>
+                    <path d="M207 331 V348 H430 M430 331 V348 M651 331 V348 H430 M430 348 V360" fill="none" stroke="#627d98" stroke-width="2" marker-end="url(#tr-arrow-nest)"/>
+                    <rect x="366" y="363" width="128" height="27" rx="6" fill="#eafaf1" stroke="#27ae60"/><text x="378" y="381" class="tr-wide-note">Concat → 出力射影 Wᴼ</text>
+
+                    <text x="20" y="414" class="tr-wide-title">③ 各HeadのScaled Dot-Product：QKᵀ → ÷√dₖ → Mask → Softmax → ×V</text>
+                </svg>
+            </div>
+            <div class="tr-zoom-caption"><strong>親子関係：</strong>Multi-Headの各HeadがScaled Dot-Productを1回ずつ計算し、最後に全Headを連結します。Self／Masked／Crossという名前は、その計算へ入るQ・K・Vの出どころとMaskの有無を表します。</div>
+        </div>
+
+        <h3>■ 用語の住所：どこで何をしているか</h3>
         <div class="tr-table-wrap">
-            <table class="tr-comparison">
-                <tr><th>出題形式</th><th>まず見るもの</th><th>解き方</th></tr>
-                <tr><td><span class="tr-badge">最重要</span>計算</td><td>$d_k$、Score、Mask、Softmax、$V$</td><td>式を一気に計算せず、5段階に分ける。</td></tr>
-                <tr><td><span class="tr-badge">最重要</span>配線</td><td>$Q,K,V$ の入力元</td><td>Selfは同じ入力元、CrossはQだけDecoder。</td></tr>
-                <tr><td><span class="tr-badge">最重要</span>形状</td><td>系列長と各ベクトル次元</td><td>$QK^T$ の行数はQuery数、列数はKey数。</td></tr>
+            <table class="tr-comparison tr-address-table">
+                <tr><th>用語</th><th>全体図の場所</th><th>していること</th></tr>
+                <tr><td>Positional Encoding</td><td>Encoder／Decoderの入口</td><td>Embeddingへ順序情報を足す。Attentionの中ではない。</td></tr>
+                <tr><td>Encoder Self-Attention</td><td>Encoder Blockの最初</td><td>入力文内の全単語を互いに参照する。</td></tr>
+                <tr><td>Masked Self-Attention</td><td>Decoder Blockの1つ目</td><td>生成済み部分だけを参照し、未来を隠す。</td></tr>
+                <tr><td>Cross-Attention</td><td>Decoder Blockの2つ目</td><td>DecoderのQでEncoder MemoryのK・Vを読む。</td></tr>
+                <tr><td>Multi-Head Attention</td><td>3種類のAttentionの実体</td><td>複数Headで異なる関係を並列に見る。</td></tr>
+                <tr><td>Scaled Dot-Product</td><td>Multi-Headの各Head内部</td><td>$QK^T/\\sqrt{d_k}$をSoftmaxし、Vを加重平均する。</td></tr>
+                <tr><td>Add &amp; Norm</td><td>各Attention／FFNの直後</td><td>残差加算とLayer Normalizationで学習を安定化。</td></tr>
+                <tr><td>Position-wise FFN</td><td>各Blockの後半</td><td>Attentionで混ぜた各位置を、同じMLPで個別変換する。</td></tr>
             </table>
         </div>
 
