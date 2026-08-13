@@ -224,16 +224,9 @@ window.quizData = {
         </div>
         <p><small>※Precisionは、新しく拾ったデータによって一時的に上がることもあります。</small></p>
 
-        <h3>■ その他の重要指標</h3>
+        <h3>■ 多クラス評価の平均</h3>
         <table>
             <tr><th>名称</th><th>内容・特徴</th></tr>
-            <tr>
-                <td><strong>IoU</strong><br>(Intersection over Union)</td>
-                <td>
-                    物体検出で利用。「重なり具合」を測る。<br>
-                    $\\frac{\\text{積集合 (重なり)}}{\\text{和集合 (合わせた面積)}} = \\frac{A \\cap B}{A \\cup B}$
-                </td>
-            </tr>
             <tr>
                 <td><strong>Micro平均</strong><br>vs<br><strong>Macro平均</strong></td>
                 <td>
@@ -243,6 +236,7 @@ window.quizData = {
                 </td>
             </tr>
         </table>
+        <p><strong>物体検出固有のIoU・NMS・mAP：</strong><a href="quiz.html?id=04_app_image">4-（1〜3）画像認識・物体検出・セグメンテーション</a>で、Box照合から計算問題までまとめています。</p>
 
         <h3>■ パープレキシティ：Next Token Predictionの「迷い」を測る</h3>
         <style>
@@ -427,13 +421,6 @@ window.quizData = {
             explanation: "ROC曲線は、閾値を変化させたときの TPR (Recall) と FPR (1 - Specificity) のトレードオフを描いたものです。"
         },
         {
-            category: "IoU",
-            question: "物体検出における「IoU (Intersection over Union)」の計算式はどれか。（A：予測領域、B：正解領域）",
-            options: ["(A ∩ B) / (A ∪ B)", "(A ∪ B) / (A ∩ B)", "(A ∩ B) / A", "A / B"],
-            answer: 0,
-            explanation: "「重なっている面積」を「合わせた面積（和集合）」で割った値です。ジャカール係数とも呼ばれます。"
-        },
-        {
             category: "回帰の指標",
             question: "回帰問題の評価指標である「RMSE (二乗平均平方根誤差)」の特徴はどれか。",
             options: ["値が0から1の間に収まる", "大きな誤差（外れ値）の影響を強く受ける", "誤差の絶対値の平均である", "正解率を表す"],
@@ -499,13 +486,6 @@ window.quizData = {
             options: ["0.65", "約 0.62", "0.4", "1.3"],
             answer: 1,
             explanation: "調和平均の計算: $2 \\times \\frac{0.8 \\times 0.5}{0.8 + 0.5} = 2 \\times \\frac{0.4}{1.3} = \\frac{0.8}{1.3} \\approx 0.615$。"
-        },
-        {
-            category: "mAP(応用)",
-            question: "物体検出で使われる「mAP (mean Average Precision)」の説明として正しいものはどれか。",
-            options: ["各クラスごとのIoUの平均値", "各クラスごとにPR曲線（Precision-Recall曲線）の下側面積(AP)を求め、それを全クラスで平均したもの", "全ての検出ボックスの正解率の平均", "IoUが0.5を超えたものの割合"],
-            answer: 1,
-            explanation: "mAPは、クラスごとの検出精度（AP）を平均した総合的な指標です。閾値を変化させた時のPrecisionとRecallのグラフ面積を使います。"
         },
         {
             category: "回帰指標の比較(応用)",

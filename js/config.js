@@ -86,7 +86,7 @@ const menuConfig = [
     {
         id: "04_app_image",
         title: "4-（１〜３）画像認識・物体検出・セグメンテーション",
-        desc: "CNNモデル史（VGG→ResNet→ViT） / WideResNet / Shifted Window / YOLO / R-CNN / U-Net / IoU / mAP",
+        desc: "ResNet・WideResNet / ViT・Swin / Faster・Mask R-CNN / YOLO・SSD・FCOS / FCN・U-Net / IoU・mAP",
         isActive: true
     },
     {

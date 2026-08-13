@@ -435,7 +435,7 @@ window.quizData = {
             <div class="cnn-model-year"><small>2019</small><strong>EfficientNet</strong><small>複合スケーリング</small></div>
         </div>
         <div class="cnn-model-key">
-            <strong>歴史問題の解き方：</strong>「深くする」だけでなく、<strong>AlexNet＝学習を成立</strong>、<strong>VGG＝小さいカーネル</strong>、<strong>GoogLeNet＝並列</strong>、<strong>ResNet＝足し算</strong>、<strong>ResNeXt＝分岐数</strong>、<strong>DenseNet＝連結</strong>で区別する。
+            <strong>歴史問題の解き方：</strong>「深くする」だけでなく、<strong>AlexNet＝学習を成立</strong>、<strong>VGG＝小さいカーネル</strong>、<strong>GoogLeNet＝並列</strong>、<strong>ResNet＝足し算</strong>、<strong>ResNeXt＝分岐数</strong>、<strong>DenseNet＝連結</strong>で区別する。ResNet／WideResNetのResidual Block・劣化問題・Projection Shortcutは <a href="quiz.html?id=04_app_image">4-（1〜3）画像認識</a>で詳しく演習します。
         </div>
 
         <div class="cnn-table-wrap">
@@ -445,7 +445,7 @@ window.quizData = {
                 <tr><td><strong>AlexNet</strong></td><td>Conv 5層＋FC 3層</td><td>ReLU・Dropout・GPU</td><td>勾配飽和を抑えるReLU、Data Augmentation、FC層のDropout。Grouped Convは当初2GPUへ分割する都合。</td></tr>
                 <tr><td><strong>VGG-16/19</strong></td><td>3×3 Convを反復</td><td>小さく深く</td><td>大きいカーネルを小さい3×3の積層へ置換し、非線形性を増やしながらパラメータを抑える。</td></tr>
                 <tr><td><strong>GoogLeNet</strong></td><td>Inception Module</td><td>並列＋1×1圧縮</td><td>1×1・3×3・5×5・Poolingを並列化。高価な畳み込みの前に1×1でチャネルを削減。</td></tr>
-                <tr><td><strong>ResNet</strong></td><td>$y=F(x)+x$</td><td>残差を足す</td><td>深層化で訓練誤差まで悪化する劣化問題を軽減。恒等写像をShortcutで確保する。</td></tr>
+                <tr><td><strong>ResNet</strong></td><td>Residual Block</td><td>Shortcutで加算</td><td>本章では歴史上の位置を確認。Blockの詳細と計算は4-（1〜3）画像認識へ。</td></tr>
                 <tr><td><strong>ResNeXt</strong></td><td>Split–Transform–Merge</td><td>Cardinality</td><td>同形の変換を複数分岐で行い加算。Grouped Convで効率よく実装する。</td></tr>
                 <tr><td><strong>DenseNet</strong></td><td>$[x_0,x_1,\ldots]$</td><td>足さずにConcat</td><td>前層の特徴を後続層へすべて連結し、特徴再利用と勾配伝播を促す。</td></tr>
                 <tr><td><strong>MobileNet</strong></td><td>Depthwise → 1×1</td><td>空間とチャネルを分離</td><td>通常畳み込みを分解して端末向けに計算量を削減。V2はInverted ResidualとLinear Bottleneck。</td></tr>
@@ -497,21 +497,6 @@ window.quizData = {
                 <div class="cnn-concept-caption">異なる受容野を同時に取得。3×3・5×5の前の<strong>1×1でチャネル圧縮</strong>。</div>
             </div>
             <div class="cnn-concept-card">
-                <strong>ResNet：入力をShortcutで足す</strong>
-                <svg class="cnn-concept-svg" viewBox="0 0 320 125" role="img" aria-label="ResNetのResidual Blockは変換F(x)へ入力xをショートカットして加算する">
-                    <rect x="9" y="46" width="39" height="31" rx="4" fill="#eef7fb" stroke="#2780b8"/><text x="23" y="66" class="cnn-svg-label">x</text>
-                    <path d="M50 61 H78" stroke="#627d98" stroke-width="2"/><path d="M78 61 l-6 -4 v8 z" fill="#627d98"/>
-                    <rect x="82" y="39" width="91" height="45" rx="5" fill="#fff8e7" stroke="#f39c12"/><text x="104" y="58" class="cnn-svg-label">F(x)</text><text x="91" y="74" class="cnn-svg-note">Conv → Conv</text>
-                    <path d="M175 61 H225" stroke="#627d98" stroke-width="2"/>
-                    <path d="M29 44 V17 H205 V48" fill="none" stroke="#27ae60" stroke-width="3"/><text x="92" y="13" class="cnn-svg-note">Identity Shortcut</text>
-                    <circle cx="225" cy="61" r="17" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/><text x="219" y="67" class="cnn-svg-label">＋</text>
-                    <path d="M244 61 H306" stroke="#627d98" stroke-width="2"/><path d="M306 61 l-6 -4 v8 z" fill="#627d98"/>
-                    <text x="255" y="49" class="cnn-svg-note">y=F(x)+x</text>
-                    <text x="52" y="113" class="cnn-svg-note">形が違うときはShortcut側を1×1 Convで合わせる</text>
-                </svg>
-                <div class="cnn-concept-caption">学ぶのは目的写像 $H(x)$ そのものではなく<strong>残差 $F(x)=H(x)-x$</strong>。</div>
-            </div>
-            <div class="cnn-concept-card">
                 <strong>ResNeXt：同じ変換を複数分岐</strong>
                 <svg class="cnn-concept-svg" viewBox="0 0 320 125" role="img" aria-label="ResNeXtは入力を複数の同形変換へ分岐し結果を集約する">
                     <rect x="5" y="45" width="42" height="32" rx="4" fill="#eef7fb" stroke="#2780b8"/><text x="20" y="65" class="cnn-svg-label">x</text>
@@ -535,19 +520,6 @@ window.quizData = {
                 </svg>
                 <div class="cnn-concept-caption"><strong>ResNet/ResNeXt＝加算</strong>、<strong>DenseNet＝連結</strong>。頻出の引っかけ。</div>
             </div>
-        </div>
-
-        <h3>■ ResNetはここまで覚える</h3>
-        <div class="cnn-table-wrap">
-            <table class="comparison-table cnn-model-table">
-                <tr><th>論点</th><th>答え</th><th>見分け方</th></tr>
-                <tr><td><strong>劣化問題</strong></td><td>深くしただけで訓練誤差まで悪化</td><td>テスト誤差だけ悪化する過学習とは異なる。</td></tr>
-                <tr><td><strong>Residual学習</strong></td><td>$F(x)=H(x)-x$ を学び、$H(x)=F(x)+x$</td><td>最適写像が恒等写像なら $F(x)=0$ にすればよい。</td></tr>
-                <tr><td><strong>Identity Shortcut</strong></td><td>入力 $x$ をそのまま加算</td><td>入出力の空間サイズとチャネル数が同じ。</td></tr>
-                <tr><td><strong>Projection Shortcut</strong></td><td>$1×1$ Convなどで形を合わせて加算</td><td>strideやチャネル数が変わるとき。</td></tr>
-                <tr><td><strong>Basic Block</strong></td><td>$3×3 → 3×3$</td><td>主にResNet-18/34。</td></tr>
-                <tr><td><strong>Bottleneck Block</strong></td><td>$1×1 → 3×3 → 1×1$</td><td>主にResNet-50/101/152。圧縮→処理→復元。</td></tr>
-            </table>
         </div>
 
         <h3>■ 最終暗記：モデル名から1語を返す</h3>
@@ -997,51 +969,6 @@ window.quizData = {
             options: ["推論時に必ず3モデルの多数決を行う", "学習時に中間層へ勾配を届けやすくし、正則化も促す", "入力画像を3倍に増やす", "Grouped Convのグループ数を決める"],
             answer: 1,
             explanation: "中間出力にも補助損失を与え、深いネットワークの学習を助けます。通常、推論時の主出力は最終分類器を使います。"
-        },
-        {
-            id: "cnn-resnet-equation",
-            category: "ResNet（残差式）",
-            difficulty: "標準",
-            question: "Residual Blockの基本式として正しいものはどれか。",
-            options: ["$y=F(x)×x$", "$y=F(x)-x$", "$y=F(x)+x$", "$y=\\mathrm{softmax}(x)$"],
-            answer: 2,
-            explanation: "変換経路$F(x)$にShortcut経路の入力$x$を要素ごとに加えます。目的写像$H(x)$に対して、残差$F(x)=H(x)-x$を学びます。"
-        },
-        {
-            id: "cnn-resnet-degradation",
-            category: "ResNet（劣化問題）",
-            difficulty: "応用",
-            question: "ResNetが主に解決した「劣化問題」の説明として正しいものはどれか。",
-            options: ["訓練誤差は下がるがテスト誤差だけ上がる", "入力画像の解像度が低下する", "畳み込みで端の画素が失われる", "層を深くしただけで、テスト誤差だけでなく訓練誤差まで悪化する"],
-            answer: 3,
-            explanation: "訓練誤差まで悪化する点が過学習との違いです。Shortcutにより少なくとも恒等写像を表現しやすくします。"
-        },
-        {
-            id: "cnn-resnet-identity-shortcut",
-            category: "ResNet（Identity Shortcut）",
-            difficulty: "標準",
-            question: "ResNetで入力$x$を変換せず、そのまま$F(x)$へ加えられる条件はどれか。",
-            options: ["$x$と$F(x)$の形状が一致する", "バッチサイズが1である", "カーネルが必ず1×1である", "チャネル数が1である"],
-            answer: 0,
-            explanation: "要素ごとの加算には高さ・幅・チャネル数が一致する必要があります。一致すればパラメータを持たないIdentity Shortcutを使えます。"
-        },
-        {
-            id: "cnn-resnet-projection-shortcut",
-            category: "ResNet（Projection Shortcut）",
-            difficulty: "応用",
-            question: "Residual Blockでstrideにより空間サイズが変わり、チャネル数も増える。Shortcut側の代表的な処理はどれか。",
-            options: ["Global Average Poolingで1値にする", "stride付き1×1 Convで形状を合わせる", "Softmaxで確率にする", "入力をそのまま無条件に加える"],
-            answer: 1,
-            explanation: "Projection Shortcutでは1×1 Convを使い、高さ・幅とチャネル数を$F(x)$側に合わせてから加算します。"
-        },
-        {
-            id: "cnn-resnet-block-types",
-            category: "ResNet（Block比較）",
-            difficulty: "応用",
-            question: "ResNetのBasic BlockとBottleneck Blockの対応として正しいものはどれか。",
-            options: ["Basicは1×1だけ、Bottleneckは5×5だけ", "BasicはInception、BottleneckはDense接続", "Basicは3×3→3×3、Bottleneckは1×1→3×3→1×1", "両方ともDepthwise→Pointwise"],
-            answer: 2,
-            explanation: "Basic Blockは主にResNet-18/34、Bottleneckは主にResNet-50/101/152で使われます。Bottleneckの1×1はチャネル圧縮と復元を担当します。"
         },
         {
             id: "cnn-resnext-cardinality",
