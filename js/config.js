@@ -52,7 +52,7 @@ const menuConfig = [
     {
         id: "03_dl_regularization",
         title: "3-（３）深層モデルのための正則化",
-        desc: "L1・L2正則化 / Dropout / Batch Norm / Early Stopping",
+        desc: "L1・L2・weight decay / Dropout・DropConnect / Early Stopping / 陰的正則化",
         isActive: true
     },
     {
@@ -76,7 +76,7 @@ const menuConfig = [
     {
         id: "03_dl_generalization",
         title: "3-（７）汎化性能向上のテクニック",
-        desc: "データ拡張(MixUp) / Batch Norm / アンサンブル",
+        desc: "画像・自然言語のデータ拡張 / 正規化4種 / アンサンブル / ハイパーパラメータ探索",
         isActive: true
     },
 
