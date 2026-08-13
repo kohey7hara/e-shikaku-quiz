@@ -132,6 +132,23 @@ window.quizData = {
                 <li><strong>ASIC</strong>: 特定用途向け専用IC（TPUなど）。設計後は変更不可だが、性能・電力効率は最強。</li>
             </ul>
         </div>
+
+        <h3>■ 最後はこの表だけ</h3>
+        <table class="comp-table">
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>少数の高性能コア・分岐や逐次処理</td><td><strong>CPU</strong><br><small>Central Processing Unit</small></td><td>低遅延で複雑な制御を処理しやすい。</td></tr>
+            <tr><td>多数コア・行列積を大量並列</td><td><strong>GPU</strong><br><small>Graphics Processing Unit</small></td><td>深層学習の高スループット計算に向く。</td></tr>
+            <tr><td>Google・シストリックアレイ</td><td><strong>TPU</strong><br><small>Tensor Processing Unit</small></td><td>テンソル／行列演算向けの専用アクセラレータ。</td></tr>
+            <tr><td>NVIDIA GPUの並列計算基盤</td><td><strong>CUDA</strong><br><small>Compute Unified Device Architecture</small></td><td>GPUを汎用計算へ利用するプラットフォーム。</td></tr>
+            <tr><td>GPUを画像以外の汎用計算へ</td><td><strong>GPGPU</strong><br><small>General-Purpose computing on Graphics Processing Units</small></td><td>GPUの大量並列性を科学計算や深層学習に使う。</td></tr>
+            <tr><td>1命令で複数データ</td><td><strong>SIMD</strong><br><small>Single Instruction, Multiple Data</small></td><td>ベクトルの同一演算をまとめて実行する。</td></tr>
+            <tr><td>1命令を多数スレッドで実行</td><td><strong>SIMT</strong><br><small>Single Instruction, Multiple Threads</small></td><td>GPUが多数threadを束ねて動かす方式。</td></tr>
+            <tr><td>異なる命令を異なるデータへ</td><td><strong>MIMD</strong><br><small>Multiple Instruction, Multiple Data</small></td><td>マルチコアCPUなどの独立した並列処理。</td></tr>
+            <tr><td>製造後に回路を書き換える</td><td><strong>FPGA</strong><br><small>Field-Programmable Gate Array</small></td><td>柔軟性と低遅延を両立しやすい。</td></tr>
+            <tr><td>特定用途へ固定設計</td><td><strong>ASIC</strong><br><small>Application-Specific Integrated Circuit</small></td><td>変更しにくい代わりに性能・電力効率が高い。</td></tr>
+            <tr><td>Guest OSを丸ごと持つ</td><td><strong>VM</strong><br><small>Virtual Machine</small></td><td>隔離は強いがコンテナより重い。</td></tr>
+            <tr><td>Host OSのkernelを共有</td><td><strong>Container / Docker</strong></td><td>軽量・高速で実行環境を再現しやすい。</td></tr>
+        </table>
     `,
 
     questions: [

@@ -166,6 +166,23 @@ window.quizData = {
         </div>
         <div class="ig-sum"><strong>重要な性質：Completeness</strong><br>各特徴の寄与を全部足すと、おおむね $F(x)-F(x')$（入力と基準の出力差）になります。</div>
         <p><strong>識別：</strong>Grad-CAMはCNNの特徴マップから粗い場所を可視化。Integrated Gradientsは微分可能なモデルで入力特徴ごとの寄与を求めます。</p>
+
+        <h3>■ 最後はこの表だけ</h3>
+        <table class="comp-table">
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>学習済み特徴を別タスクへ再利用</td><td><strong>Transfer Learning</strong></td><td>少量データでは特徴抽出部を固定し、出力側から学ぶ。</td></tr>
+            <tr><td>学習済み重みをタスクに合わせて微調整</td><td><strong>Fine-tuning</strong></td><td>一部または全層を小さい学習率で更新する。</td></tr>
+            <tr><td>学習元と適用先で分布が違う</td><td><strong>Domain Adaptation</strong></td><td>Domain shiftを埋め、対象領域でも性能を保つ。</td></tr>
+            <tr><td>ラベルなしデータから正解を作る</td><td><strong>Self-supervised Learning</strong></td><td>データ自身を教師信号として表現を事前学習する。</td></tr>
+            <tr><td>似た組を近づけ、異なる組を離す</td><td><strong>Contrastive Learning</strong></td><td>Siamese Networkなどで距離を学習する。</td></tr>
+            <tr><td>Anchor・Positive・Negative</td><td><strong>Triplet Loss</strong></td><td>$d(A,P)+margin&lt;d(A,N)$ を目指す。</td></tr>
+            <tr><td>AIの判断根拠を人に説明</td><td><strong>XAI</strong><br><small>Explainable Artificial Intelligence</small></td><td>予測だけでなく「なぜ」を可視化・近似する。</td></tr>
+            <tr><td>GAP後のクラス重みで注目位置を可視化</td><td><strong>CAM</strong><br><small>Class Activation Mapping</small></td><td>最後の特徴マップをクラス別の線形重みで合成する。</td></tr>
+            <tr><td>CNNの注目位置をヒートマップ化</td><td><strong>Grad-CAM</strong><br><small>Gradient-weighted Class Activation Mapping</small></td><td>対象クラスの勾配で最後の特徴マップを重み付けする。</td></tr>
+            <tr><td>予測点の近傍を単純モデルで説明</td><td><strong>LIME</strong><br><small>Local Interpretable Model-agnostic Explanations</small></td><td>モデル非依存の局所近似で説明する。</td></tr>
+            <tr><td>協力ゲーム理論・特徴の貢献度</td><td><strong>SHAP</strong><br><small>SHapley Additive exPlanations</small></td><td>Shapley valueに基づき予測への寄与を配分する。</td></tr>
+            <tr><td>baselineから入力まで勾配を積分</td><td><strong>IG</strong><br><small>Integrated Gradients</small></td><td>寄与の総和が概ね出力差になるCompletenessを持つ。</td></tr>
+        </table>
     `,
 
     questions: [

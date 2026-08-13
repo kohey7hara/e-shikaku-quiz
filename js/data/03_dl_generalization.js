@@ -307,17 +307,19 @@ window.quizData = {
         <h3>■ 最後はこの表だけ</h3>
         <div class="gen-table-wrap">
             <table class="gen-table">
-                <tr><th>問題文の合図</th><th>答える語</th></tr>
-                <tr><td>入力とラベルを同じ比率で混ぜる</td><td><strong>MixUp</strong></td></tr>
-                <tr><td>N=Number（個数）、M=Magnitude（強さ）</td><td><strong>RandAugment</strong></td></tr>
-                <tr><td>NCHWでCを固定し、N・H・Wを集計</td><td><strong>Batch Norm</strong></td></tr>
-                <tr><td>NLDで各トークンのD個の特徴を集計</td><td><strong>Layer Norm</strong></td></tr>
-                <tr><td>小バッチCNN・チャネルを群分け</td><td><strong>Group Norm</strong></td></tr>
-                <tr><td>復元抽出</td><td><strong>Bootstrap</strong></td></tr>
-                <tr><td>独立・並列・平均</td><td><strong>Bagging</strong></td></tr>
-                <tr><td>前の誤りを次が修正</td><td><strong>Boosting</strong></td></tr>
-                <tr><td>予測をメタモデルへ</td><td><strong>Stacking</strong></td></tr>
-                <tr><td>過去の評価から次候補</td><td><strong>Bayesian Optimization</strong></td></tr>
+                <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+                <tr><td>入力とラベルを同じ比率で混ぜる</td><td><strong>MixUp</strong></td><td>入力間を補間し、決定境界を滑らかにする。</td></tr>
+                <tr><td>N＝変換数、M＝共通の強さ</td><td><strong>RandAugment</strong></td><td>変換の組合せ探索をNとMへ単純化する。</td></tr>
+                <tr><td>NCHWでCを固定し、N・H・Wを集計</td><td><strong>BN（Batch Normalization）</strong></td><td>バッチ統計を使うため小バッチでは不安定になりやすい。</td></tr>
+                <tr><td>NLDで各トークンのD特徴を集計</td><td><strong>LN（Layer Normalization）</strong></td><td>他の文やトークンと混ぜず、バッチに依存しない。</td></tr>
+                <tr><td>各画像・各チャネルのH・Wを集計</td><td><strong>IN（Instance Normalization）</strong></td><td>画像ごとのコントラストを整え、スタイル変換で使われる。</td></tr>
+                <tr><td>小バッチCNN・チャネルを群分け</td><td><strong>GN（Group Normalization）</strong></td><td>各画像内のグループで統計を取り、バッチに依存しない。</td></tr>
+                <tr><td>元データから復元抽出</td><td><strong>Bootstrap</strong></td><td>同じ標本が複数回選ばれることがある。</td></tr>
+                <tr><td>独立・並列に学習して平均／投票</td><td><strong>Bagging（Bootstrap Aggregating）</strong></td><td>複数モデルを統合し、主に分散を下げる。</td></tr>
+                <tr><td>前の誤りを次が重点的に修正</td><td><strong>Boosting</strong></td><td>弱学習器を逐次的に加えて予測を改善する。</td></tr>
+                <tr><td>複数モデルの予測をメタモデルへ</td><td><strong>Stacking</strong></td><td>予測値を新しい特徴として統合方法も学習する。</td></tr>
+                <tr><td>過去の評価から次候補を選ぶ</td><td><strong>Bayesian Optimization</strong></td><td>1回の評価が高価な探索で試行を節約する。</td></tr>
+                <tr><td>設定選択／最後の性能確認</td><td><strong>Validation／Test</strong></td><td>検証データで選び、テストデータは最終評価だけに使う。</td></tr>
             </table>
         </div>
     `,

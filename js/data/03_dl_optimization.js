@@ -279,6 +279,23 @@ window.quizData = {
             </tr>
         </table>
         <p><strong>試験の確認順：</strong>① XavierかHeか → ② 正規分布か一様分布か → ③ 問われているのは<strong>分散</strong>か<strong>標準偏差</strong>か。</p>
+
+        <h3>■ 最後はこの表だけ</h3>
+        <table>
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>現在のミニバッチ勾配だけで更新</td><td><strong>SGD</strong><br><small>Stochastic Gradient Descent（確率的勾配降下法）</small></td><td>$w\\leftarrow w-\\eta g$。細長い谷ではジグザグしやすい。</td></tr>
+            <tr><td>過去の移動方向を慣性として蓄積</td><td><strong>Momentum</strong></td><td>振動を打ち消し、同じ方向へ加速する。</td></tr>
+            <tr><td>一歩先の位置で勾配を見る</td><td><strong>NAG</strong><br><small>Nesterov Accelerated Gradient</small></td><td>Momentumを先読みして修正する。</td></tr>
+            <tr><td>過去の勾配二乗を累積</td><td><strong>AdaGrad</strong><br><small>Adaptive Gradient</small></td><td>スパース勾配に強いが、学習率が下がり続ける。</td></tr>
+            <tr><td>勾配二乗の移動平均で割る</td><td><strong>RMSProp</strong><br><small>Root Mean Square Propagation</small></td><td>AdaGradの古い履歴を忘れ、停滞を抑える。</td></tr>
+            <tr><td>一次・二次モーメント＋初期バイアス補正</td><td><strong>Adam</strong><br><small>Adaptive Moment Estimation</small></td><td>MomentumとRMSPropの考えを組み合わせる。</td></tr>
+            <tr><td>直列演算の勾配</td><td><strong>連鎖律：掛ける</strong></td><td>上流の勾配×その演算の局所微分。</td></tr>
+            <tr><td>同じ変数から分岐した勾配</td><td><strong>各経路を加算</strong></td><td>変数への総影響をすべて足す。</td></tr>
+            <tr><td>損失1個から多数パラメータへ戻る</td><td><strong>逆モード自動微分</strong></td><td>出力側から1回戻ると全勾配を効率よく得られる。</td></tr>
+            <tr><td>Sigmoid／tanhと相性</td><td><strong>Xavier（Glorot）初期化</strong></td><td>入出力の分散を保ち、飽和を抑える。</td></tr>
+            <tr><td>ReLUと相性／$fan_{in}$が与えられる</td><td><strong>He（Kaiming）初期化</strong></td><td>分散$2/fan_{in}$、標準偏差$\\sqrt{2/fan_{in}}$。</td></tr>
+            <tr><td>全ニューロンを同じ値で初期化</td><td><strong>対称性が破れない</strong></td><td>同じ勾配で同じ特徴しか学べないため、重みはランダムにする。</td></tr>
+        </table>
     `,
 
     questions: [

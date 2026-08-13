@@ -104,16 +104,19 @@ window.quizData = {
         <p><strong>3つの値を照合：</strong>$H(P,Q)=H(P)+D_{KL}(P||Q)$ なので、今回も $1.208\\approx1.0+0.208$ となります。つまり、<strong>クロスエントロピー ＝ 元々の驚き ＋ 予測がずれた分の余計な驚き</strong>です。</p>
         <p><strong>対数の底：</strong>底が2なら単位は bit、自然対数 $\\ln$ なら単位は natです。同じ問題の途中で底を混ぜないようにします。</p>
 
-        <h3>■ 問題文の動詞で見分ける</h3>
-        <ul>
-            <li>「尤度を最大」→ <strong>最尤推定 (MLE)</strong></li>
-            <li>「事前確率も掛けて、最大の候補を選ぶ」→ <strong>MAP推定</strong></li>
-            <li>「正規化して、事後分布全体を求める」→ <strong>ベイズ推定</strong></li>
-            <li>「1つの分布の不確実性」→ <strong>エントロピー</strong></li>
-            <li>「正解分布 $P$ と予測分布 $Q$ の損失」→ <strong>クロスエントロピー</strong></li>
-            <li>「2つの分布のずれ」→ <strong>KLダイバージェンス</strong></li>
-            <li>「知る前と知った後で減った不確実性」→ <strong>相互情報量</strong></li>
-        </ul>
+        <h3>■ 最後はこの表だけ</h3>
+        <table>
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>観測データの尤度を最大化</td><td><strong>MLE</strong><br><small>Maximum Likelihood Estimation（最尤推定）</small></td><td>事前確率を使わず、データに最も合う一点を選ぶ。</td></tr>
+            <tr><td>尤度×事前確率を最大化</td><td><strong>MAP</strong><br><small>Maximum A Posteriori（最大事後確率推定）</small></td><td>事前知識も使うが、答えは一点。</td></tr>
+            <tr><td>正規化して事後分布全体を残す</td><td><strong>ベイズ推定</strong></td><td>掛ける→足す→割る。不確実性も確率として残す。</td></tr>
+            <tr><td>1つの分布の迷い・平均情報量</td><td><strong>エントロピー</strong></td><td>均等なほど大きく、確実なら0。</td></tr>
+            <tr><td>正解分布 $P$ で予測 $Q$ を採点</td><td><strong>クロスエントロピー</strong></td><td>正解へ低い確率を付けるほど罰が大きい。</td></tr>
+            <tr><td>向きのある2分布のずれ</td><td><strong>KL</strong><br><small>Kullback-Leibler divergence</small></td><td>非負・非対称で、同じ分布なら0。</td></tr>
+            <tr><td>対称で有界な分布のずれ</td><td><strong>JS</strong><br><small>Jensen-Shannon divergence</small></td><td>混合分布$M=(P+Q)/2$へのKLを両側から平均する。</td></tr>
+            <tr><td>$Y$を知って減った$X$の迷い</td><td><strong>相互情報量</strong></td><td>$I(X;Y)=H(X)-H(X|Y)$。独立なら0。</td></tr>
+            <tr><td>回帰誤差を二乗して平均</td><td><strong>MSE</strong><br><small>Mean Squared Error（平均二乗誤差）</small></td><td>大きな誤差を強く罰する。</td></tr>
+        </table>
     `,
     questions: [
         // ---------------------------------------------------------

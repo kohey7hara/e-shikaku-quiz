@@ -10,7 +10,7 @@ window.quizData = {
           <tr><td><strong>FN</strong><br>False Negative</td><td>本当は正例なのに、予測は負例</td><td>病気の人を見逃した</td></tr>
           <tr><td><strong>FP</strong><br>False Positive</td><td>本当は負例なのに、予測は正例</td><td>健康な人を「病気」と誤判定した</td></tr>
           <tr><td><strong>TN</strong><br>True Negative</td><td>本当は負例で、予測も負例</td><td>健康な人を「健康」と当てた</td></tr>
-          <tr><td><strong>PP</strong><br>Perplexity</td><td>パープレキシティ。言語モデルの迷いの大きさ</td><td>PP=4なら、平均的に4択で迷う程度</td></tr>
+          <tr><td><strong>PPL</strong><br>Perplexity</td><td>パープレキシティ。言語モデルの迷いの大きさ</td><td>PPL=4なら、平均的に4択で迷う程度</td></tr>
           <tr><td><strong>Q / K / V</strong></td><td>Query（質問）/ Key（索引）/ Value（中身）</td><td>質問Qに合う索引Kを探し、その中身Vを取り出す</td></tr>
         </table>
 
@@ -67,13 +67,13 @@ window.quizData = {
         <p>Cross-Attentionでは、QはDecoder側、KとVはEncoderの出力です。</p>
 
         <h3>7. パープレキシティ：言語モデルがどれくらい迷うか</h3>
-        <p><strong>PPはPerplexity（パープレキシティ）の略</strong>です。1トークン当たり平均クロスエントロピーをHとすると、$PP=\\exp(H)$ です。</p>
+        <p><strong>PPLはPerplexity（パープレキシティ）の略</strong>です。1トークン当たり平均クロスエントロピーをHとすると、$PPL=\\exp(H)$ です。</p>
         <ol>
           <li>問題のHを確認する。例：$H=\\ln(4)$</li>
-          <li>式へ入れる。$PP=\\exp(\\ln(4))$</li>
-          <li>$\\exp$ と $\\ln$ は互いに打ち消すので、$PP=4$</li>
+          <li>式へ入れる。$PPL=\\exp(\\ln(4))$</li>
+          <li>$\\exp$ と $\\ln$ は互いに打ち消すので、$PPL=4$</li>
         </ol>
-        <p>PPは小さいほど良く、1が理想です。PP=4は「平均的に4個の候補で迷っている」感覚です。</p>
+        <p>PPLは小さいほど良く、1が理想です。PPL=4は「平均的に4個の候補で迷っている」感覚です。</p>
 
         <h3>8. PyTorchで混同しやすい組合せ</h3>
         <ul>
@@ -90,6 +90,23 @@ window.quizData = {
           <li><strong>各選択肢を図へ戻す：</strong>用語の印象ではなく、図の流れと矛盾しないかで消去します。</li>
         </ol>
         <p>この後半には、本試験を想定した図解付き長文問題があります。最初は時間を測らず、図の矢印へQ・K・Vやテンソル形状を書き込んでください。</p>
+
+        <h3>■ 最後はこの表だけ</h3>
+        <table>
+          <tr><th>問題文の合図</th><th>最初に書くもの</th><th>事故防止の一言</th></tr>
+          <tr><td>事後確率を求める</td><td><strong>事前確率 × 尤度 → 全候補で正規化</strong></td><td>掛け算した値をそのまま確率とせず、最後に和で割る。</td></tr>
+          <tr><td>logitsを確率へ</td><td><strong>Softmax</strong></td><td>最大logitを先に引いても結果は変わらず、overflowを防げる。</td></tr>
+          <tr><td>本当の正例を拾った割合</td><td><strong>TPR = TP/(TP+FN)</strong></td><td>TPRはTrue Positive Rateで、Recallと同じ。</td></tr>
+          <tr><td>本当の負例を誤って陽性にした割合</td><td><strong>FPR = FP/(FP+TN)</strong></td><td>分母は「本当の負例」。</td></tr>
+          <tr><td>ベクトルの向き</td><td><strong>内積 ÷ 2つのノルム</strong></td><td>コサイン類似度は大きさではなく角度を見る。</td></tr>
+          <tr><td>CNNの出力形状</td><td><strong>$\\lfloor(H+2P-D(K-1)-1)/S+1\\rfloor$</strong></td><td>CNNはConvolutional Neural Network。高さ・幅は式、チャネルはフィルタ数を見る。</td></tr>
+          <tr><td>Attentionの内部</td><td><strong>$QK^T → /\\sqrt{d_k} → Softmax → ×V$</strong></td><td>QとKで重みを作り、Vの中身を集める。</td></tr>
+          <tr><td>言語モデルの迷い</td><td><strong>PPL = exp(平均NLL)</strong></td><td>PPLはPerplexity、NLLはNegative Log-Likelihood。小さいほど良い。</td></tr>
+          <tr><td>深いCNN・入力を足す</td><td><strong>ResNet: $y=F(x)+x$</strong></td><td>形が違えば1×1 ConvなどでShortcutを射影する。</td></tr>
+          <tr><td>BNかLNか</td><td><strong>BN＝batch統計、LN＝各sample/tokenの特徴</strong></td><td>BNはBatch Normalization、LNはLayer Normalization。</td></tr>
+          <tr><td>外部知識を検索して回答</td><td><strong>RAG</strong><br><small>Retrieval-Augmented Generation</small></td><td>検索結果を文脈へ追加する。モデル重みの更新とは別。</td></tr>
+          <tr><td>生成モデルの識別</td><td><strong>VAE＝確率潜在変数／GAN＝対戦／DDPM＝逆拡散</strong></td><td><small>Variational Autoencoder／Generative Adversarial Network／Denoising Diffusion Probabilistic Models</small></td></tr>
+        </table>
     `,
     questions: [
         {
@@ -146,7 +163,7 @@ window.quizData = {
             id:"metric-perplexity", category:"評価指標・計算", kind:"手計算", difficulty:"新シラバス",
             question:"言語モデルの1トークン当たり平均クロスエントロピーが $\\ln 4$ のとき、パープレキシティはいくつか。",
             options:["4", "$\\ln4$", "2", "16"], answer:0,
-            explanation:"パープレキシティは $PP=\\exp(H)$。したがって $\\exp(\\ln4)=4$。平均的に4択から迷っているような不確実性と解釈できます。"
+            explanation:"パープレキシティは $PPL=\\exp(H)$。したがって $\\exp(\\ln4)=4$。平均的に4択から迷っているような不確実性と解釈できます。"
         },
         {
             id:"dl-cross-entropy", category:"深層学習・数式", kind:"手計算", difficulty:"必須",
@@ -366,7 +383,7 @@ const bootcampBeginnerExplanations = {
     "math-entropy": `<p>エントロピーは、結果がどれほど予測しにくいかを表す平均情報量です。</p><p>H=-(0.5×log2 0.5+0.5×log2 0.5)。log2 0.5=-1なので、H=-(-0.5-0.5)=1 bitです。</p><p>2つが同じ確率のとき最も迷うため、2択のエントロピーは最大の1 bitになります。</p>`,
     "math-bayes": `<p>感度90%を、そのまま「陽性なら病気である確率」としてはいけません。最初の有病率1%も使います。</p><p>1万人で考えると、病気100人のうち陽性は90人。健康9,900人のうち偽陽性は495人です。陽性者は合計585人なので、本当に病気なのは90÷585≒0.154、約15.4%です。</p><p>人数へ置き換えると、ベイズ則の分母を作りやすくなります。</p>`,
     "metric-micro-macro": `<p><strong>macro平均</strong>は、まずクラスごとに指標を出し、それらを同じ重みで平均します。そのため件数の少ないクラスも1クラスとして平等に扱われます。</p><p><strong>micro平均</strong>は全クラスのTPなどを先に合計するため、件数の多いクラスの影響が強くなります。少数クラスも重視したい本問ではmacro平均が適切です。</p>`,
-    "metric-perplexity": `<p><strong>PPはPerplexity（パープレキシティ）の略</strong>で、言語モデルが次のトークン選びでどれくらい迷っているかを表します。</p><ol><li>平均クロスエントロピーをHとすると、PP=exp(H)です。</li><li>H=ln(4)を代入して、PP=exp(ln(4))。</li><li>expとlnは互いに逆の演算なので、exp(ln(4))=4です。</li></ol><p>PP=4は「平均的に4個ほどの候補で迷う」程度と解釈できます。小さいほど良く、理想値は1です。</p>`,
+    "metric-perplexity": `<p><strong>PPLはPerplexity（パープレキシティ）の略</strong>で、言語モデルが次のトークン選びでどれくらい迷っているかを表します。</p><ol><li>平均クロスエントロピーをHとすると、PPL=exp(H)です。</li><li>H=ln(4)を代入して、PPL=exp(ln(4))。</li><li>expとlnは互いに逆の演算なので、exp(ln(4))=4です。</li></ol><p>PPL=4は「平均的に4個ほどの候補で迷う」程度と解釈できます。小さいほど良く、理想値は1です。</p>`,
     "dl-cross-entropy": `<p>クロスエントロピーは、正解クラスへモデルがどれだけ高い確率を付けたかを損失にします。</p><p>one-hotとは正解だけが1、他が0の教師ラベルです。そのため式L=-Σ t_i ln(p_i)では正解クラスの項だけ残り、L=-ln(0.7)≒0.357です。</p><p>正解確率が1へ近づくほど損失は0へ近づきます。</p>`,
     "dl-ce-gradient": `<p>Softmaxとクロスエントロピーを組み合わせると、複雑な微分が整理され、各ロジットの勾配は<strong>予測p_i－正解t_i</strong>になります。</p><p>例えば正解クラスでp=0.7、t=1なら勾配は-0.3です。勾配降下ではこのロジットを上げる方向へ更新されます。誤クラスでp=0.2、t=0なら+0.2となり、そのロジットを下げます。</p>`,
     "dl-conv-output": `<p>記号は入力H=32、余白P=1、カーネルK=3、移動幅S=2、間隔D=1です。</p><p>出力=⌊(H+2P-D(K-1)-1)/S+1⌋へ入れると、⌊(32+2-2-1)/2+1⌋=⌊16.5⌋=16です。</p><p>⌊ ⌋は小数点以下を切り捨てる記号です。高さと幅が同じ条件なので16×16になります。</p>`,

@@ -522,11 +522,22 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ 最終暗記：モデル名から1語を返す</h3>
+        <h3>■ 最後はこの表だけ</h3>
         <div class="cnn-table-wrap">
-            <table class="comparison-table cnn-model-table">
-                <tr><th>AlexNet</th><th>VGG</th><th>GoogLeNet</th><th>ResNet</th><th>ResNeXt</th><th>DenseNet</th></tr>
-                <tr><td>ReLU・Dropout</td><td>3×3積層</td><td>Inception</td><td>Residual Add</td><td>Cardinality</td><td>Dense Concat</td></tr>
+            <table class="comparison-table">
+                <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+                <tr><td>局所を見る・重みを全位置で共有</td><td><strong>CNN（Convolutional Neural Network）</strong></td><td>画像の空間構造を保って特徴を抽出する。</td></tr>
+                <tr><td>フィルタ数を聞かれた</td><td><strong>出力チャネル数 $C_{out}$</strong></td><td>1フィルタが特徴マップを1枚作る。</td></tr>
+                <tr><td>パラメータ数（バイアスあり）</td><td><strong>$(K_hK_wC_{in}+1)C_{out}$</strong></td><td>重みだけなら$K_hK_wC_{in}C_{out}$。$+1$は各出力チャネルのバイアス。</td></tr>
+                <tr><td>チャネル別の空間処理 → $1×1$で混合</td><td><strong>Depthwise Separable Convolution</strong></td><td>空間処理とチャネル混合を分けて軽量化する。</td></tr>
+                <tr><td>各特徴マップ全体を1個の平均へ</td><td><strong>GAP（Global Average Pooling）</strong></td><td>$H×W×C→1×1×C$で、Cは残す。</td></tr>
+                <tr><td>GPU・Dropout・ReLU</td><td><strong>AlexNet</strong></td><td>ReLU（Rectified Linear Unit）で深いCNNの学習を実用化。</td></tr>
+                <tr><td>小さい $3×3$ を反復</td><td><strong>VGG（Visual Geometry Group）</strong></td><td>小さなカーネルを積み、深さと非線形性を増やす。</td></tr>
+                <tr><td>複数サイズの畳み込みを並列</td><td><strong>GoogLeNet／Inception</strong></td><td>$1×1$で圧縮しながら複数スケールを見る。</td></tr>
+                <tr><td>Shortcut・残差を加算</td><td><strong>ResNet（Residual Network）</strong></td><td>深層化による劣化問題を改善する。</td></tr>
+                <tr><td>Cardinality・同形の複数分岐</td><td><strong>ResNeXt</strong></td><td>分岐をGrouped Convolutionで効率よく実装する。</td></tr>
+                <tr><td>前層の特徴をすべて連結</td><td><strong>DenseNet</strong></td><td>Addではなくチャネル方向へConcatする。</td></tr>
+                <tr><td>深さ・幅・解像度を同時に拡大</td><td><strong>EfficientNet</strong></td><td>Compound Scalingで3軸をバランスよく調整する。</td></tr>
             </table>
         </div>
     `,

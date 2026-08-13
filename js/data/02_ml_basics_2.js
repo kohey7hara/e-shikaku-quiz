@@ -379,6 +379,22 @@ window.quizData = {
         </div>
         <div class="ppl-warn"><strong>試験の罠：</strong>PPLは正解率でも、文章品質・事実性・安全性の保証でもありません。同条件なら小さい方が次トークンへ高い確率を付けていますが、下流タスク性能やハルシネーションの少なさまで必ず優れるとは限りません。</div>
         <p><strong>差の読み方：</strong>平均損失が$\\ln2$だけ下がると、$PPL$は$e^{\\ln2}=2$分の1になります。損失の小さな差が指数変換でPPLの比になる点も計算問題になり得ます。</p>
+        <h3>■ 最後はこの表だけ</h3>
+        <table>
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>予測Positiveの中で正解</td><td><strong>Precision（適合率）</strong></td><td>$TP/(TP+FP)$。誤警報を減らしたい場面。</td></tr>
+            <tr><td>実際のPositiveをどれだけ拾う</td><td><strong>Recall＝TPR</strong><br><small>True Positive Rate（真陽性率）</small></td><td>$TP/(TP+FN)$。見逃しを減らしたい場面。</td></tr>
+            <tr><td>実際のNegativeを正しく陰性</td><td><strong>Specificity＝TNR</strong><br><small>True Negative Rate（真陰性率）</small></td><td>$TN/(TN+FP)$。陰性側の正解率。</td></tr>
+            <tr><td>実際は陰性なのに陽性</td><td><strong>FPR</strong><br><small>False Positive Rate（偽陽性率）</small></td><td>$FP/(FP+TN)=1-$Specificity。</td></tr>
+            <tr><td>PrecisionとRecallの調和平均</td><td><strong>F1-score</strong></td><td>片方だけ高くても高得点にならない。</td></tr>
+            <tr><td>しきい値を動かし、横FPR・縦TPR</td><td><strong>ROC</strong><br><small>Receiver Operating Characteristic curve</small></td><td>左上へ膨らむほどよい。</td></tr>
+            <tr><td>ROC曲線下の面積／順位性能</td><td><strong>AUC</strong><br><small>Area Under the Curve</small></td><td>1が理想、ランダムは約0.5。</td></tr>
+            <tr><td>不均衡データでPrecision対Recall</td><td><strong>PR曲線</strong><br><small>Precision-Recall curve</small></td><td>横Recall・縦Precision。FPの影響が見えやすい。</td></tr>
+            <tr><td>PR曲線を1値に要約</td><td><strong>AP</strong><br><small>Average Precision</small></td><td>Recall増分ごとのPrecisionを積み上げる。</td></tr>
+            <tr><td>多数クラスを同数扱い</td><td><strong>Macro平均</strong></td><td>クラス別指標を単純平均し、少数クラスも重視。</td></tr>
+            <tr><td>大誤差を強く罰す／外れ値に頑健</td><td><strong>RMSE／MAE</strong><br><small>Root Mean Squared Error／Mean Absolute Error</small></td><td>RMSEは二乗平均の平方根、MAEは絶対値の平均。</td></tr>
+            <tr><td>次トークン予測の実効的な迷い</td><td><strong>PPL</strong><br><small>Perplexity（パープレキシティ）</small></td><td>自然対数の平均NLLなら$e^{NLL}$、bitなら$2^{H_2}$。同条件では小さいほどよい。</td></tr>
+        </table>
     `,
 
     questions: [

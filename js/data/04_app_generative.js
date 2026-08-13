@@ -151,8 +151,8 @@ window.quizData = {
 
         <h3>■ E資格対策：重要キーワード</h3>
         <div class="keyword-box">
-            <strong>1. VAEの損失関数 (ELBO)</strong><br>
-            「再構成誤差」＋「正則化項（<strong>KLダイバージェンス</strong>）」の和。<br>
+            <strong>1. VAEの目的関数（ELBOと学習Loss）</strong><br>
+            <strong>ELBOは「再構成対数尤度 − KL項」を最大化</strong>します。これと同じことを、学習Lossでは<strong>「再構成損失 ＋ KL項」（−ELBO）を最小化</strong>して行います。<br>
             ※<strong>Reparameterization Trick</strong>で確率操作を微分可能にする。
         </div>
         <div class="keyword-box">
@@ -164,6 +164,21 @@ window.quizData = {
             <strong>3. モード崩壊 (Mode Collapse)</strong><br>
             GANの学習失敗例。Generatorが「Discriminatorを騙しやすい特定の画像」ばかり生成し、<strong>多様性が失われる</strong>現象。
         </div>
+
+        <h3>■ 最後はこの表だけ</h3>
+        <table class="comp-table">
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>Encoderが $\\mu$ と $\\log\\sigma^2$ などを出す</td><td><strong>VAE</strong><br><small>Variational Autoencoder</small></td><td>潜在変数を点ではなく確率分布として学ぶ。</td></tr>
+            <tr><td>再構成対数尤度−KLを最大化</td><td><strong>ELBO</strong><br><small>Evidence Lower Bound</small></td><td>−ELBOのLossなら「再構成損失＋KL」を最小化する。</td></tr>
+            <tr><td>$z=\\mu+\\sigma\\epsilon$</td><td><strong>Reparameterization Trick</strong></td><td>確率的サンプリングを通して勾配を伝える。</td></tr>
+            <tr><td>生成器と識別器が競う</td><td><strong>GAN</strong><br><small>Generative Adversarial Network</small></td><td>Gが偽物を作り、Dが本物かを判定する。</td></tr>
+            <tr><td>同じ種類ばかり生成</td><td><strong>Mode Collapse</strong></td><td>GANがデータ分布の多様性を表せていない。</td></tr>
+            <tr><td>ラベルなどを条件に生成</td><td><strong>cGAN</strong><br><small>Conditional Generative Adversarial Network</small></td><td>GとDへ条件を与え、生成内容を制御する。</td></tr>
+            <tr><td>ペアなし画像変換・往復で元へ戻る</td><td><strong>CycleGAN</strong></td><td>Cycle-consistency lossで対応画像なしの変換を学ぶ。</td></tr>
+            <tr><td>Wasserstein距離・Lipschitz制約</td><td><strong>WGAN</strong><br><small>Wasserstein Generative Adversarial Network</small></td><td>分布が離れていても有用な学習信号を得やすい。</td></tr>
+            <tr><td>段階的にノイズを加え、逆向きに除去</td><td><strong>DDPM</strong><br><small>Denoising Diffusion Probabilistic Models</small></td><td>逆拡散でノイズからデータを生成する。</td></tr>
+            <tr><td>生成画像の品質と多様性・小さいほど良い</td><td><strong>FID</strong><br><small>Fréchet Inception Distance</small></td><td>実画像と生成画像の特徴分布の距離を測る。</td></tr>
+        </table>
     `,
 
     questions: [

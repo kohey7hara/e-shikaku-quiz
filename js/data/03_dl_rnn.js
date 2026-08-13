@@ -304,21 +304,6 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ 最後の暗記表</h3>
-        <div class="table-wrap">
-            <table class="rnn-comparison">
-                <tr><th>用語</th><th>一言</th><th>セットで覚える</th></tr>
-                <tr><td><strong>BPTT</strong></td><td>時間を遡る逆伝播</td><td>長い連鎖 → 勾配消失・爆発。</td></tr>
-                <tr><td><strong>Truncated BPTT</strong></td><td>一定時刻で逆伝播を打ち切る</td><td>計算・メモリ削減。ただし長期依存は学びにくくなる。</td></tr>
-                <tr><td><strong>勾配クリッピング</strong></td><td>勾配ノルムを閾値以下へ縮小</td><td>勾配<strong>爆発</strong>対策。消失対策ではない。</td></tr>
-                <tr><td><strong>LSTM</strong></td><td>セル＋忘却・入力・出力ゲート</td><td>加算型のセル更新で長期依存を扱いやすい。</td></tr>
-                <tr><td><strong>GRU</strong></td><td>更新・リセットゲート</td><td>独立セルなし。LSTMより軽量。</td></tr>
-                <tr><td><strong>Bidirectional RNN</strong></td><td>前後の文脈を結合</td><td>未来が必要なのでオンライン生成には不向き。</td></tr>
-                <tr><td><strong>Seq2Seq</strong></td><td>Encoderで読み、Decoderで生成</td><td>Attentionなしは固定長ベクトルがボトルネック。</td></tr>
-                <tr><td><strong>Attention</strong></td><td>入力状態の重み付き和</td><td>Score → Softmax → Weighted Sum。</td></tr>
-            </table>
-        </div>
-
         <h3>■ RNNモデル史：何をフィードバックし、何を記憶するか</h3>
         <div class="rnn-model-timeline" aria-label="代表的RNNモデルの歴史">
             <div class="rnn-model-year"><small>1986</small><strong>Jordan</strong><small>出力を戻す</small></div>
@@ -339,10 +324,10 @@ window.quizData = {
         <div class="table-wrap">
             <table class="rnn-comparison rnn-model-table">
                 <tr><th>モデル</th><th>状態・接続</th><th>一言暗記</th><th>設計意図・用途</th></tr>
-                <tr><td><strong>Elman Network</strong></td><td>$h_{t-1}\to h_t$</td><td>隠れ状態をContextへ</td><td>直前の内部表現を現在の計算へ戻す、基本的なSimple RNN。</td></tr>
-                <tr><td><strong>Jordan Network</strong></td><td>$y_{t-1}\to h_t$</td><td>出力をContextへ</td><td>直前の出力をフィードバックし、過去の出力系列を次の状態へ反映。</td></tr>
-                <tr><td><strong>Stacked RNN</strong></td><td>$h_t^{(l-1)}\to h_t^{(l)}$</td><td>時間＋層の深さ</td><td>同じ時刻で下層から上層へ渡し、より抽象的な系列特徴を学ぶ。</td></tr>
-                <tr><td><strong>Bidirectional RNN</strong></td><td>$[\overrightarrow h_t;\overleftarrow h_t]$</td><td>過去＋未来</td><td>全系列が使える分類・ラベリング向け。未来未確定のオンライン生成には不向き。</td></tr>
+                <tr><td><strong>Elman Network</strong></td><td>$h_{t-1}\\to h_t$</td><td>隠れ状態をContextへ</td><td>直前の内部表現を現在の計算へ戻す、基本的なSimple RNN。</td></tr>
+                <tr><td><strong>Jordan Network</strong></td><td>$y_{t-1}\\to h_t$</td><td>出力をContextへ</td><td>直前の出力をフィードバックし、過去の出力系列を次の状態へ反映。</td></tr>
+                <tr><td><strong>Stacked RNN</strong></td><td>$h_t^{(l-1)}\\to h_t^{(l)}$</td><td>時間＋層の深さ</td><td>同じ時刻で下層から上層へ渡し、より抽象的な系列特徴を学ぶ。</td></tr>
+                <tr><td><strong>Bidirectional RNN</strong></td><td>$[\\overrightarrow h_t;\\overleftarrow h_t]$</td><td>過去＋未来</td><td>全系列が使える分類・ラベリング向け。未来未確定のオンライン生成には不向き。</td></tr>
                 <tr><td><strong>LSTM</strong></td><td>$c_t$と$h_t$、3ゲート</td><td>加算型セル更新</td><td>勾配を長く伝えやすくし、長期依存を扱う。忘却・入力・出力ゲート。</td></tr>
                 <tr><td><strong>GRU</strong></td><td>$h_t$、2ゲート</td><td>セルなしで軽量</td><td>更新・リセットゲートで新旧情報を調整。LSTMよりパラメータが少ない。</td></tr>
                 <tr><td><strong>Echo State Network</strong></td><td>固定Reservoir＋学習する出力</td><td>内部重みを学習しない</td><td>ランダムな再帰層で豊かな動的特徴を作り、通常は出力重みだけ学習。</td></tr>
@@ -446,11 +431,22 @@ window.quizData = {
             </table>
         </div>
 
-        <h3>■ モデル名から一語を返す</h3>
+        <h3>■ 最後はこの表だけ</h3>
         <div class="table-wrap">
-            <table class="rnn-comparison rnn-model-table">
-                <tr><th>Elman</th><th>Jordan</th><th>LSTM</th><th>GRU</th><th>ESN</th><th>CTC</th></tr>
-                <tr><td>Hidden feedback</td><td>Output feedback</td><td>Cell＋3 gates</td><td>2 gates</td><td>Fixed reservoir</td><td>blank＋collapse</td></tr>
+            <table class="rnn-comparison">
+                <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+                <tr><td>隠れ状態を次時刻へ渡す</td><td><strong>RNN（Recurrent Neural Network）</strong></td><td>過去の状態を使って系列を順に処理する。</td></tr>
+                <tr><td>時間方向へ展開して逆伝播</td><td><strong>BPTT（Backpropagation Through Time）</strong></td><td>時間を層のように見なし、誤差を過去へ伝える。</td></tr>
+                <tr><td>勾配ノルムが閾値を超えた</td><td><strong>Gradient Clipping</strong></td><td>勾配爆発を抑えるが、勾配消失の解決策ではない。</td></tr>
+                <tr><td>セル状態・忘却／入力／出力ゲート</td><td><strong>LSTM（Long Short-Term Memory）</strong></td><td>加算型のセル更新で長期依存を扱いやすくする。</td></tr>
+                <tr><td>更新／リセットゲート・独立セルなし</td><td><strong>GRU（Gated Recurrent Unit）</strong></td><td>LSTMより単純でパラメータが少ない。</td></tr>
+                <tr><td>過去と未来の両方を参照</td><td><strong>BiRNN（Bidirectional Recurrent Neural Network）</strong></td><td>全系列が必要なためオンライン生成には不向き。</td></tr>
+                <tr><td>Encoderで読み、Decoderで生成</td><td><strong>Seq2Seq（Sequence-to-Sequence）</strong></td><td>長さの異なる系列同士を変換できる。</td></tr>
+                <tr><td>Score → Softmax → 重み付き和</td><td><strong>Attention</strong></td><td>Decoderが必要なEncoder状態を生成時に直接参照する。</td></tr>
+                <tr><td>blank・重複をまとめる・位置合わせ不要</td><td><strong>CTC（Connectionist Temporal Classification）</strong></td><td>全alignment経路の確率を合計する。</td></tr>
+                <tr><td>固定されたランダムなReservoir</td><td><strong>ESN（Echo State Network）</strong></td><td>通常は再帰層を固定し、出力重みだけを学習する。</td></tr>
+                <tr><td>前後文脈＋ラベル遷移</td><td><strong>BiLSTM–CRF</strong></td><td>BiLSTM（Bidirectional LSTM）とCRF（Conditional Random Field）を組み合わせる。</td></tr>
+                <tr><td>Hiddenを戻す／Outputを戻す</td><td><strong>Elman／Jordan Network</strong></td><td>Elmanは隠れ状態、Jordanは出力をフィードバックする。</td></tr>
             </table>
         </div>
     `,
@@ -599,9 +595,9 @@ window.quizData = {
         {
             category: "RNNのパラメータ数(応用)",
             question: "入力次元 $D$、隠れ層次元 $H$ の単純なRNNにおける、1ステップ分のパラメータ数はおよそいくつか（バイアス含む）。",
-            options: ["$H(H + D + 1)$", "$H^2$", "$D^2$", "$H \times D$"],
+            options: ["$H(H + D + 1)$", "$H^2$", "$D^2$", "$H \\times D$"],
             answer: 0,
-            explanation: "入力への重み($H \times D$)、前状態への重み($H \times H$)、バイアス($H$)の合計が必要です。"
+            explanation: "入力への重み($H \\times D$)、前状態への重み($H \\times H$)、バイアス($H$)の合計が必要です。"
         },
         {
             category: "Global Attention(応用)",

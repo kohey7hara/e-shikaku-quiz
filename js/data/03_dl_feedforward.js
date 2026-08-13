@@ -457,6 +457,20 @@ window.quizData = {
                 <code>[0.7, 0.2, 0.1]</code>
             </div>
         </div>
+        <h3>■ 最後はこの表だけ</h3>
+        <table>
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>$z=Wx+b$を層状に重ねる</td><td><strong>MLP</strong><br><small>Multi-Layer Perceptron（多層パーセプトロン）</small></td><td>全結合層の間に非線形な活性化関数を挟む。</td></tr>
+            <tr><td>連続値をそのまま予測</td><td><strong>恒等関数＋MSE／MAE</strong><br><small>Mean Squared Error／Mean Absolute Error</small></td><td>MSEは二乗、MAEは絶対値で回帰誤差を測る。</td></tr>
+            <tr><td>Yes／Noを1個出力</td><td><strong>Sigmoid＋BCE</strong><br><small>Binary Cross-Entropy（二値交差エントロピー）</small></td><td>1個の独立な確率を0〜1へ変換する。</td></tr>
+            <tr><td>排他的な$K$クラスから1つ</td><td><strong>Softmax＋CE</strong><br><small>Cross-Entropy（交差エントロピー）</small></td><td>$K$出力の合計を1にする。</td></tr>
+            <tr><td>複数ラベルが同時に正解</td><td><strong>各クラス独立Sigmoid＋BCE</strong></td><td>クラス同士を排他的にしない。</td></tr>
+            <tr><td>$K$段階に順序がある</td><td><strong>累積型の順序回帰・$K-1$境界</strong></td><td>大小関係を利用し、各境界を超えたか判定する代表方式。</td></tr>
+            <tr><td>正ならそのまま、負なら0</td><td><strong>ReLU</strong><br><small>Rectified Linear Unit</small></td><td>正側の勾配を保つが、負側はDying ReLUに注意。</td></tr>
+            <tr><td>負側にも小さな傾きを残す</td><td><strong>Leaky ReLU</strong></td><td>負側の勾配を完全な0にしない。</td></tr>
+            <tr><td>滑らかなReLU・Transformerで頻出</td><td><strong>GELU</strong><br><small>Gaussian Error Linear Unit</small></td><td>負側もわずかに通す滑らかな活性化。</td></tr>
+            <tr><td>全結合層のパラメータ数</td><td><strong>入力数×出力数＋出力数</strong></td><td>重みの本数に、出力ノードごとのバイアスを足す。</td></tr>
+        </table>
     `,
 
     questions: [

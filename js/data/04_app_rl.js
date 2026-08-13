@@ -84,7 +84,7 @@ window.quizData = {
                 <ul class="tech-list">
                     <li><strong>Actor</strong>: 行動を決める（方策）。</li>
                     <li><strong>Critic</strong>: 行動を採点する（価値）。</li>
-                    <li><span class="good">強み</span>: 安定かつ高速。現在の主流。</li>
+                    <li><span class="good">強み</span>: 方策と価値推定を組み合わせる代表的な構成。</li>
                 </ul>
             </div>
         </div>
@@ -93,7 +93,7 @@ window.quizData = {
         <table class="comp-table">
             <tr><th>モデル</th><th>仕組み・キーワード</th><th>特徴</th></tr>
             <tr>
-                <td><strong>DQN</strong><br>(Deep Q-Net)</td>
+                <td><strong>DQN</strong><br>(Deep Q-Network)</td>
                 <td>
                     従来のQ学習をDeep化。<br>
                     <div class="dqn-features">
@@ -120,7 +120,7 @@ window.quizData = {
             <tr>
                 <td><strong>Rainbow</strong></td>
                 <td>DQNの改良版全部入り。<br>(Double, Dueling, Noisy, Multi-step, etc.)</td>
-                <td>DQN系で最強の性能。</td>
+                <td>Double・Dueling・Noisyなど複数のDQN改良を統合。</td>
             </tr>
         </table>
 
@@ -130,6 +130,22 @@ window.quizData = {
             <li><strong>割引率 $\\gamma$ (Gamma)</strong>: 未来の報酬をどれくらい割り引いて評価するか。0なら現在のみ、1なら永遠の未来まで考慮。</li>
             <li><strong>ベルマン方程式</strong>: 「現在の価値」＝「即時報酬」＋「次の状態の価値（割引あり）」という再帰的な関係式。強化学習の根幹。</li>
         </ul>
+
+        <h3>■ 最後はこの表だけ</h3>
+        <table class="comp-table">
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>状態・行動・報酬・遷移</td><td><strong>MDP</strong><br><small>Markov Decision Process</small></td><td>現在の状態を基に意思決定する基本的な数理モデル。</td></tr>
+            <tr><td>将来報酬の割引和を最大化</td><td><strong>Return $G_t$</strong></td><td>$\\gamma$ が小さいほど直近の報酬を重視する。</td></tr>
+            <tr><td>即時報酬＋次状態の推定値</td><td><strong>TD学習</strong><br><small>Temporal-Difference Learning</small></td><td>最終結果を待たず、1段先の推定値で更新する。</td></tr>
+            <tr><td>Q値をニューラルネットで近似</td><td><strong>DQN</strong><br><small>Deep Q-Network</small></td><td>離散行動の価値 $Q(s,a)$ を出力する。</td></tr>
+            <tr><td>経験をランダム再利用</td><td><strong>Experience Replay</strong></td><td>連続データの相関を弱め、学習を安定させる。</td></tr>
+            <tr><td>TD target計算用ネットを一時固定</td><td><strong>Target Network</strong></td><td>動く予測を動く目標で追う不安定さを抑える。</td></tr>
+            <tr><td>過去の別方策データでも学ぶ</td><td><strong>Off-policy</strong></td><td>Q学習・DQNは現在の方策以外の経験も利用できる。</td></tr>
+            <tr><td>Actorが行動、Criticが採点</td><td><strong>Actor-Critic</strong></td><td>方策と価値推定を組み合わせる。</td></tr>
+            <tr><td>複数workerが非同期更新</td><td><strong>A3C</strong><br><small>Asynchronous Advantage Actor-Critic</small></td><td>異なる経験を並行して集め、相関を弱める。</td></tr>
+            <tr><td>方策更新を急に変えない・clip</td><td><strong>PPO</strong><br><small>Proximal Policy Optimization</small></td><td>更新幅を制限して方策勾配を安定させる。</td></tr>
+            <tr><td>観測だけでは真の状態が分からない</td><td><strong>POMDP</strong><br><small>Partially Observable Markov Decision Process</small></td><td>履歴や内部状態から見えない情報を補う必要がある。</td></tr>
+        </table>
     `,
 
     questions: [

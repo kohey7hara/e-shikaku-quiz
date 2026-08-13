@@ -62,6 +62,20 @@ window.quizData = {
             </li>
             <li><strong>次元の呪い</strong>: 次元が増えると空間の体積が爆発的に増え、データがスカスカになる現象。<br>→ 近傍法などが機能しなくなるため、次元削減が必要。</li>
         </ul>
+
+        <h3>■ 最後はこの表だけ</h3>
+        <table>
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>定規で測る直線距離</td><td><strong>ユークリッド距離（$L_2$）</strong></td><td>座標差を二乗和し、平方根を取る。</td></tr>
+            <tr><td>碁盤目・絶対値の和</td><td><strong>マンハッタン距離（$L_1$）</strong></td><td>各軸に沿った移動量を足す。</td></tr>
+            <tr><td>長さを無視して向きだけ比較</td><td><strong>コサイン距離</strong></td><td>$1-$コサイン類似度。文章ベクトルにも使う。</td></tr>
+            <tr><td>分散・相関を考慮した異常度</td><td><strong>マハラノビス距離</strong></td><td>ばらつきの大きい方向を割り引く。</td></tr>
+            <tr><td>近い$k$個の多数決</td><td><strong>k-NN</strong><br><small>k-Nearest Neighbors（k近傍法）</small></td><td>$k$が小さすぎると複雑、大きすぎると単純。</td></tr>
+            <tr><td>軸で空間を再帰分割し近傍探索</td><td><strong>kd-tree</strong><br><small>k-dimensional tree</small></td><td>低次元の厳密近傍探索を高速化する。</td></tr>
+            <tr><td>訓練・テストとも悪い／単純すぎる</td><td><strong>未学習・高バイアス</strong></td><td>データの規則そのものを捉えられていない。</td></tr>
+            <tr><td>訓練だけ良く、テストが悪い</td><td><strong>過学習・高バリアンス</strong></td><td>訓練データのノイズまで覚えている。</td></tr>
+            <tr><td>高次元で近傍が遠く、空間が疎</td><td><strong>次元の呪い</strong></td><td>次元削減やデータ増加が必要になる。</td></tr>
+        </table>
     `,
 
     questions: [

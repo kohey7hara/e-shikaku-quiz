@@ -167,6 +167,21 @@ window.quizData = {
             <tr><td><strong>学習率</strong></td><td>更新の歩幅</td><td>大きすぎれば発散、小さすぎれば停滞。汎化にも影響する。</td></tr>
         </table>
         <div class="reg-memory"><strong>一言で覚える：</strong>L1は「0を作る」、L2は「全体を縮める」、Dropoutは「点を消す」、DropConnectは「線を消す」、Early Stoppingは「検証損失の谷で戻す」。</div>
+
+        <h3>■ 最後はこの表だけ</h3>
+        <table>
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>絶対値ペナルティ／スパース化</td><td><strong>L1正則化（Lasso）</strong><br><small>Least Absolute Shrinkage and Selection Operator</small></td><td>ひし形の角で接し、重みをちょうど0にしやすい。</td></tr>
+            <tr><td>二乗ペナルティ／全体を小さく</td><td><strong>L2正則化（Ridge）</strong></td><td>大きな重みを強く罰し、滑らかに縮める。</td></tr>
+            <tr><td>更新ごとに重みを直接縮める</td><td><strong>weight decay</strong></td><td>SGD（Stochastic Gradient Descent）ではL2と同じ更新形。</td></tr>
+            <tr><td>適応的勾配更新と重み減衰を分離</td><td><strong>AdamW</strong><br><small>Adaptive Moment Estimation with decoupled Weight Decay</small></td><td>L2項を適応的学習率で歪めず、別に減衰させる。</td></tr>
+            <tr><td>ニューロンをランダムに無効化</td><td><strong>Dropout</strong></td><td>特定ノード同士の共適応を抑える。</td></tr>
+            <tr><td>重み・結合をランダムに無効化</td><td><strong>DropConnect</strong></td><td>点を消すDropoutに対し、線を消す。</td></tr>
+            <tr><td>学習時に生存値を$1/(1-p)$倍（$p$はドロップ率）</td><td><strong>Inverted Dropout</strong></td><td>期待値をそろえるため、推論時の倍率調整は不要。</td></tr>
+            <tr><td>検証指標が改善しない</td><td><strong>Early Stopping</strong></td><td>最後ではなく、検証性能が最良の重みへ戻す。</td></tr>
+            <tr><td>小さめバッチの勾配ノイズ</td><td><strong>陰的正則化</strong></td><td>汎化に役立つ場合があるが、小さいほど良いとは限らない。</td></tr>
+            <tr><td>学習率が大きすぎる／小さすぎる</td><td><strong>発散／停滞</strong></td><td>学習率は最適化だけでなく、到達する解の汎化にも影響する。</td></tr>
+        </table>
     `,
 
     questions: [

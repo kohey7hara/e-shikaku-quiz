@@ -112,24 +112,15 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ まとめ：E資格のツボ</h3>
+        <h3>■ 最後はこの表だけ</h3>
         <table class="summary-table">
-            <tr><th>モデル/手法</th><th>キーワード</th><th>Word2Vecとの違い</th></tr>
-            <tr>
-                <td><strong>ELMo</strong></td>
-                <td>Bi-LSTM<br>文脈化単語埋め込み</td>
-                <td>ベクトルが<strong>可変</strong>（文脈による）。<br>Word2Vecは固定。</td>
-            </tr>
-            <tr>
-                <td><strong>fastText</strong></td>
-                <td>Subword (部分語)<br>文字n-gram</td>
-                <td>単語の中身（文字の並び）を見る。<br><strong>未知語</strong>に強い。</td>
-            </tr>
-            <tr>
-                <td><strong>BPE /<br>SentencePiece</strong></td>
-                <td>サブワード分割<br>語彙数削減</td>
-                <td>前処理の技術。<br>未知語をなくし、効率的に学習させる。</td>
-            </tr>
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>同じ単語でも文脈でベクトルが変わる</td><td><strong>ELMo（Embeddings from Language Models）</strong></td><td>BiLSTM（Bidirectional Long Short-Term Memory）で前後文脈を使う。</td></tr>
+            <tr><td>文字n-gram・綴りの一部を利用</td><td><strong>fastText</strong></td><td>既知の部分文字列を組み合わせ、OOVへ対応しやすい。</td></tr>
+            <tr><td>学習語彙に存在しない語</td><td><strong>OOV（Out-of-Vocabulary）</strong></td><td>文字・サブワード単位なら未知語を分解して扱える。</td></tr>
+            <tr><td>最頻出の隣接ペアを反復して結合</td><td><strong>BPE（Byte Pair Encoding）</strong></td><td>頻出列を1 token、レア語を複数tokenへ分ける。</td></tr>
+            <tr><td>空白分割に依存せず生テキストから学習</td><td><strong>SentencePiece</strong></td><td>言語固有の形態素解析なしでサブワード化できる。</td></tr>
+            <tr><td>固定語彙を抑えつつ未知語も扱う</td><td><strong>Subword Tokenization</strong></td><td>単語と文字の中間単位でBPEやSentencePieceが使われる。</td></tr>
         </table>
     `,
 

@@ -452,16 +452,22 @@ window.quizData = {
             </table>
         </div>
 
-        <h3>■ 最後の暗記表</h3>
+        <h3>■ 最後はこの表だけ</h3>
         <div class="tr-table-wrap">
             <table class="tr-comparison">
-                <tr><th>用語</th><th>一言</th><th>セットで覚える</th></tr>
-                <tr><td>Scaled Dot-Product</td><td>$QK^T/\\sqrt{d_k}$</td><td>Scale → Mask → Softmax → Value。</td></tr>
-                <tr><td>Self-Attention</td><td>Q/K/Vが同じ入力元</td><td>Encoderは全体、DecoderはCausal Mask。</td></tr>
-                <tr><td>Cross-Attention</td><td>QがDecoder、K/VがEncoder</td><td>出力側が入力側を検索。</td></tr>
-                <tr><td>Multi-Head</td><td>複数視点を並列計算</td><td>Concat後に $W^O$。</td></tr>
-                <tr><td>Positional Encoding</td><td>順序情報を入力へ加算</td><td>原論文はsin/cos。</td></tr>
-                <tr><td>計算量</td><td>Self-Attentionは系列長に対し $O(n^2d)$</td><td>Score行列が $n\\times n$。</td></tr>
+                <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+                <tr><td>検索語／見出し／取り出す中身</td><td><strong>Q／K／V（Query／Key／Value）</strong></td><td>$QK^T$で関連度を求め、重みに応じて$V$を混ぜる。</td></tr>
+                <tr><td>内積を√dₖで割る</td><td><strong>Scaled Dot-Product Attention</strong></td><td>Softmaxの飽和と勾配の弱まりを防ぐ。</td></tr>
+                <tr><td>Q・K・Vが同じ入力元</td><td><strong>Self-Attention</strong></td><td>同じ系列内のトークン同士を参照する。</td></tr>
+                <tr><td>QはDecoder、K/VはEncoder</td><td><strong>Cross-Attention</strong></td><td>出力側が入力系列の情報を検索する。</td></tr>
+                <tr><td>Attention行列の右上を−∞</td><td><strong>Causal Mask</strong></td><td>自己回帰生成で未来のトークンを見せない。</td></tr>
+                <tr><td>複数Headを並列 → Concat → $W^O$</td><td><strong>MHA（Multi-Head Attention）</strong></td><td>異なる表現部分空間を複数視点で見る。</td></tr>
+                <tr><td>各位置へ同じ2層全結合を適用</td><td><strong>FFN（Feed-Forward Network）</strong></td><td>位置ごとに独立して特徴を変換する。</td></tr>
+                <tr><td>Token embeddingへ順序情報を加算</td><td><strong>PE（Positional Encoding）</strong></td><td>Attentionだけでは語順を区別できない。</td></tr>
+                <tr><td>双方向理解・分類</td><td><strong>Encoder-only</strong></td><td>BERTなど。入力全体を相互参照する。</td></tr>
+                <tr><td>左から右へ次トークン生成</td><td><strong>Decoder-only</strong></td><td>GPTなど。Causal Maskで自己回帰する。</td></tr>
+                <tr><td>入力系列を読み、別系列を生成</td><td><strong>Encoder–Decoder</strong></td><td>翻訳などでCross-Attentionを使う。</td></tr>
+                <tr><td>系列長$n$でScoreが$n×n$</td><td><strong>$O(n^2d)$</strong></td><td>Self-Attentionの主要計算量は系列長の二乗で増える。</td></tr>
             </table>
         </div>
     `,

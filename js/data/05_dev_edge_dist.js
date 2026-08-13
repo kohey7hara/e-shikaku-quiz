@@ -124,13 +124,21 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ E資格対策：重要キーワード比較</h3>
+        <h3>■ 最後はこの表だけ</h3>
         <table class="comp-table">
-            <tr><th>用語</th><th>内容</th><th>試験のツボ</th></tr>
-            <tr><td><strong>QAT</strong><br>(Quantization Aware Training)</td><td><strong>学習中</strong>に量子化をシミュレーションして、劣化しにくい重みを見つける。</td><td>推論時に行うPTQより<strong>精度が高い</strong>。</td></tr>
-            <tr><td><strong>MobileNet</strong></td><td><strong>Depthwise Separable Conv</strong>を用いた軽量モデル。</td><td>通常の畳み込みより計算量を劇的に削減。</td></tr>
-            <tr><td><strong>All-Reduce</strong></td><td>全GPUのデータを集計(Reduce)し、全GPUに配る(Broadcast)通信アルゴリズム。</td><td><strong>Ring All-Reduce</strong>などの効率化手法がある。</td></tr>
-            <tr><td><strong>同期型 vs 非同期型</strong></td><td>同期型は全員の計算を待つ。非同期型（パラメータサーバ）は待たない。</td><td>現在は精度が安定する<strong>同期型</strong>が主流。</td></tr>
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>小さい重み・チャネルを削る</td><td><strong>Pruning</strong></td><td>枝刈りで疎または小さいモデルにする。</td></tr>
+            <tr><td>FP32をINT8へ変換</td><td><strong>Quantization</strong></td><td>格納量とメモリ帯域、対応演算のコストを減らす。</td></tr>
+            <tr><td>学習後に量子化</td><td><strong>PTQ</strong><br><small>Post-Training Quantization</small></td><td>導入は容易だが、QATより精度が落ちやすい。</td></tr>
+            <tr><td>学習中に量子化誤差を模擬</td><td><strong>QAT</strong><br><small>Quantization-Aware Training</small></td><td>量子化後の精度を保ちやすい。</td></tr>
+            <tr><td>教師のsoft targetを生徒へ</td><td><strong>Knowledge Distillation</strong></td><td>正解ラベルだけでなくクラス間の類似度も伝える。</td></tr>
+            <tr><td>空間処理とチャネル混合を分離</td><td><strong>MobileNet</strong><br><small>Depthwise Separable Convolution</small></td><td>通常畳み込みを分解して計算量を減らす。</td></tr>
+            <tr><td>同じモデル・異なるデータ</td><td><strong>Data Parallelism / DDP</strong><br><small>Distributed Data Parallel</small></td><td>各GPUの勾配を同期して同じ重みを保つ。</td></tr>
+            <tr><td>1台に載らない巨大モデルを分割</td><td><strong>Model Parallelism</strong></td><td>層やテンソルを複数GPUへ分ける。</td></tr>
+            <tr><td>全GPUで集計し全GPUへ配布</td><td><strong>All-Reduce</strong></td><td>データ並列の勾配同期に使い、Ring方式は通信を分散する。</td></tr>
+            <tr><td>FP16/BF16とFP32を使い分ける</td><td><strong>AMP</strong><br><small>Automatic Mixed Precision</small></td><td>速度・メモリ効率を上げ、必要箇所は精度を保つ。</td></tr>
+            <tr><td>optimizer状態などの重複を分割</td><td><strong>ZeRO</strong><br><small>Zero Redundancy Optimizer</small></td><td>データ並列で各GPUが重複保持するメモリを減らす。</td></tr>
+            <tr><td>全workerを待つ／待たない</td><td><strong>同期型／非同期型</strong></td><td>同期型は安定しやすく、非同期型は古い勾配に注意する。</td></tr>
         </table>
     `,
 

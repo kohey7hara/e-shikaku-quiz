@@ -21,6 +21,12 @@ window.quizData = {
             .img-svg-mini { font-size: 9px; fill: #627d98; }
             .img-caption { padding: 0 15px 13px; color: #334e68; line-height: 1.7; }
             .img-link-map { margin: 9px 0 20px; padding: 11px 13px; border: 1px dashed #9fb3c8; border-radius: 8px; background: #f8fafc; line-height: 1.75; }
+            .img-nms-answer { margin-top: 12px; padding: 12px; overflow-x: auto; border: 1px solid #c8dbee; border-radius: 10px; background: #f8fbfe; }
+            .img-nms-answer table { width: 100%; min-width: 680px; border-collapse: collapse; }
+            .img-nms-answer th, .img-nms-answer td { padding: 8px; border: 1px solid #d7e2ec; text-align: left; vertical-align: top; }
+            .img-nms-answer th { background: #eaf2fb; }
+            .img-nms-answer .keep { color: #137a55; font-weight: 800; }
+            .img-nms-answer .drop { color: #c0392b; font-weight: 800; }
         </style>
 
         <h3>■ まず3つ：出力が違う</h3>
@@ -58,6 +64,29 @@ window.quizData = {
             <div class="img-caption"><strong>一言暗記：</strong>分類＝1画像1答／検出＝物体ごとに枠／セグメンテーション＝画素ごとに色分け。</div>
         </div>
         <div class="img-link-map"><strong>章の分担：</strong>畳み込みの出力形状・重み数・受容野・AlexNet／VGGなどの比較史は <a href="quiz.html?id=03_dl_cnn">3-（4）CNN</a>、Precision／Recall／PR曲線の一般原理は <a href="quiz.html?id=02_ml_basics_2">2-（1）機械学習 Vol.2</a>。本章は画像モデルと応用タスクの流れに集中します。</div>
+
+        <h3>■ 略語は最初にこれだけ：正式名称＋一言</h3>
+        <div class="img-core">略語は丸暗記せず、<strong>正式名称から役割を思い出す</strong>と整理できます。同じ略語が問題文に再登場したときは、この表へ戻ってください。</div>
+        <div class="img-table-wrap">
+            <table class="img-table">
+                <tr><th>略語（正式名称）</th><th>簡単にいうと</th></tr>
+                <tr><td><strong>CNN</strong>（Convolutional Neural Network）</td><td>畳み込みで画像の局所特徴を取り出すネットワーク。</td></tr>
+                <tr><td><strong>ResNet</strong>（Residual Network）</td><td>入力を近道させ、変換結果と足す画像モデル。</td></tr>
+                <tr><td><strong>ViT</strong>（Vision Transformer）／<strong>CLS</strong>（Classification token）</td><td>画像をPatch列として処理し、CLSを分類結果の代表にする。</td></tr>
+                <tr><td><strong>Swin</strong>（Shifted Window Transformer）</td><td>局所窓を次層でずらし、窓をまたぐ情報もつなぐ。</td></tr>
+                <tr><td><strong>R-CNN</strong>（Region-based Convolutional Neural Network）</td><td>候補領域ごとに詳しく調べる2ステージ検出系。</td></tr>
+                <tr><td><strong>RPN</strong>（Region Proposal Network）／<strong>ROI</strong>（Region of Interest）</td><td>RPNが物体らしい候補を作り、ROIとして詳しく調べる。</td></tr>
+                <tr><td><strong>YOLO</strong>（You Only Look Once）</td><td>画像を1回のネットワーク処理で検出する1ステージ系。</td></tr>
+                <tr><td><strong>SSD</strong>（Single Shot MultiBox Detector）</td><td>複数解像度とDefault Boxを使う1ステージ検出器。</td></tr>
+                <tr><td><strong>FCOS</strong>（Fully Convolutional One-Stage Object Detection）</td><td>Anchorを置かず、各位置からBoxを直接予測する検出器。</td></tr>
+                <tr><td><strong>FPN</strong>（Feature Pyramid Network）</td><td>高・低解像度の特徴を組み合わせ、大小の物体を扱う。</td></tr>
+                <tr><td><strong>NMS</strong>（Non-Maximum Suppression）</td><td>同じ物体に重なった複数Boxから、代表だけを残す後処理。</td></tr>
+                <tr><td><strong>IoU</strong>（Intersection over Union）</td><td>2つのBoxの「重なり÷和集合」。0〜1で重なりを測る。</td></tr>
+                <tr><td><strong>AP／mAP</strong>（Average Precision／mean Average Precision）</td><td>PR曲線からAPを求め、クラスごとに平均したものがmAP。</td></tr>
+                <tr><td><strong>FCN</strong>（Fully Convolutional Network）</td><td>全結合層を使わず、画素ごとのマスクを出すネットワーク。</td></tr>
+                <tr><td><strong>GT／TP／FP</strong>（Ground Truth／True Positive／False Positive）</td><td>正解データ／正しく検出／誤って検出。</td></tr>
+            </table>
+        </div>
 
         <h3>■ 1. 画像認識：ResNet系とViT系</h3>
         <div class="img-table-wrap">
@@ -177,14 +206,14 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ IoU・NMS・mAP：役割を混ぜない</h3>
+        <h3>■ IoU（重なり）・NMS（重複除去）・mAP（全体評価）：役割を混ぜない</h3>
         <div class="img-visual-wrap">
             <div class="img-visual-card">
                 <svg class="img-wide-svg" viewBox="0 0 960 270" role="img" aria-label="IoU、NMS、mAPの役割の違い">
                     <rect x="18" y="25" width="290" height="215" rx="11" fill="#eef7fb" stroke="#2780b8" stroke-width="2"/><text x="130" y="50" class="img-svg-title">IoU</text>
                     <rect x="63" y="73" width="105" height="82" fill="#63c5da" opacity=".55" stroke="#2780b8" stroke-width="2"/><rect x="119" y="104" width="105" height="82" fill="#f8c471" opacity=".55" stroke="#f39c12" stroke-width="2"/><rect x="119" y="104" width="49" height="51" fill="#8dd3a8" opacity=".9"/><text x="49" y="207" class="img-svg-label">重なり ÷ 和集合</text><text x="54" y="225" class="img-svg-note">予測同士／予測とGTを比較</text>
                     <rect x="335" y="25" width="290" height="215" rx="11" fill="#fff8e7" stroke="#f39c12" stroke-width="2"/><text x="450" y="50" class="img-svg-title">NMS</text>
-                    <g fill="none" stroke-width="3"><rect x="377" y="82" width="118" height="87" stroke="#27ae60"/><rect x="392" y="94" width="118" height="87" stroke="#e67e22" stroke-dasharray="6,4" opacity=".65"/><rect x="472" y="71" width="103" height="82" stroke="#9b59b6"/></g><text x="374" y="76" class="img-svg-mini">.92 残す</text><path d="M483 95 L510 122 M510 95 L483 122" stroke="#d64545" stroke-width="5"/><text x="368" y="207" class="img-svg-label">同クラス・高IoUを抑制</text><text x="388" y="225" class="img-svg-note">予測Box vs 予測Box</text>
+                    <g fill="none" stroke-width="3"><rect x="377" y="82" width="118" height="87" stroke="#27ae60"/><rect x="392" y="94" width="118" height="87" stroke="#d64545" stroke-dasharray="6,4" opacity=".65"/><rect x="472" y="71" width="103" height="82" stroke="#9b59b6"/></g><text x="374" y="76" class="img-svg-mini">A .92 残す</text><text x="401" y="191" class="img-svg-mini" fill="#d64545">B .81 抑制</text><text x="504" y="67" class="img-svg-mini">C .54 残す</text><text x="368" y="207" class="img-svg-label">同クラス・高IoUを抑制</text><text x="388" y="225" class="img-svg-note">予測Box vs 予測Box</text>
                     <rect x="652" y="25" width="290" height="215" rx="11" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/><text x="759" y="50" class="img-svg-title">mAP</text>
                     <path d="M695 174 V77 M695 174 H902" stroke="#627d98"/><path d="M696 88 L737 99 L780 112 L823 139 L895 163" fill="none" stroke="#27ae60" stroke-width="3"/><path d="M696 88 L737 99 L780 112 L823 139 L895 163 L895 174 L696 174 Z" fill="#82e0aa" opacity=".35"/><text x="680" y="69" class="img-svg-mini">Precision</text><text x="863" y="190" class="img-svg-mini">Recall</text><text x="690" y="207" class="img-svg-label">PR面積APをクラス平均</text><text x="686" y="225" class="img-svg-note">予測 vs GTのIoUでTP／FP</text>
                 </svg>
@@ -192,7 +221,7 @@ window.quizData = {
             <div class="img-caption"><strong>正しい流れ：</strong>予測 → scoreで絞る → NMS（予測Box同士のIoU）→ 正解GTと照合（予測BoxとGTのIoU）→ TP／FP → PR曲線・AP → クラス平均がmAP。</div>
         </div>
         <div class="img-formula">$\\displaystyle IoU=\\frac{|A\\cap B|}{|A\\cup B|}=\\frac{I}{|A|+|B|-I},\\qquad mAP=\\frac{1}{C}\\sum_{c=1}^{C}AP_c$</div>
-        <div class="img-note"><strong>NMSの3手：</strong>①同じクラスでscore最大のBoxを残す → ②そのBoxとIoUが閾値を超える重複Boxを抑制 → ③残りで繰り返す。閾値が低いほど強く消すため、近接した別物体まで消す場合があります。</div>
+        <div class="img-note"><strong>NMS（Non-Maximum Suppression）の3手：</strong>①同じクラスでscore最大のBoxを残す → ②そのBoxとIoUが閾値を超える重複Boxを抑制 → ③残りで繰り返す。ここでの閾値は<strong>scoreの合格点ではなく、Box同士のIoU閾値</strong>です。閾値が低いほど強く消すため、近接した別物体まで消す場合があります。</div>
         <div class="img-core"><strong>mAPの表記：</strong>mAP@0.5はIoU 0.5以上を一致とする評価。mAP@[0.5:0.95]は複数のIoU閾値でも平均するため、Box位置の正確さまで厳しく見ます。</div>
 
         <h3>■ 3. セグメンテーション：誰まで分ける？</h3>
@@ -222,13 +251,13 @@ window.quizData = {
                 <tr><td>深さの代わりにチャネルを広く</td><td><strong>WideResNet</strong></td></tr>
                 <tr><td>分類用の特別token／場所を付与</td><td><strong>CLS token／Position embedding</strong></td></tr>
                 <tr><td>局所窓を次層でずらす</td><td><strong>Swin Transformer</strong></td></tr>
-                <tr><td>候補領域を学習</td><td><strong>RPN／Faster R-CNN</strong></td></tr>
-                <tr><td>丸めを避け双線形補間</td><td><strong>ROI Align</strong></td></tr>
-                <tr><td>複数スケール＋Default Box＋難しい背景</td><td><strong>SSD</strong></td></tr>
-                <tr><td>Anchor-Free＋FPN＋Centerness</td><td><strong>FCOS</strong></td></tr>
-                <tr><td>重複Boxを抑制</td><td><strong>NMS</strong></td></tr>
+                <tr><td>候補領域を学習</td><td><strong>RPN</strong>（Region Proposal Network）／Faster R-CNN</td></tr>
+                <tr><td>丸めを避け双線形補間</td><td><strong>ROI Align</strong><br><small>ROI: Region of Interest（候補領域）</small><br>座標を丸めず補間し、位置ずれを抑える。</td></tr>
+                <tr><td>複数スケール＋Default Box＋難しい背景</td><td><strong>SSD</strong>（Single Shot MultiBox Detector）</td></tr>
+                <tr><td>Anchor-Free＋FPN＋Centerness</td><td><strong>FCOS</strong>（Fully Convolutional One-Stage Object Detection）</td></tr>
+                <tr><td>重複Boxを抑制</td><td><strong>NMS</strong>（Non-Maximum Suppression）</td></tr>
                 <tr><td>同解像度Skipで細部を戻す</td><td><strong>U-Net</strong></td></tr>
-                <tr><td>class＋個体IDを全画素へ</td><td><strong>Panoptic Segmentation</strong></td></tr>
+                <tr><td>全画素にclass、thingには個体IDも付与</td><td><strong>Panoptic Segmentation</strong></td></tr>
             </table>
         </div>
     `,
@@ -372,9 +401,9 @@ window.quizData = {
         },
         {
             id: "img-rpn-output",
-            category: "Faster R-CNN（RPN）",
+            category: "RPN（候補領域）",
             difficulty: "標準",
-            question: "RPNが各Anchorについて主に予測するものはどれか。",
+            question: "Faster R-CNNのRPN（Region Proposal Network：候補領域を作るネットワーク）が、各Anchorについて主に予測するものはどれか。",
             options: ["物体らしさobjectnessとBounding Box補正量", "最終Maskだけ", "学習率とバッチサイズ", "PR曲線の面積"],
             answer: 0,
             explanation: "RPNは候補領域を作るネットワークです。物体か背景かと、Anchorをどのように動かすかを予測します。"
@@ -393,7 +422,7 @@ window.quizData = {
             id: "img-roi-align",
             category: "ROI Pooling／ROI Align",
             difficulty: "必須",
-            question: "ROI AlignがROI Poolingより位置ずれを抑える仕組みはどれか。",
+            question: "ROI（Region of Interest：候補領域）Alignが、ROI Poolingより位置ずれを抑える仕組みはどれか。",
             options: ["座標を整数へ丸めず、双線形補間で特徴をサンプリングする", "全座標を切り捨てる", "Anchorを削除する", "NMSを学習する"],
             answer: 0,
             explanation: "ROI Poolingの座標量子化は境界をずらします。ROI Alignは連続座標のまま補間し、Maskの画素精度を改善します。"
@@ -411,7 +440,7 @@ window.quizData = {
             id: "img-yolo",
             category: "YOLO",
             difficulty: "基礎",
-            question: "YOLO系の基本的な設計を2-stage検出器と比べた説明として正しいものはどれか。",
+            question: "YOLO（You Only Look Once）系の基本的な設計を2-stage検出器と比べた説明として正しいものはどれか。",
             options: ["独立した候補生成段階を置かず、1回のネットワークでクラスとBoxを密に予測する", "必ずSelective Searchを使う", "Maskだけを予測する", "物体ごとにCNNを再実行する"],
             answer: 0,
             explanation: "初期YOLOはgrid cellから直接予測しました。現代のYOLOにも共通する本質は、1-stageで密に予測する点です。"
@@ -420,7 +449,7 @@ window.quizData = {
             id: "img-ssd-set",
             category: "SSD",
             difficulty: "必須",
-            question: "SSDの特徴の組として正しいものはどれか。",
+            question: "SSD（Single Shot MultiBox Detector）の特徴の組として正しいものはどれか。",
             options: ["複数解像度の特徴マップ・Default Box・Hard Negative Mining", "RPN・ROI Align・Mask枝", "Anchor-Free・Centernessだけ", "CLS token・Position embedding"],
             answer: 0,
             explanation: "SSDは各スケールのDefault Box（Anchorのひな形）から検出し、背景が多すぎる問題を難しい負例の選択で調整します。"
@@ -439,10 +468,10 @@ window.quizData = {
             id: "img-fcos",
             category: "FCOS",
             difficulty: "必須",
-            question: "FCOSの説明として正しいものはどれか。",
+            question: "FCOS（Fully Convolutional One-Stage Object Detection）の説明として正しいものはどれか。",
             options: ["Anchor-Freeで、各位置からBox辺までの$l,t,r,b$を回帰し、FPNとCenternessを使う", "RPNでROIを作る2-stage専用", "Default Boxだけを分類する", "CLS tokenでBoxを作る"],
             answer: 0,
-            explanation: "FCOSはAnchor設計を不要にします。Centernessは物体中心から遠い位置の低品質なBox予測を抑えます。"
+            explanation: "FCOSはFully Convolutional One-Stage Object Detectionの略で、Anchorのひな形を置かない1ステージ検出器です。各位置からBoxの左・上・右・下辺までの距離を回帰し、Centernessで中心から遠い低品質な予測を抑えます。"
         },
         {
             id: "img-fcos-ambiguous",
@@ -457,16 +486,16 @@ window.quizData = {
             id: "img-fpn",
             category: "FPN",
             difficulty: "標準",
-            question: "FPNの主な役割はどれか。",
+            question: "FPN（Feature Pyramid Network）の主な役割はどれか。",
             options: ["深い層の意味情報と浅い層の位置情報をtop-downと横接続で統合し、複数スケールを検出する", "画像を1画素にする", "PR曲線を計算する", "未来情報を隠す"],
             answer: 0,
-            explanation: "高解像度の階層は小物体、低解像度の階層は大物体など、異なる大きさを扱いやすくします。"
+            explanation: "FPNはFeature Pyramid Networkの略です。深い層の意味情報と浅い層の位置情報を統合し、高解像度の階層は小物体、低解像度の階層は大物体というように異なる大きさを扱いやすくします。"
         },
         {
             id: "img-iou-formula",
             category: "IoU",
             difficulty: "基礎",
-            question: "正解BoxをA、予測BoxをBとしたときIoUの式はどれか。",
+            question: "正解BoxをA、予測BoxをBとしたとき、IoU（Intersection over Union：重なり÷和集合）の式はどれか。",
             options: ["$|A\\cap B|/|A\\cup B|$", "$|A\\cup B|/|A\\cap B|$", "$|A\\cap B|/|A|$だけ", "$|A|-|B|$"],
             answer: 0,
             explanation: "完全一致なら1、重なりなしなら0です。和集合はA面積＋B面積−交差面積で求めます。"
@@ -485,28 +514,39 @@ window.quizData = {
             id: "img-nms",
             category: "NMS",
             difficulty: "必須",
-            question: "NMSの処理として正しいものはどれか。",
+            question: "NMS（Non-Maximum Suppression：重複Boxを抑える後処理）の説明として正しいものはどれか。",
             options: ["同クラスでscore最大を残し、それとIoUが閾値を超える重複Boxを抑制して繰り返す", "全Boxを単純平均する", "正解Boxを削除する", "クラス数を減らす"],
             answer: 0,
-            explanation: "同じ物体へ複数Boxが出たときの後処理です。単に低scoreを全部消すのではなく、重なりも使います。"
+            explanation: "NMSは、同じ物体に何本も重なって出た予測Boxを整理する処理です。scoreが最大のBoxを代表として残し、同じクラスで大きく重なるBoxだけを重複とみなして抑制します。"
         },
         {
             id: "img-nms-step",
             category: "NMS（手順）",
             difficulty: "本試験型",
-            question: "同クラスのBox A(score .9)、B(.8)、C(.7)がある。IoU(A,B)=.8、IoU(A,C)=.1、NMS閾値.5なら、最終的に抑制されず残るBoxはどれか。",
+            question: "同クラスのBox A（score 0.9）、B（0.8）、C（0.7）がある。IoU(A,B)=0.8、IoU(A,C)=0.1、NMSのIoU閾値が0.5なら、最終的に抑制されず残るBoxはどれか。",
             options: ["AとC。Aを残し、高IoUのBを抑制する", "Bだけ", "Aだけ", "BとC"],
             answer: 0,
-            explanation: "score最大Aを残します。BはAとのIoU .8>.5なので抑制、Cは.1なので残り、次の反復対象です。"
+            explanation: "<strong>正解はAとCです。</strong> scoreはモデルの自信度（大きいほど自信が高い）、IoUはBox同士の重なり度（大きいほどよく重なる）です。NMSでは、まずscoreで代表Boxを1つ選び、そのBoxとのIoUで重複かどうかを判定します。0.5はscoreの合格点ではなく、Box同士の重なりを判定するIoU閾値です。",
+            explanationFigure: `
+                <div class="img-nms-answer">
+                    <table>
+                        <tr><th>手順</th><th>計算・比較</th><th>判定</th><th>残るBox</th></tr>
+                        <tr><td>① 代表を選ぶ</td><td>score：A 0.9 ＞ B 0.8 ＞ C 0.7</td><td>Aが最大なので<span class="keep">Aを確定して残す</span></td><td>A</td></tr>
+                        <tr><td>② AとBを比較</td><td>IoU(A,B)=0.8 ＞ 閾値0.5</td><td>大きく重なるため同じ物体の重複とみなし、<span class="drop">Bを抑制</span></td><td>A</td></tr>
+                        <tr><td>③ AとCを比較</td><td>IoU(A,C)=0.1 ＜ 閾値0.5</td><td>重なりが小さいため、<span class="keep">Cは抑制しない</span></td><td>A、C</td></tr>
+                        <tr><td>④ 残りで反復</td><td>未確定はCだけ</td><td>Cを確定して残す</td><td><strong>A、C</strong></td></tr>
+                    </table>
+                    <div style="margin-top:9px;line-height:1.7"><strong>覚え方：</strong>scoreは「誰を先に残すか」、IoUは「その周りのどれを重複として消すか」を決めます。</div>
+                </div>`
         },
         {
             id: "img-map",
             category: "mAP",
             difficulty: "基礎",
-            question: "物体検出のmAPの説明として正しいものはどれか。",
+            question: "物体検出のmAP（mean Average Precision）の説明として正しいものはどれか。",
             options: ["confidence閾値を動かしたPR曲線からクラスごとのAPを求め、その平均を取る", "各BoxのIoUだけを平均する", "ROC曲線の最大値", "Accuracyと同じ"],
             answer: 0,
-            explanation: "IoU条件などでTP/FPを決め、score順で得られるPrecision-Recall関係からAPを求めます。mAPはクラス平均です。"
+            explanation: "APはAverage Precision、mAPはmean Average Precisionの略です。IoU条件などでTP/FPを決め、score順で得られるPrecision-Recall関係からクラスごとのAPを求め、その平均を取ります。"
         },
         {
             id: "img-map-calc",
@@ -531,10 +571,10 @@ window.quizData = {
             id: "img-fcn",
             category: "FCN",
             difficulty: "必須",
-            question: "FCNの説明として正しいものはどれか。",
+            question: "FCN（Fully Convolutional Network）の説明として正しいものはどれか。",
             options: ["全結合層を畳み込みへ置き換え、空間的な予測をUpsamplingして画素マスクを出す", "ROIごとにSVMだけで分類", "Anchorを必ず使う", "文章を生成する"],
             answer: 0,
-            explanation: "FCNは画像全体を一度に処理し、粗い出力をTransposed Conv等で元の解像度へ戻します。"
+            explanation: "FCNはFully Convolutional Networkの略です。画像全体を一度に処理し、粗い出力をTransposed Convolutionなどで元の解像度へ戻して、画素ごとのマスクを作ります。"
         },
         {
             id: "img-unet",

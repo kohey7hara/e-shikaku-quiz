@@ -108,7 +108,7 @@ window.quizData = {
             <tr><th>項目</th><th>BERT</th><th>GPT</th></tr>
             <tr><td><strong>構造</strong></td><td><strong>Encoder</strong>のみ<br>(入力を理解する部分)</td><td><strong>Decoder</strong>のみ<br>(出力を生成する部分)</td></tr>
             <tr><td><strong>注意の向き</strong></td><td><strong>双方向</strong> (Bidirectional)<br>未来の単語も見れる</td><td><strong>単方向</strong> (Auto-regressive)<br>過去しか見れない</td></tr>
-            <tr><td><strong>事前学習</strong></td><td><strong>MLM</strong> (穴埋め)<br><strong>NSP</strong> (次の文か予測)</td><td><strong>CL</strong> (次単語予測)<br>Language Modeling</td></tr>
+            <tr><td><strong>事前学習</strong></td><td><strong>MLM</strong> (穴埋め)<br><strong>NSP</strong> (次の文か予測)</td><td><strong>CLM</strong> (次トークン予測)<br>自己回帰言語モデル</td></tr>
             <tr><td><strong>得意タスク</strong></td><td><span class="good">分類、抽出、質問応答</span><br>（意味理解系）</td><td><span class="good">文章生成、要約、対話</span><br>（生成系）</td></tr>
             <tr><td><strong>弱点</strong></td><td><span class="bad">文章生成は苦手</span><br>(マスクがないと動かない)</td><td><span class="bad">文脈理解はやや劣る</span><br>(後ろを見れないため)</td></tr>
         </table>
@@ -153,6 +153,21 @@ window.quizData = {
             <tr><td><strong>得意</strong></td><td>最新・社内知識、根拠提示</td><td>文体・出力形式・タスク適応</td></tr>
         </table>
         <p><strong>試験の罠：</strong>RAGはモデルが必ず正しくなる魔法ではありません。検索失敗や、取得文書を無視する生成も起こり得ます。</p>
+
+        <h3>■ 最後はこの表だけ</h3>
+        <table class="comp-table">
+            <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>周辺語から中央語を予測</td><td><strong>CBOW（Continuous Bag-of-Words）</strong></td><td>複数の文脈語をまとめて対象語を当てる。</td></tr>
+            <tr><td>中央語から周辺語を予測</td><td><strong>Skip-gram</strong></td><td>レアな単語の表現を学びやすい。</td></tr>
+            <tr><td>全語彙Softmaxを避け、正例と負例を二値識別</td><td><strong>Negative Sampling</strong></td><td>Word2Vecの学習計算を軽くする。</td></tr>
+            <tr><td>双方向Encoder・穴埋め</td><td><strong>BERT（Bidirectional Encoder Representations from Transformers）</strong></td><td>MLMで前後の文脈を使う理解系モデル。</td></tr>
+            <tr><td>一部トークンを隠して予測</td><td><strong>MLM（Masked Language Modeling）</strong></td><td>BERTの代表的な事前学習課題。</td></tr>
+            <tr><td>2文が連続するかを予測</td><td><strong>NSP（Next Sentence Prediction）</strong></td><td>原典BERTの文関係を学ぶ事前学習課題。</td></tr>
+            <tr><td>Causal Mask・左から右へ生成</td><td><strong>GPT（Generative Pre-trained Transformer）</strong></td><td>CLM（Causal Language Modeling）で次トークンを予測する。</td></tr>
+            <tr><td>外部文書を検索してから生成</td><td><strong>RAG（Retrieval-Augmented Generation）</strong></td><td>推論時に関連文書を文脈へ加え、知識更新ごとの再学習を減らせる。</td></tr>
+            <tr><td>頻出文字列を順に結合</td><td><strong>BPE（Byte Pair Encoding）</strong></td><td>サブワード化して語彙数と未知語を抑える。</td></tr>
+            <tr><td>未知語・語彙に存在しない語</td><td><strong>OOV（Out-of-Vocabulary）</strong></td><td>fastTextやサブワード分割はOOVへ強い。</td></tr>
+        </table>
     `,
 
     questions: [
@@ -189,7 +204,7 @@ window.quizData = {
         },
         {
             category: "BERTの事前学習",
-            question: "BERTの事前学習タスクの一つである「MLM (Masked Language Model)」とはどのようなものか。",
+            question: "BERTの事前学習タスクの一つである「MLM（Masked Language Modeling）」とはどのようなものか。",
             options: ["入力文の一部をランダムに[MASK]トークンに置き換え、その元の単語を予測する", "次の文が論理的に繋がっているかを予測する", "次の単語を順番に予測する", "文章の感情を分類する"],
             answer: 0,
             explanation: "穴埋め問題（クイズ）を大量に解かせることで、前後の文脈から単語の意味を推測する能力を養います。"

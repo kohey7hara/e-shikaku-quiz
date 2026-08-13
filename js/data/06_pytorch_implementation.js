@@ -130,6 +130,23 @@ window.quizData = {
                 </td>
             </tr>
         </table>
+
+        <h3>■ 最後はこの表だけ</h3>
+        <table class="tips-table">
+            <tr><th>問題文の合図</th><th>答えるコード／語</th><th>一言理由</th></tr>
+            <tr><td>1回のパラメータ更新</td><td><code>zero_grad → forward → loss → backward → step</code></td><td>PyTorchの勾配は加算されるため、更新ごとに消す。</td></tr>
+            <tr><td>多クラス分類・logits入力</td><td><code>nn.CrossEntropyLoss()</code><br><small>CE: Cross Entropy</small></td><td>Softmax相当を内部で安定に計算する。</td></tr>
+            <tr><td>DropoutとBNを推論動作へ</td><td><code>model.eval()</code><br><small>BN: Batch Normalization</small></td><td>層の挙動を変える。勾配記録停止とは別。</td></tr>
+            <tr><td>推論で計算グラフを作らない</td><td><code>torch.no_grad()</code></td><td>メモリと計算を節約する。通常はevalと併用。</td></tr>
+            <tr><td>(B,C,H,W)を全結合へ</td><td><code>torch.flatten(x, 1)</code></td><td>Batch軸を残し、残りをFeaturesへまとめる。</td></tr>
+            <tr><td>自作データをDataLoaderへ</td><td><code>Dataset: __len__, __getitem__</code></td><td>件数と1件の取得方法を定義する。</td></tr>
+            <tr><td><code>batch_first=True</code>のLSTM</td><td><strong>input: (B,L,D<sub>in</sub>)<br>output: (B,L,Directions×H)</strong><br><small>LSTM: Long Short-Term Memory</small></td><td>batch軸が先頭。単方向ならoutput末尾はH。</td></tr>
+            <tr><td>LSTMの最後の状態</td><td><strong>h_n/c_n: (Layers×Directions,B,H)</strong></td><td>batch_firstでも隠れ状態の軸順は変わらない。</td></tr>
+            <tr><td>双方向LSTMのoutput幅</td><td><strong>2 × hidden_size</strong></td><td>順方向と逆方向の特徴を連結する。</td></tr>
+            <tr><td>重みだけを保存・復元</td><td><code>state_dict()</code> / <code>load_state_dict()</code></td><td>構造はコードで再生成し、パラメータ辞書を扱う。</td></tr>
+            <tr><td>1 GPU＝1 processで分散学習</td><td><strong>DDP</strong><br><small>Distributed Data Parallel</small></td><td>各processの勾配を同期し、同じモデルを更新する。</td></tr>
+            <tr><td>FP16/BF16で高速化しFP32も併用</td><td><strong>AMP</strong><br><small>Automatic Mixed Precision</small></td><td><code>autocast</code>等で速度・メモリと数値安定性を両立する。</td></tr>
+        </table>
     `,
 
     questions: [
