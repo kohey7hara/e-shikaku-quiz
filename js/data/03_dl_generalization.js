@@ -12,6 +12,8 @@ window.quizData = {
             .gen-table th { background: #eaf2fb; }
             .gen-table th, .gen-table td { padding: 9px; border: 1px solid #d7e2ec; vertical-align: top; }
             .gen-table td:first-child { white-space: nowrap; }
+            .gen-compact-terms td:nth-child(odd) { white-space: nowrap; color: #123f68; font-weight: 800; }
+            .gen-symbol-table td:nth-child(2) { min-width: 430px; }
             .gen-visual-wrap { margin: 12px 0 20px; overflow-x: auto; border: 1px solid #d7e2ec; border-radius: 12px; background: #fff; }
             .gen-visual-card { box-sizing: border-box; min-width: 830px; padding: 12px; }
             .gen-wide-svg { display: block; width: 100%; min-width: 800px; height: auto; margin: 0 auto; }
@@ -93,7 +95,7 @@ window.quizData = {
                     <rect x="270" y="15" width="55" height="55" rx="6" fill="#fef3c7" stroke="#f39c12"/><circle cx="297" cy="41" r="13" fill="#f8c471"/><text x="275" y="87" class="gen-svg-note">Brightness</text>
                     <text x="140" y="115" class="gen-svg-label">すべてラベル A</text><text x="132" y="133" class="gen-svg-note">意味を壊す変換は使わない</text>
                 </svg>
-                <div class="gen-card-caption">Flip／Erase／Crop／Contrast／Brightness／Rotate、ノイズ付与。変換後も正解が変わらないことが前提。</div>
+                <div class="gen-card-caption">画像の位置・見え方を少し変えて別の訓練例を作る。変換後も正解が変わらないことが前提。</div>
             </div>
             <div class="gen-card">
                 <strong>Random Erasing：一部を隠す</strong>
@@ -107,15 +109,15 @@ window.quizData = {
             <div class="gen-card">
                 <strong>RandAugment：個数N・強度M</strong>
                 <svg class="gen-mini-svg" viewBox="0 0 340 145" role="img" aria-label="変換候補からN個を選び共通強度Mで適用するRandAugment">
-                    <rect x="10" y="17" width="118" height="105" rx="9" fill="#f8fafc" stroke="#9fb3c8"/><text x="32" y="38" class="gen-svg-label">変換候補プール</text>
+                    <rect x="10" y="17" width="118" height="105" rx="9" fill="#f8fafc" stroke="#9fb3c8"/><text x="36" y="38" class="gen-svg-label">変換の候補例</text>
                     <g fill="#eef7fb" stroke="#2780b8"><rect x="22" y="49" width="42" height="23" rx="4"/><rect x="72" y="49" width="42" height="23" rx="4"/><rect x="22" y="82" width="42" height="23" rx="4"/><rect x="72" y="82" width="42" height="23" rx="4"/></g>
                     <text x="32" y="65" class="gen-svg-mini">Flip</text><text x="81" y="65" class="gen-svg-mini">Crop</text><text x="29" y="98" class="gen-svg-mini">Rotate</text><text x="78" y="98" class="gen-svg-mini">Color</text>
                     <path d="M135 70 H168" stroke="#627d98" stroke-width="2" marker-end="url(#gen-aug-arrow)"/>
-                    <rect x="176" y="25" width="65" height="90" rx="9" fill="#fff8e7" stroke="#f39c12"/><text x="190" y="48" class="gen-svg-label">N個選ぶ</text><text x="195" y="74" class="gen-svg-title">N=2</text><text x="187" y="99" class="gen-svg-note">組合せはrandom</text>
+                    <rect x="176" y="25" width="65" height="90" rx="9" fill="#fff8e7" stroke="#f39c12"/><text x="189" y="48" class="gen-svg-label">① 個数</text><text x="195" y="74" class="gen-svg-title">N=2</text><text x="184" y="99" class="gen-svg-note">2種類を選ぶ</text>
                     <path d="M247 70 H271" stroke="#627d98" stroke-width="2" marker-end="url(#gen-aug-arrow)"/>
-                    <rect x="278" y="37" width="52" height="66" rx="8" fill="#eafaf1" stroke="#27ae60"/><text x="290" y="60" class="gen-svg-label">強度</text><text x="289" y="84" class="gen-svg-title">M</text>
+                    <rect x="278" y="37" width="52" height="66" rx="8" fill="#eafaf1" stroke="#27ae60"/><text x="287" y="59" class="gen-svg-label">② 強さ</text><text x="289" y="84" class="gen-svg-title">M</text>
                 </svg>
-                <div class="gen-card-caption">複雑な方策探索をせず、主に「適用数N」と「共通の強度M」を決める。</div>
+                <div class="gen-card-caption"><strong>N = Number（個数）</strong>、<strong>M = Magnitude（強さ）</strong>。1枚の画像にN種類の変換を選び、それぞれをMレベルの強さで順番にかける。</div>
             </div>
             <div class="gen-card">
                 <strong>MixUp：入力もラベルも混ぜる</strong>
@@ -133,17 +135,47 @@ window.quizData = {
         </div>
 
         <div class="gen-table-wrap">
+            <table class="gen-table gen-compact-terms">
+                <tr><th>手法</th><th>何をする？</th><th>手法</th><th>何をする？</th></tr>
+                <tr><td>Flip</td><td>画像を反転する。画像分類では左右反転が代表。</td><td>Erase</td><td>一部を矩形で隠し、見えない状況にも強くする。</td></tr>
+                <tr><td>Crop</td><td>画像の一部を切り出し、位置や構図を変える。</td><td>Contrast</td><td>明るい所と暗い所の<strong>差</strong>を変える。</td></tr>
+                <tr><td>Brightness</td><td>画像<strong>全体の明るさ</strong>を変える。</td><td>Rotate</td><td>画像を少し回転する。</td></tr>
+                <tr><td>ノイズ付与</td><td>画素値を少しランダムに揺らす。ぼかすGaussian Filterとは別。</td><td colspan="2"><strong>共通ルール：</strong>見た目だけを変え、正解ラベルは変えない。</td></tr>
+            </table>
+        </div>
+        <div class="gen-note">
+            <strong>RandAugmentを2手で考える：</strong><br>
+            ① 候補から<strong>N種類</strong>をランダムに選ぶ → ② 選んだ変換を<strong>Mレベルの強さ</strong>で適用する。<br>
+            <strong>例：</strong>N=2なら「Rotate＋Brightness」のように2種類を選ぶ。Mを大きくすると、回転角や明るさの変化をより強くする。Nは画像枚数や学習回数ではない。
+        </div>
+
+        <div class="gen-table-wrap">
             <table class="gen-table">
                 <tr><th>対象</th><th>シラバスの手法</th><th>見分け方</th></tr>
                 <tr><td><strong>画像</strong></td><td>ノイズ付与、Random Flip／Erase／Crop／Contrast／Brightness／Rotate、RandAugment、MixUp</td><td>ラベル不変を守る。MixUpだけはラベルも混合。</td></tr>
                 <tr><td><strong>自然言語</strong></td><td>EDA、MixUp</td><td>EDA＝同義語置換・ランダム挿入・交換・削除。意味を壊さない。</td></tr>
             </table>
         </div>
-        <div class="gen-note"><strong>出題対象の境界：</strong>添付シラバスでグレー網掛けの「音声のデータ拡張」はオプション（出題対象外）のため、この章の問題には入れていません。</div>
 
         <h3>■ 正規化：平均・分散を「どこから取るか」</h3>
         <p>4手法は共通して、対象集合の平均・分散で標準化し、学習可能な $\\gamma,\\beta$ で尺度を戻します。</p>
         <div class="gen-formula">$\\displaystyle \\hat{x}=\\frac{x-\\mu}{\\sqrt{\\sigma^2+\\varepsilon}},\\qquad y=\\gamma\\hat{x}+\\beta$</div>
+        <div class="gen-table-wrap">
+            <table class="gen-table gen-symbol-table">
+                <tr><th>表記</th><th>文字の意味</th><th>具体例</th></tr>
+                <tr>
+                    <td><strong>NCHW</strong><br>CNNの画像</td>
+                    <td><strong>N</strong>：Batch（同時に処理する画像の枚数）<br><strong>C</strong>：Channel（RGBの色、途中の層では特徴マップ数）<br><strong>H</strong>：Height（高さ）　<strong>W</strong>：Width（幅）</td>
+                    <td><strong>(8, 3, 32, 32)</strong><br>32×32のRGB画像が8枚</td>
+                </tr>
+                <tr>
+                    <td><strong>NLD</strong><br>Transformerの系列</td>
+                    <td><strong>N</strong>：文章数　<strong>L</strong>：Length（トークン数）<br><strong>D</strong>：Dimension（各トークンを表す特徴・埋め込みの数）</td>
+                    <td><strong>(2, 4, 8)</strong><br>2文×4トークン、各トークンは8特徴</td>
+                </tr>
+            </table>
+        </div>
+        <div class="gen-core"><strong>D方向とは：</strong>1つのトークンを表すD個の数値を横に見ること。TransformerのLayer Normは、他の文章Nや他のトークンLとは混ぜず、<strong>各トークンごとにD個の特徴から平均・分散</strong>を求めます。Dは層の深さではありません。</div>
         <div class="gen-visual-wrap">
             <div class="gen-visual-card">
                 <svg class="gen-wide-svg" viewBox="0 0 960 300" role="img" aria-label="CNNのNCHWと系列のNLDでBatch Layer Instance Group Normalizationが統計を取る範囲を比較する図">
@@ -154,7 +186,7 @@ window.quizData = {
                     <text x="52" y="235" class="gen-svg-label">バッチ依存</text><text x="52" y="251" class="gen-svg-note">CNN・大きめbatch</text>
 
                     <rect x="252" y="48" width="220" height="220" rx="11" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/>
-                    <text x="312" y="75" class="gen-svg-title">Layer Norm</text><text x="288" y="96" class="gen-svg-note">NLD：各N・各Lの D方向</text>
+                    <text x="312" y="75" class="gen-svg-title">Layer Norm</text><text x="288" y="96" class="gen-svg-note">各トークンのD個の特徴を集計</text>
                     <g stroke="#b8c7d6"><rect x="284" y="116" width="35" height="28" fill="#f8fafc"/><rect x="324" y="116" width="35" height="28" fill="#f8fafc"/><rect x="364" y="116" width="35" height="28" fill="#f8fafc"/><rect x="404" y="116" width="35" height="28" fill="#f8fafc"/><rect x="284" y="150" width="35" height="28" fill="#8dd3a8"/><rect x="324" y="150" width="35" height="28" fill="#8dd3a8"/><rect x="364" y="150" width="35" height="28" fill="#8dd3a8"/><rect x="404" y="150" width="35" height="28" fill="#8dd3a8"/><rect x="284" y="184" width="35" height="28" fill="#f8fafc"/><rect x="324" y="184" width="35" height="28" fill="#f8fafc"/><rect x="364" y="184" width="35" height="28" fill="#f8fafc"/><rect x="404" y="184" width="35" height="28" fill="#f8fafc"/></g>
                     <text x="286" y="235" class="gen-svg-label">バッチ非依存</text><text x="286" y="251" class="gen-svg-note">RNN・Transformer</text>
 
@@ -170,14 +202,14 @@ window.quizData = {
                     <text x="752" y="235" class="gen-svg-label">バッチ非依存</text><text x="752" y="251" class="gen-svg-note">小batchのCNN</text>
                 </svg>
             </div>
-            <div class="gen-visual-caption"><strong>軸で見分ける：</strong>BNだけが別サンプルNをまたぐ。CNNのBN・IN・GNはNCHW、系列モデルのLNは各トークンのD方向で見ると整理しやすい。</div>
+            <div class="gen-visual-caption"><strong>軸で見分ける：</strong>BNはCを1つ固定し、そのCについてN・H・Wから統計を取る。TransformerのLNは各トークンを1つ固定し、そのD個の特徴から統計を取る。</div>
         </div>
 
         <div class="gen-table-wrap">
             <table class="gen-table">
                 <tr><th>手法</th><th>統計を取る範囲</th><th>試験で返す一言</th></tr>
                 <tr><td><strong>Batch Norm</strong></td><td>CごとにN,H,W</td><td>学習時はバッチ統計、推論時は保存した移動平均。小バッチに弱い。</td></tr>
-                <tr><td><strong>Layer Norm</strong></td><td>各サンプル／トークンの特徴方向</td><td>バッチ非依存。RNN・Transformer。</td></tr>
+                <tr><td><strong>Layer Norm</strong></td><td>各トークンごとのD個の特徴</td><td>他のN・Lとは混ぜない。バッチ非依存。RNN・Transformer。</td></tr>
                 <tr><td><strong>Instance Norm</strong></td><td>各画像・各CのH,W</td><td>画像ごとのコントラストを正規化。スタイル変換。</td></tr>
                 <tr><td><strong>Group Norm</strong></td><td>各画像でCをG群に分け、群内C,H,W</td><td>バッチ非依存。小バッチのCNN。</td></tr>
             </table>
@@ -277,7 +309,9 @@ window.quizData = {
             <table class="gen-table">
                 <tr><th>問題文の合図</th><th>答える語</th></tr>
                 <tr><td>入力とラベルを同じ比率で混ぜる</td><td><strong>MixUp</strong></td></tr>
-                <tr><td>変換数N・強度M</td><td><strong>RandAugment</strong></td></tr>
+                <tr><td>N=Number（個数）、M=Magnitude（強さ）</td><td><strong>RandAugment</strong></td></tr>
+                <tr><td>NCHWでCを固定し、N・H・Wを集計</td><td><strong>Batch Norm</strong></td></tr>
+                <tr><td>NLDで各トークンのD個の特徴を集計</td><td><strong>Layer Norm</strong></td></tr>
                 <tr><td>小バッチCNN・チャネルを群分け</td><td><strong>Group Norm</strong></td></tr>
                 <tr><td>復元抽出</td><td><strong>Bootstrap</strong></td></tr>
                 <tr><td>独立・並列・平均</td><td><strong>Bagging</strong></td></tr>
@@ -332,7 +366,7 @@ window.quizData = {
             question: "RandAugmentで主に指定する2つの量はどれか。",
             options: ["適用する変換数Nと共通の変換強度M", "クラス数Cとバッチ数N", "学習率とMomentum", "平均と分散"],
             answer: 0,
-            explanation: "候補群からN個の変換を選び、共通強度Mで適用します。複雑な拡張方策探索を簡略化した手法です。"
+            explanation: "NはNumber（個数）、MはMagnitude（強さ）です。候補群からN種類を選び、それぞれをMレベルの強さで適用します。"
         },
         {
             id: "gen-randaugment-interpretation",
@@ -341,7 +375,16 @@ window.quizData = {
             question: "RandAugmentでN=2としたときの意味として最も適切なものはどれか。",
             options: ["候補変換から原則2種類を選んで適用する", "各画像を2クラスへ分類する", "画像を必ず2倍に拡大する", "2エポックだけ学習する"],
             answer: 0,
-            explanation: "Nは1入力へ組み合わせる変換の個数です。Mはその変換の強さを表します。"
+            explanation: "Nは1枚の画像へかける変換の個数です。N=2なら、RotateとBrightnessなど2種類を選びます。画像を2枚作る、2回学習するという意味ではありません。"
+        },
+        {
+            id: "gen-randaugment-magnitude",
+            category: "RandAugment",
+            difficulty: "標準",
+            question: "RandAugmentのMを大きくしたとき、一般に何が変わるか。",
+            options: ["回転角や明るさ変更など、選ばれた変換をより強くかける", "1枚に適用する変換の個数だけが増える", "画像のクラス数が増える", "バッチサイズが大きくなる"],
+            answer: 0,
+            explanation: "MはMagnitude、つまり強さのレベルです。Rotateなら回転角、Brightnessなら明るさの変化量というように、各変換に応じた強さへ対応します。"
         },
         {
             id: "gen-mixup-definition",
@@ -424,7 +467,7 @@ window.quizData = {
             question: "CNNのNCHW形式における通常のBatch Normalizationは、各チャネルCについて主にどの軸から平均・分散を求めるか。",
             options: ["N・H・W", "Cだけ", "Nだけ", "Hだけ"],
             answer: 0,
-            explanation: "出力チャネルごとに、そのチャネルの全サンプル・全空間位置、すなわちN,H,W方向で統計を取ります。"
+            explanation: "N=画像枚数、C=チャネル、H=高さ、W=幅です。BNはCを1つ固定し、そのチャネルのN,H,W全体から平均・分散を求めます。"
         },
         {
             id: "gen-bn-mean-var-calc",
@@ -472,7 +515,16 @@ window.quizData = {
             question: "TransformerでLayer Normalizationが使いやすい主な理由はどれか。",
             options: ["各サンプル・トークン内の特徴方向で正規化し、バッチサイズに依存しない", "全バッチの同じ画素だけを見る", "推論時だけ動作する", "パラメータ数を必ず半分にする"],
             answer: 0,
-            explanation: "LNは各入力内で統計計算が完結し、系列長やバッチ構成の影響を受けにくい手法です。"
+            explanation: "TransformerをNLDで表すと、N=文章数、L=トークン数、D=各トークンの特徴数です。LNは各トークンごとにD個の値を正規化するため、バッチ構成に依存しません。"
+        },
+        {
+            id: "gen-layer-norm-d-axis",
+            category: "Layer Normalization（軸）",
+            difficulty: "標準",
+            question: "TransformerのテンソルをNLD形式で表すとき、各トークンへ通常のLayer Normalizationを行う主な方向はどれか。",
+            options: ["D：そのトークンを表す特徴・埋め込みの方向", "N：文章をまたぐ方向", "L：すべてのトークンを混ぜる方向", "層の深さ方向"],
+            answer: 0,
+            explanation: "DはDimension、各トークンを表す特徴数です。各トークンを1つ固定し、そのD個の値から平均・分散を求めます。Dはネットワークの層数ではありません。"
         },
         {
             id: "gen-instance-norm",
