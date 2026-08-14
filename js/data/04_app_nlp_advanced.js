@@ -1,5 +1,5 @@
 window.quizData = {
-    title: "4-（５）発展的NLP：ELMo, fastText, Tokenization",
+    title: "4-（４）関連知識（参考）：ELMo・fastText・Tokenization",
     
     cheatSheet: `
         <style>

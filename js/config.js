@@ -92,13 +92,13 @@ const menuConfig = [
     {
         id: "04_app_nlp",
         title: "4-（４）自然言語処理",
-        desc: "Word2Vec / BERT / GPT / Next Token Prediction / RAG / 自己回帰",
+        desc: "LSI・n-gram・Word2Vec / BERT / GPT / Zero・Few-shot / RAG",
         isActive: true
     },
     {
         id: "04_app_nlp_advanced",
-        title: "4-（４）発展的NLP",
-        desc: "ELMo, fastText, Tokenization",
+        title: "4-（４）関連知識（参考）",
+        desc: "ELMo / fastText / BPE / SentencePiece（比較用）",
         isActive: true
     },
     {
