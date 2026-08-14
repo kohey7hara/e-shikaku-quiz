@@ -110,7 +110,7 @@ const menuConfig = [
     {
         id: "04_app_rl",
         title: "4-（７）深層強化学習",
-        desc: "DQN / A3C / 方策勾配法 / 報酬",
+        desc: "DQN / TD・Q学習 / Experience Replay / A3C / 方策勾配・Actor-Critic",
         isActive: true
     },
     {

@@ -21,7 +21,7 @@
     <div class="section-head"><h2>分野別ドリル</h2><span>苦手カテゴリをピンポイントで補強</span></div><ul class="menu-list" id="menuContainer"></ul>
     <p class="footer-note">出題範囲は<a href="https://www.jdla.org/certificate/engineer/" target="_blank" rel="noopener">JDLA公式 E資格シラバス</a>を基準に構成しています。本ドリルは非公式の学習教材であり、合格を保証するものではありません。</p>
 </main>
-<script src="js/config.js?v=20260814-generative-simple-v1"></script>
+<script src="js/config.js?v=20260814-rl-v1"></script>
 <script>
     const card = item => `<li class="menu-item ${item.featured?'featured':''}"><a href="quiz.html?id=${item.id}"><span class="badge">${item.featured?'最優先':'演習可能'}</span><span class="menu-title">${item.title}</span><span class="menu-desc">${item.desc}</span></a></li>`;
     document.getElementById('featuredMenu').innerHTML=menuConfig.filter(x=>x.featured&&x.isActive).map(card).join('');
