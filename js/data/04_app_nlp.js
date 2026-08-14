@@ -59,7 +59,7 @@ window.quizData = {
             </div>
             <div class="nlp-caption"><strong>一言暗記：</strong>Word2Vec＝単語を座標にする／BERT＝前後を見て文を読む／GPT＝過去を見て続きを書く。3モデルを直列につなぐ図ではなく、役割の比較です。</div>
         </div>
-        <div class="nlp-link-map"><strong>章の分担：</strong>Q・K・V、Scaled Dot-Product、Multi-Head、Mask行列の計算は <a href="quiz.html?id=03_dl_transformer">3-（6）Transformer</a>。ELMo・fastText・BPE・SentencePieceは <a href="quiz.html?id=04_app_nlp_advanced">4-（4）関連知識</a>。本章はシラバス本線のLSI・n-gram・Word2Vec・BERT・GPT-n・基盤モデル・Prompt・RAGへ集中します。</div>
+        <div class="nlp-link-map"><strong>章の分担：</strong>Q・K・V、Scaled Dot-Product、Multi-Head、Mask行列の計算は <a href="quiz.html?id=03_dl_transformer">3-（6）Transformer</a>。ELMo・fastText・BPE・SentencePieceは <a href="quiz.html?id=04_app_nlp_advanced">4-（5）関連知識</a>。本章はシラバス本線のLSI・n-gram・Word2Vec・BERT・GPT-n・基盤モデル・Prompt・RAGへ集中します。</div>
 
         <h3>■ 略語は最初にこれだけ：正式名称＋一言</h3>
         <div class="nlp-table-wrap">

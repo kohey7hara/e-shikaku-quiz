@@ -97,8 +97,8 @@ const menuConfig = [
     },
     {
         id: "04_app_nlp_advanced",
-        title: "4-（４）関連知識（参考）",
-        desc: "ELMo / fastText / BPE / SentencePiece（比較用）",
+        title: "4-（5）関連知識",
+        desc: "ELMo / fastText / WordPiece・BPE・Unigram / SentencePiece",
         isActive: true
     },
     {
