@@ -104,7 +104,7 @@ const menuConfig = [
     {
         id: "04_app_generative",
         title: "4-（６）生成モデル",
-        desc: "GAN / VAE / 拡散モデル / フローベース",
+        desc: "識別・自己回帰 / AE・VAE / GAN / 拡散モデル・Flow",
         isActive: true
     },
     {
