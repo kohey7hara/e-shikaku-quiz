@@ -5,7 +5,7 @@ window.quizData = {
         <style>
             .gm-core { background:#eef8f8; border-left:5px solid #35b9c5; border-radius:0 10px 10px 0; padding:14px 18px; margin:12px 0 22px; }
             .gm-note { background:#fff8e8; border-left:5px solid #f39c12; border-radius:0 10px 10px 0; padding:12px 16px; margin:12px 0 22px; }
-            .gm-formula { background:#f7f9fc; border:1px solid #d9e2ec; border-radius:8px; padding:11px 14px; margin:10px 0; font-family:Georgia, "Times New Roman", serif; overflow-x:auto; }
+            .gm-formula { background:#f7f9fc; border:1px solid #d9e2ec; border-radius:8px; padding:11px 14px; margin:10px 0; overflow-x:auto; }
             .gm-visual-wrap { overflow-x:auto; margin:14px 0 22px; }
             .gm-visual-card { min-width:990px; border:1px solid #d9e2ec; border-radius:12px; background:#fff; padding:12px; }
             .gm-wide-svg { display:block; width:100%; min-width:960px; height:auto; }
@@ -21,435 +21,677 @@ window.quizData = {
             .gm-svg-orange { fill:#fff8e7; stroke:#f39c12; stroke-width:1.5; rx:10; }
             .gm-caption { margin:8px 8px 0; color:#334e68; }
             .gm-table-wrap { overflow-x:auto; margin:12px 0 22px; }
-            .gm-table { width:100%; min-width:800px; border-collapse:collapse; }
+            .gm-table { width:100%; min-width:760px; border-collapse:collapse; }
             .gm-table th { background:#eaf2fb; color:#102a43; text-align:left; padding:10px; border:1px solid #d9e2ec; }
             .gm-table td { padding:10px; border:1px solid #d9e2ec; vertical-align:top; }
             .gm-steps { margin:8px 0 0; padding-left:1.5em; }
             .gm-steps li { margin:5px 0; }
+            .gm-details { margin:12px 0 22px; border:1px solid #d9e2ec; border-radius:8px; background:#fafcff; }
+            .gm-details summary { cursor:pointer; padding:12px 14px; font-weight:700; color:#102a43; }
+            .gm-details > div { padding:0 14px 14px; }
+            .gm-word { display:inline-block; background:#eaf2fb; border-radius:5px; padding:1px 6px; margin:2px 1px; }
         </style>
 
-        <h3>■ まず全体：生成モデルは何を学ぶか</h3>
+        <h3>■ まずこれだけ：5つの作り方</h3>
         <div class="gm-core">
-            <strong>識別モデル</strong>は主に入力からラベルを求める <strong>p(y|x)</strong> を扱います。<strong>生成モデル</strong>はデータ分布 <strong>p(x)</strong>、同時分布 <strong>p(x,y)</strong>、条件付き生成なら <strong>p(x|c)</strong> を扱い、新しいサンプルを作ります。
+            <strong>識別モデル</strong>は、写真を見て「犬か猫か」を<strong>当てる</strong>モデルです。<br>
+            <strong>生成モデル</strong>は、たくさんの例をまねて、新しい画像や文章を<strong>作る</strong>モデルです。
         </div>
-        <div class="gm-note"><strong>略語を先に読む：</strong>VAE＝Variational Autoencoder（変分オートエンコーダ）／GAN＝Generative Adversarial Network（敵対的生成ネットワーク）／ELBO＝Evidence Lower Bound（変分下限）。</div>
+        <div class="gm-note">
+            <strong>VAE</strong>＝Variational Autoencoder（変分オートエンコーダ）／
+            <strong>GAN</strong>＝Generative Adversarial Network（敵対的生成ネットワーク）
+        </div>
 
         <div class="gm-visual-wrap">
             <div class="gm-visual-card">
-                <svg class="gm-wide-svg" viewBox="0 0 960 335" role="img" aria-labelledby="gm-map-title gm-map-desc">
-                    <title id="gm-map-title">代表的な生成モデル5系統の全体マップ</title>
-                    <desc id="gm-map-desc">識別モデルと生成モデルを分け、自己回帰、VAE、GAN、拡散モデル、フローベースモデルの学び方と生成方法を横並びで比較する。</desc>
-                    <text x="20" y="28" class="gm-svg-title">識別するか、分布を学んで生成するか</text>
-                    <rect x="20" y="48" width="280" height="64" class="gm-svg-purple"></rect>
+                <svg class="gm-wide-svg" viewBox="0 0 960 300" role="img" aria-labelledby="gm-map-title gm-map-desc">
+                    <title id="gm-map-title">生成モデル5種類のやさしい比較</title>
+                    <desc id="gm-map-desc">自己回帰、VAE、GAN、拡散モデル、Flowを日常語で比較する。</desc>
+                    <text x="20" y="28" class="gm-svg-title">まずは「どう作るか」だけ覚える</text>
+
+                    <rect x="20" y="48" width="280" height="62" class="gm-svg-purple"></rect>
                     <text x="38" y="74" class="gm-svg-label">識別モデル</text>
-                    <text x="38" y="97" class="gm-svg-note">x → p(y|x) → ラベル y</text>
-                    <rect x="320" y="48" width="620" height="64" class="gm-svg-green"></rect>
+                    <text x="38" y="96" class="gm-svg-note">入力を見て、答えを当てる</text>
+                    <rect x="320" y="48" width="620" height="62" class="gm-svg-green"></rect>
                     <text x="338" y="74" class="gm-svg-label">生成モデル</text>
-                    <text x="338" y="97" class="gm-svg-note">p(x)・p(x,y)・p(x|c) を学び、新しいxを作る</text>
+                    <text x="338" y="96" class="gm-svg-note">学習データの特徴を覚え、新しいデータを作る</text>
 
-                    <rect x="20" y="132" width="172" height="174" class="gm-svg-purple"></rect>
+                    <rect x="20" y="130" width="172" height="142" class="gm-svg-purple"></rect>
                     <text x="36" y="158" class="gm-svg-label">自己回帰</text>
-                    <text x="36" y="186" class="gm-svg-note">x₁ → x₂ → …</text>
-                    <text x="36" y="211" class="gm-svg-mini">過去を条件に1要素ずつ</text>
-                    <text x="36" y="235" class="gm-svg-mini">尤度を計算しやすい</text>
-                    <text x="36" y="267" class="gm-svg-note">逐次生成</text>
+                    <text x="36" y="193" class="gm-svg-note">前までを見て</text>
+                    <text x="36" y="218" class="gm-svg-note">次を1つずつ作る</text>
 
-                    <rect x="207" y="132" width="172" height="174" class="gm-svg-blue"></rect>
+                    <rect x="207" y="130" width="172" height="142" class="gm-svg-blue"></rect>
                     <text x="223" y="158" class="gm-svg-label">VAE</text>
-                    <text x="223" y="186" class="gm-svg-note">x → q(z|x) → z → x̂</text>
-                    <text x="223" y="211" class="gm-svg-mini">分布へ圧縮</text>
-                    <text x="223" y="235" class="gm-svg-mini">ELBOで学習</text>
-                    <text x="223" y="267" class="gm-svg-note">Decoderで生成</text>
+                    <text x="223" y="193" class="gm-svg-note">中心と広がりへ圧縮</text>
+                    <text x="223" y="218" class="gm-svg-note">そこから戻して作る</text>
 
-                    <rect x="394" y="132" width="172" height="174" class="gm-svg-red"></rect>
+                    <rect x="394" y="130" width="172" height="142" class="gm-svg-red"></rect>
                     <text x="410" y="158" class="gm-svg-label">GAN</text>
-                    <text x="410" y="186" class="gm-svg-note">z → G → 偽物 → D</text>
-                    <text x="410" y="211" class="gm-svg-mini">生成器と識別器が競う</text>
-                    <text x="410" y="235" class="gm-svg-mini">尤度を直接計算しない</text>
-                    <text x="410" y="267" class="gm-svg-note">Gで1回生成</text>
+                    <text x="410" y="193" class="gm-svg-note">作るGと</text>
+                    <text x="410" y="218" class="gm-svg-note">見破るDが競う</text>
 
-                    <rect x="581" y="132" width="172" height="174" class="gm-svg-green"></rect>
-                    <text x="597" y="158" class="gm-svg-label">Diffusion</text>
-                    <text x="597" y="186" class="gm-svg-note">画像 → ノイズ</text>
-                    <text x="597" y="211" class="gm-svg-mini">逆向きの除去を学習</text>
-                    <text x="597" y="235" class="gm-svg-mini">安定して学習しやすい</text>
-                    <text x="597" y="267" class="gm-svg-note">反復して生成</text>
+                    <rect x="581" y="130" width="172" height="142" class="gm-svg-green"></rect>
+                    <text x="597" y="158" class="gm-svg-label">拡散モデル</text>
+                    <text x="597" y="193" class="gm-svg-note">ノイズで壊し</text>
+                    <text x="597" y="218" class="gm-svg-note">少しずつ戻す</text>
 
-                    <rect x="768" y="132" width="172" height="174" class="gm-svg-orange"></rect>
+                    <rect x="768" y="130" width="172" height="142" class="gm-svg-orange"></rect>
                     <text x="784" y="158" class="gm-svg-label">Flow</text>
-                    <text x="784" y="186" class="gm-svg-note">z ⇄ 可逆変換 ⇄ x</text>
-                    <text x="784" y="211" class="gm-svg-mini">Jacobianを計算</text>
-                    <text x="784" y="235" class="gm-svg-mini">厳密尤度を扱える</text>
-                    <text x="784" y="267" class="gm-svg-note">逆変換で生成</text>
+                    <text x="784" y="193" class="gm-svg-note">元へ戻せる変換で</text>
+                    <text x="784" y="218" class="gm-svg-note">行き来する</text>
                 </svg>
-                <p class="gm-caption"><strong>一言暗記：</strong>自己回帰＝順番に書く／VAE＝分布へ圧縮／GAN＝競う／Diffusion＝壊して戻す／Flow＝可逆変換で往復。</p>
+                <p class="gm-caption"><strong>一言暗記：</strong>順番に書く／圧縮して戻す／作る人と見破る人／汚して戻す／往復できる変換。</p>
             </div>
         </div>
 
-        <h3>■ オートエンコーダ（Autoencoder）・DAE（Denoising Autoencoder）・VAE：どこが違うか</h3>
+        <details class="gm-details">
+            <summary>試験で出る確率の書き方を見る</summary>
+            <div>識別モデルは主に <strong>p(y|x)</strong>、生成モデルは <strong>p(x)</strong>・<strong>p(x,y)</strong>・条件付き生成の <strong>p(x|c)</strong> を扱う、と表します。</div>
+        </details>
+
+        <h3>■ AE・DAE・VAE：圧縮メモの違い</h3>
         <div class="gm-table-wrap">
             <table class="gm-table">
-                <tr><th>モデル</th><th>入力 → 目標</th><th>潜在表現</th><th>主な狙い</th></tr>
-                <tr><td><strong>AE（Autoencoder／オートエンコーダ）</strong></td><td>x → xを再構成</td><td>決定的な点 z</td><td>圧縮・特徴抽出。通常のAEだけではpriorからの生成規則を保証しない。</td></tr>
-                <tr><td><strong>DAE（Denoising Autoencoder／ノイズ除去オートエンコーダ）</strong></td><td>汚した入力 x̃ → 元のx</td><td>決定的な点 z</td><td>ノイズに頑健な表現を学ぶ。</td></tr>
-                <tr><td><strong>VAE（Variational Autoencoder／変分オートエンコーダ）</strong></td><td>x → xを再構成</td><td>分布 q<sub>φ</sub>(z|x)</td><td>priorからサンプリングして生成できるように学ぶ。</td></tr>
-            </table>
-        </div>
-        <div class="gm-note"><strong>KL＝Kullback–Leibler divergence（KLダイバージェンス）</strong>。VAEでは、入力ごとの潜在分布 q<sub>φ</sub>(z|x) を事前分布 p(z) に近づける役を持ちます。</div>
-
-        <div class="gm-visual-wrap">
-            <div class="gm-visual-card">
-                <svg class="gm-wide-svg" viewBox="0 0 960 390" role="img" aria-labelledby="gm-vae-title gm-vae-desc">
-                    <title id="gm-vae-title">VAEの学習経路と生成経路</title>
-                    <desc id="gm-vae-desc">入力をEncoderで平均と対数分散へ変換し、外部ノイズを使って再パラメータ化した潜在変数をDecoderへ渡す。再構成損失とKL項を学び、生成時はpriorからDecoderだけを使う。</desc>
-                    <defs><marker id="gm-arrow-vae" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#486581"></path></marker></defs>
-                    <text x="20" y="28" class="gm-svg-title">VAE：点ではなく分布を経由する</text>
-                    <rect x="20" y="48" width="920" height="242" class="gm-svg-blue"></rect>
-                    <text x="38" y="74" class="gm-svg-label">学習時</text>
-                    <rect x="40" y="106" width="80" height="48" class="gm-svg-box"></rect>
-                    <text x="72" y="135" class="gm-svg-note">入力 x</text>
-                    <line x1="126" y1="130" x2="168" y2="130" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae)"></line>
-                    <rect x="180" y="100" width="126" height="60" class="gm-svg-box"></rect>
-                    <text x="202" y="124" class="gm-svg-note">Encoder</text>
-                    <text x="195" y="145" class="gm-svg-mini">qφ(z|x)</text>
-                    <line x1="312" y1="130" x2="354" y2="130" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae)"></line>
-                    <rect x="366" y="94" width="148" height="72" class="gm-svg-box"></rect>
-                    <text x="386" y="119" class="gm-svg-note">μ・log σ²</text>
-                    <text x="382" y="143" class="gm-svg-mini">σ=exp(½ log σ²)</text>
-                    <rect x="608" y="44" width="78" height="34" class="gm-svg-purple"></rect>
-                    <text x="622" y="66" class="gm-svg-mini">ε〜N(0,I)</text>
-                    <line x1="647" y1="80" x2="647" y2="92" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae)"></line>
-                    <line x1="520" y1="130" x2="562" y2="130" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae)"></line>
-                    <rect x="574" y="94" width="146" height="72" class="gm-svg-purple"></rect>
-                    <text x="591" y="120" class="gm-svg-note">z=μ+σ⊙ε</text>
-                    <text x="590" y="144" class="gm-svg-mini">Reparameterization</text>
-                    <line x1="726" y1="130" x2="768" y2="130" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae)"></line>
-                    <rect x="780" y="100" width="82" height="60" class="gm-svg-box"></rect>
-                    <text x="794" y="124" class="gm-svg-note">Decoder</text>
-                    <text x="793" y="145" class="gm-svg-mini">pθ(x|z)</text>
-                    <line x1="868" y1="130" x2="898" y2="130" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae)"></line>
-                    <text x="907" y="135" class="gm-svg-note">x̂</text>
-
-                    <rect x="112" y="202" width="282" height="58" class="gm-svg-box"></rect>
-                    <text x="134" y="226" class="gm-svg-label">再構成損失</text>
-                    <text x="134" y="248" class="gm-svg-mini">xとx̂を近づける</text>
-                    <rect x="520" y="202" width="306" height="58" class="gm-svg-box"></rect>
-                    <text x="542" y="226" class="gm-svg-label">KL項</text>
-                    <text x="542" y="248" class="gm-svg-mini">qφ(z|x)をprior p(z)=N(0,I)へ近づける</text>
-
-                    <rect x="20" y="310" width="920" height="58" class="gm-svg-green"></rect>
-                    <text x="38" y="335" class="gm-svg-label">生成時：</text>
-                    <text x="118" y="335" class="gm-svg-note">z〜N(0,I)</text>
-                    <line x1="195" y1="331" x2="248" y2="331" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae)"></line>
-                    <text x="262" y="335" class="gm-svg-note">Decoder</text>
-                    <line x1="325" y1="331" x2="378" y2="331" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae)"></line>
-                    <text x="392" y="335" class="gm-svg-note">新しいsample</text>
-                    <text x="548" y="335" class="gm-svg-note">※Encoderは使わない</text>
-                </svg>
-                <p class="gm-caption"><strong>ここが試験の分かれ目：</strong>乱数そのものを微分するのではなく、εを外へ出して μ・σ を微分できる形にします。</p>
-            </div>
-        </div>
-
-        <div class="gm-formula"><strong>ELBO（Evidence Lower Bound／変分下限）</strong> = E<sub>q</sub>[log p<sub>θ</sub>(x|z)] − KL(q<sub>φ</sub>(z|x) || p(z))</div>
-        <div class="gm-formula"><strong>学習Loss（−ELBO）</strong> = 再構成損失 ＋ KL項　→ 最小化</div>
-
-        <h3>■ GAN：本物と偽物を同じ判定器へ入れる</h3>
-        <div class="gm-visual-wrap">
-            <div class="gm-visual-card">
-                <svg class="gm-wide-svg" viewBox="0 0 960 360" role="img" aria-labelledby="gm-gan-title gm-gan-desc">
-                    <title id="gm-gan-title">GANのGeneratorとDiscriminatorの学習経路</title>
-                    <desc id="gm-gan-desc">本物データとGeneratorが作る偽物を同じDiscriminatorへ入力し、Discriminatorは見分け、Generatorは偽物を本物と判定させるよう交互に学ぶ。</desc>
-                    <defs><marker id="gm-arrow-gan" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#486581"></path></marker></defs>
-                    <text x="20" y="28" class="gm-svg-title">GAN：Gが作り、Dが同じ物差しで判定する</text>
-                    <rect x="20" y="48" width="920" height="218" class="gm-svg-red"></rect>
-                    <rect x="42" y="78" width="120" height="48" class="gm-svg-green"></rect>
-                    <text x="61" y="107" class="gm-svg-note">本物 x〜p_data</text>
-                    <line x1="168" y1="102" x2="610" y2="119" stroke="#27ae60" stroke-width="2" marker-end="url(#gm-arrow-gan)"></line>
-
-                    <rect x="42" y="176" width="120" height="48" class="gm-svg-purple"></rect>
-                    <text x="66" y="205" class="gm-svg-note">noise z</text>
-                    <line x1="168" y1="200" x2="224" y2="200" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-gan)"></line>
-                    <rect x="236" y="170" width="160" height="60" class="gm-svg-red"></rect>
-                    <text x="255" y="195" class="gm-svg-label">Generator G</text>
-                    <text x="255" y="216" class="gm-svg-mini">生成器ネットワーク</text>
-                    <line x1="402" y1="200" x2="450" y2="200" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-gan)"></line>
-                    <rect x="462" y="176" width="110" height="48" class="gm-svg-box"></rect>
-                    <text x="480" y="205" class="gm-svg-note">偽物 G(z)</text>
-                    <line x1="578" y1="200" x2="610" y2="179" stroke="#d64545" stroke-width="2" marker-end="url(#gm-arrow-gan)"></line>
-
-                    <rect x="622" y="100" width="174" height="100" class="gm-svg-purple"></rect>
-                    <text x="642" y="137" class="gm-svg-label">Discriminator D</text>
-                    <text x="642" y="159" class="gm-svg-mini">識別器ネットワーク</text>
-                    <text x="642" y="181" class="gm-svg-mini">本物らしさ D(・)</text>
-                    <line x1="802" y1="150" x2="838" y2="150" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-gan)"></line>
-                    <rect x="850" y="126" width="72" height="48" class="gm-svg-box"></rect>
-                    <text x="860" y="155" class="gm-svg-mini">本物確率</text>
-
-                    <rect x="20" y="286" width="446" height="52" class="gm-svg-purple"></rect>
-                    <text x="38" y="308" class="gm-svg-label">Dを更新：</text>
-                    <text x="118" y="308" class="gm-svg-note">D(x)→1、D(G(z))→0</text>
-                    <rect x="494" y="286" width="446" height="52" class="gm-svg-red"></rect>
-                    <text x="512" y="308" class="gm-svg-label">Gを更新：</text>
-                    <text x="592" y="308" class="gm-svg-note">D(G(z))→1 を目指す</text>
-                    <text x="38" y="330" class="gm-svg-mini">GとDを交互に更新する</text>
-                    <text x="512" y="330" class="gm-svg-mini">zが違っても似た出力ばかり＝Mode Collapse</text>
-                </svg>
-            </div>
-        </div>
-
-        <div class="gm-formula"><strong>基本GAN：</strong>min<sub>G</sub> max<sub>D</sub> E<sub>x</sub>[log D(x)] + E<sub>z</sub>[log(1−D(G(z)))]</div>
-        <div class="gm-note"><strong>BCE（Binary Cross-Entropy／二値交差エントロピー）</strong>で本物・偽物を学習します。実務でよく使うnon-saturating Generator lossは −E<sub>z</sub>[log D(G(z))]。「識別誤差率を最大化」ではなく、<strong>偽物を本物側へ判定させる</strong>と覚えます。</div>
-
-        <div class="gm-table-wrap">
-            <table class="gm-table">
-                <tr><th>GAN系</th><th>核となる工夫</th><th>試験の合図</th></tr>
-                <tr><td><strong>DCGAN（Deep Convolutional Generative Adversarial Network）</strong></td><td>畳み込み中心。G隠れ層はReLU（Rectified Linear Unit）・出力はtanh、D隠れ層はLeaky ReLU。</td><td>Poolingをstrided / transposed convolutionへ置換する設計指針。</td></tr>
-                <tr><td><strong>WGAN（Wasserstein GAN）</strong></td><td>確率ではなく実数scoreを出すCriticとWasserstein距離を使う。</td><td>1-Lipschitz制約。原論文はweight clipping、WGAN-GP（WGAN with Gradient Penalty）はgradient penalty。</td></tr>
-                <tr><td><strong>cGAN（Conditional GAN）</strong></td><td>条件cをGとDの両方へ入力する。</td><td>ラベルなどを指定して生成内容を制御。</td></tr>
-                <tr><td><strong>CycleGAN</strong></td><td>対応ペアなしで領域X↔Yを変換。2つのGと2つのDを使う。</td><td>Cycle-consistency：F(G(x))≈x。</td></tr>
+                <tr><th>方式</th><th>やっていること</th><th>一言イメージ</th></tr>
+                <tr>
+                    <td><strong>AE<br>Autoencoder</strong></td>
+                    <td>元データ → 圧縮メモ z → 元へ戻す</td>
+                    <td>大事な特徴だけをメモする</td>
+                </tr>
+                <tr>
+                    <td><strong>DAE<br>Denoising Autoencoder</strong></td>
+                    <td>わざと汚したデータ → きれいな元データ</td>
+                    <td>汚れを落とす練習をする</td>
+                </tr>
+                <tr>
+                    <td><strong>VAE<br>Variational Autoencoder</strong></td>
+                    <td>元データ → 中心 μ と広がり σ → 元へ戻す</td>
+                    <td>幅をもった設計図から新しい例を作る</td>
+                </tr>
             </table>
         </div>
 
-        <h3>■ DiffusionとFlow：どちらも分布を変換するが、道筋が違う</h3>
-        <div class="gm-note"><strong>DDPM＝Denoising Diffusion Probabilistic Models</strong>。代表的な学習では、MSE（Mean Squared Error／平均二乗誤差）で加えたnoise εと予測noise ε̂の差を小さくします。</div>
-        <div class="gm-visual-wrap">
-            <div class="gm-visual-card">
-                <svg class="gm-wide-svg" viewBox="0 0 960 410" role="img" aria-labelledby="gm-df-title gm-df-desc">
-                    <title id="gm-df-title">拡散モデルとフローベース生成モデルの比較</title>
-                    <desc id="gm-df-desc">拡散モデルはデータへ段階的にノイズを加え、学習した逆過程で反復的に除去する。フローはデータと単純分布を可逆変換で結び、ヤコビアンから厳密尤度を計算する。</desc>
-                    <defs><marker id="gm-arrow-df" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#486581"></path></marker></defs>
-                    <text x="20" y="28" class="gm-svg-title">Diffusion＝反復して戻す／Flow＝可逆変換で往復</text>
-                    <rect x="20" y="48" width="450" height="338" class="gm-svg-green"></rect>
-                    <text x="38" y="76" class="gm-svg-label">Diffusion Model（拡散モデル）</text>
-                    <text x="38" y="103" class="gm-svg-note">Forward process：固定scheduleでGaussian noiseを加える</text>
-                    <rect x="42" y="120" width="72" height="42" class="gm-svg-box"></rect>
-                    <text x="60" y="146" class="gm-svg-note">x₀</text>
-                    <line x1="120" y1="141" x2="174" y2="141" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-df)"></line>
-                    <rect x="186" y="120" width="72" height="42" class="gm-svg-box"></rect>
-                    <text x="205" y="146" class="gm-svg-note">x_t</text>
-                    <line x1="264" y1="141" x2="318" y2="141" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-df)"></line>
-                    <rect x="330" y="120" width="112" height="42" class="gm-svg-purple"></rect>
-                    <text x="348" y="146" class="gm-svg-note">x_T（noise）</text>
-                    <text x="38" y="194" class="gm-svg-note">Reverse process：学習したnetworkで反復denoise</text>
-                    <line x1="412" y1="219" x2="348" y2="219" stroke="#27ae60" stroke-width="2" marker-end="url(#gm-arrow-df)"></line>
-                    <text x="375" y="210" class="gm-svg-mini">x_T</text>
-                    <line x1="320" y1="219" x2="256" y2="219" stroke="#27ae60" stroke-width="2" marker-end="url(#gm-arrow-df)"></line>
-                    <text x="280" y="210" class="gm-svg-mini">…</text>
-                    <line x1="228" y1="219" x2="164" y2="219" stroke="#27ae60" stroke-width="2" marker-end="url(#gm-arrow-df)"></line>
-                    <text x="188" y="210" class="gm-svg-mini">x_t</text>
-                    <line x1="136" y1="219" x2="72" y2="219" stroke="#27ae60" stroke-width="2" marker-end="url(#gm-arrow-df)"></line>
-                    <text x="86" y="210" class="gm-svg-mini">x₀</text>
-                    <rect x="42" y="258" width="400" height="92" class="gm-svg-box"></rect>
-                    <text x="58" y="282" class="gm-svg-label">代表的DDPMの学習</text>
-                    <text x="58" y="306" class="gm-svg-note">x₀＋時刻t＋noise ε → x_t → εθ(x_t,t)</text>
-                    <text x="58" y="330" class="gm-svg-note">MSE(ε, ε̂)を小さくする</text>
-
-                    <rect x="490" y="48" width="450" height="338" class="gm-svg-orange"></rect>
-                    <text x="508" y="76" class="gm-svg-label">Flow-based Model（フローベース生成モデル）</text>
-                    <text x="508" y="103" class="gm-svg-note">生成：単純分布 z → g⁻¹ → 複雑なデータ x</text>
-                    <rect x="520" y="126" width="112" height="48" class="gm-svg-purple"></rect>
-                    <text x="538" y="155" class="gm-svg-note">z〜N(0,I)</text>
-                    <line x1="638" y1="150" x2="700" y2="150" stroke="#f39c12" stroke-width="2" marker-end="url(#gm-arrow-df)"></line>
-                    <rect x="712" y="120" width="100" height="60" class="gm-svg-box"></rect>
-                    <text x="731" y="145" class="gm-svg-note">g⁻¹</text>
-                    <text x="727" y="166" class="gm-svg-mini">可逆変換</text>
-                    <line x1="818" y1="150" x2="864" y2="150" stroke="#f39c12" stroke-width="2" marker-end="url(#gm-arrow-df)"></line>
-                    <rect x="876" y="126" width="42" height="48" class="gm-svg-green"></rect>
-                    <text x="892" y="155" class="gm-svg-note">x</text>
-                    <text x="508" y="211" class="gm-svg-note">尤度計算：x → g → z（逆向きに戻す）</text>
-                    <rect x="864" y="214" width="58" height="44" class="gm-svg-box"></rect>
-                    <text x="888" y="241" class="gm-svg-note">x</text>
-                    <line x1="854" y1="236" x2="800" y2="236" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-df)"></line>
-                    <rect x="700" y="214" width="90" height="44" class="gm-svg-orange"></rect>
-                    <text x="741" y="241" class="gm-svg-note">g</text>
-                    <line x1="690" y1="236" x2="616" y2="236" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-df)"></line>
-                    <rect x="530" y="214" width="76" height="44" class="gm-svg-box"></rect>
-                    <text x="562" y="241" class="gm-svg-note">z</text>
-                    <rect x="520" y="270" width="398" height="80" class="gm-svg-box"></rect>
-                    <text x="538" y="294" class="gm-svg-note">○ 厳密なlog-likelihoodを計算可能</text>
-                    <text x="538" y="317" class="gm-svg-note">△ 可逆でJacobianを計算できる構造が必要</text>
-                    <text x="538" y="340" class="gm-svg-mini">基本形ではxとzを同次元にする</text>
-                </svg>
-            </div>
+        <div class="gm-note">
+            <span class="gm-word"><strong>z</strong>＝圧縮した設計図（潜在変数）</span>
+            <span class="gm-word"><strong>Encoder</strong>＝圧縮する側</span>
+            <span class="gm-word"><strong>Decoder</strong>＝元へ戻す側</span>
+            <span class="gm-word"><strong>prior</strong>＝生成を始める基準分布（事前分布）</span>
         </div>
 
-        <div class="gm-formula"><strong>拡散の前向き過程：</strong>x<sub>t</sub> = √ᾱ<sub>t</sub> x<sub>0</sub> + √(1−ᾱ<sub>t</sub>) ε</div>
-        <div class="gm-formula"><strong>Flowの変数変換：</strong>z=g(x) のとき、log p<sub>X</sub>(x) = log p<sub>Z</sub>(g(x)) + log |det J<sub>g</sub>(x)|</div>
-
-        <h3>■ 自己回帰：確率を掛けて、1要素ずつ生成</h3>
+        <h3>■ VAE：中心と広がりから設計図 z を選ぶ</h3>
         <div class="gm-core">
-            <div class="gm-formula"><strong>p(x₁:T) = ∏<sub>t=1</sub><sup>T</sup> p(x<sub>t</sub> | x<sub>&lt;t</sub>)</strong></div>
-            <ul class="gm-steps">
-                <li>各要素を、それより前の要素を条件として予測する。</li>
-                <li>正規化された尤度を計算しやすい一方、生成は原則として逐次的。</li>
-                <li>この章では生成方式としての因数分解を扱い、Causal Mask等の内部計算はTransformer章へ任せる。</li>
-            </ul>
+            <ol class="gm-steps">
+                <li>Encoderが、設計図の<strong>中心 μ</strong>と<strong>広がり σ</strong>を出す。</li>
+                <li>乱数 ε を使い、<strong>z = μ + σε</strong> で設計図を1つ選ぶ。</li>
+                <li>Decoderが z から元データに似たものを作る。</li>
+            </ol>
         </div>
 
-        <h3>■ 計算問題はこの表に当てはめる</h3>
+        <div class="gm-visual-wrap">
+            <div class="gm-visual-card">
+                <svg class="gm-wide-svg" viewBox="0 0 960 385" role="img" aria-labelledby="gm-vae-title gm-vae-desc">
+                    <title id="gm-vae-title">VAEを3手順で理解する図</title>
+                    <desc id="gm-vae-desc">Encoderが中心と広がりを出し、乱数で潜在変数を選び、Decoderで復元する。損失は再構成と分布の整形の2つ。</desc>
+                    <defs><marker id="gm-arrow-vae-simple" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#486581"></path></marker></defs>
+                    <text x="20" y="28" class="gm-svg-title">VAE：圧縮 → zを選ぶ → 復元</text>
+                    <rect x="20" y="48" width="920" height="238" class="gm-svg-blue"></rect>
+                    <text x="38" y="76" class="gm-svg-label">学習時</text>
+
+                    <rect x="42" y="108" width="84" height="48" class="gm-svg-box"></rect>
+                    <text x="65" y="137" class="gm-svg-note">入力 x</text>
+                    <line x1="132" y1="132" x2="170" y2="132" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae-simple)"></line>
+
+                    <rect x="182" y="100" width="130" height="64" class="gm-svg-box"></rect>
+                    <text x="202" y="125" class="gm-svg-label">圧縮する</text>
+                    <text x="202" y="148" class="gm-svg-mini">Encoder</text>
+                    <line x1="318" y1="132" x2="356" y2="132" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae-simple)"></line>
+
+                    <rect x="368" y="96" width="154" height="72" class="gm-svg-box"></rect>
+                    <text x="389" y="121" class="gm-svg-note">中心 μ</text>
+                    <text x="389" y="146" class="gm-svg-note">広がり σ</text>
+                    <line x1="528" y1="132" x2="566" y2="132" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae-simple)"></line>
+
+                    <rect x="578" y="96" width="150" height="72" class="gm-svg-purple"></rect>
+                    <text x="596" y="120" class="gm-svg-note">z = μ + σ×ε</text>
+                    <text x="596" y="145" class="gm-svg-mini">乱数 ε でzを選ぶ</text>
+                    <line x1="734" y1="132" x2="772" y2="132" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-vae-simple)"></line>
+
+                    <rect x="784" y="100" width="130" height="64" class="gm-svg-box"></rect>
+                    <text x="804" y="125" class="gm-svg-label">復元する</text>
+                    <text x="804" y="148" class="gm-svg-mini">Decoder → x̂</text>
+
+                    <rect x="92" y="205" width="330" height="56" class="gm-svg-box"></rect>
+                    <text x="112" y="229" class="gm-svg-label">① 元のxに近づける</text>
+                    <text x="112" y="250" class="gm-svg-mini">再構成損失</text>
+                    <rect x="520" y="205" width="330" height="56" class="gm-svg-box"></rect>
+                    <text x="540" y="229" class="gm-svg-label">② 分布を基準へ近づける</text>
+                    <text x="540" y="250" class="gm-svg-mini">KL項</text>
+
+                    <rect x="20" y="307" width="920" height="56" class="gm-svg-green"></rect>
+                    <text x="38" y="341" class="gm-svg-label">生成時：</text>
+                    <text x="118" y="341" class="gm-svg-note">基準分布から z を選ぶ → Decoder → 新しいデータ</text>
+                    <text x="610" y="341" class="gm-svg-note">※Encoderは使わない</text>
+                </svg>
+                <p class="gm-caption"><strong>再パラメータ化：</strong>乱数部分を ε として別に置くと、μ・σを学習できる計算の形になります。</p>
+            </div>
+        </div>
+
+        <div class="gm-core">
+            <strong>VAEの学習でやりたいこと</strong><br>
+            ① 元データへ上手に戻す　＋　② 設計図 z の分布を基準の形へそろえる
+            <div class="gm-formula"><strong>学習損失（−ELBO）</strong> ＝ 再構成損失 ＋ 分布のずれ（KL項）</div>
+            <strong>KL</strong>＝Kullback–Leibler divergence（KLダイバージェンス：分布のずれ）／
+            <strong>ELBO</strong>＝Evidence Lower Bound（変分下限）
+        </div>
+
+        <details class="gm-details">
+            <summary>試験用の正式なVAEの式を見る</summary>
+            <div>
+                <div class="gm-formula"><strong>ELBO（変分下限）</strong> ＝ E<sub>q</sub>[log p<sub>θ</sub>(x|z)] − KL(q<sub>φ</sub>(z|x) || p(z))</div>
+                <p>ELBOは<strong>最大化</strong>します。同じことを「−ELBO＝再構成損失＋KL項を<strong>最小化</strong>」とも表します。</p>
+                <p>実装ではEncoderが μ と log σ² を出し、σ を求めて z=μ+σε とします。</p>
+            </div>
+        </details>
+
+        <h3>■ GAN：偽造者Gと鑑定者Dが競う</h3>
+        <div class="gm-core">
+            <strong>GAN（Generative Adversarial Network／敵対的生成ネットワーク）</strong>では、次の2者が競います。
+            <ol class="gm-steps">
+                <li><strong>G（生成器）</strong>が偽物を作る。</li>
+                <li><strong>D（識別器）</strong>が本物か偽物かを判定する。</li>
+                <li>交互に練習し、Gが本物らしいデータを作れるようになる。</li>
+            </ol>
+        </div>
+
+        <div class="gm-visual-wrap">
+            <div class="gm-visual-card">
+                <svg class="gm-wide-svg" viewBox="0 0 960 345" role="img" aria-labelledby="gm-gan-title gm-gan-desc">
+                    <title id="gm-gan-title">GANの生成器と識別器の競争</title>
+                    <desc id="gm-gan-desc">乱数を材料に生成器が偽物を作り、識別器が本物データと偽物を判定する。両者を交互に学習する。</desc>
+                    <defs><marker id="gm-arrow-gan-simple" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#486581"></path></marker></defs>
+                    <text x="20" y="28" class="gm-svg-title">基本GAN：作るGと見破るDが競う</text>
+                    <rect x="20" y="48" width="920" height="208" class="gm-svg-red"></rect>
+
+                    <rect x="42" y="78" width="130" height="48" class="gm-svg-green"></rect>
+                    <text x="65" y="107" class="gm-svg-note">本物データ x</text>
+                    <line x1="178" y1="102" x2="614" y2="119" stroke="#27ae60" stroke-width="2" marker-end="url(#gm-arrow-gan-simple)"></line>
+
+                    <rect x="42" y="170" width="130" height="48" class="gm-svg-purple"></rect>
+                    <text x="61" y="199" class="gm-svg-note">乱数 z（材料）</text>
+                    <line x1="178" y1="194" x2="224" y2="194" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-gan-simple)"></line>
+
+                    <rect x="236" y="164" width="170" height="60" class="gm-svg-red"></rect>
+                    <text x="255" y="190" class="gm-svg-label">生成器 G</text>
+                    <text x="255" y="213" class="gm-svg-mini">偽物を作る</text>
+                    <line x1="412" y1="194" x2="458" y2="194" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-gan-simple)"></line>
+
+                    <rect x="470" y="170" width="112" height="48" class="gm-svg-box"></rect>
+                    <text x="488" y="199" class="gm-svg-note">偽物 G(z)</text>
+                    <line x1="588" y1="194" x2="614" y2="177" stroke="#d64545" stroke-width="2" marker-end="url(#gm-arrow-gan-simple)"></line>
+
+                    <rect x="626" y="98" width="180" height="100" class="gm-svg-purple"></rect>
+                    <text x="646" y="135" class="gm-svg-label">識別器 D</text>
+                    <text x="646" y="160" class="gm-svg-note">本物か判定する</text>
+                    <line x1="812" y1="148" x2="846" y2="148" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-gan-simple)"></line>
+
+                    <rect x="858" y="124" width="68" height="48" class="gm-svg-box"></rect>
+                    <text x="866" y="153" class="gm-svg-mini">本物らしさ</text>
+
+                    <rect x="20" y="276" width="446" height="48" class="gm-svg-purple"></rect>
+                    <text x="38" y="306" class="gm-svg-note">D：本物→1、偽物→0 を当てる</text>
+                    <rect x="494" y="276" width="446" height="48" class="gm-svg-red"></rect>
+                    <text x="512" y="306" class="gm-svg-note">G：偽物を1と判定させたい</text>
+                </svg>
+                <p class="gm-caption"><strong>注意：</strong>違う乱数からも似たものばかり作る失敗を <strong>Mode Collapse（モード崩壊）</strong> と呼びます。</p>
+            </div>
+        </div>
+
         <div class="gm-table-wrap">
             <table class="gm-table">
-                <tr><th>与えられるもの</th><th>使う式</th><th>見る場所</th></tr>
-                <tr><td>各時刻の条件付き確率</td><td>全部を掛ける</td><td>自己回帰の系列確率</td></tr>
-                <tr><td>μ・σ・ε</td><td>z=μ+σε</td><td>VAEのReparameterization</td></tr>
-                <tr><td>再構成対数尤度・KL</td><td>ELBO=再構成対数尤度−KL</td><td>最大化か、−ELBO最小化か</td></tr>
-                <tr><td>D(real)・D(fake)</td><td>−log D(real)−log(1−D(fake))</td><td>DiscriminatorのBCE（二値交差エントロピー）loss</td></tr>
-                <tr><td>ᾱ<sub>t</sub>・x₀・ε</td><td>xₜ=√ᾱₜx₀+√(1−ᾱₜ)ε</td><td>拡散の時刻tのデータ</td></tr>
-                <tr><td>p<sub>Z</sub>(g(x))・Jacobian</td><td>掛ける（logなら足す）</td><td>Flowのデータ密度</td></tr>
+                <tr><th>名前</th><th>まず覚えること</th><th>試験語</th></tr>
+                <tr><td><strong>DCGAN</strong><br>Deep Convolutional Generative Adversarial Network</td><td>画像向けに畳み込みを使うGAN</td><td>G：ReLU（Rectified Linear Unit）・出力tanh／D：Leaky ReLU</td></tr>
+                <tr><td><strong>WGAN</strong><br>Wasserstein GAN</td><td>Dの代わりに実数の評価値を出すCriticを使う</td><td>Wasserstein距離／評価値が急変しない（1-Lipschitz）</td></tr>
+                <tr><td><strong>cGAN</strong><br>Conditional GAN</td><td>「猫を作って」など条件を指定する</td><td>条件cをGとDの両方へ入れる</td></tr>
+                <tr><td><strong>CycleGAN</strong></td><td>ペア画像なしでA↔Bを変換する</td><td>往復して元へ戻すCycle-consistency</td></tr>
             </table>
         </div>
 
-        <h3>■ 発展比較（本線を覚えた後）</h3>
+        <details class="gm-details">
+            <summary>試験用の正式なGANの式・派生語を見る</summary>
+            <div>
+                <div class="gm-formula"><strong>Dの基本：</strong>本物 D(x)→1、偽物 D(G(z))→0</div>
+                <div class="gm-formula"><strong>Gの基本：</strong>偽物を D(G(z))→1 と判定させたい</div>
+                <div class="gm-formula"><strong>minimax：</strong>min<sub>G</sub> max<sub>D</sub> E<sub>x</sub>[log D(x)] + E<sub>z</sub>[log(1−D(G(z)))]</div>
+                <p>BCE（Binary Cross-Entropy／二値交差エントロピー）は、本物か偽物かの2値判定に使う損失です。WGAN-GP（WGAN with Gradient Penalty）は、勾配ペナルティで1-Lipschitz制約を近似します。</p>
+            </div>
+        </details>
+
+        <h3>■ DiffusionとFlow：戻し方が違う</h3>
+        <div class="gm-core">
+            <strong>Diffusion（拡散モデル）</strong>＝画像を砂嵐のように壊し、少しずつ戻す練習。<br>
+            <strong>Flow（フローベース）</strong>＝必ず元へ戻れる変換で、簡単な乱数とデータを行き来。
+        </div>
+        <div class="gm-note">
+            <strong>DDPM</strong>＝Denoising Diffusion Probabilistic Models。代表的な拡散モデルで、加えたノイズを当てる練習をします。
+        </div>
+
+        <div class="gm-visual-wrap">
+            <div class="gm-visual-card">
+                <svg class="gm-wide-svg" viewBox="0 0 960 380" role="img" aria-labelledby="gm-df-title gm-df-desc">
+                    <title id="gm-df-title">拡散モデルとフローベースモデルのやさしい比較</title>
+                    <desc id="gm-df-desc">拡散モデルはノイズを加えて壊し、予測したノイズを反復的に除く。Flowは可逆変換で単純な乱数とデータを行き来する。</desc>
+                    <defs><marker id="gm-arrow-df-simple" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#486581"></path></marker></defs>
+                    <text x="20" y="28" class="gm-svg-title">Diffusion＝少しずつ戻す／Flow＝変換を逆向きに戻す</text>
+
+                    <rect x="20" y="48" width="450" height="308" class="gm-svg-green"></rect>
+                    <text x="38" y="76" class="gm-svg-label">Diffusion（拡散モデル）</text>
+                    <text x="38" y="104" class="gm-svg-note">準備（固定）：ノイズを加えて学習用の x_t を作る</text>
+                    <rect x="42" y="120" width="100" height="42" class="gm-svg-box"></rect>
+                    <text x="57" y="146" class="gm-svg-note">元データ x₀</text>
+                    <line x1="148" y1="141" x2="180" y2="141" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-df-simple)"></line>
+                    <rect x="192" y="120" width="96" height="42" class="gm-svg-box"></rect>
+                    <text x="211" y="146" class="gm-svg-note">途中 x_t</text>
+                    <line x1="294" y1="141" x2="326" y2="141" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-df-simple)"></line>
+                    <rect x="338" y="120" width="104" height="42" class="gm-svg-purple"></rect>
+                    <text x="350" y="146" class="gm-svg-note">ほぼノイズ x_T</text>
+
+                    <text x="38" y="196" class="gm-svg-note">生成：右から左へ、予測したノイズを少しずつ除く</text>
+                    <rect x="338" y="206" width="104" height="34" class="gm-svg-purple"></rect>
+                    <text x="350" y="228" class="gm-svg-mini">ほぼノイズ x_T</text>
+                    <line x1="332" y1="223" x2="294" y2="223" stroke="#27ae60" stroke-width="2" marker-end="url(#gm-arrow-df-simple)"></line>
+                    <rect x="192" y="206" width="96" height="34" class="gm-svg-box"></rect>
+                    <text x="215" y="228" class="gm-svg-mini">途中 x_t</text>
+                    <line x1="186" y1="223" x2="148" y2="223" stroke="#27ae60" stroke-width="2" marker-end="url(#gm-arrow-df-simple)"></line>
+                    <rect x="42" y="206" width="100" height="34" class="gm-svg-box"></rect>
+                    <text x="57" y="228" class="gm-svg-mini">元データ x₀</text>
+
+                    <rect x="42" y="252" width="400" height="78" class="gm-svg-box"></rect>
+                    <text x="58" y="278" class="gm-svg-label">学ぶこと：加えたノイズ ε を当てる</text>
+                    <text x="58" y="304" class="gm-svg-note">正解 ε と予測 ε̂ の平均二乗誤差（MSE）を小さくする</text>
+
+                    <rect x="490" y="48" width="450" height="308" class="gm-svg-orange"></rect>
+                    <text x="508" y="76" class="gm-svg-label">Flow（フローベース）</text>
+                    <text x="508" y="104" class="gm-svg-note">生成：簡単な乱数からデータへ戻す</text>
+                    <rect x="520" y="124" width="112" height="48" class="gm-svg-purple"></rect>
+                    <text x="546" y="153" class="gm-svg-note">簡単な乱数 z</text>
+                    <line x1="638" y1="148" x2="698" y2="148" stroke="#f39c12" stroke-width="2" marker-end="url(#gm-arrow-df-simple)"></line>
+                    <rect x="710" y="118" width="106" height="60" class="gm-svg-box"></rect>
+                    <text x="730" y="143" class="gm-svg-note">逆変換 g⁻¹</text>
+                    <text x="730" y="164" class="gm-svg-mini">元へ戻す</text>
+                    <line x1="822" y1="148" x2="862" y2="148" stroke="#f39c12" stroke-width="2" marker-end="url(#gm-arrow-df-simple)"></line>
+                    <rect x="874" y="124" width="48" height="48" class="gm-svg-green"></rect>
+                    <text x="893" y="153" class="gm-svg-note">x</text>
+
+                    <text x="508" y="216" class="gm-svg-note">尤度（データらしさ）を計算：x → g → z</text>
+                    <rect x="856" y="230" width="66" height="46" class="gm-svg-box"></rect>
+                    <text x="883" y="258" class="gm-svg-note">x</text>
+                    <line x1="846" y1="253" x2="800" y2="253" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-df-simple)"></line>
+                    <rect x="702" y="230" width="88" height="46" class="gm-svg-orange"></rect>
+                    <text x="738" y="258" class="gm-svg-note">g</text>
+                    <line x1="692" y1="253" x2="630" y2="253" stroke="#486581" stroke-width="2" marker-end="url(#gm-arrow-df-simple)"></line>
+                    <rect x="540" y="230" width="80" height="46" class="gm-svg-box"></rect>
+                    <text x="574" y="258" class="gm-svg-note">z</text>
+
+                    <rect x="520" y="294" width="402" height="42" class="gm-svg-box"></rect>
+                    <text x="538" y="320" class="gm-svg-note">○ 厳密な尤度　△ 可逆変換とヤコビアンが必要</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="gm-note">
+            <strong>拡散モデルの記号：</strong>
+            x₀＝元データ／x<sub>t</sub>＝時刻tの汚れたデータ／ε＝加えたノイズ。<br>
+            √ᾱ<sub>t</sub>＝元データ側の係数、√(1−ᾱ<sub>t</sub>)＝ノイズ側の係数。
+        </div>
+
+        <div class="gm-note">
+            <strong>Flowの言葉：</strong>
+            Jacobian（ヤコビアン）＝変換による「伸び縮み率」。伸び縮みした分だけ確率密度を補正します。
+        </div>
+
+        <details class="gm-details">
+            <summary>試験用のDiffusion・Flowの式を見る</summary>
+            <div>
+                <div class="gm-formula"><strong>拡散：</strong>x<sub>t</sub> = √ᾱ<sub>t</sub>x<sub>0</sub> + √(1−ᾱ<sub>t</sub>)ε</div>
+                <div class="gm-formula"><strong>Flow：</strong>z=g(x) のとき、log p<sub>X</sub>(x) = log p<sub>Z</sub>(g(x)) + log |det J<sub>g</sub>(x)|</div>
+                <p>DDPMは Denoising Diffusion Probabilistic Models。代表的な学習では、加えたノイズεを予測します。</p>
+            </div>
+        </details>
+
+        <h3>■ 自己回帰：前までを見て、次を1つ作る</h3>
+        <div class="gm-core">
+            <ol class="gm-steps">
+                <li>「今日は」までを見て、次の語を予測する。</li>
+                <li>「今日は 天気が」までを見て、さらに次を予測する。</li>
+                <li>各段階の確率を全部掛けると、系列全体の確率になる。</li>
+            </ol>
+        </div>
+        <details class="gm-details">
+            <summary>試験用の自己回帰の式を見る</summary>
+            <div>
+                <div class="gm-formula">p(x₁:T) = ∏<sub>t=1</sub><sup>T</sup> p(x<sub>t</sub> | x<sub>1:t−1</sub>)</div>
+                <p>x₁:T＝系列全体、x₁:t−1＝それまでに出た要素。生成は原則1つずつなので時間がかかりやすい方式です。</p>
+            </div>
+        </details>
+
+        <h3>■ 計算問題：何をすればよいか</h3>
         <div class="gm-table-wrap">
             <table class="gm-table">
-                <tr><th>語</th><th>一言</th></tr>
-                <tr><td><strong>Pix2Pix</strong></td><td>対応する入力・出力ペアで学ぶ画像変換cGAN。</td></tr>
-                <tr><td><strong>FID（Fréchet Inception Distance）</strong></td><td>実画像と生成画像の特徴分布距離。一般に小さいほど近い。</td></tr>
-                <tr><td><strong>Score-based Model</strong></td><td>対数密度の勾配 ∇<sub>x</sub>log p(x) を学ぶ。</td></tr>
-                <tr><td><strong>初代StyleGAN</strong></td><td>Mapping NetworkとAdaINでstyleを制御。StyleGAN2は別方式へ発展。</td></tr>
-                <tr><td><strong>VQ-VAE（Vector Quantized VAE）</strong></td><td>離散codebookを使う潜在表現。</td></tr>
-                <tr><td><strong>CLIP（Contrastive Language-Image Pre-training）</strong></td><td>画像とテキストを近い埋め込み空間へ配置する対照学習モデル。</td></tr>
+                <tr><th>与えられたもの</th><th>やること</th><th>答えの意味</th></tr>
+                <tr><td>μ・σ・ε</td><td>σ×εを計算し、最後にμを足す</td><td>選ばれた潜在変数 z</td></tr>
+                <tr><td>再構成対数尤度・KL</td><td>ELBO＝再構成対数尤度−KL<br>Lossは符号を反転</td><td>VAEの学習損失</td></tr>
+                <tr><td>μ・σの正規分布（Gaussian）のKL</td><td>σ²とlogσ²を先に簡単にする</td><td>潜在分布のずれ</td></tr>
+                <tr><td>D(real)・D(fake)</td><td>本物側の損失＋偽物側の損失</td><td>Dの二値交差エントロピー</td></tr>
+                <tr><td>元データ・ノイズ・係数</td><td>元データ側とノイズ側を別々に計算して足す</td><td>時刻tの汚れたデータ x<sub>t</sub></td></tr>
+                <tr><td>CycleGANの往復結果</td><td>各要素の絶対値の差を足す</td><td>元へ戻せた程度</td></tr>
+                <tr><td>密度・変換の傾き</td><td>密度×伸び縮み率</td><td>Flowで補正した密度</td></tr>
             </table>
         </div>
 
         <h3>■ 最後はこの表だけ</h3>
         <div class="gm-table-wrap">
             <table class="gm-table">
-                <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
-                <tr><td>過去を条件に1要素ずつ生成</td><td><strong>Autoregressive（自己回帰）</strong></td><td>系列確率を条件付き確率の積へ分解。</td></tr>
-                <tr><td>汚した入力から元データを復元</td><td><strong>DAE（Denoising Autoencoder／ノイズ除去オートエンコーダ）</strong></td><td>ノイズに頑健な表現を学ぶ。</td></tr>
-                <tr><td>μ・logσ²・z=μ+σε</td><td><strong>VAE（Variational Autoencoder／変分オートエンコーダ）</strong></td><td>潜在変数を確率分布として扱う。</td></tr>
-                <tr><td>再構成対数尤度−KLを最大化</td><td><strong>ELBO（Evidence Lower Bound／変分下限）</strong></td><td>−ELBOなら再構成損失＋KLを最小化。</td></tr>
-                <tr><td>生成器Gと識別器Dが競う</td><td><strong>GAN（Generative Adversarial Network）</strong></td><td>Gは偽物を作り、Dは本物らしさを判定。</td></tr>
-                <tr><td>同じ種類ばかり生成</td><td><strong>Mode Collapse</strong></td><td>生成分布の多様性が失われる。</td></tr>
-                <tr><td>畳み込み中心・GはReLU・DはLeakyReLU</td><td><strong>DCGAN（Deep Convolutional Generative Adversarial Network）</strong></td><td>GANの安定学習の代表的設計指針。</td></tr>
-                <tr><td>Critic・Wasserstein距離・1-Lipschitz</td><td><strong>WGAN（Wasserstein GAN）</strong></td><td>分布が離れていても有用な信号を得やすい。</td></tr>
-                <tr><td>ラベル等の条件をGとDへ入力</td><td><strong>cGAN（Conditional GAN）</strong></td><td>生成する内容を条件で制御。</td></tr>
-                <tr><td>ペアなし変換・往復して元へ</td><td><strong>CycleGAN</strong></td><td>Cycle-consistency lossを使う。</td></tr>
-                <tr><td>段階的にノイズを加え、逆向きに除去</td><td><strong>DDPM（Denoising Diffusion Probabilistic Models）</strong></td><td>代表的実装はnoise εを予測する。</td></tr>
-                <tr><td>可逆変換・Jacobian・厳密尤度</td><td><strong>Flow-based Model</strong></td><td>単純分布とデータ分布を往復する。</td></tr>
+                <tr><th>問題文の合図</th><th>答え</th><th>まず思い出すこと</th></tr>
+                <tr><td>前までを見て次を1つ</td><td><strong>自己回帰</strong></td><td>順番に作る</td></tr>
+                <tr><td>汚した入力から元へ</td><td><strong>DAE</strong></td><td>汚れを落とす練習</td></tr>
+                <tr><td>中心μ・広がりσ・乱数ε</td><td><strong>VAE</strong></td><td>幅をもつ設計図</td></tr>
+                <tr><td>再構成＋KL</td><td><strong>−ELBO</strong></td><td>上手に戻す＋分布を整える</td></tr>
+                <tr><td>作るGと見破るD</td><td><strong>GAN</strong></td><td>交互に競う</td></tr>
+                <tr><td>同じものばかり作る</td><td><strong>Mode Collapse</strong></td><td>多様性がなくなる</td></tr>
+                <tr><td>画像向けの畳み込みGAN</td><td><strong>DCGAN</strong></td><td>GはReLU、DはLeaky ReLU</td></tr>
+                <tr><td>Critic・Wasserstein・1-Lipschitz</td><td><strong>WGAN</strong></td><td>確率でなく実数評価</td></tr>
+                <tr><td>作りたい条件を指定</td><td><strong>cGAN</strong></td><td>条件cをGとDへ</td></tr>
+                <tr><td>ペアなし変換・往復</td><td><strong>CycleGAN</strong></td><td>A→B→Aで元へ</td></tr>
+                <tr><td>ノイズを加え、少しずつ除く</td><td><strong>DDPM</strong></td><td>加えたノイズを当てる</td></tr>
+                <tr><td>戻せる変換・ヤコビアン</td><td><strong>Flow</strong></td><td>乱数とデータを往復</td></tr>
             </table>
         </div>
+
+        <details class="gm-details">
+            <summary>略語の正式名称を見る</summary>
+            <div>
+                AE＝Autoencoder／DAE＝Denoising Autoencoder／VAE＝Variational Autoencoder／
+                ELBO＝Evidence Lower Bound／KL＝Kullback–Leibler／GAN＝Generative Adversarial Network／
+                DCGAN＝Deep Convolutional Generative Adversarial Network／
+                WGAN＝Wasserstein GAN／cGAN＝Conditional GAN／
+                DDPM＝Denoising Diffusion Probabilistic Models／MSE＝Mean Squared Error／
+                BCE＝Binary Cross-Entropy／ReLU＝Rectified Linear Unit
+            </div>
+        </details>
     `,
 
     questions: [
         {
+            id: "gen-discriminative-vs-generative",
             category: "識別モデルと生成モデル",
-            question: "識別モデルが P(y|x) を学習するのに対し、生成モデルが学習しようとする確率はどれか。",
-            options: ["P(x)、P(x,y)、または条件付き生成のP(x|c)", "P(y|x)だけ", "決定境界だけ", "Accuracyだけ"],
+            question: "「画像を見て犬か猫か当てる」識別モデルに対し、生成モデルが主に学ぶものはどれか。",
+            options: ["新しいデータを作れるよう、p(x)などのデータ分布を学ぶ", "P(y|x)だけを学ぶ", "Accuracyだけを学ぶ", "決定境界だけを学ぶ"],
             answer: 0,
-            explanation: "識別モデルは主に入力xからラベルyを求めるP(y|x)を扱います。生成モデルはデータ分布P(x)、生成的分類なら同時分布P(x,y)、条件付き生成ならP(x|c)を扱います。"
+            explanation: "<strong>① 識別</strong>は入力xから答えyを当てます。<br><strong>② 生成</strong>は学習データらしさを覚えます。<br><strong>③ したがって</strong>p(x)、p(x,y)、条件付きならp(x|c)を扱います。"
         },
         {
+            id: "gen-vae-encoder-output",
             category: "VAEの構造",
-            question: "VAE (Variational Autoencoder) のEncoderが出力するものは何か。",
-            options: ["近似事後q(z|x)のパラメータであるμとlogσ²など", "固定された潜在ベクトルだけ", "復元された画像", "クラスラベルだけ"],
+            question: "VAEのEncoderは、潜在変数zを選ぶために何を出力するか。",
+            options: ["zの中心μと広がりを表すlogσ²など", "完成した画像だけ", "クラスラベルだけ", "固定されたzを必ず1個だけ"],
             answer: 0,
-            explanation: "実装では平均μとlog variance（logσ²）を出すのが代表的です。σ=exp(0.5 logσ²)とし、εを使ってzを作ります。"
+            explanation: "<strong>①</strong> VAEはzを最初から1点に決めません。<br><strong>②</strong> Encoderが中心μと広がりσを出します。<br><strong>③</strong> そこへ乱数εを入れ、z=μ+σεでzを1つ選びます。"
         },
         {
-            category: "Reparameterization Trick",
-            question: "VAEにおいて「Reparameterization Trick」を用いる主な理由は何か。",
-            options: ["確率的なサンプリングをεへ外出しし、μとσへ誤差逆伝播できるようにするため", "潜在次元を必ず1にするため", "画像を分類するため", "GeneratorとDiscriminatorを競わせるため"],
+            id: "gen-reparameterization-reason",
+            category: "再パラメータ化",
+            question: "VAEで z=μ+σε と書く主な理由は何か。",
+            options: ["乱数部分をεとして分け、μとσを学習できる計算経路にするため", "潜在次元を必ず1にするため", "画像分類だけを行うため", "GANの識別器を作るため"],
             answer: 0,
-            explanation: "z=μ+σεと書けば、乱数εは外部から与え、学習対象μ・σを決定的な計算経路に置けます。"
+            explanation: "<strong>①</strong> zを直接ランダムに選ぶと、その選択部分は微分しにくくなります。<br><strong>②</strong> ランダムさを外部のεへ分けます。<br><strong>③</strong> z=μ+σεなら、μ・σまで誤差を戻して学習できます。"
         },
         {
+            id: "gen-gan-generator-goal",
             category: "GANの仕組み",
-            question: "GAN (Generative Adversarial Network) におけるGenerator (生成器) の目的は何か。",
-            options: ["Discriminatorが生成データを本物側と判定するようなデータを作る", "本物データを分類するだけ", "入力画像を必ず同じ画像へ復元する", "潜在変数の事後分布を推定する"],
+            question: "GANのGenerator（生成器）Gが目指すことは何か。",
+            options: ["作った偽物をDiscriminatorに本物だと思わせる", "本物画像を分類するだけ", "入力をそのまま復元する", "KL項だけを計算する"],
             answer: 0,
-            explanation: "GはD(G(z))を本物側へ近づけます。実務で代表的なnon-saturating lossは−log D(G(z))の最小化です。"
+            explanation: "<strong>①</strong> Gは乱数zから偽物G(z)を作ります。<br><strong>②</strong> Dは本物らしさを判定します。<br><strong>③</strong> GはD(G(z))を1側、つまり本物判定へ近づけます。"
         },
         {
+            id: "gen-mode-collapse",
             category: "モード崩壊",
-            question: "GANの学習における失敗例の一つ「モード崩壊 (Mode Collapse)」とはどのような現象か。",
-            options: ["異なるノイズからも似たパターンばかりを生成し、多様性が失われる", "Generatorが必ずノイズだけを生成する", "Discriminatorの出力が常に0.5になる理想状態", "画像が平均化して少しぼやけるだけ"],
+            question: "GANのMode Collapse（モード崩壊）とは何か。",
+            options: ["違う乱数からも似たものばかり生成し、多様性がなくなる", "常にノイズだけを出す", "Dが正しく判定できる理想状態", "画像が少し明るくなる"],
             answer: 0,
-            explanation: "生成器が識別器を騙しやすい少数の出力へ集中し、真のデータ分布にある複数のmodeを覆えなくなる現象です。"
+            explanation: "<strong>①</strong> 本来は乱数が違えば多様な出力がほしいです。<br><strong>②</strong> GがDをだませる少数の型だけに偏ることがあります。<br><strong>③</strong> 同じ種類ばかりになる失敗がMode Collapseです。"
         },
         {
+            id: "gen-diffusion-reverse-process",
             category: "拡散モデルの概要",
-            question: "拡散モデル (Diffusion Model) の画像生成プロセス（逆拡散過程）の基本的な動作はどれか。",
-            options: ["ほぼ純粋なノイズから開始し、学習した逆過程で反復的にノイズを減らす", "潜在変数から必ず1回で生成する", "識別器だけで画像を作る", "画像を単に圧縮する"],
+            question: "拡散モデルが新しい画像を作るときの基本動作はどれか。",
+            options: ["ほぼ純粋なノイズから始め、少しずつノイズを除く", "潜在変数から必ず1回で作る", "識別器だけで画像を作る", "画像を圧縮するだけ"],
             answer: 0,
-            explanation: "学習時のforward processは既知のscheduleで段階的にノイズを加えます。生成時は学習したreverse processで反復的にデータへ戻します。"
+            explanation: "<strong>① 学習</strong>では元画像へノイズを加えます。<br><strong>② モデル</strong>は加えたノイズを当てる練習をします。<br><strong>③ 生成</strong>ではノイズから少しずつノイズ除去して画像へ戻します。"
         },
         {
-            category: "VAEの弱点",
-            question: "一般的に、GANと比較した際のVAEの生成画像の特徴（弱点）は何か。",
-            options: ["画素独立GaussianやMSE（Mean Squared Error／平均二乗誤差）型の再構成では、平均化されてぼやけやすい", "必ずノイズだけになる", "潜在空間を持てない", "生成時に識別器が必須"],
+            id: "gen-vae-blur",
+            category: "VAEの特徴",
+            question: "単純な平均二乗誤差（MSE）型の再構成を使うVAEで、画像がぼやけやすい理由はどれか。",
+            options: ["正解候補が複数あると、その平均が損失を小さくしやすいから", "必ずノイズだけを出すから", "潜在変数を持たないから", "識別器が必須だから"],
             answer: 0,
-            explanation: "すべてのVAEが必ずぼやけるわけではありませんが、単純なGaussian尤度やMSE再構成では複数の可能性を平均化しやすい傾向があります。"
+            explanation: "<strong>①</strong> zへの圧縮で細かな情報が失われることがあります。<br><strong>②</strong> 同じようなzから複数の細部が考えられると、MSEは平均を選びやすくなります。<br><strong>③</strong> 輪郭や模様が平均化され、ぼやけて見えやすくなります。"
         },
         {
+            id: "gen-dcgan-name",
             category: "DCGAN",
-            question: "GANの学習を安定させるために、全結合層の代わりに畳み込み層を使用するなどしたアーキテクチャを何と呼ぶか。",
-            options: ["DCGAN (Deep Convolutional Generative Adversarial Network)", "CycleGAN", "WGAN", "VAE"],
+            question: "画像向けに畳み込み層を中心として構成したGANはどれか。",
+            options: ["DCGAN", "CycleGAN", "WGAN", "VAE"],
             answer: 0,
-            explanation: "DCGANは畳み込み中心の設計指針です。Generatorの隠れ層はReLU・出力はtanh、Discriminatorの隠れ層はLeaky ReLUが基本です。"
+            explanation: "<strong>①</strong> DCはDeep Convolutionalの意味です。<br><strong>②</strong> 全結合中心ではなく畳み込みを使います。<br><strong>③</strong> 代表構成はG隠れ層ReLU・出力tanh、D隠れ層Leaky ReLUです。"
         },
         {
+            id: "gen-cyclegan-unpaired",
             category: "CycleGAN",
-            question: "対応ペアではない画像データセット間（例：馬の集合とシマウマの集合）でのスタイル変換を可能にしたモデルはどれか。",
+            question: "対応ペアのない「馬の画像集」と「シマウマの画像集」だけで相互変換を学ぶモデルはどれか。",
             options: ["CycleGAN", "DCGAN", "WGAN", "VAE"],
             answer: 0,
-            explanation: "CycleGANは対応ペアを必要とせず、X→Y→Xで元へ戻るcycle-consistency lossを使います。"
+            explanation: "<strong>①</strong> 馬Aと対応するシマウマBのペアは不要です。<br><strong>②</strong> 馬→シマウマ→馬と往復させます。<br><strong>③</strong> 元へ戻れるようにするCycle-consistencyを使います。"
         },
         {
+            id: "gen-vae-kl-role",
             category: "VAEのKL項",
-            question: "VAEの損失関数に含まれる「KLダイバージェンス」項の役割は何か。",
-            options: ["近似事後q(z|x)を事前分布p(z)へ近づけ、priorから生成しやすくする", "画像を必ず鮮明にする", "再構成損失そのもの", "潜在次元を増やす"],
+            question: "VAEのKL項は何のために使うか。",
+            options: ["入力ごとのzの分布を、生成時に使う基準分布へ近づける", "画像を必ず鮮明にする", "再構成損失そのものにする", "潜在次元を増やす"],
             answer: 0,
-            explanation: "KL項はqφ(z|x)とprior p(z)の整合性を高めます。これにより、生成時にp(z)から引いたzをDecoderへ入れやすくなります。"
+            explanation: "<strong>① 学習時</strong>は入力ごとにzの分布を作ります。<br><strong>② 生成時</strong>は基準分布p(z)からzを選びます。<br><strong>③ KL項</strong>で両者を近づけ、Decoderが生成時のzを扱いやすくします。"
         },
         {
-            category: "GANの損失関数（理論）",
-            question: "標準的なGANの損失関数は、数理的にはどのようなダイバージェンスの最小化と解釈できるか。",
-            options: ["最適なDiscriminatorのもとでのJensen-Shannon (JS) ダイバージェンス", "KLダイバージェンスだけ", "IoU", "コサイン類似度"],
+            id: "gen-gan-js",
+            category: "GAN理論",
+            question: "元のminimax GANで、Dが最適だと仮定したときGが小さくするものはどれか。",
+            options: ["実分布と生成分布のJensen–Shannon（JS）ダイバージェンス", "物体検出の枠の重なり", "Accuracy", "コサイン距離"],
             answer: 0,
-            explanation: "元のminimax GANでは、Dが最適なとき、Gは実分布と生成分布のJSダイバージェンスを小さくする解釈になります。一般のGANすべてにそのまま当てはめない点に注意します。"
+            explanation: "<strong>①</strong> Dが十分に最適だと仮定します。<br><strong>②</strong> GANの目的は定数＋JSダイバージェンスの形になります。<br><strong>③</strong> GがJSを小さくすると、生成分布が実分布へ近づきます。"
         },
         {
+            id: "gen-wgan-name",
             category: "WGAN",
-            question: "GANの学習不安定性を改善するために、「Wasserstein距離」を導入したモデルは何か。",
-            options: ["WGAN (Wasserstein GAN)", "DCGAN", "CycleGAN", "VAE"],
+            question: "Wasserstein距離を使ってGANの学習信号を得やすくしたモデルはどれか。",
+            options: ["WGAN", "DCGAN", "CycleGAN", "VAE"],
             answer: 0,
-            explanation: "WGANは実数scoreを出すCriticと1-Lipschitz制約を使い、分布が離れている場合にも有用な学習信号を得やすくします。"
+            explanation: "<strong>①</strong> 通常GANは分布が離れると学習信号が弱くなることがあります。<br><strong>②</strong> WGANはWasserstein距離に基づく実数評価を使います。<br><strong>③</strong> 分布が離れていても有用な信号を得やすくします。"
         },
         {
+            id: "gen-ddpm-target",
             category: "拡散モデルの学習",
-            question: "拡散モデル（DDPM：Denoising Diffusion Probabilistic Models）の学習時に、ニューラルネットワーク（U-Net等）が予測するターゲットは具体的に何か。",
-            options: ["代表的なε予測パラメータ化では、加えられたnoise ε", "常にクラスラベルだけ", "Discriminatorのscore", "FlowのJacobian"],
+            question: "代表的なDDPMで、モデルが学習時に予測するものは何か。",
+            options: ["元データへ加えたノイズε", "クラスラベルだけ", "GANの識別結果", "Flowのヤコビアン"],
             answer: 0,
-            explanation: "代表的DDPMではεθ(xₜ,t)で加えたnoise εを予測します。x₀予測やv予測など別のパラメータ化もあるため、拡散モデルすべてが必ずεだけを予測するとは限りません。"
+            explanation: "<strong>①</strong> 学習時に正体の分かるノイズεを加えます。<br><strong>②</strong> モデルへ汚れたデータx_tと時刻tを渡します。<br><strong>③</strong> 予測ε̂と正解εの差を小さくします。"
         },
         {
+            id: "gen-cgan-condition",
             category: "Conditional GAN",
-            question: "「Conditional GAN (cGAN)」において、生成したい画像の条件（ラベルなど）はどのようにモデルに入力されるか。",
-            options: ["GeneratorとDiscriminatorの両方へ入力する", "Generatorだけ", "Discriminatorだけ", "どちらにも入れない"],
+            question: "cGANで「猫を作る」などの条件cは、どこへ入力するか。",
+            options: ["GeneratorとDiscriminatorの両方", "Generatorだけ", "Discriminatorだけ", "どちらにも入れない"],
             answer: 0,
-            explanation: "Gは条件に沿って生成し、Dは『その条件に合う本物か』を判定します。そのため条件cを両方へ渡します。"
+            explanation: "<strong>①</strong> Gは条件に合うデータを作ります。<br><strong>②</strong> Dはその条件に合う本物かを判定します。<br><strong>③</strong> そのため条件cをGとDの両方へ渡します。"
         },
-        { id:"gen-dae", category:"Denoising Autoencoder", question:"Denoising Autoencoderの学習方法はどれか。", options:["汚した入力から元のクリーン入力を復元する", "入力を分類するだけ", "識別器と敵対させる", "報酬を最大化する"], answer:0, explanation:"入力x̃にはnoiseを加えますが、教師は元のxです。単なる恒等写像ではなく、noiseに頑健な表現を学びます。" },
-        { id:"gen-ae-bottleneck", category:"Autoencoder", question:"Undercomplete AutoencoderのBottleneckの目的はどれか。", options:["入力より低次元へ圧縮し、再構成に重要な特徴を抽出させる", "出力次元を無限にする", "分類ラベルを追加する", "勾配を止める"], answer:0, explanation:"容量を制限し、単純な恒等写像を避けて再構成に必要な情報をzへ持たせます。" },
-        { id:"gen-vae-reparam-calc", category:"VAE Reparameterization（計算）", kind:"計算", question:"$z=\\mu+\\sigma\\epsilon$で$\\mu=2,\\sigma=0.5,\\epsilon=-1$ならzはいくつか。", options:["1.5", "2.5", "1", "-1.5"], answer:0, explanation:"$2+0.5\\times(-1)=1.5$です。noiseをεへ外出ししてμ・σへ勾配を流します。" },
-        { id:"gen-elbo-sign", category:"VAE ELBO", question:"VAEのELBOとして正しい形はどれか。", options:["再構成対数尤度 − $D_{KL}(q(z|x)||p(z))$", "再構成損失＋Accuracy", "GAN lossだけ", "報酬−TD誤差"], answer:0, explanation:"ELBO最大化は、負のELBOである『再構成損失＋KL項』の最小化と対応します。" },
-        { id:"gen-flow", category:"フローベース生成モデル", question:"フローベース生成モデルの主要な特徴はどれか。", options:["可逆変換と変数変換公式により厳密尤度を計算できる", "Discriminatorが必須", "逆変換できない", "noiseを段階的に加えるだけ"], answer:0, explanation:"単純分布とdata分布を可逆写像で結び、Jacobian determinantで密度を変換します。" },
-        { id:"gen-flow-tradeoff", category:"フローベース（制約）", question:"フローベースモデルの設計上の代表的制約はどれか。", options:["変換を可逆かつJacobian計算可能にする必要がある", "lossが微分不能", "潜在次元を必ず1にする", "画像を扱えない"], answer:0, explanation:"厳密尤度と逆生成のため、network構造へ可逆性とJacobian計算容易性の制約がかかります。" },
-        { id:"gen-wgan", category:"Wasserstein GAN", question:"WGANのCriticと通常GANのDiscriminatorの違いとして正しいものはどれか。", options:["Criticは確率に限定しない実数scoreを出し、1-Lipschitz制約を課す", "Criticは必ず0か1だけを返す", "CriticはGeneratorである", "WGANには実dataを使わない"], answer:0, explanation:"WGANのCriticはreal/fake確率ではなく実数scoreを出します。原論文はweight clipping、WGAN-GPはgradient penaltyでLipschitz制約を実現します。" },
-        { id:"gen-diffusion-forward", category:"拡散モデル（数式理解）", question:"DDPMのforward processで時刻tが進むにつれて一般に起きることはどれか。", options:["dataへ段階的にGaussian noiseが加わり、単純なnoise分布へ近づく", "noiseが必ず一度で消える", "識別器が生成器を分類する", "潜在変数が離散化される"], answer:0, explanation:"forward processは既知のscheduleで徐々にnoiseを加えます。reverse processはnetworkが学習します。" },
-
-        { id:"gen-autoregressive-definition", category:"自己回帰", question:"自己回帰型生成モデルの特徴として正しいものはどれか。", options:["過去の要素を条件に次の要素を1つずつ生成し、系列確率を条件付き確率の積へ分解する", "全要素を互いに無関係として生成する", "必ずGeneratorとDiscriminatorを競わせる", "可逆変換だけを使う"], answer:0, explanation:"$p(x_{1:T})=\\prod_t p(x_t|x_{1:t-1})$です。尤度を計算しやすい一方、生成は逐次的になりやすい特徴があります。" },
-        { id:"gen-family-compare", category:"生成モデル比較", question:"生成モデル族と特徴の対応として正しいものはどれか。", options:["自己回帰＝逐次尤度、GAN＝敵対学習、Diffusion＝反復denoise、Flow＝可逆変換", "自己回帰＝可逆変換、GAN＝ELBO、Diffusion＝Cycle loss、Flow＝識別境界", "すべてDiscriminatorが必須", "すべて厳密尤度を計算できる"], answer:0, explanation:"各方式の一語対応を固定します。GANは一般に明示的尤度を直接計算せず、Diffusionは反復sampling、Flowは可逆性が核です。" },
-        { id:"gen-ae-vs-vae", category:"AEとVAE", question:"通常のAutoencoderとVAEの違いとして正しいものはどれか。", options:["通常AEは決定的なzで再構成し、VAEはq(z|x)とpriorをELBOで結ぶ", "通常AEにも必ずKL項がある", "VAEはEncoderを持たない", "通常AEだけが確率分布を出す"], answer:0, explanation:"通常AEは圧縮・再構成が主目的です。VAEは近似事後をpriorへ整合させ、priorからのsample生成を可能にします。" },
-        { id:"gen-elbo-calc", category:"VAE ELBO（計算）", kind:"計算", question:"再構成対数尤度が−8、KL項が2のとき、ELBO（Evidence Lower Bound／変分下限）と学習Loss（−ELBO）はどれか。", options:["ELBO=−10、Loss=10", "ELBO=−6、Loss=6", "ELBO=10、Loss=−10", "ELBO=2、Loss=8"], answer:0, explanation:"ELBO=−8−2=−10です。学習で最小化する−ELBOは10です。符号を逆にしないことが重要です。" },
-        { id:"gen-gaussian-kl-calc", category:"VAE KL（計算）", kind:"計算", question:"$D_{KL}(N(\\mu,\\sigma^2)||N(0,1))=\\frac12(\\mu^2+\\sigma^2-\\log\\sigma^2-1)$。$\\mu=1,\\sigma=1$のときKLはいくつか。", options:["0.5", "0", "1", "2"], answer:0, explanation:"$\\frac12(1^2+1^2-\\log1-1)=\\frac12(1+1-0-1)=0.5$です。" },
-        { id:"gen-discriminator-role", category:"GANの識別器", question:"標準GANのDiscriminatorを更新するときの目標はどれか。", options:["D(real)を1へ、D(fake)を0へ近づける", "D(real)とD(fake)を両方1へする", "noise zを復元する", "KL項を最大化する"], answer:0, explanation:"Dは本物と偽物を見分けます。一方G更新時はD(G(z))を1側へ近づけます。" },
-        { id:"gen-gan-bce-calc", category:"GAN Loss（計算）", kind:"計算", question:"D(real)=0.8、D(fake)=0.3のとき、Dの1組分のBCE（Binary Cross-Entropy／二値交差エントロピー）loss $-\\ln D(real)-\\ln(1-D(fake))$ は約いくつか。$-\\ln0.8\\approx0.22,-\\ln0.7\\approx0.36$とする。", options:["0.58", "0.14", "1.10", "1.60"], answer:0, explanation:"$-\\ln0.8-\\ln(1-0.3)=0.22+0.36=0.58$です。fake側は$-\\ln D(fake)$ではなく$-\\ln(1-D(fake))$です。" },
-        { id:"gen-dcgan-activations", category:"DCGAN", question:"DCGANの代表的な活性化関数の組合せとして正しいものはどれか。", options:["G隠れ層ReLU・G出力tanh・D隠れ層LeakyReLU", "GもDも全層Sigmoid", "G隠れ層LeakyReLU・D隠れ層ReLUだけ", "G出力ReLU・D出力tanh"], answer:0, explanation:"GeneratorとDiscriminatorで同じ活性化を使うわけではありません。G出力tanh、D隠れ層LeakyReLUが頻出です。" },
-        { id:"gen-cycle-loss-calc", category:"CycleGAN（計算）", kind:"計算", question:"x=(1,2)、F(G(x))=(0.8,2.3)のとき、L1 cycle loss $|1-0.8|+|2-2.3|$ はいくつか。", options:["0.5", "0.1", "1.5", "2.5"], answer:0, explanation:"$0.2+0.3=0.5$です。変換して戻した結果が元入力からどれだけずれたかを測ります。" },
-        { id:"gen-diffusion-xt-calc", category:"拡散モデル（計算）", kind:"計算", question:"$x_t=\\sqrt{\\bar\\alpha_t}x_0+\\sqrt{1-\\bar\\alpha_t}\\epsilon$。$\\bar\\alpha_t=0.64,x_0=2,\\epsilon=-1$のとき$x_t$はいくつか。", options:["1.0", "1.3", "1.6", "2.2"], answer:0, explanation:"$\\sqrt{0.64}=0.8,\\sqrt{0.36}=0.6$なので、$0.8\\times2+0.6\\times(-1)=1.6-0.6=1.0$です。" },
-        { id:"gen-flow-jacobian-calc", category:"Flow（計算）", kind:"計算", question:"dataからlatentへの変換が$z=g(x)=2x$で、$p_Z(g(x))=0.1$とする。$p_X(x)=p_Z(g(x))|dg/dx|$はいくつか。", options:["0.2", "0.05", "0.1", "2.0"], answer:0, explanation:"$|dg/dx|=2$なので、$p_X(x)=0.1\\times2=0.2$です。可逆変換による体積変化をJacobianで補正します。" }
+        {
+            id: "gen-dae",
+            category: "Denoising Autoencoder",
+            question: "DAE（Denoising Autoencoder）はどのように学習するか。",
+            options: ["汚した入力から元のきれいな入力を復元する", "入力を分類するだけ", "識別器と競わせる", "報酬を最大化する"],
+            answer: 0,
+            explanation: "<strong>①</strong> 元データxをわざと汚してx̃を作ります。<br><strong>②</strong> 入力にはx̃、正解には元のxを使います。<br><strong>③</strong> ノイズに強い特徴を学びます。"
+        },
+        {
+            id: "gen-ae-bottleneck",
+            category: "Autoencoder",
+            question: "Autoencoderの狭いBottleneck（ボトルネック）を設ける目的は何か。",
+            options: ["保存できる情報を制限し、復元に重要な特徴を残させる", "出力次元を無限にする", "分類ラベルを追加する", "勾配を止める"],
+            answer: 0,
+            explanation: "<strong>①</strong> 容量が大きすぎると入力を丸写しできます。<br><strong>②</strong> 狭いBottleneckで保存量を制限します。<br><strong>③</strong> 復元に必要な重要特徴だけを残させます。"
+        },
+        {
+            id: "gen-vae-reparam-calc",
+            category: "VAE 再パラメータ化（計算）",
+            kind: "計算",
+            question: "使う式：$z=\\mu+\\sigma\\epsilon$。値：$\\mu=2,\\sigma=0.5,\\epsilon=-1$。zはいくつか。",
+            options: ["1.5", "2.5", "1", "-1.5"],
+            answer: 0,
+            explanation: "<strong>① 掛け算：</strong>$\\sigma\\epsilon=0.5\\times(-1)=-0.5$。<br><strong>② 足し算：</strong>$z=2-0.5=1.5$。<br><strong>③ 意味：</strong>乱数εを分けることで、μ・σを学習できます。"
+        },
+        {
+            id: "gen-elbo-sign",
+            category: "VAE ELBO",
+            question: "VAEのELBOとして正しい形はどれか。",
+            options: ["再構成対数尤度 − KL", "再構成損失＋Accuracy", "GANの損失だけ", "報酬−価値関数の誤差"],
+            answer: 0,
+            explanation: "<strong>①</strong> 再構成対数尤度は、上手に元へ戻せたほど大きくなります。<br><strong>②</strong> KLは分布のずれなので引きます。<br><strong>③</strong> ELBOを最大化することは、−ELBOを最小化することと同じです。"
+        },
+        {
+            id: "gen-flow",
+            category: "フローベース生成モデル",
+            question: "Flow（フローベース生成モデル）の主な特徴はどれか。",
+            options: ["元へ戻せる変換を使い、厳密な尤度を計算できる", "識別器が必須", "逆変換できない", "ノイズを段階的に加えるだけ"],
+            answer: 0,
+            explanation: "<strong>①</strong> 複雑なデータxを簡単な分布zへ変換します。<br><strong>②</strong> 可逆なのでzからxへ戻して生成できます。<br><strong>③</strong> 伸び縮みをヤコビアンで補正し、尤度を計算できます。"
+        },
+        {
+            id: "gen-flow-tradeoff",
+            category: "Flowの制約",
+            question: "Flowのネットワーク設計に必要な条件はどれか。",
+            options: ["変換が可逆で、ヤコビアンを計算できる", "損失が微分できない", "潜在次元が必ず1", "画像を扱えない"],
+            answer: 0,
+            explanation: "<strong>①</strong> zからxへ戻すため、変換は可逆である必要があります。<br><strong>②</strong> 密度補正のため、伸び縮み率を計算します。<br><strong>③</strong> そのため可逆性とヤコビアン計算が設計上の制約です。"
+        },
+        {
+            id: "gen-wgan",
+            category: "Wasserstein GAN",
+            question: "WGANのCriticと、通常GANのDiscriminatorの違いはどれか。",
+            options: ["Criticは確率に限らない実数評価を出し、1-Lipschitz制約を課す", "Criticは必ず0か1だけを返す", "CriticはGeneratorである", "WGANは本物データを使わない"],
+            answer: 0,
+            explanation: "<strong>① 通常D：</strong>本物確率を出します。<br><strong>② Critic：</strong>大小を比較する実数評価を出します。<br><strong>③ 制約：</strong>値が急変しすぎない1-Lipschitz制約を課します。"
+        },
+        {
+            id: "gen-diffusion-forward",
+            category: "拡散モデル",
+            question: "拡散モデルのforward process（前向き過程）で、時刻tが進むとどうなるか。",
+            options: ["データへ段階的にノイズが加わり、ほぼノイズへ近づく", "ノイズが一度で消える", "識別器が生成器を分類する", "潜在変数が離散化される"],
+            answer: 0,
+            explanation: "<strong>①</strong> x₀は元データです。<br><strong>②</strong> 時刻が進むほど決められた量のノイズを加えます。<br><strong>③</strong> 最後は単純なノイズ分布へ近づきます。"
+        },
+        {
+            id: "gen-autoregressive-definition",
+            category: "自己回帰",
+            question: "自己回帰型生成モデルの特徴はどれか。",
+            options: ["前までの要素を見て、次の要素を1つずつ生成する", "全要素を無関係に同時生成する", "必ずGとDを競わせる", "可逆変換だけを使う"],
+            answer: 0,
+            explanation: "<strong>①</strong> それまでに出た要素を条件にします。<br><strong>②</strong> 次を1つ生成し、またそれを条件へ加えます。<br><strong>③</strong> 全体の確率は各段階の条件付き確率の積です。"
+        },
+        {
+            id: "gen-family-compare",
+            category: "生成モデル比較",
+            question: "生成モデルと作り方の対応として正しいものはどれか。",
+            options: ["自己回帰＝順番、GAN＝競争、拡散＝ノイズ除去、Flow＝可逆変換", "自己回帰＝可逆変換、GAN＝ELBO、拡散＝往復損失、Flow＝識別", "すべてDが必要", "すべて1回で生成"],
+            answer: 0,
+            explanation: "<strong>① 自己回帰：</strong>次を順番に作る。<br><strong>② GAN／拡散：</strong>競争する／ノイズを戻す。<br><strong>③ Flow：</strong>元へ戻せる変換で乱数とデータを往復します。"
+        },
+        {
+            id: "gen-ae-vs-vae",
+            category: "AEとVAE",
+            question: "通常のAEとVAEの違いはどれか。",
+            options: ["AEは1点zへ圧縮し、VAEは中心と広がりをもつzの分布を使う", "AEにも必ずKL項がある", "VAEはEncoderを持たない", "AEだけが分布を出す"],
+            answer: 0,
+            explanation: "<strong>① AE：</strong>同じ入力なら同じ1点zへ圧縮します。<br><strong>② VAE：</strong>中心μと広がりσをもつ分布へ圧縮します。<br><strong>③</strong> VAEは基準分布からzを選んで新しい例を生成できます。"
+        },
+        {
+            id: "gen-elbo-calc",
+            category: "VAE ELBO（計算）",
+            kind: "計算",
+            question: "使う式：ELBO＝再構成対数尤度−KL。値：再構成対数尤度=−8、KL=2。ELBOとLoss（−ELBO）はどれか。",
+            options: ["ELBO=−10、Loss=10", "ELBO=−6、Loss=6", "ELBO=10、Loss=−10", "ELBO=2、Loss=8"],
+            answer: 0,
+            explanation: "<strong>① ELBO：</strong>$-8-2=-10$。<br><strong>② Loss：</strong>符号を反転して$10$。<br><strong>③ 注意：</strong>ELBOは最大化、−ELBOは最小化します。"
+        },
+        {
+            id: "gen-gaussian-kl-calc",
+            category: "VAE KL（応用計算）",
+            kind: "計算",
+            question: "使う式：$KL=\\frac12(\\mu^2+\\sigma^2-\\log\\sigma^2-1)$。値：$\\mu=1,\\sigma=1$。KLはいくつか。",
+            options: ["0.5", "0", "1", "2"],
+            answer: 0,
+            explanation: "<strong>① 簡単化：</strong>$\\sigma^2=1,\\log1=0$。<br><strong>② 括弧内：</strong>$1^2+1-0-1=1$。<br><strong>③ 最後：</strong>$\\frac12\\times1=0.5$。"
+        },
+        {
+            id: "gen-discriminator-role",
+            category: "GANの識別器",
+            question: "通常GANでDiscriminator（識別器）Dを学習するときの目標はどれか。",
+            options: ["本物D(x)を1へ、偽物D(G(z))を0へ近づける", "本物も偽物も1へ近づける", "乱数zを復元する", "KL項を最大化する"],
+            answer: 0,
+            explanation: "<strong>① 本物：</strong>D(x)を1へ近づけます。<br><strong>② 偽物：</strong>D(G(z))を0へ近づけます。<br><strong>③</strong> Gを学習するときだけ、偽物を1と思わせる方向を目指します。"
+        },
+        {
+            id: "gen-gan-bce-calc",
+            category: "GAN BCE（計算）",
+            kind: "計算",
+            question: "使う式：$L_D=-\\ln D(real)-\\ln(1-D(fake))$。値：D(real)=0.8、D(fake)=0.3。近似：$-\\ln0.8=0.22,-\\ln0.7=0.36$。$L_D$はどれか。",
+            options: ["0.58", "0.14", "1.10", "1.60"],
+            answer: 0,
+            explanation: "<strong>① 本物側：</strong>$-\\ln0.8=0.22$。<br><strong>② 偽物側：</strong>$-\\ln(1-0.3)=-\\ln0.7=0.36$。<br><strong>③ 合計：</strong>$0.22+0.36=0.58$。"
+        },
+        {
+            id: "gen-dcgan-activations",
+            category: "DCGAN",
+            question: "DCGANの代表的な活性化関数の組合せはどれか。",
+            options: ["G隠れ層ReLU・G出力tanh・D隠れ層Leaky ReLU", "GもDも全層Sigmoid", "G隠れ層Leaky ReLU・D隠れ層ReLUだけ", "G出力ReLU・D出力tanh"],
+            answer: 0,
+            explanation: "<strong>① G隠れ層：</strong>ReLU。<br><strong>② G出力：</strong>tanh。<br><strong>③ D隠れ層：</strong>Leaky ReLU。この組合せを固定して覚えます。"
+        },
+        {
+            id: "gen-cycle-loss-calc",
+            category: "CycleGAN（計算）",
+            kind: "計算",
+            question: "元x=(1,2)、往復後F(G(x))=(0.8,2.3)。L1 cycle loss $|1-0.8|+|2-2.3|$ はどれか。",
+            options: ["0.5", "0.1", "1.5", "2.5"],
+            answer: 0,
+            explanation: "<strong>① 1つ目：</strong>$|1-0.8|=0.2$。<br><strong>② 2つ目：</strong>$|2-2.3|=0.3$。<br><strong>③ 合計：</strong>$0.2+0.3=0.5$。小さいほど元へ戻せています。"
+        },
+        {
+            id: "gen-diffusion-xt-calc",
+            category: "拡散モデル（計算）",
+            kind: "計算",
+            question: "使う式：$x_t=\\sqrt{\\bar\\alpha_t}x_0+\\sqrt{1-\\bar\\alpha_t}\\epsilon$。値：$\\bar\\alpha_t=0.64,x_0=2,\\epsilon=-1$。$x_t$はどれか。",
+            options: ["1.0", "1.3", "1.6", "2.2"],
+            answer: 0,
+            explanation: "<strong>① 元データ側：</strong>$\\sqrt{0.64}=0.8$。<br><strong>② ノイズ側：</strong>$\\sqrt{1-0.64}=\\sqrt{0.36}=0.6$。<br><strong>③ 合計：</strong>$0.8\\times2+0.6\\times(-1)=1.0$。"
+        },
+        {
+            id: "gen-flow-jacobian-calc",
+            category: "Flow（計算）",
+            kind: "計算",
+            question: "使う式：$p_X(x)=p_Z(g(x))|dg/dx|$。値：$g(x)=2x,p_Z(g(x))=0.1$。$p_X(x)$はどれか。",
+            options: ["0.2", "0.05", "0.1", "2.0"],
+            answer: 0,
+            explanation: "<strong>① 伸び率：</strong>$g(x)=2x$なので$|dg/dx|=2$。<br><strong>② 密度補正：</strong>$0.1\\times2$。<br><strong>③ 答え：</strong>$p_X(x)=0.2$。ヤコビアンは伸び縮みを補正します。"
+        }
     ]
 };
