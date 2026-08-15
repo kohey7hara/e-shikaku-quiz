@@ -125,8 +125,8 @@ const menuConfig = [
     // =================================================================
     {
         id: "05_dev_edge_dist",
-        title: "5-（１）（２）エッジAI & 分散処理",
-        desc: "軽量化(蒸留・量子化・プルーニング) / モデル並列・データ並列",
+        title: "5-（１）エッジコンピューティング・5-（２）分散処理",
+        desc: "Pruning・Quantization・Distillation / Data Parallelism・Model Parallelism",
         isActive: true
     },
     {

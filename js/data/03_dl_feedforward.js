@@ -648,14 +648,6 @@ window.quizData = {
             explanation: "one-hot教師では正解クラスの項だけ残るため $-\\ln0.7\\approx0.357$ です。全クラスの対数を無条件に足しません。"
         },
         {
-            id: "ff-temperature-softmax",
-            category: "温度付きSoftmax",
-            question: "温度付きSoftmax $softmax(z/T)$ でTを大きくしたときの分布はどうなるか。",
-            options: ["より平坦になり、クラス間の相対情報が見えやすくなる", "必ずone-hotになる", "確率和が0になる", "最大クラスが入れ替わるとは限らず、常に逆順になる"],
-            answer: 0,
-            explanation: "Tが大きいとロジット差を縮めるため分布はsoftになります。蒸留では教師の非正解クラス間の関係も生徒へ伝えやすくします。"
-        },
-        {
             id: "ff-multilabel-output",
             category: "多クラス・マルチラベル（識別）",
             question: "1枚の画像に「犬」と「屋外」が同時に成立するマルチラベル分類の典型的な出力・損失はどれか。",
