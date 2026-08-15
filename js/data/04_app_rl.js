@@ -333,7 +333,7 @@ window.quizData = {
             question: "報酬が$r_1=2,r_2=4$、割引率$\\gamma=0.5$のとき、$G_0=r_1+\\gamma r_2$はいくつか。",
             options: ["4", "6", "3", "5"],
             answer: 0,
-            explanation: "<strong>① 遠い報酬：</strong>$0.5\\times4=2$。<br><strong>② 現在に近い報酬：</strong>$2$。<br><strong>③ 合計：</strong>$G_0=2+2=4$です。"
+            explanation: "<strong>使う公式（2時刻のReturn）：</strong><br>$G_0=r_1+\\gamma r_2$<br><br><strong>① 遠い報酬：</strong>$0.5\\times4=2$。<br><strong>② 現在に近い報酬：</strong>$2$。<br><strong>③ 合計：</strong>$G_0=2+2=4$です。"
         },
         {
             id: "rl-discount-factor",
@@ -374,7 +374,7 @@ window.quizData = {
             question: "$V(s)=3,r=1,\\gamma=0.5,V(s')=4$のとき、$\\delta=r+\\gamma V(s')-V(s)$はいくつか。",
             options: ["0", "3", "-1", "2"],
             answer: 0,
-            explanation: "<strong>① TD目標：</strong>$y=1+0.5\\times4=3$。<br><strong>② 現在の予測：</strong>$V(s)=3$。<br><strong>③ 誤差：</strong>$\\delta=3-3=0$です。"
+            explanation: "<strong>使う公式（TD誤差）：</strong><br>$\\delta=\\{r+\\gamma V(s')\\}-V(s)$<br><br><strong>① TD目標：</strong>$y=1+0.5\\times4=3$。<br><strong>② 現在の予測：</strong>$V(s)=3$。<br><strong>③ 誤差：</strong>$\\delta=3-3=0$です。"
         },
         {
             id: "rl-q-learning-target",
@@ -382,7 +382,7 @@ window.quizData = {
             question: "Q学習のTD目標として正しいものはどれか。",
             options: ["$r+\\gamma\\max_{a'}Q(s',a')$", "$r-\\gamma\\max_{a'}Q(s',a')$", "$Q(s,a)$だけ", "$\\pi(a|s)$だけ"],
             answer: 0,
-            explanation: "<strong>①</strong> 直後の報酬rを使います。<br><strong>②</strong> 次状態で最も大きいQ値を選び、γを掛けます。<br><strong>③</strong> 両者を足した値が現在のQの目標です。"
+            explanation: "<strong>使う公式（Q学習のTD目標）：</strong><br>$y=r+\\gamma\\max_{a'}Q(s',a')$<br><br><strong>①</strong> 直後の報酬rを使います。<br><strong>②</strong> 次状態で最も大きいQ値を選び、γを掛けます。<br><strong>③</strong> 両者を足した値が現在のQの目標です。"
         },
         {
             id: "rl-q-update",
@@ -391,7 +391,7 @@ window.quizData = {
             question: "$Q=2,r=1,\\gamma=0.9,\\max Q(s',a')=4,\\alpha=0.5$のQ学習更新後はどれか。",
             options: ["3.3", "4.6", "2.6", "5"],
             answer: 0,
-            explanation: "<strong>① 目標：</strong>$y=1+0.9\\times4=4.6$。<br><strong>② 誤差：</strong>$4.6-2=2.6$。<br><strong>③ 更新：</strong>$2+0.5\\times2.6=3.3$です。"
+            explanation: "<strong>使う公式（Q学習の更新式）：</strong><br>$y=r+\\gamma\\max_{a'}Q(s',a')$<br>$Q_{new}=Q+\\alpha(y-Q)$<br><br><strong>① 目標：</strong>$y=1+0.9\\times4=4.6$。<br><strong>② 誤差：</strong>$4.6-2=2.6$。<br><strong>③ 更新：</strong>$Q_{new}=2+0.5\\times2.6=3.3$です。"
         },
         {
             id: "rl-q-off-policy",
@@ -416,7 +416,7 @@ window.quizData = {
             question: "行動が4個、$\\epsilon=0.2$。探索時は4行動から一様に選ぶ。greedy行動が選ばれる総確率はどれか。",
             options: ["0.85", "0.80", "0.20", "0.25"],
             answer: 0,
-            explanation: "<strong>① 活用：</strong>$1-0.2=0.8$。<br><strong>② 探索中に同じ行動：</strong>$0.2\\times\\frac14=0.05$。<br><strong>③ 合計：</strong>$0.8+0.05=0.85$です。"
+            explanation: "<strong>使う公式（ε-greedyでgreedy行動を選ぶ確率）：</strong><br>$P(\\text{greedy})=(1-\\epsilon)+\\frac{\\epsilon}{n}$<br>nは行動数です。<br><br><strong>① 活用：</strong>$1-0.2=0.8$。<br><strong>② 探索中に同じ行動：</strong>$0.2\\times\\frac14=0.05$。<br><strong>③ 合計：</strong>$0.8+0.05=0.85$です。"
         },
         {
             id: "rl-dqn-expansion",
@@ -470,18 +470,19 @@ window.quizData = {
             id: "rl-dqn-target-calc",
             category: "DQN TD目標（計算）",
             kind: "計算",
-            question: "$r=1,\\gamma=0.9,\\max Q_{target}(s',a')=4$のとき、DQNのTD目標yはいくつか。",
+            question: "次状態$s'$は非終端とする。$r=1,\\gamma=0.9,\\max Q_{target}(s',a')=4$のとき、DQNのTD目標yはいくつか。",
             options: ["4.6", "3.6", "5.0", "1.9"],
             answer: 0,
-            explanation: "<strong>① 未来側：</strong>$0.9\\times4=3.6$。<br><strong>② 即時報酬：</strong>$1$。<br><strong>③ 合計：</strong>$y=1+3.6=4.6$です。"
+            explanation: "<strong>使う公式（DQNの非終端時TD目標）：</strong><br>$y=r+\\gamma\\max_{a'}Q_{target}(s',a')$<br><br><strong>① 未来側：</strong>$0.9\\times4=3.6$。<br><strong>② 即時報酬：</strong>$1$。<br><strong>③ 合計：</strong>$y=1+3.6=4.6$です。"
         },
         {
             id: "rl-dqn-terminal",
             category: "DQNの終端状態",
+            kind: "計算",
             question: "終端状態へ到達し、報酬$r=2$を得た。DQNのTD目標yはどれか。",
             options: ["2", "$2+\\gamma\\max Q_{target}$", "0", "$\\gamma$"],
             answer: 0,
-            explanation: "<strong>①</strong> 終端後に次の行動はありません。<br><strong>②</strong> 未来価値のbootstrap項は0です。<br><strong>③</strong> したがってTD目標は報酬そのものの$y=r=2$です。"
+            explanation: "<strong>使う公式（DQNの終端時TD目標）：</strong><br>非終端なら $y=r+\\gamma\\max_{a'}Q_{target}(s',a')$、終端なら $y=r$<br><br><strong>①</strong> 終端後に次の行動はありません。<br><strong>②</strong> 未来価値のbootstrap項は0です。<br><strong>③</strong> したがってTD目標は報酬そのものの$y=r=2$です。"
         },
         {
             id: "rl-dqn-loss-calc",
@@ -490,7 +491,7 @@ window.quizData = {
             question: "TD目標$y=5$、Online Networkの予測$Q(s,a)=3$。二乗誤差$(y-Q)^2$はいくつか。",
             options: ["4", "2", "8", "16"],
             answer: 0,
-            explanation: "<strong>① 差：</strong>$5-3=2$。<br><strong>② 二乗：</strong>$2^2=4$。<br><strong>③</strong> この損失を小さくするようOnline Networkを更新します。"
+            explanation: "<strong>使う公式（DQNの二乗誤差）：</strong><br>$L=\\{y-Q_{online}(s,a)\\}^2$<br><br><strong>① 差：</strong>$5-3=2$。<br><strong>② 二乗：</strong>$2^2=4$。<br><strong>③</strong> この損失を小さくするようOnline Networkを更新します。"
         },
         {
             id: "rl-dqn-action-space",
@@ -530,7 +531,7 @@ window.quizData = {
             question: "Advantage $A(s,a)$の代表的な定義はどれか。",
             options: ["$Q(s,a)-V(s)$", "$Q(s,a)+V(s)$", "$V(s)-Q(s,a)$", "$Q(s,a)\\times V(s)$"],
             answer: 0,
-            explanation: "<strong>① Q：</strong>その行動を選んだ価値です。<br><strong>② V：</strong>その状態での平均的な価値です。<br><strong>③</strong> 差$Q-V$で、その行動が平均より良いかを表します。"
+            explanation: "<strong>使う公式（Advantageの定義）：</strong><br>$A(s,a)=Q(s,a)-V(s)$<br><br><strong>① Q：</strong>その行動を選んだ価値です。<br><strong>② V：</strong>その状態での平均的な価値です。<br><strong>③</strong> 差$Q-V$で、その行動が平均より良いかを表します。"
         },
         {
             id: "rl-advantage-calc",
@@ -539,7 +540,7 @@ window.quizData = {
             question: "$r=1,\\gamma=0.9,V(s')=4,V(s)=3$。$A\\approx r+\\gamma V(s')-V(s)$はいくつか。",
             options: ["1.6", "0.6", "2.6", "4.6"],
             answer: 0,
-            explanation: "<strong>① 実際側：</strong>$1+0.9\\times4=4.6$。<br><strong>② Criticの予想：</strong>$V(s)=3$。<br><strong>③ 差：</strong>$A\\approx4.6-3=1.6$です。"
+            explanation: "<strong>使う公式（1-step Advantageの近似）：</strong><br>$A_t\\approx r+\\gamma V(s')-V(s)$<br><br><strong>① 実際側：</strong>$1+0.9\\times4=4.6$。<br><strong>② Criticの予想：</strong>$V(s)=3$。<br><strong>③ 差：</strong>$A\\approx4.6-3=1.6$です。"
         },
         {
             id: "rl-a3c-expansion",
@@ -580,7 +581,7 @@ window.quizData = {
             question: "$r_1=1,r_2=2,\\gamma=0.5,V(s_2)=4$。2-step目標$R=1+\\gamma\\times2+\\gamma^2V(s_2)$はいくつか。",
             options: ["3", "2", "4", "5"],
             answer: 0,
-            explanation: "<strong>① 2個の報酬：</strong>$1+0.5\\times2=2$。<br><strong>② bootstrap：</strong>$0.5^2\\times4=1$。<br><strong>③ 合計：</strong>$R=2+1=3$です。"
+            explanation: "<strong>使う公式（2-step return）：</strong><br>$R_0^{(2)}=r_1+\\gamma r_2+\\gamma^2V(s_2)$<br><br><strong>① 2個の報酬：</strong>$1+0.5\\times2=2$。<br><strong>② bootstrap（2ステップ後から先の残り価値）：</strong>$0.5^2\\times4=1$。<br><strong>③ 合計：</strong>$R=2+1=3$です。"
         },
         {
             id: "rl-a3c-entropy",
