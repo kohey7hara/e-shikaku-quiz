@@ -131,8 +131,8 @@ const menuConfig = [
     },
     {
         id: "05_dev_accel_env",
-        title: "5-（３）（４）ハードウェア & 環境構築",
-        desc: "GPU / TPU / SIMD / コンテナ仮想化(Docker)",
+        title: "5-（３）アクセラレータ・5-（４）環境構築",
+        desc: "SIMD・SIMT・MIMD / GPU・TPU / 3種類の仮想化・Dockerfile",
         isActive: true
     },
 
