@@ -115,8 +115,8 @@ const menuConfig = [
     },
     {
         id: "04_app_misc",
-        title: "4-（８）（９）様々な学習方法 & 説明性",
-        desc: "転移学習 / 距離学習 / XAI (Grad-CAM, Integrated Gradients, SHAP)",
+        title: "4-（８）（９）様々な学習方法・説明性（eXplainable AI／XAI）",
+        desc: "転移学習・ドメイン適応 / 半教師・自己教師 / 距離学習 / XAI",
         isActive: true
     },
 
