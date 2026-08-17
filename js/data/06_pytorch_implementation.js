@@ -8,7 +8,8 @@ window.quizData = {
             .pt-note { background:#fff8e8; border-left:5px solid #f39c12; padding:10px 13px; margin:12px 0; border-radius:0 8px 8px 0; }
             .pt-code { background:#172a3a; color:#f7fbff; padding:14px; border-radius:9px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em; line-height:1.65; overflow-x:auto; white-space:pre; }
             .pt-code .pt-comment { color:#b7c9d8; }
-            .pt-question-code { margin:12px 0; padding:12px 14px; background:#172a3a; color:#f7fbff; border-radius:9px; font:500 .82em/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; white-space:pre; overflow-x:auto; }
+            .pt-question-code { margin:12px 0; padding:12px 14px; background:#f6f9fc; color:#17324d; border:1px solid #cfdae7; border-radius:9px; font:600 .82em/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; white-space:pre; overflow-x:auto; }
+            .pt-question-code code { display:block; padding:0; border-radius:0; background:transparent; color:inherit; font:inherit; }
             .pt-table-wrap, .pt-visual-wrap { overflow-x:auto; margin:14px 0 20px; }
             .pt-table { width:100%; min-width:760px; border-collapse:collapse; }
             .pt-table th, .pt-table td { border:1px solid #d7e2ee; padding:10px 12px; text-align:left; vertical-align:top; }
