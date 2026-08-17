@@ -8,6 +8,7 @@ window.quizData = {
             .pt-note { background:#fff8e8; border-left:5px solid #f39c12; padding:10px 13px; margin:12px 0; border-radius:0 8px 8px 0; }
             .pt-code { background:#172a3a; color:#f7fbff; padding:14px; border-radius:9px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.92em; line-height:1.65; overflow-x:auto; white-space:pre; }
             .pt-code .pt-comment { color:#b7c9d8; }
+            .pt-question-code { margin:12px 0; padding:12px 14px; background:#172a3a; color:#f7fbff; border-radius:9px; font:500 .82em/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; white-space:pre; overflow-x:auto; }
             .pt-table-wrap, .pt-visual-wrap { overflow-x:auto; margin:14px 0 20px; }
             .pt-table { width:100%; min-width:760px; border-collapse:collapse; }
             .pt-table th, .pt-table td { border:1px solid #d7e2ee; padding:10px 12px; text-align:left; vertical-align:top; }
@@ -28,8 +29,9 @@ window.quizData = {
         <div class="pt-wrap">
         <div class="pt-lead">
             <strong>シラバスにPyTorch専用の独立章はないため、この章は「全章の概念をPyTorchコードで読めるか」を鍛える横断ドリルです。</strong><br>
-            試験コードは、まず <strong>①Shape ②dtype ③device ④学習／推論モード ⑤勾配の流れ</strong> の5点を確認します。
+            試験コードは、まず <strong>①Shape ②dtype ③device ④学習／推論モード ⑤勾配の流れ</strong> の5点を確認します。公開受験レポートを参考に、複数行コードから連続して問う「本試験型コード読解」も収録しています。
         </div>
+        <div class="pt-note"><strong>2026#2の確認環境：</strong>JDLA公式掲載の <code>torch==2.12.0</code>、<code>torchvision==0.27.0</code> を基準にしています。古いAPIを丸暗記するのではなく、Shape・処理の意味・現在の代表的な書き方を優先します。</div>
         <div class="pt-note"><strong>先に略語：</strong>MLP＝Multilayer Perceptron（多層パーセプトロン）、CNN＝Convolutional Neural Network（畳み込みニューラルネットワーク）、RNN＝Recurrent Neural Network（再帰型ニューラルネットワーク）、LSTM＝Long Short-Term Memory、GRU＝Gated Recurrent Unit、BN＝Batch Normalization、BCE＝Binary Cross-Entropy、VAE＝Variational Autoencoder、GAN＝Generative Adversarial Network、DQN＝Deep Q-Network、DDP＝Distributed Data Parallel、AMP＝Automatic Mixed Precision（自動混合精度）。<br>CPU＝Central Processing Unit、GPU＝Graphics Processing Unit、RGB＝Red・Green・Blueです。NCHWはN＝B（batch数）・C＝channel・H＝height・W＝width。CLS tokenは分類用token、PAD tokenは長さをそろえる埋め草です。logits（ロジット）はSoftmaxやSigmoidをかける前の生の点数です。</div>
 
         <h3>■ 最初に読む記号</h3>
@@ -182,6 +184,16 @@ with torch.inference_mode():
             <tr><td><code>cat</code> / <code>stack</code></td><td>catは既存軸で連結、stackは新しい軸を追加</td><td>軸を増やすか</td></tr>
             <tr><td><code>attn_mask</code> / <code>key_padding_mask</code></td><td>前者は位置間（例：未来禁止）、後者は各batchのPAD位置</td><td>(L,L)／(B,L)</td></tr>
         </table></div>
+
+        <h3>■ 本試験型コードは60秒で4手</h3>
+        <div class="pt-table-wrap"><table class="pt-table">
+            <tr><th>手順</th><th>最初に確認するもの</th><th>自分への質問</th></tr>
+            <tr><td><strong>① 入力</strong></td><td>Shape・dtype・device</td><td>各軸は何か。class labelはlongか。modelとdataは同じdeviceか。</td></tr>
+            <tr><td><strong>② forward</strong></td><td>各層の出力Shape</td><td>Conv／Pool／Flatten／LSTM／Attentionの後で何Shapeになるか。</td></tr>
+            <tr><td><strong>③ loss</strong></td><td>logitsとtargetの契約</td><td>CE・BCE・MSEのどれか。Softmax／Sigmoidを重ねていないか。</td></tr>
+            <tr><td><strong>④ 更新</strong></td><td>mode・勾配・処理順</td><td>zero_grad→backward→stepか。eval／no_grad／detachの役割は何か。</td></tr>
+        </table></div>
+        <div class="pt-note"><strong>連問の解き方：</strong>同じコードが続いたら、最初の問題で各行の右にShapeを書き込みます。次の問題では最初から読み直さず、そのメモを再利用します。迷った問題は約72秒で仮決めし、後から戻ります。</div>
 
         <h3>■ 最後はこの表だけ</h3>
         <div class="pt-table-wrap"><table class="pt-table">
@@ -601,6 +613,146 @@ with torch.inference_mode():
             question:"PyTorch実験の再現性について最も正確な説明はどれか。",
             options:["Python・NumPy・torch等のseed、deterministic設定、DataLoader worker/generator等を管理するが、環境差まで含む完全一致は常に保証されない","<code>torch.manual_seed</code>を1回呼べば全環境で完全一致する","num_workersを増やせば必ず再現する","model.eval()だけで学習が再現する"], answer:0,
             explanation:"<p>乱数源は複数あり、GPU algorithmやlibrary/version差でも結果が変わり得ます。再現性と速度にはtrade-offがあるため、必要な範囲を明示して設定します。</p>"
+        },
+
+        // 6. 公開受験レポートの形式を踏まえた本試験型コード連問
+        {
+            id:"pt-exam-autograd-loss", setId:"pt-exam-autograd", setOrder:1,
+            category:"本試験型・Autograd", kind:"図表・長文", difficulty:"本試験型",
+            question:"次のコードについて、<code>loss</code>の値はどれか。<pre class='pt-question-code'><code>w = torch.tensor(2.0, requires_grad=True)\nx = torch.tensor(3.0)\ntarget = torch.tensor(1.0)\npred = w * x\nloss = (pred - target) ** 2\nloss.backward()</code></pre>",
+            options:["5","10","25","30"], answer:2,
+            explanation:"<p><strong>使う式：</strong>predictionは<code>pred=wx</code>、二乗誤差は<code>loss=(pred-target)^2</code>。</p><p><strong>代入：</strong>pred=2×3=6、loss=(6-1)^2=25。</p><p><strong>答え：</strong>25です。まずforwardの数値を上から順に追います。</p>"
+        },
+        {
+            id:"pt-exam-autograd-grad", setId:"pt-exam-autograd", setOrder:2,
+            category:"本試験型・Autograd", kind:"図表・長文", difficulty:"本試験型",
+            question:"同じコードで<code>loss.backward()</code>直後の<code>w.grad</code>はいくつか。<pre class='pt-question-code'><code>w = torch.tensor(2.0, requires_grad=True)\nx = torch.tensor(3.0)\ntarget = torch.tensor(1.0)\npred = w * x\nloss = (pred - target) ** 2\nloss.backward()</code></pre>",
+            options:["5","10","25","30"], answer:3,
+            explanation:"<p><strong>使う公式：</strong>$\\frac{d}{dw}(wx-t)^2=2(wx-t)x$。</p><p><strong>代入：</strong>2×(2×3-1)×3=2×5×3=30。</p><p><strong>答え：</strong><code>w.grad=30</code>です。Autogradは同じ微分を計算グラフから求めます。</p>"
+        },
+        {
+            id:"pt-exam-autograd-sgd", setId:"pt-exam-autograd", setOrder:3,
+            category:"本試験型・Autograd", kind:"図表・長文", difficulty:"本試験型",
+            question:"学習率0.1のSGD（Stochastic Gradient Descent／確率的勾配降下法）で1回更新すると、<code>w</code>はいくつになるか。<pre class='pt-question-code'><code># backward後：w=2.0, w.grad=30.0\nlr = 0.1\nwith torch.no_grad():\n    w -= lr * w.grad</code></pre>",
+            options:["-1.0","1.7","2.3","5.0"], answer:0,
+            explanation:"<p><strong>使う公式：</strong>$w_{new}=w-lr\\times grad$。</p><p><strong>代入：</strong>2.0-0.1×30.0=-1.0。</p><p><strong>答え：</strong>-1.0です。Optimizerの<code>step()</code>も基本的に勾配を使ってparameterを更新します。</p>"
+        },
+
+        {
+            id:"pt-exam-mlp-output", setId:"pt-exam-mlp", setOrder:1,
+            category:"本試験型・MLP", kind:"図表・長文", difficulty:"本試験型",
+            question:"次の多クラス分類コードで<code>logits</code>のShapeはどれか。<pre class='pt-question-code'><code>model = nn.Sequential(\n    nn.Linear(4, 8),\n    nn.ReLU(),\n    nn.Linear(8, 3)\n)\nx = torch.randn(5, 4)\ntarget = torch.tensor([0, 2, 1, 0, 2], dtype=torch.long)\nlogits = model(x)\nloss = nn.CrossEntropyLoss()(logits, target)</code></pre>",
+            options:["(5,3)","(3,5)","(5,8)","(4,3)"], answer:0,
+            explanation:"<p><strong>使うShape規則：</strong><code>Linear(in,out)</code>は最後の軸をoutへ変え、Batch軸は保ちます。</p><p><strong>代入：</strong>(5,4)→Linear(4,8)で(5,8)→Linear(8,3)で(5,3)。</p><p><strong>答え：</strong>(5,3)です。5 sampleそれぞれに3 classの点数があります。</p>"
+        },
+        {
+            id:"pt-exam-mlp-params", setId:"pt-exam-mlp", setOrder:2,
+            category:"本試験型・MLP", kind:"図表・長文", difficulty:"本試験型",
+            question:"同じモデルの学習parameter総数はいくつか。biasは両Linearにある。<pre class='pt-question-code'><code>model = nn.Sequential(\n    nn.Linear(4, 8),\n    nn.ReLU(),\n    nn.Linear(8, 3)\n)</code></pre>",
+            options:["56","64","67","75"], answer:2,
+            explanation:"<p><strong>使う公式：</strong>Linearのparameter数＝入力×出力＋出力bias。</p><p><strong>代入：</strong>(4×8+8)+(8×3+3)=40+27=67。</p><p><strong>答え：</strong>67個です。ReLUには学習parameterがありません。</p>"
+        },
+        {
+            id:"pt-exam-mlp-ce-contract", setId:"pt-exam-mlp", setOrder:3,
+            category:"本試験型・MLP", kind:"図表・長文", difficulty:"本試験型",
+            question:"この<code>CrossEntropyLoss</code>への入力として、なぜコードは正しいのか。<pre class='pt-question-code'><code>logits = model(x)          # shape (5,3)\ntarget = torch.tensor(\n    [0,2,1,0,2], dtype=torch.long\n)                          # shape (5)\nloss = nn.CrossEntropyLoss()(logits, target)</code></pre>",
+            options:["raw logitsは(B,C)、hard labelはlongの(B)だから","logitsへSoftmaxを2回かけているから","targetがfloatのone-hotだから","Batch軸とClass軸を入れ替えているから"], answer:0,
+            explanation:"<p><strong>使う契約：</strong>hard class labelを使う標準形では、CE入力＝raw logits (B,C)、target＝<code>torch.long</code>のclass index (B)。</p><p><strong>照合：</strong>(5,3)とlongの(5)なので一致します。</p><p><strong>答え：</strong>選択肢1です。学習時にSoftmaxを先にかけません。</p>"
+        },
+
+        {
+            id:"pt-exam-cnn-pool-shape", setId:"pt-exam-cnn", setOrder:1,
+            category:"本試験型・CNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"次のモデルで、最初の<code>MaxPool2d</code>直後のShapeはどれか。<pre class='pt-question-code'><code>model = nn.Sequential(\n    nn.Conv2d(3, 16, 3, padding=1),\n    nn.ReLU(),\n    nn.MaxPool2d(2),\n    nn.Conv2d(16, 32, 3, padding=1),\n    nn.ReLU(),\n    nn.AdaptiveAvgPool2d((1, 1)),\n    nn.Flatten(1),\n    nn.Linear(32, 10)\n)\nx = torch.randn(8, 3, 32, 32)</code></pre>",
+            options:["(8,16,16,16)","(8,3,16,16)","(8,16,32,32)","(16,8,16,16)"], answer:0,
+            explanation:"<p><strong>使うShape規則：</strong>padding=1の3×3 Conv・stride=1はH,Wを保ち、MaxPool2d(2)はH,Wを半分にします。</p><p><strong>代入：</strong>(8,3,32,32)→Convで(8,16,32,32)→Poolで(8,16,16,16)。</p><p><strong>答え：</strong>(8,16,16,16)です。</p>"
+        },
+        {
+            id:"pt-exam-cnn-conv-params", setId:"pt-exam-cnn", setOrder:2,
+            category:"本試験型・CNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"最初の<code>Conv2d(3,16,3,padding=1)</code>のparameter数はいくつか。biasありとする。<pre class='pt-question-code'><code>nn.Conv2d(\n    in_channels=3,\n    out_channels=16,\n    kernel_size=3,\n    padding=1\n)</code></pre>",
+            options:["432","448","576","592"], answer:1,
+            explanation:"<p><strong>使う公式：</strong>parameter数＝(K_h×K_w×C_in＋bias 1個)×C_out。</p><p><strong>代入：</strong>(3×3×3+1)×16=28×16=448。</p><p><strong>答え：</strong>448個です。paddingはparameter数へ影響しません。</p>"
+        },
+        {
+            id:"pt-exam-cnn-final-shape", setId:"pt-exam-cnn", setOrder:3,
+            category:"本試験型・CNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"同じモデルで、<code>AdaptiveAvgPool2d((1,1))</code>以降のShape推移として正しいものはどれか。<pre class='pt-question-code'><code>...\nnn.Conv2d(16, 32, 3, padding=1),\nnn.AdaptiveAvgPool2d((1, 1)),\nnn.Flatten(1),\nnn.Linear(32, 10)</code></pre>",
+            options:["(8,32,1,1)→(8,32)→(8,10)","(8,1,1,32)→(256)→(10)","(8,32,16,16)→(8,8192)→(8,10)だけ","(32,8,1,1)→(32,8)→(10,8)"], answer:0,
+            explanation:"<p><strong>使うShape規則：</strong>AdaptiveAvgPoolは各channelの空間を1×1へし、Flatten(1)はBatch以外をまとめ、Linearは最後の軸を10へ変えます。</p><p><strong>代入：</strong>(8,32,H,W)→(8,32,1,1)→(8,32)→(8,10)。</p><p><strong>答え：</strong>選択肢1です。</p>"
+        },
+
+        {
+            id:"pt-exam-eval-missing", setId:"pt-exam-eval", setOrder:1,
+            category:"本試験型・推論", kind:"図表・長文", difficulty:"本試験型",
+            question:"次のvalidationコードで、DropoutとBatchNormを推論時の挙動へ切り替えるため不足している1行はどれか。<pre class='pt-question-code'><code>def evaluate(model, loader, device):\n    # ここに1行必要\n    with torch.no_grad():\n        for x, y in loader:\n            x = x.to(device)\n            logits = model(x)</code></pre>",
+            options:["<code>model.eval()</code>","<code>model.zero_grad()</code>","<code>model.cpu()</code>","<code>loss.backward()</code>"], answer:0,
+            explanation:"<p><strong>使う規則：</strong><code>eval()</code>はDropout・BatchNorm等の層の挙動を推論用へ切り替えます。</p><p><strong>コード照合：</strong><code>no_grad()</code>は勾配記録だけを止め、層のmodeは変更しません。</p><p><strong>答え：</strong><code>model.eval()</code>です。</p>"
+        },
+        {
+            id:"pt-exam-eval-no-grad", setId:"pt-exam-eval", setOrder:2,
+            category:"本試験型・推論", kind:"図表・長文", difficulty:"本試験型",
+            question:"同じコードの<code>with torch.no_grad():</code>が担当する役割はどれか。<pre class='pt-question-code'><code>model.eval()\nwith torch.no_grad():\n    logits = model(x)</code></pre>",
+            options:["Autogradの計算グラフ記録を止める","Dropout率を0へ書き換える","BatchNormのrunning statsを削除する","modelをGPUへ送る"], answer:0,
+            explanation:"<p><strong>使う規則：</strong><code>no_grad()</code>はその範囲の勾配記録を止めます。</p><p><strong>結果：</strong>推論時のmemory・計算を減らせますが、model modeは変えません。</p><p><strong>答え：</strong>Autogradの計算グラフ記録を止める、です。</p>"
+        },
+        {
+            id:"pt-exam-eval-only", setId:"pt-exam-eval", setOrder:3,
+            category:"本試験型・推論", kind:"図表・長文", difficulty:"本試験型",
+            question:"<code>model.eval()</code>だけを呼び、<code>no_grad()</code>も<code>inference_mode()</code>も使わずにforwardした場合、最も正確な説明はどれか。<pre class='pt-question-code'><code>model.eval()\nlogits = model(x)</code></pre>",
+            options:["層は推論modeだが、必要なTensorでは計算グラフが記録され得る","勾配記録も必ず停止する","parameterが自動削除される","学習modeのDropoutが有効なまま"], answer:0,
+            explanation:"<p><strong>使う区別：</strong><code>eval()</code>＝層のmode、<code>no_grad()</code>／<code>inference_mode()</code>＝Autograd記録。</p><p><strong>照合：</strong>前者しか呼んでいないため、層は推論modeでも勾配記録は別です。</p><p><strong>答え：</strong>選択肢1です。</p>"
+        },
+
+        {
+            id:"pt-exam-lstm-embedding", setId:"pt-exam-lstm", setOrder:1,
+            category:"本試験型・LSTM", kind:"図表・長文", difficulty:"本試験型",
+            question:"次のコードで<code>emb</code>のShapeはどれか。<pre class='pt-question-code'><code>embedding = nn.Embedding(1000, 64)\nlstm = nn.LSTM(\n    64, 32, num_layers=2,\n    bidirectional=True, batch_first=True\n)\nids = torch.randint(0, 1000, (4, 12))\nemb = embedding(ids)\noutput, (h_n, c_n) = lstm(emb)</code></pre>",
+            options:["(4,12,64)","(12,4,64)","(4,12,32)","(1000,64)"], answer:0,
+            explanation:"<p><strong>使うShape規則：</strong><code>Embedding(V,E)</code>は各token IDをE次元vectorへ変え、元の軸を保ちます。</p><p><strong>代入：</strong>IDs (B,L)=(4,12)、E=64。</p><p><strong>答え：</strong>(4,12,64)です。</p>"
+        },
+        {
+            id:"pt-exam-lstm-output", setId:"pt-exam-lstm", setOrder:2,
+            category:"本試験型・LSTM", kind:"図表・長文", difficulty:"本試験型",
+            question:"同じコードの<code>output</code>のShapeはどれか。<pre class='pt-question-code'><code>lstm = nn.LSTM(\n    input_size=64, hidden_size=32,\n    num_layers=2, bidirectional=True,\n    batch_first=True\n)\noutput, (h_n, c_n) = lstm(emb)  # emb: (4,12,64)</code></pre>",
+            options:["(4,12,64)","(4,12,32)","(4,2,32)","(12,4,64)"], answer:0,
+            explanation:"<p><strong>使う公式：</strong>batch_firstのoutput＝(B,L,Directions×H_hidden)。</p><p><strong>代入：</strong>(4,12,2×32)=(4,12,64)。</p><p><strong>答え：</strong>(4,12,64)です。双方向なので最後の軸が2倍です。</p>"
+        },
+        {
+            id:"pt-exam-lstm-state", setId:"pt-exam-lstm", setOrder:3,
+            category:"本試験型・LSTM", kind:"図表・長文", difficulty:"本試験型",
+            question:"同じコードの<code>h_n</code>と<code>c_n</code>のShapeはどれか。<pre class='pt-question-code'><code>lstm = nn.LSTM(64, 32,\n    num_layers=2, bidirectional=True,\n    batch_first=True)\noutput, (h_n, c_n) = lstm(emb)</code></pre>",
+            options:["(4,4,32)","(4,12,64)","(2,4,32)","(4,32)"], answer:0,
+            explanation:"<p><strong>使う公式：</strong>state＝(Layers×Directions,B,H_hidden)。</p><p><strong>代入：</strong>(2×2,4,32)=(4,4,32)。</p><p><strong>答え：</strong>両方とも(4,4,32)です。<code>batch_first</code>でもstateの軸順は変わりません。</p>"
+        },
+        {
+            id:"pt-exam-lstm-padding", setId:"pt-exam-lstm", setOrder:4,
+            category:"本試験型・LSTM", kind:"図表・長文", difficulty:"本試験型",
+            question:"実際の系列長が<code>[12,10,8,6]</code>で右側をPADしている。文分類に<code>output[:, -1, :]</code>を使う問題点はどれか。<pre class='pt-question-code'><code># output: (B=4, L=12, Features)\nlengths = torch.tensor([12, 10, 8, 6])\nfeatures = output[:, -1, :]</code></pre>",
+            options:["短いsampleでは最後の実tokenでなくPAD位置の出力を選び得る","必ず最初のtokenを選ぶ","Class軸を平均してしまう","h_nとc_nを自動削除する"], answer:0,
+            explanation:"<p><strong>使う規則：</strong><code>-1</code>は全sampleで固定のL=12位置です。</p><p><strong>照合：</strong>長さ10・8・6のsampleでは、その位置はPAD領域です。</p><p><strong>答え：</strong>PAD位置を選び得ます。lengthで最後の実tokenを集める、packを使う、または双方向stateを正しく整形します。</p>"
+        },
+
+        {
+            id:"pt-exam-transformer-head", setId:"pt-exam-transformer", setOrder:1,
+            category:"本試験型・Transformer", kind:"図表・長文", difficulty:"本試験型",
+            question:"次のEncoderで1 headあたりの次元はいくつか。<pre class='pt-question-code'><code>layer = nn.TransformerEncoderLayer(\n    d_model=128, nhead=8,\n    batch_first=True\n)\nencoder = nn.TransformerEncoder(layer, num_layers=2)\nx = torch.randn(4, 20, 128)\npad_mask = torch.zeros(4, 20, dtype=torch.bool)\ny = encoder(x, src_key_padding_mask=pad_mask)</code></pre>",
+            options:["8","16","20","128"], answer:1,
+            explanation:"<p><strong>使う公式：</strong>head_dim=d_model/nhead。</p><p><strong>代入：</strong>128/8=16。</p><p><strong>答え：</strong>16です。d_modelはnheadで割り切れる必要があります。</p>"
+        },
+        {
+            id:"pt-exam-transformer-output", setId:"pt-exam-transformer", setOrder:2,
+            category:"本試験型・Transformer", kind:"図表・長文", difficulty:"本試験型",
+            question:"同じEncoderの出力<code>y</code>のShapeはどれか。<pre class='pt-question-code'><code># batch_first=True\nx = torch.randn(4, 20, 128)\ny = encoder(\n    x, src_key_padding_mask=pad_mask\n)</code></pre>",
+            options:["(4,20,128)","(20,4,128)","(4,8,16)","(4,128)"], answer:0,
+            explanation:"<p><strong>使うShape規則：</strong>Transformer Encoderはtoken数Lとmodel次元Dを保ち、batch_firstなら(B,L,D)です。</p><p><strong>代入：</strong>(4,20,128)→Encoder→(4,20,128)。</p><p><strong>答え：</strong>(4,20,128)です。headへ分割しても最後に結合されます。</p>"
+        },
+        {
+            id:"pt-exam-transformer-mask", setId:"pt-exam-transformer", setOrder:3,
+            category:"本試験型・Transformer", kind:"図表・長文", difficulty:"本試験型",
+            question:"<code>src_key_padding_mask</code>のShapeとbool値の意味として正しいものはどれか。<pre class='pt-question-code'><code>x = torch.randn(4, 20, 128)\npad_mask = torch.zeros(4, 20, dtype=torch.bool)\ny = encoder(x, src_key_padding_mask=pad_mask)</code></pre>",
+            options:["(B,L)=(4,20)で、True位置をkeyとして無視する","(L,L)=(20,20)で、True位置だけ学習する","(B,D)=(4,128)で、True channelを削除する","(nhead,L)=(8,20)で、headを停止する"], answer:0,
+            explanation:"<p><strong>使うShape規則：</strong>key padding maskは各sample・各key位置に印を持つため(B,L)。</p><p><strong>代入：</strong>B=4、L=20なので(4,20)。PyTorchのbool padding maskではTrue位置を無視します。</p><p><strong>答え：</strong>選択肢1です。</p>"
         }
     ]
 };

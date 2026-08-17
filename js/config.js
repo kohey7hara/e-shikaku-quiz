@@ -142,7 +142,7 @@ const menuConfig = [
     {
         id: "06_pytorch_implementation",
         title: "6. PyTorch実装対策ドリル（全章横断・完全版）",
-        desc: "Tensor・Autograd / 損失・学習ループ / CNN・RNN・Transformer / DataLoader・保存 / 転移・分散・AMP",
+        desc: "Tensor・Autograd / 損失・学習ループ / CNN・RNN・Transformer / 本試験型コード連問 / 転移・分散・AMP",
         isActive: true // ★今回追加
     }
 ];
