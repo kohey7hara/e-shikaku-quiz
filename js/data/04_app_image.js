@@ -65,6 +65,12 @@ window.quizData = {
         </div>
         <div class="img-link-map"><strong>章の分担：</strong>畳み込みの出力形状・重み数・受容野・AlexNet／VGGなどの比較史は <a href="quiz.html?id=03_dl_cnn">3-（4）CNN</a>、Precision／Recall／PR曲線の一般原理は <a href="quiz.html?id=02_ml_basics_2">2-（1）機械学習 Vol.2</a>。本章は画像モデルと応用タスクの流れに集中します。</div>
 
+        <h3>■ モデル図はこの順で読む</h3>
+        <div class="img-core">
+            <strong>① 出力はclass・Box・Maskのどれか</strong> → <strong>② 候補領域を先に作る2-stageか、直接出す1-stageか</strong> → <strong>③ 接続はAddかConcatか</strong> → <strong>④ 局所窓・Patch・多段特徴のどれか</strong>の順です。<br>
+            AddのResidual Block＝ResNet、Patch列＋CLS＝ViT、ずらす局所窓＝Swin、RPNで候補＝Faster R-CNN、Default Box＝SSD、Anchorなし＋Centerness＝FCOS、上から下へ特徴を戻して横接続＝FPNと見分けます。
+        </div>
+
         <h3>■ 略語は最初にこれだけ：正式名称＋一言</h3>
         <div class="img-core">略語は丸暗記せず、<strong>正式名称から役割を思い出す</strong>と整理できます。同じ略語が問題文に再登場したときは、この表へ戻ってください。</div>
         <div class="img-table-wrap">
@@ -249,12 +255,15 @@ window.quizData = {
                 <tr><th>問題文の合図</th><th>答える語</th></tr>
                 <tr><td>残差を加算／訓練誤差まで悪化</td><td><strong>ResNet／劣化問題</strong></td></tr>
                 <tr><td>深さの代わりにチャネルを広く</td><td><strong>WideResNet</strong></td></tr>
-                <tr><td>分類用の特別token／場所を付与</td><td><strong>CLS token／Position embedding</strong></td></tr>
+                <tr><td>Patch列・分類用の特別token・位置を付与</td><td><strong>ViT／CLS token／Position embedding</strong></td></tr>
                 <tr><td>局所窓を次層でずらす</td><td><strong>Swin Transformer</strong></td></tr>
                 <tr><td>候補領域を学習</td><td><strong>RPN</strong>（Region Proposal Network）／Faster R-CNN</td></tr>
+                <tr><td>ROI Align後にClass・Box・Maskを並列出力</td><td><strong>Mask R-CNN</strong></td></tr>
                 <tr><td>丸めを避け双線形補間</td><td><strong>ROI Align</strong><br><small>ROI: Region of Interest（候補領域）</small><br>座標を丸めず補間し、位置ずれを抑える。</td></tr>
+                <tr><td>1-stageで画像からBoxとclassを直接予測</td><td><strong>YOLO</strong>（You Only Look Once）</td></tr>
                 <tr><td>複数スケール＋Default Box＋難しい背景</td><td><strong>SSD</strong>（Single Shot MultiBox Detector）</td></tr>
                 <tr><td>Anchor-Free＋FPN＋Centerness</td><td><strong>FCOS</strong>（Fully Convolutional One-Stage Object Detection）</td></tr>
+                <tr><td>Top-down経路＋Lateral Connection</td><td><strong>FPN</strong>（Feature Pyramid Network）</td></tr>
                 <tr><td>重複Boxを抑制</td><td><strong>NMS</strong>（Non-Maximum Suppression）</td></tr>
                 <tr><td>同解像度Skipで細部を戻す</td><td><strong>U-Net</strong></td></tr>
                 <tr><td>全画素にclass、thingには個体IDも付与</td><td><strong>Panoptic Segmentation</strong></td></tr>
@@ -622,6 +631,114 @@ window.quizData = {
             options: ["$2×30/(50+70)=0.5$", "$30/(50+70)=0.25$", "$30/(50+70-30)=1/3$", "$60/30=2$"],
             answer: 0,
             explanation: "Diceは$2|P\\cap G|/(|P|+|G|)$なので$60/120=0.5$です。"
+        },
+        {
+            id: "img-visual-resnet-blocks",
+            setId: "image-visual-architectures",
+            setOrder: 1,
+            category: "画像モデル図・Residual Block",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次のResidual Block A・Bの対応として正しいものはどれか。どちらも最後にShortcutとAddする。
+                <div class="img-table-wrap">
+                    <table class="img-table" aria-label="ResNetの2種類のResidual Block処理列比較">
+                        <tr><th>図</th><th>主経路F(x)</th><th>代表モデル</th></tr>
+                        <tr><td><strong>A</strong></td><td><strong>3×3 Conv</strong> → ReLU → <strong>3×3 Conv</strong> → Add</td><td>ResNet-18／34</td></tr>
+                        <tr><td><strong>B</strong></td><td><strong>1×1 圧縮</strong> → 3×3 → <strong>1×1 拡張</strong> → Add</td><td>ResNet-50／101／152</td></tr>
+                    </table>
+                </div>`,
+            options: ["A＝Bottleneck、B＝Basic", "A＝Basic、B＝Bottleneck", "A＝U-Net、B＝FPN", "A＝ViT、B＝Swin"],
+            answer: 1,
+            explanation: "<strong>図の決め手：</strong>Aは3×3が2個、Bは1×1・3×3・1×1の3段です。<br><strong>正解：</strong>A＝Basic Block、B＝Bottleneck Blockです。<br><strong>他候補との違い：</strong>U-NetはEncoderとDecoderをConcatで結び、ViT/SwinはAttention系です。Residual Blockはいずれも最後にShortcutをAddします。"
+        },
+        {
+            id: "img-visual-vit-swin",
+            setId: "image-visual-architectures",
+            setOrder: 2,
+            category: "画像モデル図・Patch系モデル比較",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次のA・Bに対応するモデルの組合せはどれか。
+                <div class="img-visual-wrap"><div class="img-visual-card">
+                    <svg class="img-wide-svg" viewBox="0 0 960 235" role="img" aria-label="Aは画像をパッチ列へ変換しCLSを加えてEncoderへ、Bは局所窓を次の層でずらす">
+                        <text x="20" y="28" class="img-svg-title">A</text>
+                        <rect x="55" y="48" width="126" height="126" rx="8" fill="#d6ecfa" stroke="#2780b8"/><path d="M97 48 V174 M139 48 V174 M55 90 H181 M55 132 H181" stroke="#fff" stroke-width="3"/>
+                        <text x="202" y="116" class="img-svg-title">→</text><rect x="244" y="68" width="70" height="48" rx="7" fill="#f39c12"/><text x="258" y="98" class="img-svg-label">[CLS]</text>
+                        <g fill="#eafaf1" stroke="#27ae60"><rect x="325" y="68" width="48" height="48" rx="6"/><rect x="380" y="68" width="48" height="48" rx="6"/><rect x="435" y="68" width="48" height="48" rx="6"/></g>
+                        <text x="337" y="98" class="img-svg-note">P1</text><text x="392" y="98" class="img-svg-note">P2</text><text x="447" y="98" class="img-svg-note">…</text><text x="505" y="98" class="img-svg-title">→ Encoder</text>
+                        <line x1="604" y1="20" x2="604" y2="212" stroke="#d7e2ec"/>
+                        <text x="630" y="28" class="img-svg-title">B</text>
+                        <g transform="translate(650 48)" stroke="#fff" stroke-width="2"><rect width="60" height="60" fill="#63c5da"/><rect x="60" width="60" height="60" fill="#f8c471"/><rect y="60" width="60" height="60" fill="#82e0aa"/><rect x="60" y="60" width="60" height="60" fill="#d9c2f0"/></g>
+                        <text x="785" y="112" class="img-svg-title">→</text><g transform="translate(825 48)" stroke="#fff" stroke-width="2"><rect width="60" height="60" fill="#63c5da"/><rect x="60" width="60" height="60" fill="#f8c471"/><rect y="60" width="60" height="60" fill="#82e0aa"/><rect x="60" y="60" width="60" height="60" fill="#d9c2f0"/><rect x="30" y="30" width="90" height="90" fill="none" stroke="#e74c3c" stroke-width="4"/></g>
+                        <text x="657" y="200" class="img-svg-note">局所Windowを次層でShiftし、窓をまたぐ情報を接続</text>
+                    </svg>
+                </div></div>`,
+            options: ["A＝Swin、B＝ViT", "A＝ResNet、B＝U-Net", "A＝ViT、B＝Swin", "A＝SSD、B＝FCOS"],
+            answer: 2,
+            explanation: "<strong>図の決め手：</strong>Aは画像をPatch token列へ変換しCLSを加え、Bは局所Windowの位置を次層でずらしています。<br><strong>正解：</strong>A＝ViT、B＝Swin Transformerです。<br><strong>他候補との違い：</strong>ResNetは残差Add、U-NetはEncoder–DecoderのSkip Concat、SSD/FCOSは物体検出器です。"
+        },
+        {
+            id: "img-visual-rcnn-evolution",
+            setId: "image-visual-architectures",
+            setOrder: 3,
+            category: "画像モデル図・R-CNN系",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次の進化図で、外部手法で作っていた候補領域をネットワーク内のRPNで学習するようになった変化はどの矢印か。
+                <div class="img-table-wrap">
+                    <table class="img-table" aria-label="R-CNNからMask R-CNNまでの進化">
+                        <tr><th>A</th><th>→</th><th>B</th><th>→</th><th>C</th><th>→</th><th>D</th></tr>
+                        <tr><td><strong>R-CNN</strong><br>ROIごとCNN</td><td>①</td><td><strong>Fast R-CNN</strong><br>画像全体で特徴共有</td><td>②</td><td><strong>Faster R-CNN</strong><br>新しい候補生成部品</td><td>③</td><td><strong>Mask R-CNN</strong><br>ROI Align＋Mask枝</td></tr>
+                    </table>
+                </div>`,
+            options: ["①：R-CNN→Fast R-CNN", "②：Fast R-CNN→Faster R-CNN", "③：Faster R-CNN→Mask R-CNN", "どの矢印でもない"],
+            answer: 1,
+            explanation: "<strong>図の決め手：</strong>候補領域を学習する部品はRPNで、初めて現れるのはFaster R-CNNです。<br><strong>正解：</strong>②のFast R-CNN→Faster R-CNNです。<br><strong>他候補との違い：</strong>①は画像全体のCNN特徴を共有する改良、③はROI Alignと個体Maskの予測枝を加える改良です。"
+        },
+        {
+            id: "img-visual-one-stage-detectors",
+            setId: "image-visual-architectures",
+            setOrder: 4,
+            category: "画像モデル図・1-stage検出",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次の1-stage検出器A〜Cの対応として正しいものはどれか。
+                <div class="img-table-wrap">
+                    <table class="img-table" aria-label="3種類の1-stage検出器の構造比較">
+                        <tr><th>図</th><th>画像から出力までの決め手</th></tr>
+                        <tr><td><strong>A</strong></td><td>画像 → 1回のネットワーク処理 → 密にclass・Boxを直接予測</td></tr>
+                        <tr><td><strong>B</strong></td><td>複数解像度の特徴map → 各位置の<strong>Default Box</strong>を分類・補正</td></tr>
+                        <tr><td><strong>C</strong></td><td>FPN各位置 → 辺までのl,t,r,b＋class＋<strong>Centerness</strong>（Anchorなし）</td></tr>
+                    </table>
+                </div>`,
+            options: ["A＝SSD、B＝FCOS、C＝YOLO", "A＝Faster R-CNN、B＝U-Net、C＝ViT", "A＝YOLO、B＝SSD、C＝FCOS", "A＝FCOS、B＝YOLO、C＝SSD"],
+            answer: 2,
+            explanation: "<strong>図の決め手：</strong>Aは1回で直接予測、BはDefault Box、CはAnchorなしのl,t,r,bとCenternessです。<br><strong>正解：</strong>A＝YOLO、B＝SSD、C＝FCOSです。<br><strong>他候補との違い：</strong>Faster R-CNNはRPNで候補を作る2-stage、U-Netはセグメンテーション、ViTは画像分類などに使うTransformer系Backboneです。"
+        },
+        {
+            id: "img-visual-fpn-paths",
+            setId: "image-visual-architectures",
+            setOrder: 5,
+            category: "画像モデル図・FPN",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次の図のXが行う処理と、FPNの目的の組合せとして正しいものはどれか。
+                <div class="img-visual-wrap"><div class="img-visual-card">
+                    <svg class="img-wide-svg" viewBox="0 0 960 270" role="img" aria-label="FPNのtop-down経路と、正体を問う横方向の経路X">
+                        <text x="20" y="28" class="img-svg-title">Backbone：下へ行くほど低解像度・意味が強い</text>
+                        <g fill="#eef7fb" stroke="#2780b8"><rect x="45" y="55" width="150" height="42" rx="7"/><rect x="105" y="115" width="150" height="42" rx="7"/><rect x="165" y="175" width="150" height="42" rx="7"/></g>
+                        <text x="76" y="81" class="img-svg-label">C3：高解像度</text><text x="136" y="141" class="img-svg-label">C4</text><text x="196" y="201" class="img-svg-label">C5：低解像度</text>
+                        <path d="M315 196 H440 V146 H510" fill="none" stroke="#8e44ad" stroke-width="3"/><path d="M510 146 V86 H580" fill="none" stroke="#8e44ad" stroke-width="3"/>
+                        <text x="358" y="188" class="img-svg-note">Top-down：Upsample</text>
+                        <path d="M195 76 H580 M255 136 H510 M315 196 H440" fill="none" stroke="#f39c12" stroke-width="3" stroke-dasharray="8 5"/>
+                        <rect x="592" y="53" width="160" height="46" rx="7" fill="#eafaf1" stroke="#27ae60"/><rect x="522" y="113" width="160" height="46" rx="7" fill="#eafaf1" stroke="#27ae60"/><rect x="452" y="173" width="160" height="46" rx="7" fill="#eafaf1" stroke="#27ae60"/>
+                        <text x="637" y="81" class="img-svg-label">P3 小物体</text><text x="567" y="141" class="img-svg-label">P4</text><text x="497" y="201" class="img-svg-label">P5 大物体</text>
+                        <rect x="690" y="130" width="230" height="86" rx="9" fill="#fff8e7" stroke="#f39c12"/><text x="785" y="163" class="img-svg-title">経路 X</text><text x="704" y="195" class="img-svg-note">橙の破線が何を運ぶか？</text>
+                    </svg>
+                </div></div>`,
+            options: ["X＝特徴をすべて捨て、1解像度だけにする／大物体だけを検出", "X＝同解像度のBackbone特徴を横から融合／大小の物体を複数階層で扱う", "X＝NMS／重複Boxだけを作る", "X＝Causal Mask／未来のPatchを隠す"],
+            answer: 1,
+            explanation: "<strong>図の決め手：</strong>上位の意味情報をUpsampleするTop-down経路と、同解像度のBackbone特徴を横から入れるLateral Connectionがあります。<br><strong>正解：</strong>Xは横接続による特徴融合で、P3〜P5の複数階層から大小の物体を扱います。<br><strong>他候補との違い：</strong>NMSは検出後の重複除去、Causal Maskは自己回帰Transformerで未来を隠す処理です。"
         }
     ]
 };

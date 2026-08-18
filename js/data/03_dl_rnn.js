@@ -41,6 +41,11 @@ window.quizData = {
             .rnn-model-year strong { display: block; margin: 2px 0 5px; color: #50305e; }
             .rnn-model-year small { display: block; line-height: 1.45; color: #627d98; }
             .rnn-model-key { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #8e44ad; border-radius: 7px; background: #f7f1fa; line-height: 1.7; }
+            .rnn-read-guide { margin: 12px 0 20px; padding: 14px 16px; border: 1px solid #c8dbee; border-radius: 10px; background: #f8fbfe; }
+            .rnn-read-row { display: grid; grid-template-columns: 2.2em 1fr; gap: 8px; align-items: start; margin: 7px 0; line-height: 1.65; }
+            .rnn-read-number { display: inline-flex; align-items: center; justify-content: center; width: 1.8em; height: 1.8em; border-radius: 50%; background: #2780b8; color: #fff; font-weight: 800; }
+            .rnn-shift-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0; }
+            .rnn-shift-token { min-width: 45px; padding: 5px 8px; border: 1px solid #9fb3c8; border-radius: 6px; background: #fff; text-align: center; }
             @media (max-width: 760px) {
                 .rnn-concept-grid { grid-template-columns: 1fr; }
                 .lstm-box { display: block; width: auto; margin: 8px 0; }
@@ -267,6 +272,14 @@ window.quizData = {
             $c=0.25(2,0)+0.75(0,4)=(0.5,3)$。
         </div>
 
+        <h3>■ モデル図の読み方／試験で見る場所</h3>
+        <div class="rnn-read-guide">
+            <div class="rnn-read-row"><span class="rnn-read-number">1</span><span><strong>矢印の向き：</strong>$\\rightarrow$ は左から右、$\\leftarrow$ は右から左。各方向がどこまで読んだ状態かを確認する。</span></div>
+            <div class="rnn-read-row"><span class="rnn-read-number">2</span><span><strong>出力する範囲：</strong>各時刻なら $[\\overrightarrow h_t;\\overleftarrow h_t]$、系列を1個にまとめるなら $[\\overrightarrow h_T;\\overleftarrow h_1]$。</span></div>
+            <div class="rnn-read-row"><span class="rnn-read-number">3</span><span><strong>結合方法：</strong>Concatなら次元は足す。各方向64次元なら $64+64=128$ 次元。</span></div>
+            <div class="rnn-read-row"><span class="rnn-read-number">4</span><span><strong>Decoderの入力：</strong>学習時は正解列を1個右へずらしてBOSを置く。推論時は直前の予測を入れる。</span></div>
+        </div>
+
         <h3>■ 学習時と推論時：ここが混乱ポイント</h3>
         <div class="table-wrap">
             <table class="rnn-comparison">
@@ -275,6 +288,13 @@ window.quizData = {
                 <tr><td><strong>推論時：自己回帰生成</strong></td><td>モデル自身が直前に予測したトークン</td><td>誤りが次の入力へ入り、連鎖しうる。</td></tr>
                 <tr><td><strong>Exposure Bias</strong></td><td>学習と推論の入力条件が異なる</td><td>Teacher Forcingの副作用として問われる。</td></tr>
             </table>
+        </div>
+
+        <div class="rnn-read-guide">
+            <strong>Teacher Forcingの右シフト例</strong>
+            <div class="rnn-shift-line"><span style="min-width:5.5em;"><strong>正解列：</strong></span><span class="rnn-shift-token">私</span><span class="rnn-shift-token">は</span><span class="rnn-shift-token">猫</span><span class="rnn-shift-token">EOS</span></div>
+            <div class="rnn-shift-line"><span style="min-width:5.5em;"><strong>Decoder入力：</strong></span><span class="rnn-shift-token" style="background:#f7f1fa;">BOS</span><span class="rnn-shift-token">私</span><span class="rnn-shift-token">は</span><span class="rnn-shift-token">猫</span></div>
+            <small><strong>見る場所：</strong>同じ列で「入力から次の正解を予測」する。学習時は正解を入れられるが、推論時は正解がないため自分の予測を戻す。この差がExposure Biasです。</small>
         </div>
 
         <h3>■ 双方向RNN：未来も使えるが、未来待ち</h3>
@@ -290,7 +310,7 @@ window.quizData = {
                     <path d="M100 44 V72 M165 44 V72" stroke="#627d98" stroke-dasharray="3,2"/>
                     <text x="114" y="63" class="rnn-svg-label">結合</text>
                 </svg>
-                <div class="rnn-concept-caption">各時刻で $[\\overrightarrow h_t;\\overleftarrow h_t]$ を使う。各方向が $H$ 次元なら結合後は通常 $2H$ 次元。</div>
+                <div class="rnn-concept-caption">各時刻なら $[\\overrightarrow h_t;\\overleftarrow h_t]$。系列全体の要約なら、元系列の端まで読んだ $[\\overrightarrow h_T;\\overleftarrow h_1]$。各方向が $H$ 次元ならConcat後は通常 $2H$ 次元。</div>
             </div>
             <div class="rnn-concept-card">
                 <strong>向く場面・向かない場面</strong>
@@ -1006,6 +1026,92 @@ window.quizData = {
             options: ["GRU → LSTM → Elman → Jordan", "LSTM → Jordan → GRU → Elman", "Elman → Jordan → GRU → LSTM", "Jordan → Elman → LSTM → GRU"],
             answer: 3,
             explanation: "代表的な年代はJordan（1986）→Elman（1990）→LSTM（1997）→GRU（2014）です。"
+        },
+        {
+            id: "rnn-exam-bilstm-output-shape",
+            setId: "rnn-exam-diagram-reading",
+            setOrder: 1,
+            category: "Bidirectional LSTM（図表）",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `<div style="line-height:1.7;">次のモデル概要で、<strong>B</strong>はバッチサイズ、各方向のLSTMの隠れ次元は64とする。<code>merge_mode="concat"</code>、<code>return_sequences=False</code>のとき、出力Shapeはどれか。</div>
+                <div style="margin:12px 0;padding:12px;border:1px solid #c8dbee;border-radius:10px;background:#f8fbfe;overflow-x:auto;">
+                    <table style="width:100%;min-width:520px;border-collapse:collapse;text-align:left;">
+                        <tr><th style="padding:7px;border:1px solid #c8dbee;background:#eaf2fb;">Layer</th><th style="padding:7px;border:1px solid #c8dbee;background:#eaf2fb;">Input</th><th style="padding:7px;border:1px solid #c8dbee;background:#eaf2fb;">読む状態</th></tr>
+                        <tr><td style="padding:7px;border:1px solid #c8dbee;">Bidirectional(LSTM(64))</td><td style="padding:7px;border:1px solid #c8dbee;">$(B,T,E)$</td><td style="padding:7px;border:1px solid #c8dbee;">$\\overrightarrow h_T$（64）と $\\overleftarrow h_1$（64）</td></tr>
+                    </table>
+                    <div style="display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;"><span style="padding:7px;border:1px solid #2780b8;border-radius:6px;">$\\overrightarrow h_T$: 64</span><span>→</span><strong style="padding:8px 12px;border:2px solid #8e44ad;border-radius:7px;">Concat</strong><span>←</span><span style="padding:7px;border:1px solid #e74c3c;border-radius:6px;">$\\overleftarrow h_1$: 64</span></div>
+                </div>`,
+            options: ["$(B,128)$", "$(B,T,128)$", "$(B,64)$", "$(B,T,64)$"],
+            answer: 0,
+            explanation: `<p><strong>図で見る場所：</strong>「各方向64」「Concat」「return_sequences=False」を確認します。</p><p><strong>読み取り：</strong>系列全体を1個へまとめるので時間軸$T$は出力に残りません。順方向の最終状態64次元と、逆方向の最終状態64次元を連結します。</p><p><strong>答え：</strong>$64+64=128$より、出力は<strong>$(B,128)$</strong>です。</p><p><strong>他が違う理由：</strong>$(B,T,128)$は各時刻を返す<code>return_sequences=True</code>の形です。64次元の選択肢は片方向分しか数えていません。</p>`
+        },
+        {
+            id: "rnn-exam-bilstm-token-vs-summary",
+            setId: "rnn-exam-diagram-reading",
+            setOrder: 2,
+            category: "Bidirectional LSTM（図表）",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `<div style="line-height:1.7;">元の入力系列を$x_1,x_2,\\ldots,x_T$とする。次の図で、<strong>各時刻の系列ラベリング用表現</strong>と、<strong>系列分類用の全体要約</strong>の組合せとして正しいものはどれか。</div>
+                <div style="margin:12px 0;padding:12px;border:1px solid #d7e2ec;border-radius:10px;background:#fff;">
+                    <div style="text-align:center;color:#2780b8;font-weight:700;">$x_1\\;\\rightarrow\\;x_2\\;\\rightarrow\\;\\cdots\\;\\rightarrow\\;x_T$　（順方向）</div>
+                    <div style="text-align:center;margin:9px 0;"><span style="padding:6px 10px;border:1px solid #8e44ad;border-radius:6px;">位置$t$で2方向をConcat</span></div>
+                    <div style="text-align:center;color:#e74c3c;font-weight:700;">$x_1\\;\\leftarrow\\;x_2\\;\\leftarrow\\;\\cdots\\;\\leftarrow\\;x_T$　（逆方向）</div>
+                </div>`,
+            options: [
+                "各時刻：$[\\overrightarrow h_t;\\overleftarrow h_t]$、全体要約：$[\\overrightarrow h_T;\\overleftarrow h_1]$",
+                "各時刻：$[\\overrightarrow h_T;\\overleftarrow h_1]$、全体要約：$[\\overrightarrow h_t;\\overleftarrow h_t]$",
+                "各時刻も全体要約も $[\\overrightarrow h_1;\\overleftarrow h_T]$",
+                "逆方向は使わず、どちらも $\\overrightarrow h_T$"
+            ],
+            answer: 0,
+            explanation: `<p><strong>図で見る場所：</strong>下付き文字が「現在位置$t$」か「系列の端$1,T$」かを見ます。</p><p><strong>読み取り：</strong>位置$t$の予測には、その位置での前向き・後ろ向き状態を連結します。全体要約では、順方向が全入力を読み終えた$\\overrightarrow h_T$と、逆方向が全入力を読み終えた$\\overleftarrow h_1$を使います。</p><p><strong>答え：</strong>各時刻は$[\\overrightarrow h_t;\\overleftarrow h_t]$、全体要約は$[\\overrightarrow h_T;\\overleftarrow h_1]$です。</p><p><strong>他が違う理由：</strong>$\\overrightarrow h_1$と$\\overleftarrow h_T$は、それぞれ自分の方向でまだ系列全体を読んでいません。各時刻表現と全体要約を入れ替えないようにします。</p>`
+        },
+        {
+            id: "rnn-exam-teacher-forcing-shift",
+            setId: "rnn-exam-diagram-reading",
+            setOrder: 3,
+            category: "Teacher Forcing（図表）",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `<div style="line-height:1.7;">Decoderの正解系列が「私 → は → 猫 → EOS」である。Teacher Forcingで各位置の<strong>次トークン</strong>を学習するとき、Decoder入力と教師ラベルの正しい組合せはどれか。</div>
+                <div style="margin:12px 0;padding:12px;border:1px solid #c8dbee;border-radius:10px;background:#f8fbfe;overflow-x:auto;">
+                    <table style="width:100%;min-width:500px;border-collapse:collapse;text-align:center;"><tr><th style="border:1px solid #c8dbee;padding:6px;">位置</th><th style="border:1px solid #c8dbee;padding:6px;">1</th><th style="border:1px solid #c8dbee;padding:6px;">2</th><th style="border:1px solid #c8dbee;padding:6px;">3</th><th style="border:1px solid #c8dbee;padding:6px;">4</th></tr><tr><th style="border:1px solid #c8dbee;padding:6px;">入力</th><td colspan="4" style="border:1px solid #c8dbee;padding:6px;">ここを選ぶ</td></tr><tr><th style="border:1px solid #c8dbee;padding:6px;">予測する正解</th><td style="border:1px solid #c8dbee;padding:6px;">私</td><td style="border:1px solid #c8dbee;padding:6px;">は</td><td style="border:1px solid #c8dbee;padding:6px;">猫</td><td style="border:1px solid #c8dbee;padding:6px;">EOS</td></tr></table>
+                </div>`,
+            options: [
+                "入力：$[BOS,私,は,猫]$、教師：$[私,は,猫,EOS]$",
+                "入力：$[私,は,猫,EOS]$、教師：$[私,は,猫,EOS]$",
+                "入力：$[EOS,猫,は,私]$、教師：$[私,は,猫,BOS]$",
+                "入力：各位置でモデル自身の予測だけ、教師：使用しない"
+            ],
+            answer: 0,
+            explanation: `<p><strong>図で見る場所：</strong>入力行と「予測する正解」行を同じ列で縦に見ます。</p><p><strong>読み取り：</strong>BOSから「私」を予測し、「私」から「は」を予測します。このため正解列を1個右へずらし、空いた先頭へBOSを置きます。</p><p><strong>答え：</strong>入力$[BOS,私,は,猫]$、教師$[私,は,猫,EOS]$です。</p><p><strong>他が違う理由：</strong>入力と教師が同じでは、各位置で次ではなく同じ語を見せます。逆順化や、学習中に教師を全く使わない処理はTeacher Forcingではありません。</p>`
+        },
+        {
+            id: "rnn-exam-teacher-forcing-exposure-bias",
+            setId: "rnn-exam-diagram-reading",
+            setOrder: 4,
+            category: "学習時と推論時の入力差（図表）",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `<div style="line-height:1.7;">同じDecoderについて、次の入力経路の違いによって起こりやすい問題はどれか。</div>
+                <div style="margin:12px 0;padding:12px;border:1px solid #d7e2ec;border-radius:10px;background:#fff;">
+                    <div style="margin:7px 0;"><strong>学習時：</strong><span style="padding:5px 8px;border:1px solid #27ae60;border-radius:6px;background:#eafaf1;">前の正解 $y^*_{t-1}$</span> → Decoder → $\\hat y_t$</div>
+                    <div style="margin:7px 0;"><strong>推論時：</strong><span style="padding:5px 8px;border:1px solid #e74c3c;border-radius:6px;background:#fff3f1;">前の予測 $\\hat y_{t-1}$</span> → Decoder → $\\hat y_t$</div>
+                </div>`,
+            options: [
+                "Exposure Bias：学習時に経験しない自己予測の誤りが、推論時に次の入力へ連鎖しうる",
+                "Vanishing Resolution：画像の幅が必ず0になる",
+                "Label Leakage：推論時にも正解ラベルを必ず入力できる",
+                "Covariate Shift：双方向LSTMの出力次元が半分になる"
+            ],
+            answer: 0,
+            explanation: `<p><strong>図で見る場所：</strong>2本の経路で、次のDecoderへ入るものが「正解」か「モデルの予測」かを比較します。</p><p><strong>読み取り：</strong>Teacher Forcing中は常にきれいな正解履歴を見ます。しかし推論では一度の誤予測が次の入力となり、その後の誤りへつながります。</p><p><strong>答え：</strong>この学習時と推論時の条件差が<strong>Exposure Bias</strong>です。</p><p><strong>他が違う理由：</strong>画像解像度やBiLSTMの次元の問題ではありません。推論時には正解ラベルを利用できないため、正解を必ず入力できるという説明も逆です。</p>`
         }
     ]
 };

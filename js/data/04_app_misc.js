@@ -38,6 +38,11 @@ window.quizData = {
         <div class="mix-note">
             <strong>この章の略語：</strong>XAI＝eXplainable AI（説明可能AI）／Grad-CAM＝Gradient-weighted Class Activation Mapping／IG＝Integrated Gradients（積分勾配法）／LIME＝Local Interpretable Model-agnostic Explanations／SHAP＝SHapley Additive exPlanations。
         </div>
+        <h3>■ モデル図はこの順で読む</h3>
+        <div class="mix-core">
+            <strong>距離学習：</strong>①入力が2個か3個か → ②Encoderの重みを共有するか → ③距離をどう使うか。2枝＋共有Encoder＝Siamese、A・P・Nの3枝＋共有Encoder＝Tripletです。<br>
+            <strong>XAI：</strong>①何を入力に使うか → ②何を出力するか。クラス勾配＋特徴map→場所ならGrad-CAM、baselineからの経路勾配→入力寄与ならIG、近傍予測→局所代理モデルならLIME、特徴の組合せ→Shapley寄与ならSHAPです。
+        </div>
         <div class="mix-table-wrap">
             <table class="mix-table">
                 <tr><th>困っていること</th><th>選ぶ考え方</th><th>中心語</th></tr>
@@ -643,6 +648,55 @@ window.quizData = {
             options: ["LIME＝近傍の局所代理モデル、SHAP＝Shapley Valueに基づく加法的寄与", "LIME＝クラス勾配、SHAP＝畳み込み特徴map", "両方とも必ずCNN専用", "両方とも因果効果を証明する"],
             answer: 0,
             explanation: "LIMEは予測点の周辺を単純モデルで近似します。SHAPは協力ゲーム理論に基づき、基準値から各特徴の寄与を配分します。"
+        },
+        {
+            id: "misc-visual-siamese-triplet",
+            setId: "misc-visual-architectures",
+            setOrder: 1,
+            category: "学習モデル図・共有Encoder",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次のA・Bの構造と代表的な学習目的の組合せとして正しいものはどれか。図中のfθは、すべて同じ重みを共有するEncoderである。
+                <div class="mix-visual-wrap"><div class="mix-visual-card">
+                    <svg class="mix-wide-svg" viewBox="0 0 960 330" role="img" aria-label="Aは2入力を共有Encoderへ通して距離を測り、BはAnchor Positive Negativeを3つの共有Encoderへ通す">
+                        <defs><marker id="mix-q-metric-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#486581"/></marker></defs>
+                        <rect x="20" y="43" width="440" height="260" rx="12" class="mix-purple"/><text x="40" y="72" class="mix-svg-title">A：2つの入力</text>
+                        <rect x="48" y="102" width="84" height="44" rx="8" class="mix-box"/><text x="73" y="129" class="mix-svg-note">x1</text><rect x="48" y="205" width="84" height="44" rx="8" class="mix-box"/><text x="73" y="232" class="mix-svg-note">x2</text>
+                        <line x1="140" y1="124" x2="190" y2="124" stroke="#486581" stroke-width="2" marker-end="url(#mix-q-metric-arrow)"/><line x1="140" y1="227" x2="190" y2="227" stroke="#486581" stroke-width="2" marker-end="url(#mix-q-metric-arrow)"/>
+                        <rect x="202" y="91" width="116" height="66" rx="8" class="mix-blue"/><text x="239" y="119" class="mix-svg-label">fθ</text><text x="220" y="142" class="mix-svg-mini">共有重み</text><rect x="202" y="194" width="116" height="66" rx="8" class="mix-blue"/><text x="239" y="222" class="mix-svg-label">fθ</text><text x="220" y="245" class="mix-svg-mini">共有重み</text>
+                        <line x1="326" y1="124" x2="371" y2="161" stroke="#486581" stroke-width="2" marker-end="url(#mix-q-metric-arrow)"/><line x1="326" y1="227" x2="371" y2="190" stroke="#486581" stroke-width="2" marker-end="url(#mix-q-metric-arrow)"/><rect x="382" y="148" width="58" height="56" rx="8" class="mix-green"/><text x="397" y="174" class="mix-svg-note">距離</text><text x="395" y="194" class="mix-svg-mini">D</text>
+                        <rect x="500" y="43" width="440" height="260" rx="12" class="mix-orange"/><text x="520" y="72" class="mix-svg-title">B：3つの入力</text>
+                        <g><rect x="524" y="91" width="82" height="42" rx="8" class="mix-blue"/><rect x="524" y="148" width="82" height="42" rx="8" class="mix-green"/><rect x="524" y="205" width="82" height="42" rx="8" class="mix-orange"/></g><text x="553" y="117" class="mix-svg-note">A</text><text x="553" y="174" class="mix-svg-note">P</text><text x="553" y="231" class="mix-svg-note">N</text>
+                        <g><rect x="660" y="84" width="100" height="54" rx="8" class="mix-blue"/><rect x="660" y="141" width="100" height="54" rx="8" class="mix-blue"/><rect x="660" y="198" width="100" height="54" rx="8" class="mix-blue"/></g><text x="697" y="116" class="mix-svg-label">fθ</text><text x="697" y="173" class="mix-svg-label">fθ</text><text x="697" y="230" class="mix-svg-label">fθ</text>
+                        <path d="M606 112 H652 M606 169 H652 M606 226 H652" stroke="#486581" stroke-width="2" marker-end="url(#mix-q-metric-arrow)"/>
+                        <path d="M768 111 L837 154 M768 168 H837 M768 225 L837 182" stroke="#486581" stroke-width="2"/><rect x="840" y="140" width="78" height="58" rx="8" class="mix-green"/><text x="854" y="165" class="mix-svg-note">相対距離</text><text x="858" y="187" class="mix-svg-mini">AP&lt;AN</text>
+                        <text x="42" y="286" class="mix-svg-note">同じ組を近く、異なる組をmargin以上遠く</text><text x="522" y="286" class="mix-svg-note">A-PをA-Nよりmargin以上近く</text>
+                    </svg>
+                </div></div>`,
+            options: ["A＝Triplet Network＋Triplet Loss、B＝Siamese Network＋Contrastive Loss", "A＝Siamese Network＋Contrastive Loss、B＝Triplet Network＋Triplet Loss", "A＝Grad-CAM、B＝SHAP", "A＝DQN、B＝A3C"],
+            answer: 1,
+            explanation: "<strong>図の決め手：</strong>Aは共有Encoderが2枝で距離Dを出し、BはAnchor・Positive・Negativeの3枝です。<br><strong>正解：</strong>A＝Siamese Network＋Contrastive Loss、B＝Triplet Network＋Triplet Lossです。<br><strong>他候補との違い：</strong>Grad-CAM/SHAPは説明手法、DQN/A3Cは強化学習モデルで、入力間距離を共有Encoderで学ぶ図ではありません。"
+        },
+        {
+            id: "misc-visual-xai-io",
+            setId: "misc-visual-architectures",
+            setOrder: 2,
+            category: "XAI図・入力と出力",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次のA〜Dに対応するXAI手法の組合せはどれか。
+                <div class="mix-table-wrap">
+                    <table class="mix-table" aria-label="4つのXAI手法が使う情報と返す説明の比較">
+                        <tr><th>図</th><th>説明へ入れる情報</th><th>返すもの</th></tr>
+                        <tr><td><strong>A</strong></td><td>対象クラスの勾配 ＋ 畳み込み特徴map</td><td>画像上の粗い注目ヒートマップ</td></tr>
+                        <tr><td><strong>B</strong></td><td>baseline → 実入力までの経路上の勾配</td><td>入力特徴ごとの寄与</td></tr>
+                        <tr><td><strong>C</strong></td><td>説明したい1件の近傍を変化させた予測</td><td>近傍でだけ合う単純な局所代理モデル</td></tr>
+                        <tr><td><strong>D</strong></td><td>特徴が参加する組合せごとの予測変化</td><td>Shapley Valueによる加法的寄与</td></tr>
+                    </table>
+                </div>`,
+            options: ["A＝LIME、B＝SHAP、C＝Grad-CAM、D＝IG", "A＝SHAP、B＝LIME、C＝IG、D＝Grad-CAM", "A＝Grad-CAM、B＝IG、C＝LIME、D＝SHAP", "A＝IG、B＝Grad-CAM、C＝SHAP、D＝LIME"],
+            answer: 2,
+            explanation: "<strong>図の決め手：</strong>場所＋CNN特徴map＝Grad-CAM、baselineからの経路＝IG、近傍の単純モデル＝LIME、特徴の組合せとShapley Value＝SHAPです。<br><strong>正解：</strong>A＝Grad-CAM、B＝Integrated Gradients、C＝LIME、D＝SHAPです。<br><strong>他候補との違い：</strong>Grad-CAMはCNNの空間ヒートマップ、IGは入力特徴寄与、LIMEはモデル非依存の局所近似、SHAPは加法的寄与という出力の違いで見分けます。"
         }
     ]
 };

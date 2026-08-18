@@ -85,6 +85,32 @@ window.quizData = {
             </div>
         </div>
 
+        <h3>■ モデル図は「分岐・反復・往復」を先に探す</h3>
+        <div class="gm-core"><strong>試験の4手：</strong>①左端がデータか乱数かを見る → ②途中で2本に分岐するか、同じ処理を反復するかを見る → ③矢印が一方向か往復かを見る → ④最後が復元・判定・次の要素のどれかを見る。</div>
+        <div class="gm-visual-wrap"><div class="gm-visual-card">
+            <svg class="gm-wide-svg" viewBox="0 0 960 355" role="img" aria-labelledby="gm-read-title gm-read-desc">
+                <title id="gm-read-title">生成モデル5種類を矢印から識別する</title>
+                <desc id="gm-read-desc">VAEは中心と広がりから潜在変数を選び、GANはGeneratorとDiscriminatorが対戦し、拡散モデルはノイズ付加と反復除去を行い、Flowは可逆変換で往復し、自己回帰は前の出力を次へ戻す。</desc>
+                <defs><marker id="gm-arrow-read" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#627d98"/></marker></defs>
+                <text x="18" y="26" class="gm-svg-title">図の形そのものがモデル名の合図</text>
+
+                <g transform="translate(18 45)"><rect width="924" height="50" class="gm-svg-blue"/><text x="14" y="30" class="gm-svg-label">VAE　x → Encoder →［μ, σ］→ z → Decoder → x̂　（途中で分布の2値を出す）</text></g>
+                <g transform="translate(18 105)"><rect width="924" height="50" class="gm-svg-red"/><text x="14" y="22" class="gm-svg-label">GAN　乱数 z → Generator(G) → fake ┐</text><text x="343" y="38" class="gm-svg-note">real ────────────────────┴→ Discriminator(D) → 本物／偽物</text></g>
+                <g transform="translate(18 165)"><rect width="924" height="50" class="gm-svg-green"/><text x="14" y="30" class="gm-svg-label">Diffusion　x₀ ── ノイズを加える ─→ xₜ　／　xₜ ── denoiseを反復 ─→ x₀</text></g>
+                <g transform="translate(18 225)"><rect width="924" height="50" class="gm-svg-orange"/><text x="14" y="30" class="gm-svg-label">Flow　データ x ⇄ 可逆変換 f, f⁻¹ ⇄ 単純な潜在変数 z　（同じ道を戻れる）</text></g>
+                <g transform="translate(18 285)"><rect width="924" height="50" class="gm-svg-purple"/><text x="14" y="30" class="gm-svg-label">Autoregressive　x₁ → x₂ → x₃ → …　（生成した出力を次の条件へ戻す）</text></g>
+            </svg>
+        </div></div>
+        <div class="gm-table-wrap"><table class="gm-table">
+            <tr><th>図の決め手</th><th>モデル</th><th>他との違い</th></tr>
+            <tr><td>Encoderがμ・σを出し、zを選んでDecoderへ</td><td><strong>VAE</strong></td><td>1点の圧縮値だけでなく潜在分布を学ぶ。</td></tr>
+            <tr><td>乱数から作るGと、本物・偽物を見るDが分岐</td><td><strong>GAN</strong></td><td>Encoderで入力を復元する図ではない。</td></tr>
+            <tr><td>Forwardでnoise付加、Reverseでdenoiseを何段も反復</td><td><strong>Diffusion</strong></td><td>1回の可逆関数で厳密に戻すFlowとは違う。</td></tr>
+            <tr><td>両向き矢印・可逆変換・ヤコビアン</td><td><strong>Flow</strong></td><td>データと潜在変数を同じ変換経路で往復する。</td></tr>
+            <tr><td>直前までの出力を次の予測へ戻すloop</td><td><strong>Autoregressive</strong></td><td>系列を原則1要素ずつ生成する。</td></tr>
+        </table></div>
+        <div class="gm-note"><strong>正式名称：</strong>Diffusion Model（拡散モデル）／Normalizing Flow（正規化フロー）／Autoregressive Model（自己回帰モデル）。</div>
+
         <details class="gm-details">
             <summary>試験で出る確率の書き方を見る</summary>
             <div>識別モデルは主に <strong>p(y|x)</strong>、生成モデルは <strong>p(x)</strong>・<strong>p(x,y)</strong>・条件付き生成の <strong>p(x|c)</strong> を扱う、と表します。</div>
@@ -622,6 +648,35 @@ window.quizData = {
             options: ["AEは1点zへ圧縮し、VAEは中心と広がりをもつzの分布を使う", "AEにも必ずKL項がある", "VAEはEncoderを持たない", "AEだけが分布を出す"],
             answer: 0,
             explanation: "<strong>① AE：</strong>同じ入力なら同じ1点zへ圧縮します。<br><strong>② VAE：</strong>中心μと広がりσをもつ分布へ圧縮します。<br><strong>③</strong> VAEは基準分布からzを選んで新しい例を生成できます。"
+        },
+        {
+            id: "gen-exam-model-flow-identification",
+            category: "生成モデル構造図の識別",
+            difficulty: "本試験型",
+            kind: "図表・長文",
+            question: `<p>次のA〜Cは生成モデルの処理フローを簡略化した図である。モデル名の対応として正しいものはどれか。</p>
+                <div class="gm-visual-wrap"><div class="gm-visual-card"><svg class="gm-wide-svg" viewBox="0 0 960 230" role="img" aria-label="3種類の生成モデルの構造">
+                    <g transform="translate(18 16)"><rect width="924" height="54" class="gm-svg-blue"/><text x="16" y="33" class="gm-svg-label">A　入力 x → Encoder →［μ, σ］→ z → Decoder → 復元 x̂</text></g>
+                    <g transform="translate(18 88)"><rect width="924" height="54" class="gm-svg-red"/><text x="16" y="24" class="gm-svg-label">B　乱数 z → G → fake ┐</text><text x="281" y="41" class="gm-svg-note">real ──────────┴→ D → 本物／偽物</text></g>
+                    <g transform="translate(18 160)"><rect width="924" height="54" class="gm-svg-green"/><text x="16" y="33" class="gm-svg-label">C　元データ x₀ → noiseを段階付加 → xₜ → denoiseを反復 → 生成 x₀</text></g>
+                </svg></div></div>`,
+            options: ["A＝VAE、B＝GAN、C＝Diffusion", "A＝GAN、B＝Diffusion、C＝VAE", "A＝Flow、B＝VAE、C＝GAN", "A＝Autoregressive、B＝Flow、C＝VAE"],
+            answer: 0,
+            explanation: "<p><strong>① 図で見る場所：</strong>分布の2値、GとDの分岐、同じ処理の反復を探します。</p><p><strong>② 矢印を追う：</strong>Aはμ・σからzを選んで復元、BはGeneratorとDiscriminatorが対戦、Cはnoise付加後にdenoiseを繰り返します。</p><p><strong>③ 答え：</strong>A＝VAE、B＝GAN、C＝Diffusionです。</p><p><strong>④ 他との違い：</strong>Flowは可逆な往復矢印、Autoregressiveは直前の出力を次の条件へ戻すloopが決め手です。</p>"
+        },
+        {
+            id: "gen-exam-flow-autoregressive-arrows",
+            category: "生成モデルの矢印",
+            difficulty: "本試験型",
+            kind: "図表・長文",
+            question: `<p>図Xはデータと潜在変数の間を同じ変換経路で往復でき、図Yは生成した要素を次の予測条件へ戻す。XとYの対応はどれか。</p>
+                <div class="gm-visual-wrap"><div class="gm-visual-card"><svg class="gm-wide-svg" viewBox="0 0 960 150" role="img" aria-label="同じ経路を往復するXと、出力を次の条件へ戻すYの比較">
+                    <rect x="18" y="18" width="442" height="110" class="gm-svg-orange"/><text x="36" y="48" class="gm-svg-label">X　data x ⇄ invertible transform ⇄ latent z</text><text x="36" y="82" class="gm-svg-note">両方向を厳密に計算できる</text>
+                    <rect x="500" y="18" width="442" height="110" class="gm-svg-purple"/><text x="518" y="48" class="gm-svg-label">Y　x₁ → x₂ → x₃ → …</text><text x="518" y="82" class="gm-svg-note">前までの出力を次の条件へ加える</text>
+                </svg></div></div>`,
+            options: ["X＝Normalizing Flow、Y＝Autoregressive Model", "X＝GAN、Y＝VAE", "X＝Diffusion、Y＝Flow", "X＝VAE、Y＝GAN"],
+            answer: 0,
+            explanation: "<p><strong>① 図で見る場所：</strong>Xの両向き矢印と、Yの時系列loopを見ます。</p><p><strong>② 矢印を追う：</strong>Xは可逆変換でデータと潜在変数を往復し、Yは生成済み要素を使って次を予測します。</p><p><strong>③ 答え：</strong>X＝Normalizing Flow（正規化フロー）、Y＝Autoregressive Model（自己回帰モデル）です。</p><p><strong>④ 他との違い：</strong>Diffusionは多数stepのdenoise、GANはGとDの対戦です。</p>"
         },
         {
             id: "gen-elbo-calc",

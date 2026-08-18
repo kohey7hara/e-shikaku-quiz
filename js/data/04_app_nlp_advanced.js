@@ -31,6 +31,12 @@ window.quizData = {
 
         <div class="nlpa-link-map"><strong>この章の位置づけ：</strong>本サイトでは、4-（4）のWord2Vec・BERT・GPTを比較して理解するための補足章を「4-（5）関連知識」としています。Q・K・VやAttention計算は <a href="quiz.html?id=03_dl_transformer">3-（6）Transformer</a>、NLP本線は <a href="quiz.html?id=04_app_nlp">4-（4）自然言語処理</a> で扱います。</div>
 
+        <h3>■ モデル図はこの順で読む</h3>
+        <div class="nlpa-core">
+            <strong>① 入力単位は文字・単語・tokenのどれか</strong> → <strong>② 前後の文脈を読むか</strong> → <strong>③ 複数の表現を加算するか、系列位置を増やすか</strong>の順です。<br>
+            文字CNN → 多層BiLSTM → 層の加重和ならELMo。文字n-gramを足して<strong>1語・1ベクトル</strong>にするならfastText。入力を複数token IDへ分けて<strong>系列位置を増やす</strong>ならSubword Tokenizationです。
+        </div>
+
         <h3>■ まず全体：3つの弱点をどう補うか</h3>
         <div class="nlpa-table-wrap">
             <table class="nlpa-table">
@@ -514,6 +520,59 @@ window.quizData = {
             options: ["token IDがEmbedding行列の行番号に対応しており、語彙を変えるとIDと学習済みベクトルの対応が崩れるから", "Tokenizerが重みを毎回再学習するから", "文章の意味に関係なくtoken数を必ず1にするため", "計算機がTokenizer名だけを検査するから"],
             answer: 0,
             explanation: "モデルは『ID 1234ならEmbedding行列の1234行目』という対応を学習済みです。別語彙で同じIDが別tokenを指すと入力の意味が崩れます。モデルとTokenizerはセットで使うのが原則です。"
+        },
+        {
+            id: "nlpa-visual-elmo-pipeline",
+            setId: "nlpa-visual-architectures",
+            setOrder: 1,
+            category: "関連モデル図・ELMo",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次のELMoの処理図で、A・B・Cの組合せとして正しいものはどれか。
+                <div class="nlpa-visual-wrap"><div class="nlpa-visual-card">
+                    <svg class="nlpa-wide-svg" viewBox="0 0 960 250" role="img" aria-label="文字入力、双方向の文脈処理、複数層の統合という手掛かりからA、B、Cを特定する図">
+                        <defs><marker id="nlpa-q-elmo-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#486581"/></marker></defs>
+                        <text x="20" y="28" class="nlpa-svg-title">単語のつづりから、文脈に応じた表現を作る</text>
+                        <rect x="28" y="82" width="125" height="64" class="nlpa-svg-box"/><text x="54" y="108" class="nlpa-svg-label">文字列</text><text x="48" y="132" class="nlpa-svg-note">b・a・n・k</text>
+                        <line x1="160" y1="114" x2="207" y2="114" stroke="#486581" stroke-width="2" marker-end="url(#nlpa-q-elmo-arrow)"/>
+                        <rect x="220" y="68" width="158" height="92" class="nlpa-svg-orange"/><text x="289" y="94" class="nlpa-svg-title">A</text><text x="245" y="124" class="nlpa-svg-note">局所的な文字パターン</text><text x="248" y="145" class="nlpa-svg-note">→ 単語表現</text>
+                        <line x1="386" y1="114" x2="433" y2="114" stroke="#486581" stroke-width="2" marker-end="url(#nlpa-q-elmo-arrow)"/>
+                        <rect x="446" y="54" width="205" height="120" class="nlpa-svg-blue"/><text x="540" y="80" class="nlpa-svg-title">B</text><text x="491" y="108" class="nlpa-svg-label">複数の系列層</text><path d="M474 130 H618" stroke="#3498db" stroke-width="3" marker-end="url(#nlpa-q-elmo-arrow)"/><path d="M618 153 H474" stroke="#8e44ad" stroke-width="3" marker-end="url(#nlpa-q-elmo-arrow)"/><text x="470" y="198" class="nlpa-svg-note">左文脈と右文脈を各層で表す</text>
+                        <line x1="660" y1="114" x2="707" y2="114" stroke="#486581" stroke-width="2" marker-end="url(#nlpa-q-elmo-arrow)"/>
+                        <rect x="720" y="68" width="212" height="92" class="nlpa-svg-green"/><text x="817" y="94" class="nlpa-svg-title">C</text><text x="754" y="121" class="nlpa-svg-label">s₀・s₁・s₂ → 表現</text><text x="746" y="143" class="nlpa-svg-note">下流タスクが係数を学習</text>
+                        <text x="216" y="229" class="nlpa-svg-note">同じ bank でも左右の文脈が変われば、B以降の出力も変わる</text>
+                    </svg>
+                </div></div>`,
+            options: ["A＝WordPiece、B＝Decoder-only、C＝NMS", "A＝文字CNN、B＝多層BiLSTM、C＝各層表現の加重和", "A＝RPN、B＝FPN、C＝ROI Align", "A＝文字削除、B＝単方向CNNだけ、C＝固定one-hot"],
+            answer: 1,
+            explanation: "<strong>図の決め手：</strong>つづりを扱う文字CNN、左右両方向を読む多層BiLSTM、複数層をまとめる加重和が一直線に並びます。<br><strong>正解：</strong>A＝文字CNN、B＝多層BiLSTM、C＝各層表現の加重和です。<br><strong>他候補との違い：</strong>WordPieceは入力をtokenへ分割する方式、Decoder-onlyはGPT系、RPN/FPN/ROI Alignは画像検出の部品です。"
+        },
+        {
+            id: "nlpa-visual-fasttext-tokenization",
+            setId: "nlpa-visual-architectures",
+            setOrder: 2,
+            category: "関連モデル図・1語表現とtoken列",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `同じ単語を処理した次のA・Bについて、モデルへ渡る系列位置の数まで含めた説明として正しいものはどれか。
+                <div class="nlpa-visual-wrap"><div class="nlpa-visual-card">
+                    <svg class="nlpa-wide-svg" viewBox="0 0 960 290" role="img" aria-label="文字n-gramを一つのベクトルへ集約するAと、入力を複数token IDへ分割するBの比較">
+                        <defs><marker id="nlpa-q-fast-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#486581"/></marker></defs>
+                        <rect x="20" y="43" width="440" height="218" class="nlpa-svg-green"/><text x="40" y="72" class="nlpa-svg-title">A</text><text x="80" y="72" class="nlpa-svg-label">文字n-gramを内部で合成</text>
+                        <g class="nlpa-svg-box"><rect x="48" y="102" width="82" height="42"/><rect x="143" y="102" width="82" height="42"/><rect x="238" y="102" width="82" height="42"/></g>
+                        <text x="69" y="128" class="nlpa-svg-note">&lt;ap</text><text x="169" y="128" class="nlpa-svg-note">app</text><text x="262" y="128" class="nlpa-svg-note">ppl</text><text x="333" y="128" class="nlpa-svg-note">…</text>
+                        <line x1="120" y1="157" x2="218" y2="191" stroke="#486581" stroke-width="2"/><line x1="184" y1="157" x2="230" y2="190" stroke="#486581" stroke-width="2"/><line x1="279" y1="157" x2="242" y2="190" stroke="#486581" stroke-width="2"/>
+                        <circle cx="230" cy="203" r="24" fill="#fff" stroke="#27ae60"/><text x="222" y="210" class="nlpa-svg-title">Σ</text><line x1="256" y1="203" x2="318" y2="203" stroke="#486581" stroke-width="2" marker-end="url(#nlpa-q-fast-arrow)"/><rect x="330" y="179" width="96" height="49" class="nlpa-svg-box"/><text x="350" y="200" class="nlpa-svg-note">1語の</text><text x="342" y="219" class="nlpa-svg-note">1ベクトル</text>
+                        <rect x="500" y="43" width="440" height="218" class="nlpa-svg-orange"/><text x="520" y="72" class="nlpa-svg-title">B</text><text x="560" y="72" class="nlpa-svg-label">入力系列そのものを分割</text>
+                        <rect x="532" y="105" width="132" height="49" class="nlpa-svg-box"/><text x="550" y="135" class="nlpa-svg-note">unhappiness</text><line x1="672" y1="130" x2="718" y2="130" stroke="#486581" stroke-width="2" marker-end="url(#nlpa-q-fast-arrow)"/>
+                        <g><rect x="731" y="94" width="62" height="49" class="nlpa-svg-blue"/><rect x="801" y="94" width="62" height="49" class="nlpa-svg-blue"/><rect x="871" y="94" width="55" height="49" class="nlpa-svg-blue"/></g>
+                        <text x="750" y="124" class="nlpa-svg-note">un</text><text x="809" y="124" class="nlpa-svg-note">happi</text><text x="879" y="124" class="nlpa-svg-note">ness</text>
+                        <text x="610" y="203" class="nlpa-svg-label">3 token ID → 3系列位置</text><text x="565" y="230" class="nlpa-svg-note">系列長とAttentionなどの計算対象が変わる</text>
+                    </svg>
+                </div></div>`,
+            options: ["A＝Subword Tokenizationで複数位置、B＝fastTextで1位置", "AもBも必ず1文字ずつ別位置", "A＝fastTextで1語・1位置、B＝Subword Tokenizationで複数位置", "AもBも入力を削除する"],
+            answer: 2,
+            explanation: "<strong>図の決め手：</strong>Aは複数の文字n-gramがΣで1本の語ベクトルへ集まり、Bはun・happi・nessが別々のtoken IDとして横に並びます。<br><strong>正解：</strong>A＝fastTextで1語・1位置、B＝Subword Tokenizationで複数位置です。<br><strong>他候補との違い：</strong>fastTextの内部に複数n-gramがあっても系列長は増えません。BPEやWordPieceはモデルへ渡すtoken列そのものを分割します。"
         }
     ]
 };

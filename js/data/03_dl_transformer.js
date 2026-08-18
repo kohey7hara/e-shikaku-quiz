@@ -46,6 +46,12 @@ window.quizData = {
             .tr-address-table td:first-child { white-space: nowrap; font-weight: 750; }
             .tr-answer { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #27ae60; border-radius: 7px; background: #eafaf1; line-height: 1.7; }
             .tr-warning { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #e74c3c; border-radius: 7px; background: #fff3f1; line-height: 1.7; }
+            .tr-read-guide { margin: 12px 0 20px; padding: 14px 16px; border: 1px solid #c8dbee; border-radius: 10px; background: #f8fbfe; line-height: 1.7; }
+            .tr-read-step { display: grid; grid-template-columns: 2.2em 1fr; gap: 8px; align-items: start; margin: 7px 0; }
+            .tr-read-number { display: inline-flex; align-items: center; justify-content: center; width: 1.8em; height: 1.8em; border-radius: 50%; background: #2780b8; color: #fff; font-weight: 800; }
+            .tr-paper-table { min-width: 940px; }
+            .tr-paper-table td:nth-child(2) { min-width: 300px; }
+            .tr-paper-table td:nth-child(4) { min-width: 270px; }
             @media (max-width: 760px) {
                 .tr-concept-grid { grid-template-columns: 1fr; }
                 .concept-box { width: auto; min-width: 0; }
@@ -109,6 +115,15 @@ window.quizData = {
                 </svg>
             </div>
             <div class="tr-zoom-caption"><strong>場所の確認：</strong>Positional Encodingは入口で加算。Self-AttentionはEncoderとDecoderの各ブロック内。Cross-AttentionはDecoderがEncoder Memoryを読む場所です。</div>
+        </div>
+
+        <h3>■ モデル図の読み方／試験で見る場所</h3>
+        <div class="tr-read-guide">
+            <div class="tr-read-step"><span class="tr-read-number">1</span><span><strong>左右を分ける：</strong>まずEncoder（入力を理解）とDecoder（出力を生成）を見分ける。</span></div>
+            <div class="tr-read-step"><span class="tr-read-number">2</span><span><strong>入口を見る：</strong>Token EmbeddingとPositional Encodingは最初に1回加算され、その出力が第1ブロックへ入る。</span></div>
+            <div class="tr-read-step"><span class="tr-read-number">3</span><span><strong>×Nを縦に追う：</strong>第$l$層の出力が第$l+1$層へ入る。各層が入口のPE出力を直接受けるわけではない。<strong>同一なのは構造</strong>であり、通常は層ごとに別の学習パラメータを持つ。</span></div>
+            <div class="tr-read-step"><span class="tr-read-number">4</span><span><strong>Decoderの3箱：</strong>Masked Self-Attention → Cross-Attention → FFN。CrossではQがDecoder、K/VがEncoder。</span></div>
+            <div class="tr-read-step"><span class="tr-read-number">5</span><span><strong>出口を見る：</strong>Linear → Softmaxで次トークン。学習時のDecoder入力は正解列を右へずらしてBOSを置く。</span></div>
         </div>
 
         <h3>■ 拡大①：EncoderとDecoderの1ブロック</h3>
@@ -452,6 +467,19 @@ window.quizData = {
             </table>
         </div>
 
+        <h3>■ 論文の流れ：固定長ベクトルからSelf-Attentionへ</h3>
+        <div class="tr-table-wrap">
+            <table class="tr-comparison tr-paper-table">
+                <tr><th>年</th><th>論文・モデル</th><th>構造</th><th>試験で結び付ける貢献</th></tr>
+                <tr><td>2014</td><td><strong>Sequence to Sequence Learning with Neural Networks</strong><br>Sutskeverら</td><td>LSTM Encoder–Decoder</td><td>Attentionなし。Encoderの最終状態という固定長ベクトルへ入力をまとめる。</td></tr>
+                <tr><td>2014/2015</td><td><strong>Neural Machine Translation by Jointly Learning to Align and Translate</strong><br>Bahdanauら</td><td>BiRNN Encoder＋Additive Attention</td><td>Decoderの各時刻で入力位置を動的にalignment。小さなNNでscoreを計算。</td></tr>
+                <tr><td>2015</td><td><strong>Effective Approaches to Attention-based Neural Machine Translation</strong><br>Luongら</td><td>Attention-based Seq2Seq</td><td>Global／Local Attention、Dot／Generalなどのscore。</td></tr>
+                <tr><td>2016</td><td><strong>Google's Neural Machine Translation System（GNMT）</strong><br>Wuら</td><td>Deep LSTM＋Attention</td><td>積層LSTM、Residual Connection、Attentionを組み合わせた大規模翻訳。</td></tr>
+                <tr><td>2017</td><td><strong>Attention Is All You Need</strong><br>Vaswaniら</td><td>Transformer</td><td>再帰を使わず、Multi-Head Self-AttentionとPositional Encodingで構成。</td></tr>
+            </table>
+        </div>
+        <div class="tr-answer"><strong>読み方：</strong>①再帰があるか → ②固定長ベクトルか動的Attentionか → ③scoreがAdditiveかDot/Generalか → ④Self-Attentionだけで系列を処理するか、の順で絞ります。</div>
+
         <h3>■ 最後はこの表だけ</h3>
         <div class="tr-table-wrap">
             <table class="tr-comparison">
@@ -651,6 +679,81 @@ window.quizData = {
         {id:"tr-residual-shape-rule",category:"Add & Norm(形状)",question:"Residual Connectionで$F(x)+x$を要素ごとに加算するために必要な条件はどれか。",options:["$F(x)$と$x$の形状が一致する","バッチサイズが1である","系列長が偶数である","Attention headが1つである"],answer:0,explanation:"加算には形状の一致が必要です。そのため各サブレイヤーは基本的に$d_{model}$次元へ戻してから残差を足します。"},
         {id:"tr-position-wise-ffn-sharing",category:"Position-wise FFN",question:"Position-wise FFNの適用方法として正しいものはどれか。",options:["各位置を独立に処理し、全位置で同じ重みを共有する","位置ごとに別の重みを学習する","全位置を1ベクトルにしてから処理する","未来位置だけを処理する"],answer:0,explanation:"トークン同士を混ぜるのはAttentionです。FFNは各位置に同じ2層MLPを独立適用します。"},
         {id:"tr-encoder-mask-rule",category:"Self-Attention比較",question:"BERTなどEncoder-onlyモデルのSelf-Attentionについて、基本的に正しいものはどれか。",options:["PADは除外するが、Causal Maskなしで左右両方向を参照する","必ず未来を隠す","過去だけを参照する","Cross-Attentionだけを使う"],answer:0,explanation:"Encoderは文章理解のため左右の文脈を参照します。一方、GPTなど自己回帰Decoderは未来を隠すCausal Maskを使います。"},
-        {id:"tr-parallel-and-quadratic",category:"RNNとの比較",question:"Self-Attentionの性質をRNNと比べた説明として最も適切なものはどれか。",options:["系列位置を並列処理しやすいが、標準Attentionのスコア行列は系列長の二乗で増える","逐次処理が必須で、計算量は常に一定","長い系列ほどスコア行列が小さくなる","順序情報を再帰状態だけで表す"],answer:0,explanation:"再帰がないため位置を並列計算できますが、全トークン対を比較する標準Self-Attentionは$O(n^2d)$です。"}
+        {id:"tr-parallel-and-quadratic",category:"RNNとの比較",question:"Self-Attentionの性質をRNNと比べた説明として最も適切なものはどれか。",options:["系列位置を並列処理しやすいが、標準Attentionのスコア行列は系列長の二乗で増える","逐次処理が必須で、計算量は常に一定","長い系列ほどスコア行列が小さくなる","順序情報を再帰状態だけで表す"],answer:0,explanation:"再帰がないため位置を並列計算できますが、全トークン対を比較する標準Self-Attentionは$O(n^2d)$です。"},
+        {
+            id: "tr-exam-original-transformer-routing",
+            setId: "tr-exam-original-transformer",
+            setOrder: 1,
+            category: "原Transformer（図表）",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `<div style="line-height:1.7;">次の図は原TransformerのEncoder–Decoderを簡略化したものである。EncoderとDecoderは、それぞれ同じ<strong>構造</strong>のブロックをN層積み重ねる。図の説明として<strong>不適切なもの</strong>を1つ選べ。</div>
+                <div style="margin:12px 0;padding:14px;border:1px solid #c8dbee;border-radius:10px;background:#f8fbfe;overflow-x:auto;">
+                    <div style="min-width:760px;display:grid;grid-template-columns:7em 1fr;gap:10px;align-items:center;line-height:1.7;">
+                        <strong>Encoder</strong><div><span style="padding:6px;border:1px solid #8e44ad;border-radius:6px;">入力Embedding＋PE</span> → <span style="padding:6px;border:1px solid #2780b8;border-radius:6px;">Self-Attention → FFN</span> × N → <strong>Memory</strong></div>
+                        <strong>Decoder</strong><div><span style="padding:6px;border:1px solid #8e44ad;border-radius:6px;">右shiftした出力Embedding＋PE</span> → <span style="padding:6px;border:1px solid #f39c12;border-radius:6px;">Masked Self-Attention → Cross-Attention → FFN</span> × N → Linear → Softmax</div>
+                        <span></span><div style="text-align:center;color:#526d82;">Encoder Memory ── K・V ──→ 各Decoder層のCross-Attention　（QはDecoder側）</div>
+                    </div>
+                </div>`,
+            options: [
+                "Encoderの最終出力は、各Decoder層のCross-AttentionでKey・Valueの元になる",
+                "DecoderのMasked Multi-Head Self-Attentionは、予測位置より未来のtokenを参照させない",
+                "Decoderを構成するN層すべてへ、Positional Encodingの出力を個別に直接再入力する",
+                "EncoderとDecoderは、どちらも各位置へ適用するFeed-Forward Networkを含む"
+            ],
+            answer: 2,
+            explanation: `<p><strong>図で見る場所：</strong>まずPEの加算位置、次にDecoder内の3つの箱、最後にEncoder MemoryからCross-Attentionへ入る矢印を追います。</p><p><strong>読み取り：</strong>PEはEmbeddingへ入口で加算します。第2層以降は直前層の出力を受け取り、PE出力を各層へ個別に直接入れ直す構造ではありません。</p><p><strong>答え：</strong>不適切なのは<strong>「N層すべてへPE出力を個別に直接再入力する」</strong>です。</p><p><strong>他が違う理由：</strong>Encoder MemoryはCross-AttentionのK・V、Decoder側表現はQになります。DecoderはMasked Self-Attentionを使い、Encoder・Decoderの両方にFFNがあります。なお「同一層×N」は同一<strong>構造</strong>を直列に積む意味で、通常は重み共有を意味しません。</p>`
+        },
+        {
+            id: "tr-exam-outputs-shifted-right",
+            setId: "tr-exam-original-transformer",
+            setOrder: 2,
+            category: "Outputs shifted right（図表）",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `<div style="line-height:1.7;">原Transformerの学習図にある<strong>Outputs (shifted right)</strong>を考える。教師出力が「I → am → a → cat → EOS」のとき、Decoderへ入れる列として正しいものはどれか。</div>
+                <div style="margin:12px 0;padding:12px;border:1px solid #d7e2ec;border-radius:10px;background:#fff;overflow-x:auto;">
+                    <table style="width:100%;min-width:560px;border-collapse:collapse;text-align:center;"><tr><th style="padding:7px;border:1px solid #c8dbee;background:#eef7fb;">位置</th><th style="padding:7px;border:1px solid #c8dbee;background:#eef7fb;">1</th><th style="padding:7px;border:1px solid #c8dbee;background:#eef7fb;">2</th><th style="padding:7px;border:1px solid #c8dbee;background:#eef7fb;">3</th><th style="padding:7px;border:1px solid #c8dbee;background:#eef7fb;">4</th><th style="padding:7px;border:1px solid #c8dbee;background:#eef7fb;">5</th></tr><tr><th style="padding:7px;border:1px solid #c8dbee;">教師</th><td style="padding:7px;border:1px solid #c8dbee;">I</td><td style="padding:7px;border:1px solid #c8dbee;">am</td><td style="padding:7px;border:1px solid #c8dbee;">a</td><td style="padding:7px;border:1px solid #c8dbee;">cat</td><td style="padding:7px;border:1px solid #c8dbee;">EOS</td></tr><tr><th style="padding:7px;border:1px solid #c8dbee;">Decoder入力</th><td colspan="5" style="padding:7px;border:1px solid #c8dbee;">ここを選ぶ</td></tr></table>
+                </div>`,
+            options: [
+                "$[BOS,I,am,a,cat]$",
+                "$[I,am,a,cat,EOS]$",
+                "$[EOS,cat,a,am,I]$",
+                "$[BOS,EOS,I,am,a]$"
+            ],
+            answer: 0,
+            explanation: `<p><strong>図で見る場所：</strong>同じ位置のDecoder入力と教師出力を縦に見ます。</p><p><strong>読み取り：</strong>位置1ではBOSからI、位置2ではIからamを予測します。教師列を1個右へずらすため、先頭へBOSを追加し、入力側では最後のEOSを外します。</p><p><strong>答え：</strong>Decoder入力は<strong>$[BOS,I,am,a,cat]$</strong>です。</p><p><strong>他が違う理由：</strong>教師と同じ列では次トークン予測になりません。逆順にもせず、BOSの直後へEOSを置くわけでもありません。さらにMasked Self-Attentionが未来位置を隠します。</p>`
+        },
+        {
+            id: "tr-exam-paper-contribution-map",
+            category: "Attention論文史（図表）",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `<div style="line-height:1.7;">次の代表論文I〜Vについて、<strong>主な貢献の対応がすべて正しいもの</strong>を選べ。</div>
+                <div style="margin:12px 0;overflow-x:auto;"><table style="width:100%;min-width:720px;border-collapse:collapse;text-align:left;"><tr><th style="padding:7px;border:1px solid #c8dbee;background:#eef7fb;">記号</th><th style="padding:7px;border:1px solid #c8dbee;background:#eef7fb;">年</th><th style="padding:7px;border:1px solid #c8dbee;background:#eef7fb;">論文・モデル</th></tr><tr><td style="padding:7px;border:1px solid #c8dbee;">I</td><td style="padding:7px;border:1px solid #c8dbee;">2014</td><td style="padding:7px;border:1px solid #c8dbee;">Sequence to Sequence Learning with Neural Networks</td></tr><tr><td style="padding:7px;border:1px solid #c8dbee;">II</td><td style="padding:7px;border:1px solid #c8dbee;">2014/2015</td><td style="padding:7px;border:1px solid #c8dbee;">Bahdanau Attention</td></tr><tr><td style="padding:7px;border:1px solid #c8dbee;">III</td><td style="padding:7px;border:1px solid #c8dbee;">2015</td><td style="padding:7px;border:1px solid #c8dbee;">Luong Attention</td></tr><tr><td style="padding:7px;border:1px solid #c8dbee;">IV</td><td style="padding:7px;border:1px solid #c8dbee;">2016</td><td style="padding:7px;border:1px solid #c8dbee;">GNMT（Google's Neural Machine Translation System）</td></tr><tr><td style="padding:7px;border:1px solid #c8dbee;">V</td><td style="padding:7px;border:1px solid #c8dbee;">2017</td><td style="padding:7px;border:1px solid #c8dbee;">Attention Is All You Need</td></tr></table></div>`,
+            options: [
+                "I＝固定長文脈のLSTM Encoder–Decoder、II＝Additive Attention、III＝Global/Local・Dot/General、IV＝Deep LSTM＋Residual＋Attention、V＝再帰なしのTransformer",
+                "I＝Transformer、II＝CTC、III＝GAN、IV＝BERT、V＝LSTMだけのSeq2Seq",
+                "I＝Additive Attention、II＝再帰なし、III＝固定Reservoir、IV＝VAE、V＝Global/Local Attention",
+                "I＝GNMT、II＝Dot積だけ、III＝固定長文脈のみ、IV＝Positional Encodingだけ、V＝BiRNNのみ"
+            ],
+            answer: 0,
+            explanation: `<p><strong>図で見る場所：</strong>年を左から追い、各論文の「再帰」「Attentionのscore」「大規模化」を見ます。</p><p><strong>読み取り：</strong>固定長のSeq2Seqから、BahdanauのAdditive、LuongのGlobal/Local・Dot/General、GNMTの深いLSTM実用系を経て、再帰を使わないTransformerへ進みます。</p><p><strong>答え：</strong>I〜Vをこの順で正しく対応させた最初の選択肢です。</p><p><strong>他が違う理由：</strong>CTC・GAN・VAE・Reservoirはこの翻訳Attention史の対応ではありません。Transformerを2014年のSeq2Seqへ、Luongを固定長文脈だけへ割り当てるのも年代と貢献が逆です。</p>`
+        },
+        {
+            id: "tr-exam-bleu-flops-table",
+            category: "BLEU・FLOPs（表読解）",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `<div style="line-height:1.7;">同じ翻訳テストデータで4モデルを評価した。BLEU（Bilingual Evaluation Understudy）は高いほど翻訳結果が参照訳に近く、FLOPs（Floating Point Operations）は1回の推論に必要な演算量で小さいほど軽い。<strong>BLEUが28.0以上、かつFLOPsが15.0 GFLOPs以下</strong>を両方満たすモデルはどれか。</div>
+                <div style="margin:12px 0;overflow-x:auto;"><table style="width:100%;min-width:600px;border-collapse:collapse;text-align:center;"><tr><th style="padding:8px;border:1px solid #c8dbee;background:#eef7fb;">モデル</th><th style="padding:8px;border:1px solid #c8dbee;background:#eef7fb;">BLEU</th><th style="padding:8px;border:1px solid #c8dbee;background:#eef7fb;">FLOPs（GFLOPs）</th><th style="padding:8px;border:1px solid #c8dbee;background:#eef7fb;">パラメータ数（M）</th></tr><tr><td style="padding:8px;border:1px solid #c8dbee;">A</td><td style="padding:8px;border:1px solid #c8dbee;">27.6</td><td style="padding:8px;border:1px solid #c8dbee;">18.0</td><td style="padding:8px;border:1px solid #c8dbee;">64</td></tr><tr><td style="padding:8px;border:1px solid #c8dbee;">B</td><td style="padding:8px;border:1px solid #c8dbee;">28.3</td><td style="padding:8px;border:1px solid #c8dbee;">22.0</td><td style="padding:8px;border:1px solid #c8dbee;">82</td></tr><tr><td style="padding:8px;border:1px solid #c8dbee;">C</td><td style="padding:8px;border:1px solid #c8dbee;">28.0</td><td style="padding:8px;border:1px solid #c8dbee;">14.0</td><td style="padding:8px;border:1px solid #c8dbee;">76</td></tr><tr><td style="padding:8px;border:1px solid #c8dbee;">D</td><td style="padding:8px;border:1px solid #c8dbee;">27.9</td><td style="padding:8px;border:1px solid #c8dbee;">12.0</td><td style="padding:8px;border:1px solid #c8dbee;">90</td></tr></table><p style="font-size:.85em;color:#526d82;">全セルは同一条件で測定した完全な数値であり、欠損値はない。</p></div>`,
+            options: ["モデルA", "モデルB", "モデルC", "モデルD"],
+            answer: 2,
+            explanation: `<p><strong>図で見る場所：</strong>まずBLEU列で28.0以上に絞り、次に同じ行のFLOPs列が15.0以下かを見ます。</p><p><strong>読み取り：</strong>BはBLEU条件を満たしますがFLOPs 22.0で失格。CはBLEU 28.0、FLOPs 14.0で両方を満たします。AとDはBLEUが条件未満です。</p><p><strong>答え：</strong><strong>モデルC</strong>だけです。</p><p><strong>他が違う理由：</strong>Aは両条件を満たさず、Bは計算量超過、DはBLEU不足です。パラメータ数は表にありますが、今回の制約条件には含まれません。</p>`
+        }
     ]
 };

@@ -61,6 +61,57 @@ window.quizData = {
         </div>
         <div class="nlp-link-map"><strong>章の分担：</strong>Q・K・V、Scaled Dot-Product、Multi-Head、Mask行列の計算は <a href="quiz.html?id=03_dl_transformer">3-（6）Transformer</a>。ELMo・fastText・BPE・SentencePieceは <a href="quiz.html?id=04_app_nlp_advanced">4-（5）関連知識</a>。本章はシラバス本線のLSI・n-gram・Word2Vec・BERT・GPT-n・基盤モデル・Prompt・RAGへ集中します。</div>
 
+        <h3>■ モデル図は「入力 → 中央の箱 → 出力」の順で読む</h3>
+        <div class="nlp-core"><strong>試験の4手：</strong>①左端の入力を見る → ②中央がEncoderかDecoderか検索器かを見る → ③矢印が双方向か未来を隠す一方向かを見る → ④右端が表現・次token・検索文書付き回答のどれかを見る。</div>
+        <div class="nlp-visual-wrap">
+            <div class="nlp-visual-card">
+                <svg class="nlp-wide-svg" viewBox="0 0 960 310" role="img" aria-labelledby="nlp-read-title nlp-read-desc">
+                    <title id="nlp-read-title">BERT、GPT、RAGの構造を矢印から見分ける</title>
+                    <desc id="nlp-read-desc">BERTはEncoder-onlyで左右文脈を表現に変え、GPTはCausal Mask付きDecoder-onlyで次tokenを生成し、RAGは質問から外部文書を検索してGeneratorへ渡す。</desc>
+                    <defs><marker id="nlp-arrow-read" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#627d98"/></marker></defs>
+                    <text x="18" y="26" class="nlp-svg-title">箱の名前より、入出力と矢印を先に見る</text>
+
+                    <g transform="translate(20 50)">
+                        <rect width="920" height="66" rx="10" fill="#eef7fb" stroke="#2780b8"/>
+                        <text x="18" y="26" class="nlp-svg-label">BERT</text>
+                        <rect x="300" y="15" width="122" height="38" rx="6" fill="#fff" stroke="#2780b8"/><text x="323" y="39" class="nlp-svg-note">入力token列</text>
+                        <path d="M430 34H488" stroke="#627d98" stroke-width="2" marker-end="url(#nlp-arrow-read)"/>
+                        <rect x="498" y="10" width="150" height="48" rx="7" fill="#d6ecfa" stroke="#2780b8"/><text x="526" y="31" class="nlp-svg-label">Encoder-only</text><text x="533" y="49" class="nlp-svg-mini">左右を相互参照</text>
+                        <path d="M656 34H714" stroke="#627d98" stroke-width="2" marker-end="url(#nlp-arrow-read)"/>
+                        <text x="726" y="39" class="nlp-svg-note">文脈表現・分類</text>
+                    </g>
+
+                    <g transform="translate(20 128)">
+                        <rect width="920" height="66" rx="10" fill="#fff8e7" stroke="#f39c12"/>
+                        <text x="18" y="26" class="nlp-svg-label">GPT（Generative Pre-trained Transformer）</text>
+                        <rect x="300" y="15" width="122" height="38" rx="6" fill="#fff" stroke="#f39c12"/><text x="323" y="39" class="nlp-svg-note">過去token列</text>
+                        <path d="M430 34H488" stroke="#627d98" stroke-width="2" marker-end="url(#nlp-arrow-read)"/>
+                        <rect x="498" y="10" width="150" height="48" rx="7" fill="#fdebd0" stroke="#f39c12"/><text x="522" y="31" class="nlp-svg-label">Decoder-only</text><text x="523" y="49" class="nlp-svg-mini">Causal Mask</text>
+                        <path d="M656 34H714" stroke="#627d98" stroke-width="2" marker-end="url(#nlp-arrow-read)"/>
+                        <text x="726" y="39" class="nlp-svg-note">次token → 入力へ戻す</text>
+                    </g>
+
+                    <g transform="translate(20 206)">
+                        <rect width="920" height="78" rx="10" fill="#eafaf1" stroke="#27ae60"/>
+                        <text x="18" y="27" class="nlp-svg-label">RAG</text>
+                        <rect x="270" y="22" width="92" height="38" rx="6" fill="#fff" stroke="#27ae60"/><text x="294" y="46" class="nlp-svg-note">質問</text>
+                        <path d="M370 41H414" stroke="#627d98" stroke-width="2" marker-end="url(#nlp-arrow-read)"/>
+                        <rect x="424" y="17" width="120" height="48" rx="7" fill="#dff5e8" stroke="#27ae60"/><text x="447" y="38" class="nlp-svg-label">Retriever</text><text x="450" y="56" class="nlp-svg-mini">外部文書検索</text>
+                        <path d="M552 41H596" stroke="#627d98" stroke-width="2" marker-end="url(#nlp-arrow-read)"/>
+                        <rect x="606" y="17" width="120" height="48" rx="7" fill="#fff" stroke="#27ae60"/><text x="629" y="38" class="nlp-svg-label">Generator</text><text x="630" y="56" class="nlp-svg-mini">質問＋文書</text>
+                        <path d="M734 41H778" stroke="#627d98" stroke-width="2" marker-end="url(#nlp-arrow-read)"/>
+                        <text x="790" y="46" class="nlp-svg-note">文書を参照した回答</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+        <div class="nlp-table-wrap"><table class="nlp-table">
+            <tr><th>図の決め手</th><th>モデル</th><th>他との違い</th></tr>
+            <tr><td>Encoderだけ・左右のtokenを参照</td><td><strong>BERT</strong></td><td>次tokenを1個ずつ戻して生成する図ではない。</td></tr>
+            <tr><td>Decoderだけ・未来を隠す・出力を次の入力へ</td><td><strong>GPT</strong></td><td>双方向に未来tokenを見ることはできない。</td></tr>
+            <tr><td>外部文書DBへ寄り道してから生成</td><td><strong>RAG</strong></td><td>検索器と生成器の2段。重み更新そのものを表す図ではない。</td></tr>
+        </table></div>
+
         <h3>■ 略語は最初にこれだけ：正式名称＋一言</h3>
         <div class="nlp-table-wrap">
             <table class="nlp-table">
@@ -562,6 +613,23 @@ window.quizData = {
             options: ["指示文や例示など入力の与え方を設計し、事前学習済みモデルから目的の出力を引き出す", "モデルを毎回ゼロから学習する", "入力tokenをすべて削除する", "外部文書検索だけを行い生成しない"],
             answer: 0,
             explanation: "Promptはモデルに渡す文脈・指示・例の設計です。Promptを変えるだけなら通常は重みを更新しません。Fine-tuningとはそこが違います。"
+        },
+        {
+            id: "nlp-exam-model-flow-identification",
+            category: "モデル構造図の識別",
+            difficulty: "本試験型",
+            kind: "図表・長文",
+            question: `<p>次のA〜Cは自然言語処理モデルの処理フローを簡略化した図である。モデル名の対応として正しいものはどれか。</p>
+                <div class="nlp-visual-wrap"><div class="nlp-visual-card">
+                <svg class="nlp-wide-svg" viewBox="0 0 960 245" role="img" aria-label="3つの自然言語処理モデルの処理フロー">
+                    <defs><marker id="nlp-arrow-question-flow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#627d98"/></marker></defs>
+                    <g transform="translate(18 18)"><rect width="924" height="58" rx="9" fill="#eef7fb" stroke="#2780b8"/><text x="18" y="34" class="nlp-svg-label">A　token列 → Encoder-only（左右を相互参照）→ 文脈表現</text></g>
+                    <g transform="translate(18 92)"><rect width="924" height="58" rx="9" fill="#fff8e7" stroke="#f39c12"/><text x="18" y="25" class="nlp-svg-label">B　過去token列 → Decoder-only（未来をMask）→ 次token</text><path d="M770 33 C850 33 850 53 706 53" fill="none" stroke="#f39c12" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#nlp-arrow-question-flow)"/><text x="790" y="24" class="nlp-svg-mini">出力を戻す</text></g>
+                    <g transform="translate(18 166)"><rect width="924" height="58" rx="9" fill="#eafaf1" stroke="#27ae60"/><text x="18" y="34" class="nlp-svg-label">C　質問 → 外部文書Retriever → 文書＋質問をGeneratorへ → 回答</text></g>
+                </svg></div></div>`,
+            options: ["A＝BERT、B＝GPT、C＝RAG", "A＝GPT、B＝RAG、C＝BERT", "A＝RAG、B＝BERT、C＝GPT", "A＝Word2Vec、B＝BERT、C＝GPT"],
+            answer: 0,
+            explanation: "<p><strong>① 図で見る場所：</strong>中央の箱と、出力が入力へ戻るか、外部文書へ寄り道するかを見ます。</p><p><strong>② 矢印を追う：</strong>AはEncoderだけで左右を参照、Bは未来を隠すDecoderだけで次tokenを戻す、Cは検索して得た文書を生成器へ渡します。</p><p><strong>③ 答え：</strong>A＝BERT、B＝GPT、C＝RAGです。</p><p><strong>④ 他との違い：</strong>BERTは理解用の表現、GPTは自己回帰生成、RAGはRetriever（検索器）とGenerator（生成器）の2段構成です。</p>"
         },
         {
             id: "nlp-bert-gpt-compare",

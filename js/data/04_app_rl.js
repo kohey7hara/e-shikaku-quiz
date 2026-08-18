@@ -38,6 +38,42 @@ window.quizData = {
             <strong>A3C</strong>＝Asynchronous Advantage Actor-Critic
         </div>
 
+        <h3>■ モデル図は「出力・記憶箱・worker数」の順で読む</h3>
+        <div class="rlx-core"><strong>試験の4手：</strong>①1つの状態から何を出すかを見る → ②経験をためる箱があるかを見る → ③NetworkがOnline／Targetの2つかを見る → ④複数workerが共有モデルへ矢印を送るかを見る。</div>
+        <div class="rlx-visual-wrap"><div class="rlx-visual-card">
+            <svg class="rlx-wide-svg" viewBox="0 0 960 280" role="img" aria-labelledby="rlx-read-title rlx-read-desc">
+                <title id="rlx-read-title">DQNとA3Cを図の構造から識別する</title>
+                <desc id="rlx-read-desc">DQNは状態から離散行動ごとのQ値を出しReplay BufferとTarget Networkを使う。A3Cは複数workerがActorとCriticを持ち共有モデルを非同期更新する。</desc>
+                <defs><marker id="rlx-arrow-read" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#627d98"/></marker></defs>
+                <text x="18" y="26" class="rlx-svg-title">箱が1系列ならDQN、複数workerが集まればA3C</text>
+
+                <g transform="translate(18 48)">
+                    <rect width="924" height="90" class="rlx-blue"/>
+                    <text x="16" y="25" class="rlx-svg-label">DQN（Deep Q-Network）</text>
+                    <rect x="180" y="32" width="84" height="38" class="rlx-box"/><text x="202" y="56" class="rlx-svg-note">状態 s</text><path d="M272 51H318" stroke="#627d98" stroke-width="2" marker-end="url(#rlx-arrow-read)"/>
+                    <rect x="328" y="27" width="150" height="48" class="rlx-blue"/><text x="352" y="49" class="rlx-svg-label">Online Q</text><text x="350" y="67" class="rlx-svg-mini">学習する本体</text><path d="M486 51H532" stroke="#627d98" stroke-width="2" marker-end="url(#rlx-arrow-read)"/>
+                    <rect x="542" y="32" width="150" height="38" class="rlx-box"/><text x="562" y="56" class="rlx-svg-note">各行動Q(s,a)</text>
+                    <rect x="718" y="16" width="180" height="28" class="rlx-orange"/><text x="739" y="35" class="rlx-svg-mini">Experience Replay</text>
+                    <rect x="718" y="52" width="180" height="28" class="rlx-purple"/><text x="746" y="71" class="rlx-svg-mini">Target Network</text>
+                </g>
+
+                <g transform="translate(18 154)">
+                    <rect width="924" height="104" class="rlx-purple"/>
+                    <text x="16" y="25" class="rlx-svg-label">A3C（Asynchronous Advantage Actor-Critic）</text>
+                    <rect x="174" y="40" width="140" height="44" class="rlx-blue"/><text x="193" y="59" class="rlx-svg-note">Worker 1</text><text x="193" y="76" class="rlx-svg-mini">Actor＋Critic</text>
+                    <rect x="344" y="40" width="140" height="44" class="rlx-blue"/><text x="363" y="59" class="rlx-svg-note">Worker 2</text><text x="363" y="76" class="rlx-svg-mini">Actor＋Critic</text>
+                    <rect x="514" y="40" width="140" height="44" class="rlx-blue"/><text x="533" y="59" class="rlx-svg-note">Worker 3</text><text x="533" y="76" class="rlx-svg-mini">Actor＋Critic</text>
+                    <path d="M244 84V94H684 M414 84V94 M584 84V94 M684 94V62H694" fill="none" stroke="#627d98" stroke-width="2" marker-end="url(#rlx-arrow-read)"/>
+                    <rect x="704" y="35" width="194" height="54" class="rlx-green"/><text x="728" y="58" class="rlx-svg-label">共有モデル</text><text x="728" y="78" class="rlx-svg-mini">非同期に勾配を反映</text>
+                </g>
+            </svg>
+        </div></div>
+        <div class="rlx-table-wrap"><table class="rlx-table">
+            <tr><th>図の決め手</th><th>モデル</th><th>他との違い</th></tr>
+            <tr><td>各離散行動のQ値・Experience Replay・Target Network</td><td><strong>DQN</strong></td><td>ActorとCriticへ出力を分ける図ではない。</td></tr>
+            <tr><td>複数worker・Actor/Critic・共有重みへ非同期矢印</td><td><strong>A3C</strong></td><td>基本はOn-policyでReplay Bufferを使わない。</td></tr>
+        </table></div>
+
         <div class="rlx-visual-wrap">
             <div class="rlx-visual-card">
                 <svg class="rlx-wide-svg" viewBox="0 0 960 250" role="img" aria-labelledby="rlx-loop-title rlx-loop-desc">
@@ -590,6 +626,20 @@ window.quizData = {
             options: ["方策が早く1行動へ偏りすぎるのを抑え、探索を保つ", "報酬を必ず最大値にする", "Criticを削除する", "全行動を同じ価値に固定する"],
             answer: 0,
             explanation: "<strong>①</strong> 方策が早く1つへ偏ると探索が止まります。<br><strong>②</strong> エントロピーは行動確率のばらつきを表します。<br><strong>③</strong> 最大化目的には$+\\beta H$を加えます。最小化する損失で書くなら$-\\beta H$です。"
+        },
+        {
+            id: "rl-exam-dqn-a3c-flow-identification",
+            category: "強化学習モデル構造図の識別",
+            difficulty: "本試験型",
+            kind: "図表・長文",
+            question: `<p>次のX・Yは深層強化学習モデルの学習フローを簡略化した図である。モデル名の対応として正しいものはどれか。</p>
+                <div class="rlx-visual-wrap"><div class="rlx-visual-card"><svg class="rlx-wide-svg" viewBox="0 0 960 190" role="img" aria-label="単一Network系Xと複数worker系Yの学習フロー比較">
+                    <rect x="18" y="18" width="924" height="66" class="rlx-blue"/><text x="34" y="42" class="rlx-svg-label">X　状態 s → Online Network → 各離散行動のQ(s,a)</text><text x="34" y="67" class="rlx-svg-note">経験 → Replay Buffer　／　Target Network → TD目標</text>
+                    <rect x="18" y="104" width="924" height="66" class="rlx-purple"/><text x="34" y="128" class="rlx-svg-label">Y　環境1→Worker1 ┐　環境2→Worker2 ├→ 共有Actor-Criticを非同期更新</text><text x="34" y="153" class="rlx-svg-note">各workerがActor（方策）とCritic（価値）を使い、現在の方策で経験を集める</text>
+                </svg></div></div>`,
+            options: ["X＝DQN、Y＝A3C", "X＝A3C、Y＝DQN", "XもYもDQN", "XもYもA3C"],
+            answer: 0,
+            explanation: "<p><strong>① 図で見る場所：</strong>Q値の出力、Replay Buffer、Target Network、複数workerを探します。</p><p><strong>② 矢印を追う：</strong>Xは1つのOnline Q Networkを学習し、ReplayとTargetで安定化します。Yは各workerの勾配が共有Actor-Criticへ集まります。</p><p><strong>③ 答え：</strong>X＝DQN（Deep Q-Network）、Y＝A3C（Asynchronous Advantage Actor-Critic）です。</p><p><strong>④ 他との違い：</strong>DQNは各離散行動のQ値を出すOff-policy法、基本的なA3CはReplayを使わないOn-policyのActor-Critic法です。</p>"
         },
         {
             id: "rl-dqn-vs-a3c",

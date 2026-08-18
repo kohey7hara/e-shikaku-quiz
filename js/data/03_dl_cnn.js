@@ -231,7 +231,7 @@ window.quizData = {
                     <text x="160" y="53" class="cnn-svg-note">2マス</text><text x="200" y="53" class="cnn-svg-note">2マス</text>
                     <text x="157" y="91" class="cnn-svg-note">S=2：飛ばして動く</text>
                 </svg>
-                <div class="cnn-concept-caption"><strong>Paddingは形を保つ</strong>、Strideは<strong>出力を小さくする</strong>。</div>
+                <div class="cnn-concept-caption">例：$K=3, P=1, S=1$なら<strong>高さ・幅を保つ</strong>。$S&gt;1$なら位置を飛ばして出力を小さくする。</div>
             </div>
             <div class="cnn-concept-card">
                 <strong>フィルタ数 ＝ 出力チャネル数</strong>
@@ -385,7 +385,7 @@ window.quizData = {
             <tr><th>手法</th><th>残すもの</th><th>形・特徴</th></tr>
             <tr><td><strong>Max Pooling</strong></td><td>領域内の最大値</td><td>強い特徴を残す。学習パラメータなし。</td></tr>
             <tr><td><strong>Average Pooling</strong></td><td>領域内の平均</td><td>滑らかな要約。</td></tr>
-            <tr><td><strong>Lp Pooling</strong></td><td>$\\left(\\sum_i|x_i|^p\\right)^{1/p}$</td><td>$p\\to\\infty$ でMaxに近づく。</td></tr>
+            <tr><td><strong>Lp Pooling</strong></td><td>$\\left(\\sum_i|x_i|^p\\right)^{1/p}$</td><td>$p\\to\\infty$ で最大絶対値へ。ReLU後など入力が非負ならMax Poolingと一致。</td></tr>
             <tr><td><strong>Global Average Pooling</strong></td><td>各チャネル全体の平均</td><td>$H\\times W\\times C\\to1\\times1\\times C$。</td></tr>
         </table>
         <div class="cnn-concept-grid">
@@ -436,6 +436,12 @@ window.quizData = {
         </div>
         <div class="cnn-model-key">
             <strong>歴史問題の解き方：</strong>「深くする」だけでなく、<strong>AlexNet＝学習を成立</strong>、<strong>VGG＝小さいカーネル</strong>、<strong>GoogLeNet＝並列</strong>、<strong>ResNet＝足し算</strong>、<strong>ResNeXt＝分岐数</strong>、<strong>DenseNet＝連結</strong>で区別する。ResNet／WideResNetのResidual Block・劣化問題・Projection Shortcutは <a href="quiz.html?id=04_app_image">4-（1〜3）画像認識</a>で詳しく演習します。
+        </div>
+
+        <h3>■ モデル図はこの順で読む</h3>
+        <div class="cnn-model-key">
+            <strong>① 一本道か分岐か</strong> → <strong>② 分岐の形は同じか違うか</strong> → <strong>③ 合流はAddかConcatか</strong> → <strong>④ 3×3と1×1の役割</strong>の順です。<br>
+            一本道で<strong>11×11から始まる＝AlexNet</strong>、3×3反復＝VGG。異なる大きさの枝をConcat＝Inception、同形の枝をAdd＝ResNeXt、過去の特徴を次々Concat＝DenseNet、Depthwiseの前後を1×1で挟む＝MobileNetV2と見分けます。
         </div>
 
         <div class="cnn-table-wrap">
@@ -537,6 +543,7 @@ window.quizData = {
                 <tr><td>Shortcut・残差を加算</td><td><strong>ResNet（Residual Network）</strong></td><td>深層化による劣化問題を改善する。</td></tr>
                 <tr><td>Cardinality・同形の複数分岐</td><td><strong>ResNeXt</strong></td><td>分岐をGrouped Convolutionで効率よく実装する。</td></tr>
                 <tr><td>前層の特徴をすべて連結</td><td><strong>DenseNet</strong></td><td>Addではなくチャネル方向へConcatする。</td></tr>
+                <tr><td>1×1拡張 → Depthwise → 線形1×1圧縮</td><td><strong>MobileNetV2</strong></td><td>Inverted ResidualとLinear Bottleneckで軽量化する。</td></tr>
                 <tr><td>深さ・幅・解像度を同時に拡大</td><td><strong>EfficientNet</strong></td><td>Compound Scalingで3軸をバランスよく調整する。</td></tr>
             </table>
         </div>
@@ -549,7 +556,7 @@ window.quizData = {
         {
             category: "畳み込み演算",
             question: "畳み込みニューラルネットワーク（CNN）が、全結合層だけのネットワーク（MLP）と比べて画像認識に優れている主な理由はどれか。",
-            options: ["画像の位置ズレに対する頑健性（移動不変性）と、局所的な特徴抽出能力を持つため", "計算量がMLPよりも圧倒的に多いから", "学習データが少なくても過学習しないから", "活性化関数を使わなくて済むから"],
+            options: ["局所受容野と重み共有で画像構造を捉え、Poolingなどで位置ズレへの頑健性も得やすいため", "計算量がMLPよりも圧倒的に多いから", "学習データが少なくても過学習しないから", "活性化関数を使わなくて済むから"],
             answer: 0,
             explanation: "「重み共有」によるパラメータ削減と、「局所受容野」による空間構造の維持がCNNの強みです。厳密には畳み込みは移動に対して同じように反応位置が動く性質（移動等変性）を持ち、Poolingなどが位置ずれへの不変性を強めます。"
         },
@@ -664,10 +671,10 @@ window.quizData = {
         },
         {
             category: "受容野の計算(応用)",
-            question: "$3 \\times 3$ の畳み込み層（ストライド1）を2層重ねたとき、最終的な出力から見た入力画像の受容野のサイズはいくつになるか。",
-            options: ["$5 \\times 5$", "$3 \\times 3$", "$6 \\times 6$", "$9 \\times 9$"],
+            question: "$3 \\times 3$ の畳み込み層（ストライド1、dilation 1）を3層重ねたとき、最終出力から見た入力画像の受容野はいくつか。",
+            options: ["$7 \\times 7$", "$5 \\times 5$", "$6 \\times 6$", "$9 \\times 9$"],
             answer: 0,
-            explanation: " 1層目で3x3、2層目でさらに周囲に+1ずつ広がるため、$3+2=5$ になります。（$5 \\times 5$ の畳み込み1回と同じ受容野）"
+            explanation: "使う規則は、stride 1では$3 \\times 3$を1層増やすごとに受容野が縦横2ずつ広がることです。$3 \\to 5 \\to 7$なので、3層後は$7 \\times 7$です。"
         },
         {
             category: "プーリングの欠点(応用)",
@@ -794,10 +801,10 @@ window.quizData = {
             id: "cnn-lp-pooling-limit",
             category: "Lp Pooling",
             difficulty: "標準",
-            question: "Lp Poolingの $p$ を非常に大きくしたとき、どのPoolingに近づくか。",
+            question: "入力がすべて非負のとき、Lp Poolingの $p$ を非常に大きくすると、どのPoolingに近づくか。",
             options: ["Average Pooling", "Global Average Pooling", "Min Pooling", "Max Pooling"],
             answer: 3,
-            explanation: "$p$ が大きいほど大きな絶対値の影響が支配的になり、$p\\to\\infty$ でMax Poolingに近づきます。"
+            explanation: "Lp Poolingは一般には $p\\to\\infty$ で領域内の最大絶対値へ近づきます。今回は入力がすべて非負なので、最大絶対値は通常の最大値と同じです。したがってMax Poolingが正解です。"
         },
         {
             id: "cnn-gap-output-shape",
@@ -1025,6 +1032,111 @@ window.quizData = {
             options: ["学習率・バッチサイズ・エポック数", "カーネル・パディング・ストライド", "Precision・Recall・F値", "ネットワークの深さ・幅・入力解像度"],
             answer: 3,
             explanation: "depth・width・resolutionを一定の複合係数に基づいてバランスよく拡大します。どれか1つだけを増やす設計ではありません。"
+        },
+        {
+            id: "cnn-visual-alexnet-vgg",
+            setId: "cnn-visual-models",
+            setOrder: 1,
+            category: "CNNモデル図・歴史的CNN比較",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次のA・Bに対応するモデルの組合せはどれか。
+                <div class="cnn-table-wrap">
+                    <svg viewBox="0 0 820 205" style="display:block;width:100%;min-width:680px;height:auto" role="img" aria-label="Aは11かける11 stride 4から始まる5畳み込み3全結合、Bは3かける3畳み込みを繰り返す構造">
+                        <rect x="18" y="18" width="784" height="73" rx="10" fill="#eef7fb" stroke="#2780b8"/>
+                        <text x="36" y="44" class="cnn-svg-label">A</text><text x="72" y="44" class="cnn-svg-label">入力 → 11×11 Conv, S=4 → Pool → Conv × 4 → FC × 3</text>
+                        <text x="72" y="70" class="cnn-svg-note">ReLU・GPU・Dropout／最初は大きなカーネルで強く縮小</text>
+                        <rect x="18" y="112" width="784" height="73" rx="10" fill="#eafaf1" stroke="#27ae60"/>
+                        <text x="36" y="138" class="cnn-svg-label">B</text><text x="72" y="138" class="cnn-svg-label">入力 → [3×3 Conv → 3×3 Conv → Pool] を段階的に反復</text>
+                        <text x="72" y="164" class="cnn-svg-note">小さいカーネルを重ね、チャネル数を段階的に増やす</text>
+                    </svg>
+                </div>`,
+            options: ["A＝VGG、B＝AlexNet", "A＝AlexNet、B＝VGG", "A＝DenseNet、B＝ResNeXt", "A＝MobileNetV2、B＝Inception"],
+            answer: 1,
+            explanation: "<strong>図の決め手：</strong>Aは最初の11×11・stride 4とConv 5層＋FC 3層、Bは3×3 Convの反復です。<br><strong>正解：</strong>A＝AlexNet、B＝VGGです。<br><strong>他候補との違い：</strong>InceptionとResNeXtは分岐、DenseNetは層間Concat、MobileNetV2はDepthwise Convolutionが図に現れます。"
+        },
+        {
+            id: "cnn-visual-inception-resnext",
+            setId: "cnn-visual-models",
+            setOrder: 2,
+            category: "CNNモデル図・分岐",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次の2つの分岐ブロックA・Bの対応として正しいものはどれか。
+                <div class="cnn-table-wrap">
+                    <svg viewBox="0 0 820 250" style="display:block;width:100%;min-width:680px;height:auto" role="img" aria-label="Aは異なる大きさの処理を並列にして連結、Bは同じ形の変換を複数に分けて加算する">
+                        <text x="24" y="28" class="cnn-svg-label">A：異なる枝</text>
+                        <rect x="24" y="45" width="100" height="38" rx="6" fill="#eef7fb" stroke="#2780b8"/><text x="55" y="69" class="cnn-svg-note">入力</text>
+                        <g fill="#fff8e7" stroke="#f39c12"><rect x="180" y="34" width="102" height="30" rx="5"/><rect x="180" y="70" width="102" height="30" rx="5"/><rect x="180" y="106" width="102" height="30" rx="5"/><rect x="180" y="142" width="102" height="30" rx="5"/></g>
+                        <g class="cnn-svg-note"><text x="216" y="54">1×1</text><text x="216" y="90">3×3</text><text x="216" y="126">5×5</text><text x="204" y="162">Pooling</text></g>
+                        <path d="M124 64 L180 49 M124 64 L180 85 M124 64 L180 121 M124 64 L180 157" stroke="#627d98" fill="none"/>
+                        <path d="M282 49 L354 94 M282 85 L354 102 M282 121 L354 110 M282 157 L354 118" stroke="#627d98" fill="none"/>
+                        <rect x="356" y="84" width="110" height="46" rx="6" fill="#eafaf1" stroke="#27ae60"/><text x="382" y="112" class="cnn-svg-label">Concat</text>
+                        <line x1="500" y1="20" x2="500" y2="225" stroke="#d7e2ec"/>
+                        <text x="530" y="28" class="cnn-svg-label">B：同形の枝</text>
+                        <rect x="530" y="45" width="92" height="38" rx="6" fill="#eef7fb" stroke="#2780b8"/><text x="558" y="69" class="cnn-svg-note">入力</text>
+                        <g fill="#f4ecf7" stroke="#8e44ad"><rect x="666" y="34" width="102" height="30" rx="5"/><rect x="666" y="78" width="102" height="30" rx="5"/><rect x="666" y="122" width="102" height="30" rx="5"/></g>
+                        <g class="cnn-svg-note"><text x="688" y="54">Transform</text><text x="688" y="98">Transform</text><text x="688" y="142">Transform</text></g>
+                        <path d="M622 64 L666 49 M622 64 L666 93 M622 64 L666 137" stroke="#627d98" fill="none"/>
+                        <path d="M768 49 L796 84 M768 93 L796 93 M768 137 L796 102" stroke="#627d98" fill="none"/>
+                        <circle cx="800" cy="93" r="17" fill="#eafaf1" stroke="#27ae60"/><text x="794" y="99" class="cnn-svg-label">Σ</text>
+                        <text x="24" y="222" class="cnn-svg-note">合流の記号（ConcatかΣ）と、枝が異形か同形かを見る</text>
+                    </svg>
+                </div>`,
+            options: ["A＝DenseNet、B＝VGG", "A＝ResNeXt、B＝Inception", "A＝Inception、B＝ResNeXt", "A＝AlexNet、B＝MobileNetV2"],
+            answer: 2,
+            explanation: "<strong>図の決め手：</strong>Aは1×1・3×3・5×5・Poolingという異なる枝をConcatし、Bは同形のTransformを複数に分けてΣで集約しています。<br><strong>正解：</strong>A＝Inception、B＝ResNeXtです。<br><strong>他候補との違い：</strong>DenseNetのConcatは並列枝ではなく、過去の層の特徴を後続層へ連結します。VGGとAlexNetは基本的に一本道です。"
+        },
+        {
+            id: "cnn-visual-densenet-concat",
+            setId: "cnn-visual-models",
+            setOrder: 3,
+            category: "CNNモデル図・密な接続",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次の図で、x0とx1を要素ごとに足さず、チャネル方向へ並べた [x0, x1] を次の層へ渡すモデルはどれか。
+                <div class="cnn-table-wrap">
+                    <svg viewBox="0 0 820 190" style="display:block;width:100%;min-width:680px;height:auto" role="img" aria-label="各層の出力が後続層へすべて連結される構造">
+                        <rect x="28" y="70" width="98" height="48" rx="7" fill="#eef7fb" stroke="#2780b8"/><text x="60" y="99" class="cnn-svg-label">x0</text>
+                        <path d="M126 94 H185" stroke="#627d98"/>
+                        <rect x="186" y="70" width="110" height="48" rx="7" fill="#fff8e7" stroke="#f39c12"/><text x="220" y="99" class="cnn-svg-label">H1</text>
+                        <path d="M296 94 H365" stroke="#627d98"/>
+                        <rect x="366" y="62" width="126" height="64" rx="7" fill="#f4ecf7" stroke="#8e44ad"/><text x="393" y="88" class="cnn-svg-label">Concat</text><text x="397" y="109" class="cnn-svg-note">[x0, x1]</text>
+                        <path d="M492 94 H552" stroke="#627d98"/>
+                        <rect x="553" y="70" width="110" height="48" rx="7" fill="#eafaf1" stroke="#27ae60"/><text x="586" y="99" class="cnn-svg-label">H2</text>
+                        <path d="M78 68 C132 18 350 18 415 60" fill="none" stroke="#2780b8" stroke-dasharray="7 5"/>
+                        <path d="M241 68 C285 39 353 39 413 61" fill="none" stroke="#f39c12" stroke-dasharray="7 5"/>
+                        <text x="181" y="158" class="cnn-svg-note">後ろの層ほど、前に作られた特徴をすべて受け取る</text>
+                    </svg>
+                </div>`,
+            options: ["DenseNet", "ResNet", "VGG", "AlexNet"],
+            answer: 0,
+            explanation: "<strong>図の決め手：</strong>過去の特徴を捨てず、角括弧 [x0, x1, …] でチャネル方向へConcatしています。<br><strong>正解：</strong>DenseNetです。<br><strong>他候補との違い：</strong>ResNetは同じ形の特徴を要素ごとにAddします。VGGとAlexNetはこのような全層間の密な接続を持ちません。"
+        },
+        {
+            id: "cnn-visual-mobilenetv2-block",
+            setId: "cnn-visual-models",
+            setOrder: 4,
+            category: "CNNモデル図・MobileNetV2",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            question: `次の軽量ブロックA〜Cの正しい並びと役割はどれか。
+                <div class="cnn-table-wrap">
+                    <svg viewBox="0 0 820 195" style="display:block;width:100%;min-width:680px;height:auto" role="img" aria-label="チャネル形状とgroup数を手掛かりにA、B、Cを特定する軽量ブロック">
+                        <rect x="20" y="68" width="92" height="50" rx="7" fill="#eef7fb" stroke="#2780b8"/><text x="47" y="98" class="cnn-svg-label">入力</text>
+                        <text x="126" y="97" class="cnn-svg-label">→</text>
+                        <rect x="155" y="50" width="160" height="86" rx="8" fill="#fff8e7" stroke="#f39c12"/><text x="226" y="76" class="cnn-svg-label">A</text><text x="181" y="105" class="cnn-svg-note">C_in → tC_in</text><text x="190" y="125" class="cnn-svg-note">kernel 1×1</text>
+                        <text x="328" y="97" class="cnn-svg-label">→</text>
+                        <rect x="357" y="50" width="160" height="86" rx="8" fill="#eafaf1" stroke="#27ae60"/><text x="428" y="76" class="cnn-svg-label">B</text><text x="391" y="105" class="cnn-svg-note">kernel 3×3</text><text x="381" y="125" class="cnn-svg-note">groups = tC_in</text>
+                        <text x="530" y="97" class="cnn-svg-label">→</text>
+                        <rect x="559" y="50" width="160" height="86" rx="8" fill="#f4ecf7" stroke="#8e44ad"/><text x="630" y="76" class="cnn-svg-label">C</text><text x="577" y="105" class="cnn-svg-note">tC_in → C_out</text><text x="581" y="125" class="cnn-svg-note">1×1・活性化なし</text>
+                        <path d="M71 66 C111 18 650 18 682 48" fill="none" stroke="#2780b8" stroke-width="2" stroke-dasharray="8 5"/>
+                        <text x="263" y="170" class="cnn-svg-note">stride=1かつ入出力形状が同じならShortcutで加算</text>
+                    </svg>
+                </div>`,
+            options: ["AとBはPooling、Cは全結合", "Aは5×5 Conv、BはConcat、CはSoftmax", "AはDepthwise、Bは全結合、CはGAP", "Aで拡張、BでDepthwise空間処理、CでLinear Bottleneckへ圧縮"],
+            answer: 3,
+            explanation: "<strong>図の決め手：</strong>1×1で広げる → 3×3 Depthwiseでチャネル別に空間処理 → 活性化を付けない線形1×1で狭める順です。<br><strong>正解：</strong>MobileNetV2のInverted Residual＋Linear Bottleneckです。<br><strong>他候補との違い：</strong>通常畳み込みは空間処理とチャネル混合を一度に行い、Inceptionは異なる大きさの枝を並列化します。"
         }
     ]
 };
