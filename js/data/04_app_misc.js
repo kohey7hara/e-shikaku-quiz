@@ -324,6 +324,21 @@ window.quizData = {
             </div>
         </details>
 
+        <h3>■ モデル別キーワード</h3>
+        <div class="mix-table-wrap">
+            <table class="mix-table">
+                <tr><th>モデル</th><th>覚えるキーワード</th><th>一言イメージ</th></tr>
+                <tr><td><strong>Self-Training</strong></td><td>単一モデル・高確信予測・疑似ラベル・反復学習</td><td>自分の予測を新しい正解として学び直す。</td></tr>
+                <tr><td><strong>Co-Training</strong></td><td>2つのView・2分類器・疑似ラベル交換</td><td>別の見方をする2人が互いに教える。</td></tr>
+                <tr><td><strong>Siamese</strong></td><td>重み共有・2枝・入力ペア・Contrastive Loss</td><td>2つを同じ物差しで測る。</td></tr>
+                <tr><td><strong>Triplet</strong></td><td>Anchor・Positive・Negative・margin・3枝</td><td>似た例を近く、違う例をmargin以上遠くする。</td></tr>
+                <tr><td><strong>Grad-CAM</strong></td><td>対象クラスの勾配・畳み込み特徴map・ヒートマップ</td><td>CNNが画像のどこを見たか色で示す。</td></tr>
+                <tr><td><strong>IG</strong></td><td>baseline・経路上の勾配積分・Completeness</td><td>基準入力からの変化を各特徴へ配る。</td></tr>
+                <tr><td><strong>LIME</strong></td><td>近傍摂動・局所代理モデル・モデル非依存</td><td>その予測の周辺だけ単純な模型で説明する。</td></tr>
+                <tr><td><strong>SHAP</strong></td><td>Shapley Value・協力ゲーム理論・加法的寄与</td><td>基準値との差を特徴ごとに公平に配る。</td></tr>
+            </table>
+        </div>
+
         <h3>■ 最後はこの表だけ</h3>
         <div class="mix-table-wrap">
             <table class="mix-table">

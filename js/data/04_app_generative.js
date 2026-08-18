@@ -415,6 +415,23 @@ window.quizData = {
             </table>
         </div>
 
+        <h3>■ モデル別キーワード</h3>
+        <div class="gm-table-wrap">
+            <table class="gm-table">
+                <tr><th>モデル</th><th>覚えるキーワード</th><th>一言イメージ</th></tr>
+                <tr><td><strong>AE</strong></td><td>Encoder・潜在表現・Decoder・再構成誤差</td><td>小さく圧縮して元へ戻す。</td></tr>
+                <tr><td><strong>DAE</strong></td><td>入力を破損・元データを再構成・ノイズ除去</td><td>汚れた見本から元の姿を当てる。</td></tr>
+                <tr><td><strong>VAE</strong></td><td>μ・σ・再パラメータ化・再構成項＋KL</td><td>幅をもつ潜在分布から設計図を選ぶ。</td></tr>
+                <tr><td><strong>GAN</strong></td><td>Generator・Discriminator・敵対学習・Minimax</td><td>作る側と見破る側が競う。</td></tr>
+                <tr><td><strong>WGAN</strong></td><td>Critic・Wasserstein距離・1-Lipschitz</td><td>真偽確率ではなく本物らしさを採点する。</td></tr>
+                <tr><td><strong>cGAN</strong></td><td>条件c・GとDの両方へ条件入力</td><td>指定したクラスや属性のものを作る。</td></tr>
+                <tr><td><strong>CycleGAN</strong></td><td>非対応データ・2組のGenerator／Discriminator・Cycle Consistency</td><td>A→B→Aと往復して元へ戻す。</td></tr>
+                <tr><td><strong>DDPM</strong></td><td>順拡散・逆拡散・ノイズ予測・反復除去</td><td>ノイズを少しずつ消して生成する。</td></tr>
+                <tr><td><strong>Flow</strong></td><td>可逆変換・ヤコビアン行列式・厳密尤度</td><td>データと単純な分布を行き来する。</td></tr>
+                <tr><td><strong>自己回帰</strong></td><td>連鎖律・過去を条件・次を1つずつ生成</td><td>前までを見て続きを順番に作る。</td></tr>
+            </table>
+        </div>
+
         <h3>■ 最後はこの表だけ</h3>
         <div class="gm-table-wrap">
             <table class="gm-table">

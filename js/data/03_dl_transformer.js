@@ -480,6 +480,19 @@ window.quizData = {
         </div>
         <div class="tr-answer"><strong>読み方：</strong>①再帰があるか → ②固定長ベクトルか動的Attentionか → ③scoreがAdditiveかDot/Generalか → ④Self-Attentionだけで系列を処理するか、の順で絞ります。</div>
 
+        <h3>■ モデル別キーワード</h3>
+        <div class="tr-table-wrap">
+            <table class="tr-comparison">
+                <tr><th>モデル／部品</th><th>覚えるキーワード</th><th>一言イメージ</th></tr>
+                <tr><td><strong>原Transformer</strong></td><td><strong>Encoder–Decoder、MHA、FFN、Residual、Layer Norm、PE、再帰なし</strong></td><td>Attentionを中心に、入力理解と出力生成を分担する。</td></tr>
+                <tr><td><strong>Encoder</strong></td><td><strong>Self-Attention、双方向参照、FFN、Add & Norm</strong></td><td>入力系列の全トークンを互いに見て表現を作る。</td></tr>
+                <tr><td><strong>Decoder</strong></td><td><strong>Masked Self-Attention、Cross-Attention、FFN、右シフト</strong></td><td>未来を隠しながら、Encoderも参照して1語ずつ生成する。</td></tr>
+                <tr><td><strong>Cross-Attention</strong></td><td><strong>Q＝Decoder、K／V＝Encoder、入力系列の参照</strong></td><td>生成中の問いを使って、入力側から必要な情報を探す。</td></tr>
+                <tr><td><strong>PE</strong></td><td><strong>Positional Encoding、Embeddingへ加算、語順、sin／cos</strong></td><td>順番を持たないAttentionへ、単語の位置情報を足す。</td></tr>
+                <tr><td><strong>N層</strong></td><td><strong>同一構造のBlockを反復、直前層の出力、層ごとに別の重み</strong></td><td>同じ設計図の層を積み重ね、表現を段階的に深める。</td></tr>
+            </table>
+        </div>
+
         <h3>■ 最後はこの表だけ</h3>
         <div class="tr-table-wrap">
             <table class="tr-comparison">

@@ -317,6 +317,15 @@ window.quizData = {
             </table>
         </div>
 
+        <h3>■ モデル別キーワード</h3>
+        <div class="rlx-table-wrap">
+            <table class="rlx-table">
+                <tr><th>モデル</th><th>覚えるキーワード</th><th>一言イメージ</th></tr>
+                <tr><td><strong>DQN</strong></td><td>Q Network・Experience Replay・Target Network・Off-policy</td><td>過去の経験を混ぜ、別ネットを目標にQ値を学ぶ。</td></tr>
+                <tr><td><strong>A3C</strong></td><td>Asynchronous・複数worker・Actor-Critic・Advantage・On-policy</td><td>複数の探索者が別々に経験し共有モデルを更新する。</td></tr>
+            </table>
+        </div>
+
         <h3>■ 最後はこの表だけ</h3>
         <div class="rlx-table-wrap">
             <table class="rlx-table">

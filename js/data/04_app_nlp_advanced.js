@@ -278,6 +278,18 @@ window.quizData = {
             </ol>
         </div>
 
+        <h3>■ モデル別キーワード</h3>
+        <div class="nlpa-table-wrap">
+            <table class="nlpa-table">
+                <tr><th>モデル</th><th>覚えるキーワード</th><th>一言イメージ</th></tr>
+                <tr><td><strong>ELMo</strong></td><td>文字CNN・多層BiLSTM・文脈依存・層の加重和</td><td>同じ単語でも文によってベクトルが変わる。</td></tr>
+                <tr><td><strong>fastText</strong></td><td>文字n-gram・部分語ベクトルの加算・OOVに強い</td><td>つづりの部品を足して単語を表す。</td></tr>
+                <tr><td><strong>WordPiece</strong></td><td><code>##</code>・部分語語彙・最長一致</td><td>語彙にある最長の部分語を順に選ぶ。</td></tr>
+                <tr><td><strong>BPE</strong></td><td>頻出する隣接記号ペア・反復結合</td><td>よく隣り合う記号を1つの部品へまとめる。</td></tr>
+                <tr><td><strong>SentencePiece</strong></td><td>生テキスト・空白記号<code>▁</code>・BPE／Unigramを利用可能</td><td>空白も含めて直接tokenへ分割する枠組み。</td></tr>
+            </table>
+        </div>
+
         <h3>■ 最後はこの表だけ</h3>
         <div class="nlpa-table-wrap">
             <table class="nlpa-table">

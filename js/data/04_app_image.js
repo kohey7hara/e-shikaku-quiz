@@ -249,6 +249,25 @@ window.quizData = {
         </div>
         <div class="img-formula">$\\displaystyle mIoU=\\frac{1}{C}\\sum_{c=1}^{C}IoU_c,\\qquad Dice=\\frac{2|P\\cap G|}{|P|+|G|}$</div>
 
+        <h3>■ 物体検出モデル別キーワード</h3>
+        <div class="img-core">
+            長い選択肢は、<strong>①候補領域を何で作るか → ②Anchorを使うか → ③損失や補助出力は何か</strong>の順で確認します。
+        </div>
+        <div class="img-table-wrap">
+            <table class="img-table">
+                <tr><th>モデル</th><th>覚えるキーワード</th><th>一言イメージ</th></tr>
+                <tr><td><strong>R-CNN</strong></td><td>Selective Search／ROIごとにCNN</td><td>外部で候補を切り出し、1個ずつ調べる。</td></tr>
+                <tr><td><strong>Fast R-CNN</strong></td><td>特徴共有／ROI Pooling／外部候補</td><td>画像のCNN計算は1回。特徴マップから候補部分を取る。</td></tr>
+                <tr><td><strong>Faster R-CNN</strong></td><td>RPN／2-stage</td><td>候補を探す処理もネットワークに学習させる。</td></tr>
+                <tr><td><strong>Mask R-CNN</strong></td><td>ROI Align／Mask枝／Class・Box・Mask</td><td>Faster R-CNNに、個体を塗る枝を足す。</td></tr>
+                <tr><td><strong>YOLO</strong></td><td>1-stage／密な直接予測<br>Anchorの有無は版による</td><td>候補生成を分けず、1回でBoxとClassを出す。</td></tr>
+                <tr><td><strong>SSD</strong></td><td>Default Box／複数解像度／Hard Negative Mining</td><td>大小の特徴マップに枠のひな形を並べて検出する。</td></tr>
+                <tr><td><strong>FCOS</strong></td><td>Anchor-Free／$l,t,r,b$／Centerness／FPN／Focal Loss</td><td>各位置からBoxの四辺までの距離を直接予測する。</td></tr>
+                <tr><td><strong>FPN</strong></td><td>Top-down経路／Lateral Connection／多段特徴</td><td>深い層の意味と浅い層の細かさを混ぜる部品。</td></tr>
+            </table>
+        </div>
+        <div class="img-note"><strong>FCOSの覚え方：</strong><strong>Anchor-Free → $l,t,r,b$ → Centerness</strong>を1セットで覚えます。Focal Lossは、数の多い容易な背景例の影響を抑える分類損失です。</div>
+
         <h3>■ 最後はこの表だけ</h3>
         <div class="img-table-wrap">
             <table class="img-table">
@@ -477,10 +496,10 @@ window.quizData = {
             id: "img-fcos",
             category: "FCOS",
             difficulty: "必須",
-            question: "FCOS（Fully Convolutional One-Stage Object Detection）の説明として正しいものはどれか。",
-            options: ["Anchor-Freeで、各位置からBox辺までの$l,t,r,b$を回帰し、FPNとCenternessを使う", "RPNでROIを作る2-stage専用", "Default Boxだけを分類する", "CLS tokenでBoxを作る"],
-            answer: 0,
-            explanation: "FCOSはFully Convolutional One-Stage Object Detectionの略で、Anchorのひな形を置かない1ステージ検出器です。各位置からBoxの左・上・右・下辺までの距離を回帰し、Centernessで中心から遠い低品質な予測を抑えます。"
+            question: "FCOS（Fully Convolutional One-Stage Object Detection）の特徴として、適切なものはどれか。",
+            options: ["フィーチャーマップごとに、アスペクト比が異なる矩形をAnchorとして手作業で事前設定する", "RPN（Region Proposal Network）によりROI（Region of Interest）を生成する", "Anchorを使わず、Focal Lossで容易な背景例の影響を抑えて正例・負例の不均衡に対処する", "Selective Searchを用いて画像中から候補領域（Region Proposals）を探す"],
+            answer: 2,
+            explanation: "<strong>① 正解：</strong>3です。FCOSはFocal Lossを使い、数の多い容易な背景例が損失を支配しにくくします。<br><strong>② FCOSの芯：</strong>1-stageかつ<strong>Anchor-Free</strong>で、特徴マップの各位置からBoxの左・上・右・下までの距離 $l,t,r,b$ を回帰し、Centernessで中心から遠い低品質な予測を抑えます。<br><strong>③ 他の選択肢：</strong>FCOSは事前設定したAnchor、RPN、Selective Searchを使いません。<br><strong>④ NMSとの違い：</strong>NMS（Non-Maximum Suppression）は推論後に重複Boxを減らす後処理であり、学習時の正例・負例不均衡を扱う損失ではありません。"
         },
         {
             id: "img-fcos-ambiguous",

@@ -451,6 +451,21 @@ window.quizData = {
             </table>
         </div>
 
+        <h3>■ モデル別キーワード</h3>
+        <div class="table-wrap">
+            <table class="rnn-comparison rnn-model-table">
+                <tr><th>モデル</th><th>覚えるキーワード</th><th>一言イメージ</th></tr>
+                <tr><td><strong>Elman Network</strong></td><td><strong>隠れ状態のFeedback、Context Unit、$h_{t-1}$</strong></td><td>前の隠れ状態を覚えて、次の隠れ層へ戻す。</td></tr>
+                <tr><td><strong>Jordan Network</strong></td><td><strong>出力のFeedback、Context Unit、$y_{t-1}$</strong></td><td>前の出力を覚えて、次の隠れ層へ戻す。</td></tr>
+                <tr><td><strong>LSTM</strong></td><td><strong>セル状態、忘却・入力・出力ゲート、加算型更新、長期依存</strong></td><td>専用の記憶の通り道をゲートで管理する。</td></tr>
+                <tr><td><strong>GRU</strong></td><td><strong>更新ゲート、リセットゲート、独立セルなし、少ないパラメータ</strong></td><td>LSTMの記憶機構を2つのゲートへ簡略化する。</td></tr>
+                <tr><td><strong>BiRNN</strong></td><td><strong>順方向＋逆方向、前後文脈、Concat時は出力次元2倍</strong></td><td>文を前からも後ろからも読んで表現を結合する。</td></tr>
+                <tr><td><strong>Seq2Seq</strong></td><td><strong>Encoder–Decoder、可変長変換、自己回帰、Teacher Forcing、Attention併用も</strong></td><td>入力系列を読み取り、別の系列として順番に生成する。</td></tr>
+                <tr><td><strong>CTC</strong></td><td><strong>blank、連続重複の縮約、alignment不要、経路確率の総和</strong></td><td>細かな位置合わせを与えずに、系列全体の正解を学ぶ。</td></tr>
+                <tr><td><strong>ESN</strong></td><td><strong>Reservoir、再帰重みを固定、出力重みだけ学習、Echo State Property</strong></td><td>複雑な動きは固定した貯水池に任せ、出口だけを学習する。</td></tr>
+            </table>
+        </div>
+
         <h3>■ 最後はこの表だけ</h3>
         <div class="table-wrap">
             <table class="rnn-comparison">

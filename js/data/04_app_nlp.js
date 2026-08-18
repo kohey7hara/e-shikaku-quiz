@@ -301,6 +301,18 @@ window.quizData = {
             </table>
         </div>
 
+        <h3>■ モデル別キーワード</h3>
+        <div class="nlp-table-wrap">
+            <table class="nlp-table">
+                <tr><th>モデル</th><th>覚えるキーワード</th><th>一言イメージ</th></tr>
+                <tr><td><strong>Word2Vec</strong></td><td>CBOW／Skip-gram・Negative Sampling・固定埋め込み</td><td>単語の周辺関係を座標にする。</td></tr>
+                <tr><td><strong>BERT</strong></td><td>Transformer Encoder・MLM・双方向・<code>[CLS]</code></td><td>左右を見て穴埋めする。</td></tr>
+                <tr><td><strong>GPT</strong></td><td>Transformer Decoder・Causal Mask・自己回帰・次token予測</td><td>左側だけ見て続きを1つずつ書く。</td></tr>
+                <tr><td><strong>RAG</strong></td><td>Retriever・外部DB・文脈追加・Generator</td><td>資料を検索してから回答する。</td></tr>
+                <tr><td><strong>LSI</strong></td><td>単語×文書行列・SVD・低ランク近似・潜在トピック</td><td>大きな表を圧縮して話題を見つける。</td></tr>
+            </table>
+        </div>
+
         <h3>■ 最後はこの表だけ</h3>
         <div class="nlp-table-wrap">
             <table class="nlp-table">

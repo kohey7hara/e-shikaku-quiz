@@ -528,6 +528,21 @@ window.quizData = {
             </div>
         </div>
 
+        <h3>■ モデル別キーワード</h3>
+        <div class="cnn-table-wrap">
+            <table class="comparison-table cnn-model-table">
+                <tr><th>モデル</th><th>覚えるキーワード</th><th>一言イメージ</th></tr>
+                <tr><td><strong>AlexNet</strong></td><td><strong>11×11・stride 4、ReLU、GPU、Dropout、LRN、Grouped Conv</strong></td><td>GPUとReLUで深いCNNの学習を実用化した。</td></tr>
+                <tr><td><strong>VGG</strong></td><td><strong>3×3 Convの反復、小さく深く、VGG-16／19</strong></td><td>大きなフィルタ1枚を、小さな3×3の積層へ置き換える。</td></tr>
+                <tr><td><strong>Inception／GoogLeNet</strong></td><td><strong>並列分岐、1×1 Bottleneck、複数スケール、Concat、GAP</strong></td><td>異なる大きさの視野で同時に見て、結果を束ねる。</td></tr>
+                <tr><td><strong>ResNet</strong></td><td><strong>Residual Learning、Shortcut、$F(x)+x$、Identity／Projection</strong></td><td>入力を近道で足し、深くしたときの劣化を防ぐ。</td></tr>
+                <tr><td><strong>ResNeXt</strong></td><td><strong>Cardinality、Grouped Conv、Split–Transform–Merge、加算</strong></td><td>同じ形の変換を複数グループで並列に行う。</td></tr>
+                <tr><td><strong>DenseNet</strong></td><td><strong>Dense Connection、全先行層、Concat、Growth Rate、特徴再利用</strong></td><td>過去の特徴を捨てず、後ろの全層へ渡す。</td></tr>
+                <tr><td><strong>MobileNetV2</strong></td><td><strong>Depthwise Separable、Inverted Residual、Linear Bottleneck、1×1拡張</strong></td><td>いったん広げ、軽い畳み込みをして、線形に細く戻す。</td></tr>
+                <tr><td><strong>EfficientNet</strong></td><td><strong>Compound Scaling、depth・width・resolution、MBConv</strong></td><td>深さ・幅・解像度の3方向をバランスよく拡大する。</td></tr>
+            </table>
+        </div>
+
         <h3>■ 最後はこの表だけ</h3>
         <div class="cnn-table-wrap">
             <table class="comparison-table">
