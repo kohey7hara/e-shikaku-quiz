@@ -116,6 +116,65 @@ with torch.inference_mode():
             <tr><td>画像セグメンテーション（多クラス）</td><td>(B,C,H,W)</td><td><code>CrossEntropyLoss</code></td><td>long・クラス番号(B,H,W)</td><td>targetにC軸はない</td></tr>
         </table></div>
 
+        <h3>■ NumPy手書きDNN連問は「Shape → 公式 → コード」で解く</h3>
+        <p>本試験では、PyTorchだけでなくNumPyで全結合層・Softmax・Cross Entropy・誤差逆伝播を手書きした長いコードから、複数の空欄を連続して問う形式があります。コードを丸暗記せず、<strong>行列のShapeがつながるか</strong>を先に確認します。</p>
+        <div class="pt-note"><strong>PyTorchとの違い：</strong>手書きNumPy版は <code>Softmax → one-hot正解とのCross Entropy</code> を明示します。一方、PyTorchの標準的な多クラス分類は、<code>raw logits</code>と<code>longのclass番号</code>をそのまま<code>CrossEntropyLoss</code>へ渡します。重みのShapeも、ここでのNumPy版は<code>W=(in,out)</code>として<code>x @ W</code>、<code>nn.Linear</code>は<code>weight=(out,in)</code>として内部で実質<code>x @ weight.T + bias</code>です。2つの流儀を混ぜないことが重要です。</div>
+
+        <div class="pt-visual-wrap">
+        <svg class="pt-svg" viewBox="0 0 960 390" role="img" aria-labelledby="pt-numpy-title pt-numpy-desc">
+            <title id="pt-numpy-title">NumPyで手書きする多層全結合ネットワークの順伝播と逆伝播</title>
+            <desc id="pt-numpy-desc">入力784次元、隠れ層128次元と64次元、出力10クラスのShapeと、逆伝播で使う4つの式を示す。</desc>
+            <defs>
+                <marker id="pt-arrow-numpy-forward" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#52799b"/></marker>
+                <marker id="pt-arrow-numpy-back" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#d64545"/></marker>
+            </defs>
+            <text x="28" y="34" class="pt-svg-title">Forward：右端の特徴数だけが 784 → 128 → 64 → 10 と変わる</text>
+
+            <rect x="28" y="80" width="135" height="72" rx="9" fill="#eaf2fd" stroke="#3498db"/>
+            <text x="54" y="107" class="pt-svg-label">入力 x</text><text x="52" y="133" class="pt-svg-text">(B, 784)</text>
+            <rect x="225" y="80" width="155" height="72" rx="9" fill="#fff8e8" stroke="#f39c12"/>
+            <text x="246" y="107" class="pt-svg-label">中間層1</text><text x="245" y="133" class="pt-svg-text">ReLU → (B,128)</text>
+            <rect x="442" y="80" width="155" height="72" rx="9" fill="#fff8e8" stroke="#f39c12"/>
+            <text x="463" y="107" class="pt-svg-label">中間層2</text><text x="462" y="133" class="pt-svg-text">ReLU → (B,64)</text>
+            <rect x="659" y="80" width="155" height="72" rx="9" fill="#eafaf1" stroke="#27ae60"/>
+            <text x="686" y="107" class="pt-svg-label">出力 y</text><text x="681" y="133" class="pt-svg-text">Softmax → (B,10)</text>
+            <rect x="856" y="80" width="76" height="72" rx="9" fill="#f7f1fa" stroke="#8e44ad"/>
+            <text x="871" y="107" class="pt-svg-label">Loss</text><text x="873" y="133" class="pt-svg-mini">CE平均</text>
+
+            <g stroke="#52799b" stroke-width="2" marker-end="url(#pt-arrow-numpy-forward)">
+                <path d="M163 116H222"/><path d="M380 116H439"/><path d="M597 116H656"/><path d="M814 116H853"/>
+            </g>
+            <text x="165" y="69" class="pt-svg-mini">W0: (784,128)</text>
+            <text x="382" y="69" class="pt-svg-mini">W1: (128,64)</text>
+            <text x="605" y="69" class="pt-svg-mini">W2: (64,10)</text>
+
+            <path d="M810 205H228" fill="none" stroke="#d64545" stroke-width="2" marker-end="url(#pt-arrow-numpy-back)"/>
+            <text x="320" y="191" class="pt-svg-label" fill="#d64545">Backward：出力側から同じ規則を1層ずつ繰り返す</text>
+
+            <rect x="28" y="232" width="205" height="62" rx="8" fill="#fff0f0" stroke="#d64545"/>
+            <text x="48" y="258" class="pt-svg-label">1層前へ戻す</text><text x="48" y="281" class="pt-svg-text">du = dz @ Wᵀ</text>
+            <rect x="257" y="232" width="205" height="62" rx="8" fill="#fff0f0" stroke="#d64545"/>
+            <text x="277" y="258" class="pt-svg-label">重みの勾配</text><text x="277" y="281" class="pt-svg-text">dW = uᵀ @ dz</text>
+            <rect x="486" y="232" width="205" height="62" rx="8" fill="#fff0f0" stroke="#d64545"/>
+            <text x="506" y="258" class="pt-svg-label">biasの勾配</text><text x="506" y="281" class="pt-svg-text">db = sum(dz, axis=0)</text>
+            <rect x="715" y="232" width="217" height="62" rx="8" fill="#fff0f0" stroke="#d64545"/>
+            <text x="735" y="258" class="pt-svg-label">各sampleの誤差</text><text x="735" y="281" class="pt-svg-text">dz = y − correct</text>
+
+            <rect x="28" y="318" width="435" height="48" rx="8" fill="#f8fbfe" stroke="#b9cde0"/>
+            <text x="48" y="348" class="pt-svg-text">更新：W ← W − learning_rate × dW / B</text>
+            <rect x="486" y="318" width="446" height="48" rx="8" fill="#f8fbfe" stroke="#b9cde0"/>
+            <text x="506" y="348" class="pt-svg-text">正解率：argmax(axis=1)を比較 → mean</text>
+        </svg></div>
+
+        <div class="pt-table-wrap"><table class="pt-table">
+            <tr><th>段階</th><th>Shapeで見る</th><th>使う公式・コード</th></tr>
+            <tr><td><strong>① 初期化</strong></td><td>隣接層を (入力, 出力) で組にする</td><td><code>zip(sizes[:-1], sizes[1:])</code></td></tr>
+            <tr><td><strong>② Forward・Loss</strong></td><td><code>(B,in) @ (in,out) → (B,out)</code><br>class軸は<code>axis=1</code></td><td><code>z = u @ W + b</code><br><code>-mean(sum(correct * log(y), axis=1))</code></td></tr>
+            <tr><td><strong>③ Backward</strong></td><td><code>dz:(B,out)</code>からparameterと同じShapeを作る</td><td>各sampleは<code>dz=y-correct</code><br><code>dW=u.T@dz</code>、<code>db=sum(dz,axis=0)</code>、<code>du=dz@W.T</code></td></tr>
+            <tr><td><strong>④ 更新・評価</strong></td><td>勾配和ならBatch数Bで1回だけ割る<br>1行が1sample</td><td><code>W -= lr*dW/B</code><br><code>mean(argmax(y,axis=1) == argmax(correct,axis=1))</code></td></tr>
+        </table></div>
+        <div class="pt-note"><strong>添付問題を安全に読む補足：</strong>定義が<code>DNNClassifier(input_size, num_class, hidden_units)</code>なら、実行できる生成例は<code>DNNClassifier(784, 10, [128,64])</code>です。また、<code>np.equal(...)</code>だけではTrue/Falseの配列なので、正解率にするには最後に<code>np.mean(...)</code>が必要です。</div>
+
         <h3>■ Module・Tensor・DataLoaderの最小セット</h3>
         <div class="pt-card-grid">
             <div class="pt-card"><strong>nn.Module</strong><code>__init__</code>で層を登録し、<code>forward</code>で接続する。可変個数の層は<code>ModuleList</code>。</div>
@@ -202,6 +261,9 @@ with torch.inference_mode():
             <tr><td>1回の学習更新</td><td><code>zero_grad → forward → loss → backward → step</code></td><td>勾配は.gradへ加算される。</td></tr>
             <tr><td>多クラス分類</td><td><code>CrossEntropyLoss(logits, target)</code></td><td>logits=(B,C)、target=longの(B)。</td></tr>
             <tr><td>2値・マルチラベル</td><td><code>BCEWithLogitsLoss</code></td><td>Sigmoid込み。targetはfloatで同shape。</td></tr>
+            <tr><td>NumPyで隣接層を初期化</td><td><code>zip(sizes[:-1], sizes[1:])</code></td><td>重みShapeを(入力, 出力)で作る。</td></tr>
+            <tr><td>手書きSoftmax＋CEの逆伝播</td><td>各sampleは<code>dz=y-correct</code><br><code>dW=u.T@dz</code>、<code>db=sum(dz,axis=0)</code></td><td>biasはBatch軸axis=0を足す。</td></tr>
+            <tr><td>手書きSGD・正解率</td><td><code>W-=lr*dW/B</code><br><code>mean(argmax予測 == argmax正解)</code></td><td>下降はマイナス。class軸はaxis=1。</td></tr>
             <tr><td>推論</td><td><code>eval()</code>＋<code>inference_mode()</code></td><td>層のモードと勾配記録を別々に切替。</td></tr>
             <tr><td>CNN</td><td>(B,C,H,W)→<code>flatten(x,1)</code></td><td>Batch軸だけ残す。</td></tr>
             <tr><td>LSTM</td><td>output=(B,L,Directions×H<sub>hidden</sub>)<br>h_n/c_n=(Layers×Directions,B,H<sub>hidden</sub>)</td><td>batch_firstでも状態の軸順は不変。</td></tr>
@@ -659,6 +721,63 @@ with torch.inference_mode():
             question:"この<code>CrossEntropyLoss</code>への入力として、なぜコードは正しいのか。<pre class='pt-question-code'><code>logits = model(x)          # shape (5,3)\ntarget = torch.tensor(\n    [0,2,1,0,2], dtype=torch.long\n)                          # shape (5)\nloss = nn.CrossEntropyLoss()(logits, target)</code></pre>",
             options:["raw logitsは(B,C)、hard labelはlongの(B)だから","logitsへSoftmaxを2回かけているから","targetがfloatのone-hotだから","Batch軸とClass軸を入れ替えているから"], answer:0,
             explanation:"<p><strong>使う契約：</strong>hard class labelを使う標準形では、CE入力＝raw logits (B,C)、target＝<code>torch.long</code>のclass index (B)。</p><p><strong>照合：</strong>(5,3)とlongの(5)なので一致します。</p><p><strong>答え：</strong>選択肢1です。学習時にSoftmaxを先にかけません。</p>"
+        },
+
+        {
+            id:"pt-exam-numpy-dnn-init-pairs", setId:"pt-exam-numpy-dnn", setOrder:1,
+            category:"本試験型・NumPy DNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"NumPyで784→128→64→10の全結合ネットワークを作る。空欄（あ）に入り、隣接する層の重みを正しい順序で作るものはどれか。<pre class='pt-question-code'><code>num_units = [784, 128, 64, 10]\nweights = [\n    np.random.randn(prev_size, size)\n    for prev_size, size in （あ）\n]</code></pre>",
+            options:["<code>zip(num_units[1:], num_units[0:])</code>","<code>zip(num_units[1:], num_units[1:])</code>","<code>zip(num_units[0:], num_units[1:])</code>","<code>zip(num_units, num_units)</code>"], answer:2,
+            explanation:"<p><strong>① この空欄の役割：</strong>各重みを「手前の層のunit数、次の層のunit数」の組から作ります。</p><p><strong>② Shape：</strong>必要なのは(784,128)、(128,64)、(64,10)です。入力<code>(B,in)</code>と重み<code>(in,out)</code>を掛けると出力<code>(B,out)</code>になります。</p><p><strong>③ コード：</strong><code>zip(num_units[0:], num_units[1:])</code>は<code>(784,128),(128,64),(64,10)</code>を作ります。<code>zip</code>は短い側で終了します。</p><p><strong>④ 答え：</strong>選択肢3です。意図がさらに明確な書き方は<code>zip(num_units[:-1], num_units[1:])</code>です。</p>"
+        },
+        {
+            id:"pt-exam-numpy-dnn-softmax", setId:"pt-exam-numpy-dnn", setOrder:2,
+            category:"本試験型・NumPy DNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"出力層の点数<code>z</code>を各classの確率<code>y</code>へ変換するSoftmaxの定義式として正しいものはどれか。<pre class='pt-question-code'><code># z, y のShapeはどちらも (B, C)\n# i は注目するclass、j は全classを表す\ny_i = （い）</code></pre>",
+            options:["$\\dfrac{e^{-z_i}}{\\sum_j e^{z_j}}$","$\\dfrac{e^{-z_i}}{\\sum_j e^{-z_j}}$","$\\dfrac{e^{z_i}}{\\sum_j e^{-z_j}}$","$\\dfrac{e^{z_i}}{\\sum_j e^{z_j}}$"], answer:3,
+            explanation:"<p><strong>① この空欄の役割：</strong>同じsample内のclass点数を、合計1の確率へ直します。</p><p><strong>② Shape：</strong><code>z=(B,C)</code>です。各行ごとにC個のclassを合計するため、class軸は<code>axis=1</code>です。</p><p><strong>③ 公式：</strong>$y_i=\\dfrac{e^{z_i}}{\\sum_j e^{z_j}}$。つまり「自分の指数÷全classの指数合計」です。</p><p><strong>④ 答え：</strong>選択肢4です。実装では<code>z_shift = z - np.max(z, axis=1, keepdims=True)</code>として各行の最大値を先に引くと、overflowを防ぎながら同じ確率を得られます。</p>"
+        },
+        {
+            id:"pt-exam-numpy-dnn-cross-entropy", setId:"pt-exam-numpy-dnn", setOrder:3,
+            category:"本試験型・NumPy DNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"予測確率<code>y</code>とone-hot正解<code>correct</code>から、各sampleのCross Entropyを求める式として正しいものはどれか。<pre class='pt-question-code'><code># y, correct: (B, C)\n# correctは正解classだけ1、ほかは0\ncross_entropy = （う）\nloss = np.mean(cross_entropy)</code></pre>",
+            options:["<code>-np.sum(y * np.log(correct + 1e-8), axis=1)</code>","<code>-np.sum(correct * np.log(y + 1e-8), axis=1)</code>","<code>np.sum(correct * np.log(y + 1e-8), axis=1)</code>","<code>-np.sum(correct * np.log(y + 1e-8), axis=0)</code>"], answer:1,
+            explanation:"<p><strong>① この空欄の役割：</strong>正解classへ割り当てた予測確率を採点します。</p><p><strong>② Shape：</strong><code>(B,C)</code>をclass軸<code>axis=1</code>で合計すると、sampleごとの損失<code>(B,)</code>になります。その後<code>mean</code>で1個のlossにします。</p><p><strong>③ 公式：</strong>$L=-\\sum_i correct_i\\log y_i$。one-hotの0が誤classの項を消し、正解classの<code>-log(y)</code>だけが残ります。</p><p><strong>④ 答え：</strong>選択肢2です。<code>1e-8</code>は<code>log(0)</code>を避けます。</p>"
+        },
+        {
+            id:"pt-exam-numpy-dnn-output-grad", setId:"pt-exam-numpy-dnn", setOrder:4,
+            category:"本試験型・NumPy DNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"この実装ではBatch平均の<code>1/B</code>を更新時に1回だけ適用する。SoftmaxとCross Entropyを組み合わせた出力層で、各sampleの未平均の出力誤差<code>dz</code>として正しいものはどれか。<pre class='pt-question-code'><code># y, correct, dz: (B, C)\ndz = （え）</code></pre>",
+            options:["<code>y * correct</code>","<code>np.square(y - correct)</code>","<code>np.log(y) * correct</code>","<code>y - correct</code>"], answer:3,
+            explanation:"<p><strong>① この空欄の役割：</strong>出力の誤差を、出力層の重みへ渡せる形にします。</p><p><strong>② Shape：</strong><code>y</code>と<code>correct</code>はともに<code>(B,C)</code>なので、差の<code>dz</code>も<code>(B,C)</code>です。</p><p><strong>③ 公式：</strong>sample $n$ のCross Entropyを$\\ell_n$とすると、Softmaxとまとめた勾配は$\\dfrac{\\partial \\ell_n}{\\partial z_n}=y_n-correct_n$です。平均lossの厳密な勾配は<code>(y-correct)/B</code>ですが、この実装は勾配をいったん合計し、更新時に<code>/B</code>します。</p><p><strong>④ 答え：</strong><code>y - correct</code>です。<code>/B</code>は<code>dz</code>側か更新側のどちらか一度だけ行います。</p>"
+        },
+        {
+            id:"pt-exam-numpy-dnn-bias-grad", setId:"pt-exam-numpy-dnn", setOrder:5,
+            category:"本試験型・NumPy DNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"出力層のbias勾配を求める空欄（お）として正しいものはどれか。<pre class='pt-question-code'><code># dz: (B, C), bias: (C,)\ngrads_w[-1] = np.matmul(u.transpose(), dz)\ngrads_b[-1] = （お）</code></pre>",
+            options:["<code>np.sum(dz, axis=1)</code>","<code>np.sum(u, axis=1)</code>","<code>np.sum(dz, axis=0)</code>","<code>np.sum(u, axis=0)</code>"], answer:2,
+            explanation:"<p><strong>① この空欄の役割：</strong>全sampleが同じbiasを使うため、sampleごとの誤差を合計します。</p><p><strong>② Shape：</strong><code>dz=(B,C)</code>からbiasと同じ<code>(C,)</code>を作りたいので、Batch軸Bを消し、class軸Cを残します。</p><p><strong>③ コード：</strong><code>axis=0</code>は行方向、つまりBatchを足します。したがって<code>np.sum(dz, axis=0)</code>です。</p><p><strong>④ 答え：</strong>選択肢3です。覚え方は「biasは列ごとに1個なので、縦に足す」です。</p>"
+        },
+        {
+            id:"pt-exam-numpy-dnn-backprop-matmul", setId:"pt-exam-numpy-dnn", setOrder:6,
+            category:"本試験型・NumPy DNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"逆伝播で現在の<code>dz</code>を1層前の出力勾配<code>du</code>へ戻す空欄（か）はどれか。重みは入力側から順に格納されている。<pre class='pt-question-code'><code># i=0では dz:(B,10), weights[-1]:(64,10)\nfor i in range(self.num_hidden):\n    du = （か）\n    dz = relu_prime(u) * du</code></pre>",
+            options:["<code>np.matmul(dz, self.weights[-i-1].transpose())</code>","<code>np.matmul(dz, self.weights[-i-2].transpose())</code>","<code>np.matmul(self.weights[-i-1].transpose(), dz)</code>","<code>np.matmul(self.weights[-i-2].transpose(), dz)</code>"], answer:0,
+            explanation:"<p><strong>① この空欄の役割：</strong>現在の層の誤差を、重みを通して1層前へ戻します。</p><p><strong>② Shape：</strong>最初の反復は<code>dz:(B,10)</code>、<code>W[-1]:(64,10)</code>、したがって<code>W[-1].T:(10,64)</code>です。</p><p><strong>③ 公式：</strong>$du=dz\\,W^\\top$。代入すると<code>(B,10) @ (10,64) → (B,64)</code>となり、ReLU層のShapeへ戻れます。</p><p><strong>④ 答え：</strong>選択肢1です。次の反復では自動的に<code>weights[-2]</code>を使います。</p>"
+        },
+        {
+            id:"pt-exam-numpy-dnn-sgd-update", setId:"pt-exam-numpy-dnn", setOrder:7,
+            category:"本試験型・NumPy DNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"この実装では<code>grads_w</code>にBatch内の勾配の合計が入る。SGDで重みを更新する空欄（き）はどれか。<pre class='pt-question-code'><code>self.weights = [\n    （き）\n    for w, grad in zip(self.weights, grads_w)\n]</code></pre>",
+            options:["<code>w + learning_rate * grad * batch_size</code>","<code>w - learning_rate * grad * batch_size</code>","<code>w + learning_rate * grad / batch_size</code>","<code>w - learning_rate * grad / batch_size</code>"], answer:3,
+            explanation:"<p><strong>① この空欄の役割：</strong>損失を小さくする方向へparameterを1回更新します。</p><p><strong>② Shape：</strong><code>w</code>と<code>grad</code>は同じShapeなので要素ごとに更新できます。</p><p><strong>③ 公式：</strong>$W_{new}=W-learning\\_rate\\times dW/B$。勾配と反対へ進むのでマイナス、今回は勾配の合計なのでBatch数Bで平均します。</p><p><strong>④ 答え：</strong>選択肢4です。<code>dz</code>側ですでにBで割った実装なら、更新時にもう一度割ってはいけません。</p>"
+        },
+        {
+            id:"pt-exam-numpy-dnn-accuracy", setId:"pt-exam-numpy-dnn", setOrder:8,
+            category:"本試験型・NumPy DNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"予測<code>y</code>とone-hot正解<code>correct</code>はいずれも<code>(B,C)</code>である。正解率を求める空欄（く）はどれか。<pre class='pt-question-code'><code>accuracy = np.mean(\n    （く）\n)</code></pre>",
+            options:["<code>np.equal(np.argmin(y, axis=1), np.argmin(correct, axis=1))</code>","<code>np.equal(np.argmax(y, axis=1), np.argmax(correct, axis=1))</code>","<code>np.equal(np.argmax(y, axis=0), np.argmax(correct, axis=0))</code>","<code>np.equal(np.argmin(y, axis=0), np.argmin(correct, axis=0))</code>"], answer:1,
+            explanation:"<p><strong>① この空欄の役割：</strong>各sampleの予測classと正解classが一致したかをTrue/Falseで求めます。</p><p><strong>② Shape：</strong>1行が1sample、列がclassなので、<code>argmax(axis=1)</code>で<code>(B,C)→(B,)</code>にします。</p><p><strong>③ コード：</strong>予測と正解の<code>argmax</code>同士を<code>np.equal</code>で比較します。外側の<code>np.mean</code>がTrueの割合をscalarへ変えます。</p><p><strong>④ 答え：</strong>選択肢2です。<code>axis=0</code>ではsampleごとではなく、classごとにBatch方向の最大を探してしまいます。</p>"
         },
 
         {
