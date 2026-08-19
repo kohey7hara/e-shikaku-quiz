@@ -47,7 +47,7 @@ window.quizData = {
         <p><strong>「A×A'、B×B'」というイメージについて：</strong>考え方は「各候補で2つの値を掛ける」なので近いですが、正式には <strong>$P(D|A)\\times P(A)$、$P(D|B)\\times P(B)$</strong> と書きます。確率の記法で $A'$ は「Aではない」という補集合を表すことがあるため、尤度の代わりに $A'$ と書かないようにします。</p>
         <p><strong>ここが3手法の分かれ目：</strong>尤度 $0.75$ と $0.25$ だけを比べるのが<strong>最尤推定 (MLE)</strong>、掛けた値 $0.30$ と $0.15$ を比べて大きいAを選ぶのが<strong>MAP推定</strong>、Aが約66.7%・Bが約33.3%という分布を両方残すのが<strong>ベイズ推定</strong>です。</p>
 
-        <h3>■ 検査のベイズ問題は「人数に直して4手」で解く</h3>
+        <h3>■ 検査のベイズ問題は「10万人の人数ツリー」で解く</h3>
         <p><strong>典型問題：</strong>感染率1%、感染者を98%で陽性、非感染者も0.1%で陽性になる検査で、陽性だった人が本当に感染している確率を求めます。</p>
         <p><strong>最初に向きを確認：</strong>与えられた98%は「感染しているなら陽性」$P(+|D)$ です。求めたいのは逆向きの「陽性なら感染」$P(D|+)$ なので、98%をそのまま答えてはいけません。</p>
         <table>
@@ -57,18 +57,90 @@ window.quizData = {
             <tr><td>非感染者の0.1%も陽性</td><td>$P(+|\\bar{D})=0.001$</td><td>偽陽性率（0.1%=0.001）</td></tr>
             <tr><td>陽性者が本当に感染している確率</td><td>$P(D|+)$</td><td>事後確率・今回の答え</td></tr>
         </table>
+        <div class="exam-figure answer-figure" role="group" aria-label="10万人を感染と非感染に分け、陽性者だけを集める人数ツリー">
+            <span class="figure-title">10万人から「陽性だった人」だけを集める</span>
+            <svg viewBox="0 0 1080 520" role="img" aria-labelledby="math-bayes-tree-title math-bayes-tree-desc" style="display:block;width:100%;min-width:860px;height:auto">
+                <title id="math-bayes-tree-title">検査のベイズ問題を人数で解くツリー</title>
+                <desc id="math-bayes-tree-desc">全体10万人を感染者1000人と非感染者99000人に分けます。感染者の陽性980人と非感染者の陽性99人を集めると陽性者は1079人です。そのうち本当に感染している980人の割合は約90.8パーセントです。</desc>
+                <defs>
+                    <marker id="math-bayes-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                        <path d="M0 0L10 5L0 10Z" fill="#627d98"></path>
+                    </marker>
+                </defs>
+                <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans JP',sans-serif" fill="#102a43">
+                    <text x="115" y="28" text-anchor="middle" font-size="16" font-weight="800">① 全体</text>
+                    <text x="375" y="28" text-anchor="middle" font-size="16" font-weight="800">② 実際の状態</text>
+                    <text x="665" y="28" text-anchor="middle" font-size="16" font-weight="800">③ 検査結果</text>
+                    <text x="950" y="28" text-anchor="middle" font-size="16" font-weight="800">④ 陽性者だけを見る</text>
+
+                    <rect x="20" y="85" width="190" height="92" rx="14" fill="#102a43"></rect>
+                    <text x="115" y="119" text-anchor="middle" font-size="20" font-weight="800" fill="#fff">全体 100,000人</text>
+                    <text x="115" y="148" text-anchor="middle" font-size="13" fill="#d9e2ec">1% と 99% に分ける</text>
+
+                    <rect x="270" y="54" width="210" height="98" rx="14" fill="#e8f7f2" stroke="#168a67" stroke-width="3"></rect>
+                    <text x="375" y="82" text-anchor="middle" font-size="17" font-weight="800">感染 1%</text>
+                    <text x="375" y="108" text-anchor="middle" font-size="14">100,000 × 0.01</text>
+                    <text x="375" y="134" text-anchor="middle" font-size="18" font-weight="800">＝ 1,000人</text>
+
+                    <rect x="270" y="190" width="210" height="98" rx="14" fill="#eef3f7" stroke="#627d98" stroke-width="3"></rect>
+                    <text x="375" y="218" text-anchor="middle" font-size="17" font-weight="800">非感染 99%</text>
+                    <text x="375" y="244" text-anchor="middle" font-size="14">100,000 × 0.99</text>
+                    <text x="375" y="270" text-anchor="middle" font-size="18" font-weight="800">＝ 99,000人</text>
+
+                    <path d="M210 131H235V103H267" fill="none" stroke="#627d98" stroke-width="3" marker-end="url(#math-bayes-arrow)"></path>
+                    <path d="M210 131H235V239H267" fill="none" stroke="#627d98" stroke-width="3" marker-end="url(#math-bayes-arrow)"></path>
+
+                    <rect x="560" y="40" width="210" height="84" rx="14" fill="#dff6ed" stroke="#168a67" stroke-width="3"></rect>
+                    <text x="665" y="67" text-anchor="middle" font-size="16" font-weight="800">陽性 98%（真陽性）</text>
+                    <text x="665" y="91" text-anchor="middle" font-size="13">1,000 × 0.98</text>
+                    <text x="665" y="114" text-anchor="middle" font-size="17" font-weight="800">＝ 980人【分子】</text>
+
+                    <rect x="560" y="139" width="210" height="58" rx="12" fill="#f5f7fa" stroke="#9fb3c8" stroke-width="2"></rect>
+                    <text x="665" y="164" text-anchor="middle" font-size="14" font-weight="700">陰性 2% ＝ 20人</text>
+                    <text x="665" y="184" text-anchor="middle" font-size="12" fill="#627d98">今回は使わない</text>
+
+                    <rect x="560" y="211" width="210" height="84" rx="14" fill="#fff2dd" stroke="#d9822b" stroke-width="3"></rect>
+                    <text x="665" y="238" text-anchor="middle" font-size="16" font-weight="800">陽性 0.1%（偽陽性）</text>
+                    <text x="665" y="262" text-anchor="middle" font-size="13">99,000 × 0.001</text>
+                    <text x="665" y="285" text-anchor="middle" font-size="17" font-weight="800">＝ 99人</text>
+
+                    <rect x="560" y="310" width="210" height="58" rx="12" fill="#f5f7fa" stroke="#9fb3c8" stroke-width="2"></rect>
+                    <text x="665" y="335" text-anchor="middle" font-size="14" font-weight="700">陰性 99.9% ＝ 98,901人</text>
+                    <text x="665" y="355" text-anchor="middle" font-size="12" fill="#627d98">今回は使わない</text>
+
+                    <path d="M480 103H520V82H557" fill="none" stroke="#168a67" stroke-width="3" marker-end="url(#math-bayes-arrow)"></path>
+                    <path d="M480 103H520V168H557" fill="none" stroke="#9fb3c8" stroke-width="2" marker-end="url(#math-bayes-arrow)"></path>
+                    <path d="M480 239H520V253H557" fill="none" stroke="#d9822b" stroke-width="3" marker-end="url(#math-bayes-arrow)"></path>
+                    <path d="M480 239H520V339H557" fill="none" stroke="#9fb3c8" stroke-width="2" marker-end="url(#math-bayes-arrow)"></path>
+
+                    <rect x="840" y="92" width="220" height="218" rx="16" fill="#eaf3ff" stroke="#1769df" stroke-width="4"></rect>
+                    <text x="950" y="125" text-anchor="middle" font-size="17" font-weight="800">陽性者全員</text>
+                    <text x="950" y="155" text-anchor="middle" font-size="23" font-weight="900">980 ＋ 99</text>
+                    <text x="950" y="184" text-anchor="middle" font-size="20" font-weight="800">＝ 1,079人【分母】</text>
+                    <line x1="865" y1="201" x2="1035" y2="201" stroke="#9fb3c8" stroke-width="2"></line>
+                    <text x="950" y="230" text-anchor="middle" font-size="14">その中の感染者は 980人</text>
+                    <text x="950" y="258" text-anchor="middle" font-size="19" font-weight="900">980 ÷ 1,079</text>
+                    <text x="950" y="287" text-anchor="middle" font-size="21" font-weight="900" fill="#1769df">＝ 90.8% ≒ 91%</text>
+
+                    <path d="M770 82H802V142H837" fill="none" stroke="#168a67" stroke-width="3" marker-end="url(#math-bayes-arrow)"></path>
+                    <path d="M770 253H802V260H837" fill="none" stroke="#d9822b" stroke-width="3" marker-end="url(#math-bayes-arrow)"></path>
+
+                    <text x="540" y="413" text-anchor="middle" font-size="16" font-weight="800">陽性者1,079人を「新しい全体」として見る</text>
+                    <rect x="210" y="438" width="600" height="40" rx="10" fill="#fff2dd" stroke="#d9822b" stroke-width="2"></rect>
+                    <rect x="210" y="438" width="545" height="40" rx="10" fill="#dff6ed" stroke="#168a67" stroke-width="2"></rect>
+                    <text x="482" y="464" text-anchor="middle" font-size="15" font-weight="800">本当に感染 980人（90.8%）</text>
+                    <text x="782" y="464" text-anchor="middle" font-size="13" font-weight="800">99人</text>
+                    <text x="540" y="506" text-anchor="middle" font-size="14" fill="#486581">10万人は人数を作るための仮置き。最後の分母は「陽性者全員」です。</text>
+                </g>
+            </svg>
+            <p class="figure-caption"><strong>見る場所は右端だけ：</strong>陽性者1,079人を新しい全体（分母）として、その中の本当に感染している980人（分子）を数えます。</p>
+        </div>
         <ol>
             <li><strong>① 全体を10万人と置く：</strong>小数の人数を避けるためです。何人と置いても最終割合は同じです。</li>
             <li><strong>② 感染／非感染へ分ける：</strong>感染者は $100000\\times0.01=1000$ 人、非感染者は $100000\\times0.99=99000$ 人。</li>
             <li><strong>③ 両方の「陽性」を数える：</strong>感染者の陽性は $1000\\times0.98=980$ 人、非感染者の偽陽性は $99000\\times0.001=99$ 人。</li>
             <li><strong>④ 本物÷陽性全員：</strong>$980/(980+99)=980/1079\\approx0.908$。</li>
         </ol>
-        <table>
-            <tr><th>実際の状態</th><th>人数</th><th>陽性になる割合</th><th>陽性者数</th></tr>
-            <tr><td><strong>感染</strong></td><td>1,000人</td><td>98%</td><td><strong>980人（真陽性）</strong></td></tr>
-            <tr><td><strong>非感染</strong></td><td>99,000人</td><td>0.1%</td><td><strong>99人（偽陽性）</strong></td></tr>
-            <tr><td colspan="3"><strong>陽性者の合計</strong></td><td><strong>1,079人</strong></td></tr>
-        </table>
         <p><strong>答え：</strong>陽性者1,079人のうち本当に感染している人は980人なので、$980/1079\\approx90.8\\%$。選択肢では<strong>91%</strong>です。</p>
         <p><strong>同じ計算を確率で書く：</strong>$P(D|+)=\\dfrac{0.98\\times0.01}{0.98\\times0.01+0.001\\times0.99}\\approx0.908$。人数法の980と99を、全人口に対する割合で計算しているだけです。</p>
 
@@ -80,12 +152,17 @@ window.quizData = {
         </table>
         <p><strong>ひっかけ対策：</strong>特異度が99.9%なら偽陽性率は $1-0.999=0.001=0.1\\%$。また、1%は0.01、0.1%は0.001です。百分率を小数へ直すときは100で割ります。</p>
 
-        <h3>■ 情報理論の4概念は「何を測るか」で使い分ける</h3>
+        <h3>■ 情報理論の5概念は「何を測るか」で使い分ける</h3>
         <table>
             <tr><th>用語</th><th>数式・何を測る？</th><th>簡単な例・使われる場面</th></tr>
             <tr>
+                <td><strong>自己情報量</strong><br>（1回の驚き）</td>
+                <td>$I(x)=-\\log_2P(x)$<br>実際に起きた1つの事象 $x$ の珍しさ<br>底が2なら単位は bit</td>
+                <td><strong>「珍しい出来事ほど驚きが大きい」</strong><br>・例：$P(x)=1/2$ なら1 bit、$P(x)=1/8$ なら3 bit。<br>・場面：符号化や、エントロピーを計算する材料。</td>
+            </tr>
+            <tr>
                 <td><strong>エントロピー</strong><br>(平均情報量)</td>
-                <td>$H(P) = -\\sum P(x) \\log P(x)$<br>1つの分布の迷い具合</td>
+                <td>$H(P)=\\sum_xP(x)I(x)=-\\sum_xP(x)\\log_2P(x)$<br><strong>自己情報量の平均</strong>＝1つの分布の迷い具合</td>
                 <td><strong>「選択肢の迷い具合」</strong><br>・例：犬50%・猫50%は迷いが大きく、犬100%なら0。<br>・場面：分類の不確実性や決定木の乱雑さを測る。</td>
             </tr>
             <tr>
@@ -105,10 +182,16 @@ window.quizData = {
             </tr>
         </table>
 
-        <h3>■ 情報理論は「驚き・余計な驚き・減った迷い」：式から計算する</h3>
+        <h3>■ 情報理論は「1回の驚き・平均の驚き・余計な驚き・減った迷い」</h3>
         <p><strong>まず与えられた値を確認します。</strong>基準となる分布を $P=[0.5,0.5]$、予測分布を $Q=[0.25,0.75]$ とします。対数の底は2とし、$\\log_2 0.5=-1$、$\\log_2 0.25=-2$、$\\log_2 0.75\\approx-0.415$、$\\log_2(2/3)\\approx-0.585$ を使います。</p>
         <table>
             <tr><th>概念</th><th>与えられた値</th><th>定義式 → 数値を代入</th><th>答え・何を表す？</th></tr>
+            <tr>
+                <td><strong>自己情報量</strong></td>
+                <td>$P(x)=0.25$</td>
+                <td>$I(x)=-\\log_2P(x)$<br>$=-\\log_2 0.25$<br>$=-(-2)$</td>
+                <td><strong>$I(x)=2$ bit</strong><br>確率25%の事象が1回起きたときの驚き。</td>
+            </tr>
             <tr>
                 <td><strong>エントロピー</strong></td>
                 <td>$P=[0.5,0.5]$</td>
@@ -145,6 +228,7 @@ window.quizData = {
             <tr><td>正規化して事後分布全体を残す</td><td><strong>ベイズ推定</strong></td><td>掛ける→足す→割る。不確実性も確率として残す。</td></tr>
             <tr><td>陽性後に本当に感染している確率</td><td><strong>真陽性÷陽性全員</strong></td><td>感染側と非感染側の陽性を両方数える。</td></tr>
             <tr><td>特異度から偽陽性率を出す</td><td><strong>偽陽性率＝1−特異度</strong></td><td>陽性問題の非感染者側へ掛ける。</td></tr>
+            <tr><td>1つの事象の珍しさ・驚き</td><td><strong>自己情報量</strong></td><td>$I(x)=-\\log_2P(x)$。起こりにくいほど大きい。</td></tr>
             <tr><td>1つの分布の迷い・平均情報量</td><td><strong>エントロピー</strong></td><td>均等なほど大きく、確実なら0。</td></tr>
             <tr><td>正解分布 $P$ で予測 $Q$ を採点</td><td><strong>クロスエントロピー</strong></td><td>正解へ低い確率を付けるほど罰が大きい。</td></tr>
             <tr><td>向きのある2分布のずれ</td><td><strong>KL</strong><br><small>Kullback-Leibler divergence</small></td><td>非負・非対称で、同じ分布なら0。</td></tr>
