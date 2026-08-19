@@ -3,7 +3,54 @@ window.quizData = {
     
     cheatSheet: `
         <h3>■ 距離・類似度：試験で問われる「使い分け」</h3>
-        <p>データの性質に合わせて、どの距離を使うべきかが問われます。</p>
+        <p>データの性質に合わせて、どの距離を使うべきかが問われます。まず同じ2点 $\\mathbf{x}=(1,2)$、$\\mathbf{y}=(4,6)$ を3通りで測ります。横の差は3、縦の差は4です。</p>
+        <div class="exam-figure answer-figure" role="group" aria-label="同じ2点をユークリッド距離、マンハッタン距離、チェビシェフ距離で測り比べる図">
+            <span class="figure-title">同じ2点でも「進み方のルール」で距離が変わる</span>
+            <svg viewBox="0 0 1020 420" role="img" aria-labelledby="ml-distance-path-title ml-distance-path-desc" style="display:block;width:100%;min-width:860px;height:auto">
+                <title id="ml-distance-path-title">3種類の距離の経路比較</title>
+                <desc id="ml-distance-path-desc">点x=(1,2)から点y=(4,6)までを測ります。直線のユークリッド距離は5、縦横に進むマンハッタン距離は7、斜め移動も1手とするチェビシェフ距離は4です。</desc>
+                <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans JP',sans-serif" fill="#102a43">
+                    <rect x="15" y="40" width="320" height="360" rx="16" fill="#fff" stroke="#cfdae7" stroke-width="2"></rect>
+                    <rect x="350" y="40" width="320" height="360" rx="16" fill="#fff" stroke="#cfdae7" stroke-width="2"></rect>
+                    <rect x="685" y="40" width="320" height="360" rx="16" fill="#fff" stroke="#cfdae7" stroke-width="2"></rect>
+
+                    <text x="175" y="72" text-anchor="middle" font-size="17" font-weight="900" fill="#1769df">ユークリッド距離 L₂</text>
+                    <text x="510" y="72" text-anchor="middle" font-size="17" font-weight="900" fill="#d64545">マンハッタン距離 L₁</text>
+                    <text x="845" y="72" text-anchor="middle" font-size="17" font-weight="900" fill="#168a67">チェビシェフ距離 L∞</text>
+
+                    <g stroke="#d9e2ec" stroke-width="1.5">
+                        <path d="M80 105V285M125 105V285M170 105V285M215 105V285M260 105V285M80 105H260M80 150H260M80 195H260M80 240H260M80 285H260"></path>
+                        <path d="M415 105V285M460 105V285M505 105V285M550 105V285M595 105V285M415 105H595M415 150H595M415 195H595M415 240H595M415 285H595"></path>
+                        <path d="M750 105V285M795 105V285M840 105V285M885 105V285M930 105V285M750 105H930M750 150H930M750 195H930M750 240H930M750 285H930"></path>
+                    </g>
+
+                    <line x1="80" y1="285" x2="215" y2="105" stroke="#1769df" stroke-width="7" stroke-linecap="round"></line>
+                    <polyline points="415,285 550,285 550,105" fill="none" stroke="#d64545" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                    <polyline points="750,285 795,240 840,195 885,150 885,105" fill="none" stroke="#168a67" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></polyline>
+
+                    <g fill="#fff" stroke="#102a43" stroke-width="3">
+                        <circle cx="80" cy="285" r="8"></circle><circle cx="215" cy="105" r="8"></circle>
+                        <circle cx="415" cy="285" r="8"></circle><circle cx="550" cy="105" r="8"></circle>
+                        <circle cx="750" cy="285" r="8"></circle><circle cx="885" cy="105" r="8"></circle>
+                    </g>
+                    <g fill="#168a67">
+                        <circle cx="795" cy="240" r="5"></circle><circle cx="840" cy="195" r="5"></circle><circle cx="885" cy="150" r="5"></circle>
+                    </g>
+
+                    <text x="62" y="310" font-size="13" font-weight="800">x</text><text x="227" y="110" font-size="13" font-weight="800">y</text>
+                    <text x="397" y="310" font-size="13" font-weight="800">x</text><text x="562" y="110" font-size="13" font-weight="800">y</text>
+                    <text x="732" y="310" font-size="13" font-weight="800">x</text><text x="897" y="110" font-size="13" font-weight="800">y</text>
+
+                    <text x="175" y="342" text-anchor="middle" font-size="19" font-weight="900">√(3²＋4²) ＝ 5</text>
+                    <text x="510" y="342" text-anchor="middle" font-size="19" font-weight="900">3＋4 ＝ 7</text>
+                    <text x="845" y="342" text-anchor="middle" font-size="19" font-weight="900">max(3, 4) ＝ 4</text>
+                    <text x="175" y="374" text-anchor="middle" font-size="14" fill="#486581">定規で結ぶ最短の直線</text>
+                    <text x="510" y="374" text-anchor="middle" font-size="14" fill="#486581">縦・横の移動量を全部足す</text>
+                    <text x="845" y="374" text-anchor="middle" font-size="14" fill="#486581">斜め3手＋上1手＝王将の4手</text>
+                </g>
+            </svg>
+            <p class="figure-caption"><strong>同じ2点でも値は違います：</strong>最大差4（チェビシェフ）≦ 直線5（ユークリッド）≦ 縦横7（マンハッタン）。</p>
+        </div>
         <table>
             <tr><th>名称</th><th>数式・定義</th><th>脳内イメージ・特徴</th></tr>
             <tr>
@@ -17,16 +64,61 @@ window.quizData = {
                 <td><strong>「碁盤の目の移動距離」</strong><br>・タクシーがビル街を走る距離。<br>・軸に沿ってカクカク進む。</td>
             </tr>
             <tr>
+                <td><strong>チェビシェフ距離</strong><br>($L_\\infty$ノルム)</td>
+                <td>$\\max_i |x_i-y_i|$</td>
+                <td><strong>「各座標差のうち最大のもの」</strong><br>・斜め移動も1手とする王将の最短手数。<br>・最もずれた特徴を重視。</td>
+            </tr>
+            <tr>
                 <td><strong>コサイン距離</strong><br>(1 - 類似度)</td>
-                <td>$1 - \\frac{\\mathbf{x} \\cdot \\mathbf{y}}{|\\mathbf{x}| |\\mathbf{y}|}$</td>
-                <td><strong>「方向（角度）の違い」</strong><br>・ベクトルの<strong>長さは無視</strong>。<br>・文章の類似度などで活躍。</td>
+                <td>$1 - \\frac{\\mathbf{x} \\cdot \\mathbf{y}}{\\|\\mathbf{x}\\|_2\\|\\mathbf{y}\\|_2}$</td>
+                <td><strong>「方向（角度）の違い」</strong><br>・ベクトルの<strong>長さは無視</strong>。<br>・同じ向きほど類似度は大きく、距離は小さい。<br>・文章の類似度などで活躍。</td>
             </tr>
             <tr>
                 <td><strong>マハラノビス距離</strong></td>
                 <td>$\\sqrt{(\\mathbf{x}-\\mathbf{\\mu})^T \\Sigma^{-1} (\\mathbf{x}-\\mathbf{\\mu})}$</td>
-                <td><strong>「分布の広がりを考慮した距離」</strong><br>・分散で割って正規化するイメージ。<br>・異常検知によく使われる。</td>
+                <td><strong>「分布の広がりを考慮した距離」</strong><br>・共分散（分散＋相関）で補正する。<br>・よく散らばる方向の差は割り引く。<br>・異常検知によく使われる。</td>
             </tr>
         </table>
+
+        <div class="exam-figure answer-figure" role="group" aria-label="コサイン距離とマハラノビス距離の違いを示す図">
+            <span class="figure-title">経路ではなく「向き」や「分布」を見る距離</span>
+            <svg viewBox="0 0 1020 370" role="img" aria-labelledby="ml-distance-context-title ml-distance-context-desc" style="display:block;width:100%;min-width:820px;height:auto">
+                <title id="ml-distance-context-title">コサイン距離とマハラノビス距離の比較</title>
+                <desc id="ml-distance-context-desc">コサイン距離は原点から伸びるベクトルの角度を測り、長さを無視します。マハラノビス距離は分布の楕円の広がりと相関を考慮し、よく広がる方向の差を小さく扱います。</desc>
+                <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans JP',sans-serif" fill="#102a43">
+                    <rect x="15" y="40" width="490" height="315" rx="16" fill="#fff" stroke="#cfdae7" stroke-width="2"></rect>
+                    <rect x="520" y="40" width="485" height="315" rx="16" fill="#fff" stroke="#cfdae7" stroke-width="2"></rect>
+                    <text x="260" y="72" text-anchor="middle" font-size="18" font-weight="900" fill="#1769df">コサイン距離：向き（角度）を見る</text>
+                    <text x="762" y="72" text-anchor="middle" font-size="18" font-weight="900" fill="#8b5cf6">マハラノビス距離：分布から見る</text>
+
+                    <line x1="105" y1="260" x2="415" y2="75" stroke="#d9822b" stroke-width="6" stroke-linecap="round"></line>
+                    <polygon points="415,75 399,79 407,92" fill="#d9822b"></polygon>
+                    <line x1="105" y1="260" x2="260" y2="167.5" stroke="#1769df" stroke-width="8" stroke-linecap="round"></line>
+                    <polygon points="260,168 242,172 251,186" fill="#1769df"></polygon>
+                    <circle cx="105" cy="260" r="7" fill="#102a43"></circle>
+                    <text x="86" y="281" font-size="14" font-weight="800">原点O</text>
+                    <text x="267" y="163" font-size="14" font-weight="900" fill="#1769df">短いベクトル x</text>
+                    <text x="350" y="95" font-size="14" font-weight="900" fill="#d9822b">長いベクトル y</text>
+                    <text x="260" y="302" text-anchor="middle" font-size="16" font-weight="900">長さが違っても同じ向き：θ＝0°</text>
+                    <text x="260" y="329" text-anchor="middle" font-size="15" fill="#486581">類似度＝1 ／ コサイン距離＝0</text>
+
+                    <ellipse cx="755" cy="185" rx="175" ry="58" transform="rotate(-25 755 185)" fill="#f1edff" stroke="#8b5cf6" stroke-width="3"></ellipse>
+                    <ellipse cx="755" cy="185" rx="115" ry="38" transform="rotate(-25 755 185)" fill="none" stroke="#b8a3f5" stroke-width="2" stroke-dasharray="7 6"></ellipse>
+                    <line x1="755" y1="185" x2="864" y2="134" stroke="#168a67" stroke-width="3" stroke-dasharray="6 5"></line>
+                    <line x1="755" y1="185" x2="806" y2="294" stroke="#d64545" stroke-width="3" stroke-dasharray="6 5"></line>
+                    <circle cx="755" cy="185" r="7" fill="#102a43"></circle>
+                    <circle cx="864" cy="134" r="8" fill="#168a67"></circle>
+                    <circle cx="806" cy="294" r="8" fill="#d64545"></circle>
+                    <text x="738" y="209" font-size="14" font-weight="900">平均 μ</text>
+                    <text x="873" y="128" font-size="14" font-weight="900" fill="#168a67">P</text>
+                    <text x="819" y="298" font-size="14" font-weight="900" fill="#d64545">Q</text>
+                    <text x="780" y="112" font-size="14" font-weight="800" fill="#168a67">広がる方向 → 近い扱い</text>
+                    <text x="602" y="292" font-size="14" font-weight="800" fill="#d64545">狭い方向 → 遠い扱い</text>
+                    <text x="762" y="330" text-anchor="middle" font-size="15" fill="#486581">PとQは平均からの直線距離が同じでも、異常度は違う</text>
+                </g>
+            </svg>
+            <p class="figure-caption"><strong>覚え方：</strong>コサイン＝原点から見た<strong>向き</strong>、マハラノビス＝データ分布から見た<strong>珍しさ</strong>。</p>
+        </div>
 
         <h3>■ 学習の課題：バイアス・バリアンスのトレードオフ</h3>
         <p>モデルの複雑さと誤差の関係を表す最重要概念です。</p>
@@ -68,6 +160,7 @@ window.quizData = {
             <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
             <tr><td>定規で測る直線距離</td><td><strong>ユークリッド距離（$L_2$）</strong></td><td>座標差を二乗和し、平方根を取る。</td></tr>
             <tr><td>碁盤目・絶対値の和</td><td><strong>マンハッタン距離（$L_1$）</strong></td><td>各軸に沿った移動量を足す。</td></tr>
+            <tr><td>各座標差の最大値・王将の手数</td><td><strong>チェビシェフ距離（$L_\\infty$）</strong></td><td>最も大きい座標差だけを使う。</td></tr>
             <tr><td>長さを無視して向きだけ比較</td><td><strong>コサイン距離</strong></td><td>$1-$コサイン類似度。文章ベクトルにも使う。</td></tr>
             <tr><td>分散・相関を考慮した異常度</td><td><strong>マハラノビス距離</strong></td><td>ばらつきの大きい方向を割り引く。</td></tr>
             <tr><td>近い$k$個の多数決</td><td><strong>k-NN</strong><br><small>k-Nearest Neighbors（k近傍法）</small></td><td>$k$が小さすぎると複雑、大きすぎると単純。</td></tr>
