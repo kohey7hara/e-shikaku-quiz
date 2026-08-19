@@ -35,6 +35,67 @@ const optimizationExplanationFigures = {
         </div>`
 };
 
+const optimizationQuestionFigures = {
+    chainArrowBlank: `
+        <div class="exam-figure" role="group" aria-label="3つの変数を直列につないだ計算グラフの矢印空欄">
+            <svg viewBox="0 0 760 230" role="img" aria-labelledby="opt-q-chain-title opt-q-chain-desc" style="display:block;width:100%;min-width:640px;height:auto">
+                <title id="opt-q-chain-title">直列の計算グラフと局所微分の空欄</title>
+                <desc id="opt-q-chain-desc">xからu、uからyへ進む計算グラフ。最初の矢印にA、次の矢印にdy/duと書かれ、dy/dxを求める。</desc>
+                <defs>
+                    <marker id="opt-q-chain-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2780b8"/></marker>
+                </defs>
+                <rect x="12" y="12" width="736" height="206" rx="14" fill="#fbfdff" stroke="#c9d8e6"/>
+                <g fill="#102a43" text-anchor="middle">
+                    <rect x="55" y="70" width="130" height="70" rx="10" fill="#eaf4fb" stroke="#2780b8" stroke-width="2"/>
+                    <text x="120" y="112" font-size="23" font-weight="700">x</text>
+                    <rect x="315" y="70" width="130" height="70" rx="10" fill="#fff7e3" stroke="#e3a11a" stroke-width="2"/>
+                    <text x="380" y="101" font-size="20" font-weight="700">u = f(x)</text>
+                    <text x="380" y="126" font-size="14">中間値</text>
+                    <rect x="575" y="70" width="130" height="70" rx="10" fill="#f2edfb" stroke="#7d61b4" stroke-width="2"/>
+                    <text x="640" y="101" font-size="20" font-weight="700">y = g(u)</text>
+                    <text x="640" y="126" font-size="14">出力</text>
+                </g>
+                <g fill="none" stroke="#2780b8" stroke-width="3" marker-end="url(#opt-q-chain-arrow)">
+                    <path d="M185 105 H305"/><path d="M445 105 H565"/>
+                </g>
+                <text x="245" y="87" text-anchor="middle" font-size="18" font-weight="700" fill="#d64545">A</text>
+                <text x="505" y="87" text-anchor="middle" font-size="17" font-weight="700" fill="#123f68">dy / du</text>
+                <text x="380" y="185" text-anchor="middle" font-size="18" font-weight="700" fill="#102a43">dy / dx = (dy / du) × A</text>
+            </svg>
+        </div>`,
+    branchGraph: `
+        <div class="exam-figure" role="group" aria-label="2つの入力から2つの中間値へ分岐し、1つの出力へ合流する計算グラフ">
+            <svg viewBox="0 0 820 330" role="img" aria-labelledby="opt-q-branch-title opt-q-branch-desc" style="display:block;width:100%;min-width:680px;height:auto">
+                <title id="opt-q-branch-title">分岐と合流を含む計算グラフ</title>
+                <desc id="opt-q-branch-desc">入力xとyから積uと和vを作り、uとvの積をLとする計算グラフ。</desc>
+                <defs>
+                    <marker id="opt-q-branch-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2780b8"/></marker>
+                    <marker id="opt-q-branch-purple-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7d61b4"/></marker>
+                </defs>
+                <rect x="12" y="12" width="796" height="306" rx="14" fill="#fbfdff" stroke="#c9d8e6"/>
+                <g fill="#102a43" text-anchor="middle">
+                    <rect x="45" y="70" width="110" height="62" rx="10" fill="#eaf4fb" stroke="#2780b8" stroke-width="2"/><text x="100" y="108" font-size="22" font-weight="700">x</text>
+                    <rect x="45" y="210" width="110" height="62" rx="10" fill="#eaf4fb" stroke="#2780b8" stroke-width="2"/><text x="100" y="248" font-size="22" font-weight="700">y</text>
+                    <rect x="330" y="63" width="170" height="76" rx="10" fill="#fff7e3" stroke="#e3a11a" stroke-width="2"/><text x="415" y="96" font-size="20" font-weight="700">u = x × y</text><text x="415" y="123" font-size="14">掛け算</text>
+                    <rect x="330" y="203" width="170" height="76" rx="10" fill="#f2edfb" stroke="#7d61b4" stroke-width="2"/><text x="415" y="236" font-size="20" font-weight="700">v = x + y</text><text x="415" y="263" font-size="14">足し算</text>
+                    <rect x="650" y="133" width="130" height="76" rx="10" fill="#fdecec" stroke="#d64545" stroke-width="2"/><text x="715" y="166" font-size="20" font-weight="700">L = u × v</text><text x="715" y="193" font-size="14">最終出力</text>
+                </g>
+                <g fill="none" stroke="#2780b8" stroke-width="3" marker-end="url(#opt-q-branch-arrow)">
+                    <path d="M155 90 C220 90 260 86 320 86"/>
+                    <path d="M155 112 C225 112 250 215 320 222"/>
+                    <path d="M500 101 C570 101 585 158 640 166"/>
+                    <path d="M500 241 C570 241 585 184 640 176"/>
+                </g>
+                <circle cx="236" cy="171" r="8" fill="#fbfdff"/>
+                <g fill="none" stroke="#7d61b4" stroke-width="3" stroke-dasharray="8 5" marker-end="url(#opt-q-branch-purple-arrow)">
+                    <path d="M155 252 C220 252 260 254 320 254"/>
+                    <path d="M155 230 C225 230 250 123 320 118"/>
+                </g>
+                <text x="410" y="303" text-anchor="middle" font-size="15" fill="#42566a">同じ変数から複数の経路がある点に注目</text>
+            </svg>
+        </div>`
+};
+
 window.quizData = {
     title: "3-（２）深層モデルのための最適化",
     
@@ -126,8 +187,117 @@ window.quizData = {
             <strong>最重要：</strong>Backwardは<strong>勾配を求める担当</strong>、Optimizerは<strong>その勾配で重みを更新する担当</strong>です。SGDやAdamは④に入ります。
         </div>
 
-        <h3>■ 誤差逆伝播：まず「右へ計算、左へ影響を戻す」</h3>
-        <p><strong>勾配</strong>とは「その値を少し変えたら、最終的な損失がどれだけ変わるか」です。難しい用語より、矢印の向きで覚えます。</p>
+        <h3>■ 連鎖律：矢印の式は「経路内で掛け、複数経路を足す」</h3>
+        <p><strong>勾配</strong>とは「その値を少し変えたら、最後の出力や損失がどれだけ変わるか」です。試験では、計算グラフの矢印に局所微分を入れ、求めたい端から端までつなぎます。</p>
+        <div class="optimization-visual-wrap">
+            <svg class="optimization-wide-svg" viewBox="0 0 960 390" role="img" aria-labelledby="opt-chain-basic-title opt-chain-basic-desc">
+                <title id="opt-chain-basic-title">1本道の計算グラフで使う連鎖律</title>
+                <desc id="opt-chain-basic-desc">xから中間値u、uから出力yへ順伝播し、逆伝播ではyからu、uからxへ戻る。各矢印の局所微分dy/duとdu/dxを掛けるとdy/dxになる。</desc>
+                <defs>
+                    <marker id="opt-chain-basic-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2780b8"/></marker>
+                    <marker id="opt-chain-basic-back-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#d64545"/></marker>
+                </defs>
+                <rect x="18" y="18" width="924" height="354" rx="18" fill="#fbfdff" stroke="#c9d8e6"/>
+                <text x="42" y="54" font-size="20" font-weight="700" fill="#102a43">レベル1：1本道なら、矢印に書かれた局所微分を掛ける</text>
+                <g fill="#102a43" text-anchor="middle">
+                    <rect x="65" y="94" width="150" height="78" rx="12" fill="#eaf4fb" stroke="#2780b8" stroke-width="2"/>
+                    <text x="140" y="127" font-size="22" font-weight="700">x</text><text x="140" y="153" font-size="14">入力</text>
+                    <rect x="405" y="94" width="150" height="78" rx="12" fill="#fff7e3" stroke="#e3a11a" stroke-width="2"/>
+                    <text x="480" y="125" font-size="19" font-weight="700">u = f(x)</text><text x="480" y="153" font-size="14">中間値</text>
+                    <rect x="745" y="94" width="150" height="78" rx="12" fill="#f2edfb" stroke="#7d61b4" stroke-width="2"/>
+                    <text x="820" y="125" font-size="19" font-weight="700">y = g(u)</text><text x="820" y="153" font-size="14">出力</text>
+                </g>
+                <g fill="none" stroke="#2780b8" stroke-width="3" marker-end="url(#opt-chain-basic-arrow)">
+                    <path d="M215 133 H395"/><path d="M555 133 H735"/>
+                </g>
+                <text x="305" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="#123f68">du / dx</text>
+                <text x="645" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="#123f68">dy / du</text>
+                <path d="M820 206 H140" fill="none" stroke="#d64545" stroke-width="3" marker-end="url(#opt-chain-basic-back-arrow)"/>
+                <text x="480" y="198" text-anchor="middle" font-size="15" font-weight="700" fill="#d64545">逆伝播で勾配をたどる向き：y → u → x</text>
+                <rect x="100" y="235" width="760" height="70" rx="12" fill="#eef8f1" stroke="#69a97a"/>
+                <text x="480" y="264" text-anchor="middle" font-size="18" font-weight="700" fill="#1c6b3d">求めたいもの：dy / dx</text>
+                <text x="480" y="292" text-anchor="middle" font-size="20" font-weight="700" fill="#102a43">dy / dx ＝ (dy / du) × (du / dx)</text>
+                <text x="480" y="347" text-anchor="middle" font-size="14" fill="#42566a">覚え方：左辺の y から x へ、y → u → x と文字がつながる並びを選ぶ</text>
+            </svg>
+        </div>
+        <div class="optimization-test-point">
+            <strong>試験での3手：</strong>① 求めたい微分を左辺に書く → ② 出力側から入力側へ矢印を逆にたどる → ③ 1本道では局所微分を掛ける。<br>
+            <strong>向きの注意：</strong>$du/dy$ や $dx/du$ は矢印と逆向きの微分です。求めるものが $dy/dx$ なら、$dy/du$ と $du/dx$ を使います。<br>
+            <strong>$d$ と $\partial$：</strong>変数が1つの式では $d$、Lossが多数の重みに依存する深層学習では「他を固定して1つだけ動かす」$\partial$ をよく使います。連鎖律の考え方は同じです。<br>
+            <strong>補足：</strong>真ん中の $du$ が消えるように見えるのは覚え方であり、普通の分数を約分しているわけではありません。
+        </div>
+
+        <div class="optimization-visual-wrap">
+            <svg class="optimization-wide-svg" viewBox="0 0 960 640" role="img" aria-labelledby="opt-chain-branch-title opt-chain-branch-desc">
+                <title id="opt-chain-branch-title">分岐と合流を含む複雑な計算グラフの連鎖律</title>
+                <desc id="opt-chain-branch-desc">xとyから積uと和vを作り、L=uvへ合流する。xからLへは2経路あるため、各経路の局所微分を掛けた後で足す。</desc>
+                <defs>
+                    <marker id="opt-chain-branch-blue-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2780b8"/></marker>
+                    <marker id="opt-chain-branch-purple-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7d61b4"/></marker>
+                    <marker id="opt-chain-branch-red-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#d64545"/></marker>
+                </defs>
+                <rect x="18" y="18" width="924" height="604" rx="18" fill="#fbfdff" stroke="#c9d8e6"/>
+                <text x="42" y="54" font-size="20" font-weight="700" fill="#102a43">レベル2：分岐したら「各経路で掛ける → 同じ変数への寄与を足す」</text>
+
+                <g fill="#102a43" text-anchor="middle">
+                    <rect x="54" y="120" width="126" height="68" rx="11" fill="#eaf4fb" stroke="#2780b8" stroke-width="2"/>
+                    <text x="117" y="161" font-size="23" font-weight="700">x</text>
+                    <rect x="54" y="310" width="126" height="68" rx="11" fill="#eaf4fb" stroke="#2780b8" stroke-width="2"/>
+                    <text x="117" y="351" font-size="23" font-weight="700">y</text>
+
+                    <rect x="385" y="105" width="188" height="94" rx="12" fill="#fff7e3" stroke="#e3a11a" stroke-width="2"/>
+                    <text x="479" y="139" font-size="21" font-weight="700">u = x × y</text>
+                    <text x="479" y="170" font-size="14">∂u/∂x = y　∂u/∂y = x</text>
+                    <rect x="385" y="295" width="188" height="94" rx="12" fill="#f2edfb" stroke="#7d61b4" stroke-width="2"/>
+                    <text x="479" y="329" font-size="21" font-weight="700">v = x + y</text>
+                    <text x="479" y="360" font-size="14">∂v/∂x = 1　∂v/∂y = 1</text>
+
+                    <rect x="770" y="200" width="142" height="94" rx="12" fill="#fdecec" stroke="#d64545" stroke-width="2"/>
+                    <text x="841" y="234" font-size="21" font-weight="700">L = u × v</text>
+                    <text x="841" y="265" font-size="14">∂L/∂u = v</text>
+                    <text x="841" y="284" font-size="14">∂L/∂v = u</text>
+                </g>
+
+                <g fill="none" stroke="#2780b8" stroke-width="3" marker-end="url(#opt-chain-branch-blue-arrow)">
+                    <path d="M180 154 H375"/>
+                    <path d="M180 344 H375"/>
+                    <path d="M180 344 H245 V82 H479 V97"/>
+                </g>
+                <g fill="none" stroke="#7d61b4" stroke-width="3" stroke-dasharray="8 5" marker-end="url(#opt-chain-branch-purple-arrow)">
+                    <path d="M180 154 H220 V420 H479 V397"/>
+                </g>
+                <g fill="none" stroke="#d64545" stroke-width="3" marker-end="url(#opt-chain-branch-red-arrow)">
+                    <path d="M573 152 C655 152 680 220 760 236"/>
+                    <path d="M573 342 C655 342 680 274 760 258"/>
+                </g>
+
+                <text x="278" y="136" text-anchor="middle" font-size="15" font-weight="700" fill="#123f68">∂u/∂x = y</text>
+                <text x="290" y="104" text-anchor="middle" font-size="15" font-weight="700" fill="#123f68">∂u/∂y = x</text>
+                <text x="278" y="326" text-anchor="middle" font-size="15" font-weight="700" fill="#123f68">∂v/∂y = 1</text>
+                <text x="300" y="442" text-anchor="middle" font-size="15" font-weight="700" fill="#665093">∂v/∂x = 1</text>
+                <text x="662" y="154" text-anchor="middle" font-size="15" font-weight="700" fill="#a63434">∂L/∂u = v</text>
+                <text x="662" y="349" text-anchor="middle" font-size="15" font-weight="700" fill="#a63434">∂L/∂v = u</text>
+
+                <rect x="55" y="478" width="850" height="112" rx="13" fill="#eef8f1" stroke="#69a97a"/>
+                <text x="80" y="507" font-size="17" font-weight="700" fill="#1c6b3d">x から L へは2経路ある</text>
+                <text x="80" y="540" font-size="18" font-weight="700" fill="#102a43">∂L/∂x = (∂L/∂u)(∂u/∂x) ＋ (∂L/∂v)(∂v/∂x)</text>
+                <text x="80" y="572" font-size="18" font-weight="700" fill="#102a43">∂L/∂y = (∂L/∂u)(∂u/∂y) ＋ (∂L/∂v)(∂v/∂y)</text>
+                <text x="790" y="507" text-anchor="middle" font-size="15" font-weight="700" fill="#d64545">経路内：×</text>
+                <text x="790" y="532" text-anchor="middle" font-size="15" font-weight="700" fill="#d64545">経路間：＋</text>
+            </svg>
+        </div>
+        <table>
+            <tr><th>計算グラフの箱</th><th>局所微分</th><th>試験での覚え方</th></tr>
+            <tr><td>$u=x+y$（加算）</td><td>$\partial u/\partial x=1$、$\partial u/\partial y=1$</td><td>加算は、そのまま1を返す</td></tr>
+            <tr><td>$u=xy$（乗算）</td><td>$\partial u/\partial x=y$、$\partial u/\partial y=x$</td><td>乗算は、反対側の入力を返す</td></tr>
+            <tr><td>1本道</td><td>局所微分を掛ける</td><td>経路の中は「×」</td></tr>
+            <tr><td>同じ変数から複数経路</td><td>各経路の積を足す</td><td>経路どうしは「＋」</td></tr>
+        </table>
+        <div class="core-strip">
+            <strong>本試験の解法：</strong>まず求めたい $\partial L/\partial x$ を書く → $x$ から $L$ までの全経路を探す → 各経路の矢印を掛ける → 複数経路の答えを足します。行列・Jacobianでは掛ける順序を勝手に入れ替えません。
+        </div>
+
+        <h3>■ 逆伝播：数字を入れて「右へ計算、左へ影響を戻す」</h3>
         <div class="optimization-visual-wrap">
             <svg class="optimization-wide-svg" viewBox="0 0 960 460" role="img" aria-labelledby="opt-backprop-title opt-backprop-desc">
                 <title id="opt-backprop-title">順伝播と逆伝播の計算グラフ</title>
@@ -595,6 +765,50 @@ window.quizData = {
         {id:"opt-rmsprop-calc",category:"RMSProp(計算)",kind:"計算",question:"RMSPropの二乗勾配移動平均$v_t=0.9v_{t-1}+0.1g_t^2$で、$v_{t-1}=4,g_t=2$なら$v_t$はどれか。",options:["4","3.6","4.4","2"],answer:0,explanation:"<strong>使う公式：</strong>$v_t=0.9v_{t-1}+0.1g_t^2$。<br><strong>代入：</strong>$0.9×4+0.1×2^2=3.6+0.4=4$。<br><strong>答え：</strong>4です。古い履歴を徐々に忘れる移動平均です。"},
         {id:"opt-adam-first",category:"Adam(計算)",kind:"計算",question:"Adamの一次モーメント$m_t=0.9m_{t-1}+0.1g_t$で、$m_{t-1}=0,g_t=5$なら$m_t$はどれか。",options:["0.5","5","4.5","0.1"],answer:0,explanation:"<strong>使う公式：</strong>$m_t=0.9m_{t-1}+0.1g_t$。<br><strong>代入：</strong>$0.9×0+0.1×5=0.5$。<br><strong>答え：</strong>0.5です。実際のAdamは初期バイアス補正も行います。"},
         {id:"opt-chain-rule-calc",category:"連鎖律(計算)",kind:"計算",question:"$y=x^2,z=3y$のとき$x=2$での$dz/dx$はいくつか。",options:["12","6","4","3"],answer:0,explanation:"<strong>使う公式：</strong>$dz/dx=(dz/dy)(dy/dx)$。<br><strong>局所微分：</strong>$dz/dy=3$、$dy/dx=2x$。<br><strong>代入：</strong>$3×(2×2)=12$。答えは12です。"},
+        {
+            id: "opt-chain-arrow-missing-local",
+            setId: "opt-exam-chain-rule-arrows",
+            setOrder: 1,
+            category: "計算グラフ・矢印空欄",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `次の計算グラフで、$dy/dx=(dy/du)×A$ と表す。矢印の空欄 $A$ に入るものはどれか。${optimizationQuestionFigures.chainArrowBlank}`,
+            options: ["$du/dx$", "$dx/du$", "$du/dy$", "$dy/du$"],
+            answer: 0,
+            explanation: "<strong>① 求めたいもの：</strong>$dy/dx$。<br><strong>② 矢印を逆にたどる：</strong>$y→u→x$ なので、$dy/du$ の次は $du/dx$ です。<br><strong>③ 使う公式：</strong>$dy/dx=(dy/du)(du/dx)$。<br><strong>答え：</strong>$A=du/dx$ です。$dx/du$ は矢印と逆向きです。"
+        },
+        {
+            id: "opt-chain-branch-path-sum",
+            setId: "opt-exam-chain-rule-arrows",
+            setOrder: 2,
+            category: "計算グラフ・複数経路",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `次の計算グラフで、$x$ から $L$ へは $u$ を通る経路と $v$ を通る経路がある。$\\partial L/\\partial x$ を表す式として正しいものはどれか。${optimizationQuestionFigures.branchGraph}`,
+            options: [
+                "$(\\partial L/\\partial u)(\\partial u/\\partial x)+(\\partial L/\\partial v)(\\partial v/\\partial x)$",
+                "$(\\partial L/\\partial u)(\\partial u/\\partial x)(\\partial L/\\partial v)(\\partial v/\\partial x)$",
+                "$\\partial u/\\partial x+\\partial v/\\partial x$",
+                "$(\\partial L/\\partial u)(\\partial v/\\partial x)$"
+            ],
+            answer: 0,
+            explanation: "<strong>① 全経路を探す：</strong>$x→u→L$ と $x→v→L$ の2本です。<br><strong>② 経路の中：</strong>矢印の局所微分を掛けます。<br><strong>③ 経路どうし：</strong>同じ $x$ への寄与なので足します。<br><strong>答え：</strong>$(\\partial L/\\partial u)(\\partial u/\\partial x)+(\\partial L/\\partial v)(\\partial v/\\partial x)$ です。"
+        },
+        {
+            id: "opt-chain-branch-numeric",
+            setId: "opt-exam-chain-rule-arrows",
+            setOrder: 3,
+            category: "計算グラフ・分岐計算",
+            kind: "図表・長文",
+            difficulty: "本試験型",
+            beginnerReviewed: true,
+            question: `次の計算グラフで $x=2,y=3$ とする。$\\partial L/\\partial x$ はいくつか。${optimizationQuestionFigures.branchGraph}`,
+            options: ["21", "16", "15", "30"],
+            answer: 0,
+            explanation: "<strong>① 順伝播：</strong>$u=xy=6$、$v=x+y=5$、$L=uv$。<br><strong>② 使う公式：</strong>$\\partial L/\\partial x=(\\partial L/\\partial u)(\\partial u/\\partial x)+(\\partial L/\\partial v)(\\partial v/\\partial x)$。<br><strong>③ 局所微分：</strong>$\\partial L/\\partial u=v=5$、$\\partial u/\\partial x=y=3$、$\\partial L/\\partial v=u=6$、$\\partial v/\\partial x=1$。<br><strong>④ 代入：</strong>$5×3+6×1=21$。答えは21です。"
+        },
         {id:"opt-xavier-var",category:"Xavier初期化(計算)",kind:"計算",question:"Xavier初期化で$fan_{in}=fan_{out}=100$のとき、重みの分散はどれか。",options:["0.01","0.1","1","100"],answer:0,explanation:"<strong>使う公式：</strong>$\\mathrm{Var}(w)=2/(fan_{in}+fan_{out})$。<br><strong>代入：</strong>$2/(100+100)=2/200=0.01$。<br><strong>答え：</strong>0.01です。$1/n$は入出力数が同じときだけの簡略形です。"},
         {id:"opt-he-var",category:"He初期化(計算)",kind:"計算",question:"He初期化で分散を$2/fan_{in}$とすると、$fan_{in}=100$での分散はどれか。",options:["0.02","0.01","0.2","2"],answer:0,explanation:"<strong>使う公式：</strong>$\\mathrm{Var}(w)=2/fan_{in}$。<br><strong>代入：</strong>$2/100=0.02$。<br><strong>答え：</strong>0.02です。ReLUで負側が0になる影響を補います。"},
 
