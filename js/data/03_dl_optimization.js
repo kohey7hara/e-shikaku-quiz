@@ -223,7 +223,7 @@ window.quizData = {
         <div class="optimization-test-point">
             <strong>試験での3手：</strong>① 求めたい微分を左辺に書く → ② 出力側から入力側へ矢印を逆にたどる → ③ 1本道では局所微分を掛ける。<br>
             <strong>向きの注意：</strong>$du/dy$ や $dx/du$ は矢印と逆向きの微分です。求めるものが $dy/dx$ なら、$dy/du$ と $du/dx$ を使います。<br>
-            <strong>$d$ と $\partial$：</strong>変数が1つの式では $d$、Lossが多数の重みに依存する深層学習では「他を固定して1つだけ動かす」$\partial$ をよく使います。連鎖律の考え方は同じです。<br>
+            <strong>$d$ と $\\partial$：</strong>変数が1つの式では $d$、Lossが多数の重みに依存する深層学習では「他を固定して1つだけ動かす」$\\partial$ をよく使います。連鎖律の考え方は同じです。<br>
             <strong>補足：</strong>真ん中の $du$ が消えるように見えるのは覚え方であり、普通の分数を約分しているわけではありません。
         </div>
 
@@ -288,13 +288,13 @@ window.quizData = {
         </div>
         <table>
             <tr><th>計算グラフの箱</th><th>局所微分</th><th>試験での覚え方</th></tr>
-            <tr><td>$u=x+y$（加算）</td><td>$\partial u/\partial x=1$、$\partial u/\partial y=1$</td><td>加算は、そのまま1を返す</td></tr>
-            <tr><td>$u=xy$（乗算）</td><td>$\partial u/\partial x=y$、$\partial u/\partial y=x$</td><td>乗算は、反対側の入力を返す</td></tr>
+            <tr><td>$u=x+y$（加算）</td><td>$\\partial u/\\partial x=1$、$\\partial u/\\partial y=1$</td><td>加算は、そのまま1を返す</td></tr>
+            <tr><td>$u=xy$（乗算）</td><td>$\\partial u/\\partial x=y$、$\\partial u/\\partial y=x$</td><td>乗算は、反対側の入力を返す</td></tr>
             <tr><td>1本道</td><td>局所微分を掛ける</td><td>経路の中は「×」</td></tr>
             <tr><td>同じ変数から複数経路</td><td>各経路の積を足す</td><td>経路どうしは「＋」</td></tr>
         </table>
         <div class="core-strip">
-            <strong>本試験の解法：</strong>まず求めたい $\partial L/\partial x$ を書く → $x$ から $L$ までの全経路を探す → 各経路の矢印を掛ける → 複数経路の答えを足します。行列・Jacobianでは掛ける順序を勝手に入れ替えません。
+            <strong>本試験の解法：</strong>まず求めたい $\\partial L/\\partial x$ を書く → $x$ から $L$ までの全経路を探す → 各経路の矢印を掛ける → 複数経路の答えを足します。行列・Jacobianでは掛ける順序を勝手に入れ替えません。
         </div>
 
         <h3>■ 逆伝播：数字を入れて「右へ計算、左へ影響を戻す」</h3>
