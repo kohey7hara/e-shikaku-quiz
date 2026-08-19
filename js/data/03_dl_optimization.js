@@ -15,18 +15,18 @@ const optimizationExplanationFigures = {
                 <div class="diagram-arrow">→</div>
                 <div class="diagram-node primary">SGDはジグザグ</div>
                 <div class="diagram-arrow">→</div>
-                <div class="diagram-node accent">Momentumで平均化</div>
+                <div class="diagram-node accent">Momentumで振動を抑える</div>
             </div>
         </div>`,
     chainRule: `
         <div class="exam-figure answer-figure">
-            <span class="figure-title">逆伝播は「上流の勾配 × この演算の局所微分」</span>
+            <span class="figure-title">逆伝播は「損失側から届いた勾配 × この箱の微分」</span>
             <div class="diagram-row">
-                <div class="diagram-node primary">上流の勾配<br><b>2</b></div>
+                <div class="diagram-node primary">損失側から届いた勾配<br><b>2</b></div>
                 <div class="diagram-arrow">×</div>
-                <div class="diagram-node accent">局所微分<br><b>3</b></div>
+                <div class="diagram-node accent">この箱の微分<br><b>3</b></div>
                 <div class="diagram-arrow">＝</div>
-                <div class="diagram-node warn">下流へ渡す勾配<br><b>6</b></div>
+                <div class="diagram-node warn">入力側へ渡す勾配<br><b>6</b></div>
             </div>
             <p class="figure-caption">同じ変数から複数経路へ分岐した場合、戻ってきた勾配は足し合わせます。</p>
         </div>`,
@@ -71,16 +71,27 @@ window.quizData = {
             .optimizer-formula-table td:nth-child(3), .initialization-formula-table td:nth-child(3) { min-width: 480px; }
             .optimizer-equation, .initialization-equation { margin: 6px 0; padding: 7px 10px; border-radius: 8px; background: #f3f7fb; color: #123f68; font-size: 1.02em; white-space: nowrap; }
             .optimizer-equation mjx-container, .initialization-equation mjx-container { margin: 0 !important; }
+            .optimization-visual-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 14px 0 18px; }
+            .optimization-wide-svg { display: block; width: 100%; min-width: 780px; height: auto; }
+            .optimization-keyword-table td:nth-child(2) { font-weight: 700; color: #123f68; }
+            .optimization-test-point { margin: 12px 0; padding: 11px 14px; border: 1px solid #b8d9ee; border-radius: 9px; background: #f7fbfe; line-height: 1.75; }
         </style>
 
         <h3>■ 2026シラバスの本線</h3>
         <div class="core-strip">
             <strong>① SGD・ミニバッチ・学習率 → ② Momentum・NAG → ③ 誤差逆伝播・自動微分 → ④ AdaGrad・RMSProp・Adam → ⑤ Xavier・He初期化</strong><br>
-            Adadelta、AdamWなどは比較用の発展項目です。まず上の本線を優先します。
+            この章では上の5本線を優先します。式は丸暗記する前に、<strong>「何を解決する式か」</strong>をつかみます。
         </div>
+        <table>
+            <tr><th>問題文の合図</th><th>答える語</th><th>初心者向けの意味</th></tr>
+            <tr><td>全データで1回の勾配</td><td><strong>バッチ学習／最急降下法</strong></td><td>正確だが、1回の更新が重い</td></tr>
+            <tr><td>一部のデータをまとめて更新</td><td><strong>ミニバッチ学習</strong></td><td>GPUで行列計算しやすく、実務で代表的</td></tr>
+            <tr><td>更新式の $\\eta$／歩幅</td><td><strong>学習率</strong></td><td>大きすぎると振動・発散、小さすぎると遅い</td></tr>
+            <tr><td>現在の勾配と逆向きへ更新</td><td><strong>SGD</strong></td><td>$w\\leftarrow w-\\eta g$</td></tr>
+        </table>
 
         <h3>■ 学習の全体タイムライン：初期化はどこ？</h3>
-        <p>「初期化」は学習ループに入る前の<strong>準備段階（Step 0）</strong>で行われます。<br>ここでの設定（He/Xavier）が、その後の学習効率を決定づけます。</p>
+        <p>「初期化」は学習ループに入る前の<strong>準備段階（Step 0）</strong>で行われます。<br>ここでの設定（He/Xavier）が、その後の信号・勾配の流れに大きく影響します。</p>
         
         <div class="flow-box" style="display:block; text-align:center;">
             <div style="display:inline-block; vertical-align:top; margin-right:20px;">
@@ -111,20 +122,78 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ Pathological Curvature：細長い谷</h3>
+        <h3>■ Pathological Curvature（病的曲率）：細長い谷</h3>
         <div class="core-strip">
             方向ごとの曲率が大きく異なると、SGDは<strong>急な方向へ左右に振動</strong>し、緩い谷方向には少ししか進めません。Momentumは過去の方向を平均化し、振動を打ち消しながら谷方向へ加速します。
         </div>
 
-        <h3>■ 誤差逆伝播・自動微分の3ルール</h3>
+        <h3>■ 誤差逆伝播：まず「右へ計算、左へ影響を戻す」</h3>
+        <p><strong>勾配</strong>とは「その値を少し変えたら、最終的な損失がどれだけ変わるか」です。難しい用語より、矢印の向きで覚えます。</p>
+        <div class="optimization-visual-wrap">
+            <svg class="optimization-wide-svg" viewBox="0 0 960 460" role="img" aria-labelledby="opt-backprop-title opt-backprop-desc">
+                <title id="opt-backprop-title">順伝播と逆伝播の計算グラフ</title>
+                <desc id="opt-backprop-desc">x=2から3倍してy=6、二乗して損失36を求める順伝播と、損失側から局所微分を掛けてxの勾配36を求める逆伝播。分岐では勾配を足す。</desc>
+                <defs>
+                    <marker id="opt-forward-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2780b8"/></marker>
+                    <marker id="opt-backward-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#d64545"/></marker>
+                </defs>
+                <rect x="18" y="18" width="924" height="424" rx="18" fill="#fbfdff" stroke="#c9d8e6"/>
+                <text x="45" y="52" font-size="20" font-weight="700" fill="#102a43">① 順伝播：入力から右へ計算し、損失を出す</text>
+                <g font-size="16" text-anchor="middle" fill="#102a43">
+                    <rect x="55" y="76" width="120" height="66" rx="10" fill="#eaf4fb" stroke="#2780b8" stroke-width="2"/><text x="115" y="105">入力</text><text x="115" y="130" font-weight="700">x = 2</text>
+                    <rect x="250" y="76" width="120" height="66" rx="10" fill="#fff7e3" stroke="#e3a11a" stroke-width="2"/><text x="310" y="105">この箱</text><text x="310" y="130" font-weight="700">× 3</text>
+                    <rect x="445" y="76" width="120" height="66" rx="10" fill="#eaf4fb" stroke="#2780b8" stroke-width="2"/><text x="505" y="105">中間値</text><text x="505" y="130" font-weight="700">y = 6</text>
+                    <rect x="640" y="76" width="120" height="66" rx="10" fill="#fff7e3" stroke="#e3a11a" stroke-width="2"/><text x="700" y="105">この箱</text><text x="700" y="130" font-weight="700">二乗</text>
+                    <rect x="815" y="76" width="100" height="66" rx="10" fill="#fdecec" stroke="#d64545" stroke-width="2"/><text x="865" y="105">損失</text><text x="865" y="130" font-weight="700">L = 36</text>
+                </g>
+                <g fill="none" stroke="#2780b8" stroke-width="3" marker-end="url(#opt-forward-arrow)">
+                    <path d="M175 109 H242"/><path d="M370 109 H437"/><path d="M565 109 H632"/><path d="M760 109 H807"/>
+                </g>
+                <text x="45" y="190" font-size="20" font-weight="700" fill="#102a43">② 逆伝播：損失側から「届いた勾配 × この箱の微分」</text>
+                <g font-size="15" text-anchor="middle" fill="#102a43">
+                    <rect x="55" y="218" width="130" height="72" rx="10" fill="#fdecec" stroke="#d64545" stroke-width="2"/><text x="120" y="247">入力側へ到着</text><text x="120" y="274" font-weight="700">∂L/∂x = 36</text>
+                    <rect x="250" y="218" width="130" height="72" rx="10" fill="#fff7e3" stroke="#e3a11a" stroke-width="2"/><text x="315" y="247">×3 の微分</text><text x="315" y="274" font-weight="700">3</text>
+                    <rect x="445" y="218" width="130" height="72" rx="10" fill="#fdecec" stroke="#d64545" stroke-width="2"/><text x="510" y="247">途中の勾配</text><text x="510" y="274" font-weight="700">∂L/∂y = 12</text>
+                    <rect x="640" y="218" width="130" height="72" rx="10" fill="#fff7e3" stroke="#e3a11a" stroke-width="2"/><text x="705" y="247">y² の微分</text><text x="705" y="274" font-weight="700">2y = 12</text>
+                    <rect x="815" y="218" width="100" height="72" rx="10" fill="#fdecec" stroke="#d64545" stroke-width="2"/><text x="865" y="247">出発点</text><text x="865" y="274" font-weight="700">1</text>
+                </g>
+                <g fill="none" stroke="#d64545" stroke-width="3" marker-end="url(#opt-backward-arrow)">
+                    <path d="M815 254 H778"/><path d="M640 254 H583"/><path d="M445 254 H388"/><path d="M250 254 H193"/>
+                </g>
+                <text x="480" y="319" font-size="17" text-anchor="middle" font-weight="700" fill="#d64545">直列は掛ける：1 × 12 × 3 = 36（連鎖律）</text>
+                <rect x="48" y="346" width="404" height="72" rx="12" fill="#f5f7fa" stroke="#c9d1dc"/>
+                <text x="68" y="373" font-size="16" font-weight="700" fill="#102a43">分岐は足す</text>
+                <text x="68" y="400" font-size="15" fill="#31465a">2経路から 2 と 3 が戻る → 合計勾配 2 + 3 = 5</text>
+                <rect x="492" y="346" width="420" height="72" rx="12" fill="#eef8f1" stroke="#69a97a"/>
+                <text x="512" y="373" font-size="16" font-weight="700" fill="#1c6b3d">自動微分がすること</text>
+                <text x="512" y="400" font-size="15" fill="#31465a">順伝播の箱を記録し、この掛け算・足し算を自動実行</text>
+            </svg>
+        </div>
+
+        <div class="optimization-test-point">
+            <strong>「デルタ」とは？</strong> $\\delta=\\partial L/\\partial z$ は、活性化前の値 $z$ に届いた誤差信号です。<br>
+            <strong>1サンプル・スカラーの最小例：</strong>$z=wx+b$ なら、$\\partial L/\\partial w=\\delta x$、$\\partial L/\\partial b=\\delta$、$\\partial L/\\partial x=\\delta w$。<br>
+            <strong>バッチ・行列：</strong>$\\partial L/\\partial W=X^T\\Delta$、$\\partial L/\\partial b=\\mathrm{sum}(\\Delta,\\,axis=0)$、$\\partial L/\\partial X=\\Delta W^T$。試験ではShapeや、どの軸を足すかを問われます。
+        </div>
         <table>
-            <tr><th>場面</th><th>ルール</th></tr>
-            <tr><td>直列の演算</td><td><strong>上流の勾配 × 局所微分</strong>（連鎖律）</td></tr>
-            <tr><td>同じ変数から分岐</td><td>各経路から戻る勾配を<strong>加算</strong></td></tr>
-            <tr><td>損失1個・パラメータ多数</td><td>出力から戻る<strong>逆モード自動微分</strong>が効率的</td></tr>
+            <tr><th>言葉</th><th>初心者向けの意味</th><th>試験で問われること</th></tr>
+            <tr><td><strong>誤差逆伝播</strong></td><td>損失への影響を、右から左へ戻す手順</td><td>直列は掛ける／分岐は足す</td></tr>
+            <tr><td><strong>自動微分</strong></td><td>計算グラフを記録し、逆伝播を自動計算</td><td>順伝播の記録→逆向き計算</td></tr>
+            <tr><td><strong>Optimizer</strong></td><td>得られた勾配を使って重みを更新</td><td>backwardとは別担当</td></tr>
         </table>
 
-        <h3>■ オプティマイザ図鑑（主要手法＋比較用参考）</h3>
+        <h3>■ オプティマイザは「何を記憶するか」で見分ける</h3>
+        <table class="optimization-keyword-table">
+            <tr><th>手法</th><th>一言キーワード</th><th>問題文の合図</th></tr>
+            <tr><td>SGD</td><td>今だけ</td><td>現在のミニバッチ勾配だけで更新</td></tr>
+            <tr><td>Momentum</td><td>慣性</td><td>過去の移動方向を残し、振動を抑える</td></tr>
+            <tr><td>NAG</td><td>先読み</td><td>慣性で進んだ先の位置で勾配を測る</td></tr>
+            <tr><td>AdaGrad</td><td>全履歴</td><td>勾配二乗を累積し、実効学習率が下がり続ける</td></tr>
+            <tr><td>RMSProp</td><td>古い履歴を忘れる</td><td>勾配二乗の指数移動平均</td></tr>
+            <tr><td>Adam</td><td>方向＋歩幅</td><td>一次・二次モーメント＋初期バイアス補正</td></tr>
+        </table>
+
+        <h3>■ オプティマイザの式（確認用）</h3>
         <p>2026シラバスの主要手法は、SGD、Momentum/NAG、AdaGrad、RMSProp、Adamです。式と特徴を同じ行で確認します。</p>
         <p><strong>共通記号：</strong>$w_t$＝現在の重み、$g_t$＝勾配、$\\eta$＝学習率、$t$＝更新回数</p>
         <table class="optimizer-formula-table">
@@ -192,7 +261,7 @@ window.quizData = {
                     <div class="optimizer-equation">$\\displaystyle G_t=G_{t-1}+g_t^2$</div>
                     <div class="optimizer-equation">$\\displaystyle w_{t+1}=w_t-\\frac{\\eta g_t}{\\sqrt{G_t}+\\varepsilon}$</div>
                     過去の勾配二乗を全て累積。<br>
-                    <span style="color:red;">⚠ 弱点:</span> 学習率が0になり<strong>止まる</strong>。
+                    <span style="color:red;">⚠ 弱点:</span> 実効学習率が下がり続け、更新が極端に小さくなって<strong>停滞しやすい</strong>。
                 </td>
             </tr>
             <tr>
@@ -211,21 +280,6 @@ window.quizData = {
                 </td>
             </tr>
             <tr>
-                <td><strong>Adadelta</strong><br>(アダデルタ)<br><small>比較用参考</small></td>
-                <td>
-                    <svg class="opt-icon" viewBox="0 0 80 50">
-                        <ellipse cx="70" cy="25" rx="5" ry="5" fill="#16a085" />
-                        <path d="M10,25 L40,25 L70,25" stroke="#16a085" class="path-line" />
-                    </svg>
-                </td>
-                <td>
-                    <strong>「学習率の設定不要」</strong><br>
-                    <div class="optimizer-equation">$\\displaystyle \\Delta w_t=-\\frac{\\mathrm{RMS}[\\Delta w]_{t-1}}{\\mathrm{RMS}[g]_t}\\,g_t$</div>
-                    <div class="optimizer-equation">$\\displaystyle w_{t+1}=w_t+\\Delta w_t$</div>
-                    RMSPropと似ているが、<strong>学習率ハイパーパラメータが存在しない</strong>（単位を揃える工夫で自動化）。
-                </td>
-            </tr>
-            <tr>
                 <td><strong>Adam</strong><br>(アダム)</td>
                 <td>
                     <svg class="opt-icon" viewBox="0 0 80 50">
@@ -241,14 +295,49 @@ window.quizData = {
                     <div class="optimizer-equation">$\\displaystyle w_{t+1}=w_t-\\frac{\\eta\\hat{m}_t}{\\sqrt{\\hat{v}_t}+\\varepsilon}$</div>
                     Momentum + RMSProp。<br>
                     学習初期は移動平均を<strong>バイアス補正</strong>。<br>
-                    今のデファクトスタンダード。
+                    広く用いられる代表的な適応的最適化手法。
                 </td>
             </tr>
         </table>
         <p><strong>式の注意：</strong>$\\varepsilon$ は0除算と数値不安定を防ぐ小さな定数です。Momentum/NAGは速度の符号定義によって式の＋・－が変わりますが、<strong>過去の移動方向を残す／先で勾配を見る</strong>という意味は同じです。</p>
 
-        <h3>■ 【暗記】初期化手法の鉄板セット</h3>
-        <p>Step 0（準備段階）で、乱数の「広がり具合（分散）」をどう決めるかです。</p>
+        <h3>■ Xavier・Heは「活性化関数」を見て選ぶ</h3>
+        <div class="optimization-visual-wrap">
+            <svg class="optimization-wide-svg" viewBox="0 0 960 430" role="img" aria-labelledby="opt-init-title opt-init-desc">
+                <title id="opt-init-title">Xavier初期化とHe初期化の選び方</title>
+                <desc id="opt-init-desc">sigmoidまたはtanhならXavier、ReLUならHeを選ぶ。Xavierはfan-inとfan-out、Heはfan-inを使う。標準偏差は分散の平方根。</desc>
+                <defs><marker id="opt-init-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#466681"/></marker></defs>
+                <rect x="18" y="18" width="924" height="394" rx="18" fill="#fbfdff" stroke="#c9d8e6"/>
+                <rect x="330" y="42" width="300" height="58" rx="12" fill="#102a43"/>
+                <text x="480" y="78" text-anchor="middle" font-size="19" font-weight="700" fill="#fff">最初に活性化関数を見る</text>
+                <g fill="none" stroke="#466681" stroke-width="3" marker-end="url(#opt-init-arrow)"><path d="M420 100 L280 150"/><path d="M540 100 L680 150"/></g>
+                <rect x="78" y="153" width="355" height="142" rx="15" fill="#eef6fc" stroke="#2780b8" stroke-width="2"/>
+                <text x="255" y="183" text-anchor="middle" font-size="19" font-weight="700" fill="#123f68">sigmoid／tanh → Xavier（Glorot）</text>
+                <text x="105" y="219" font-size="16" fill="#102a43">使う数：fan_in と fan_out</text>
+                <text x="105" y="251" font-size="18" font-weight="700" fill="#123f68">分散 = 2 / (fan_in + fan_out)</text>
+                <text x="105" y="278" font-size="14" fill="#31465a">入出力が同じ n のときだけ 1 / n</text>
+                <rect x="527" y="153" width="355" height="142" rx="15" fill="#fff5e8" stroke="#e39b24" stroke-width="2"/>
+                <text x="705" y="183" text-anchor="middle" font-size="19" font-weight="700" fill="#8a5100">ReLU → He（Kaiming）</text>
+                <text x="554" y="219" font-size="16" fill="#102a43">使う数：fan_in</text>
+                <text x="554" y="251" font-size="18" font-weight="700" fill="#8a5100">分散 = 2 / fan_in</text>
+                <text x="554" y="278" font-size="14" fill="#31465a">負側が0になるReLUの信号を補う</text>
+                <rect x="78" y="320" width="804" height="68" rx="12" fill="#f5f7fa" stroke="#c9d1dc"/>
+                <text x="102" y="347" font-size="16" font-weight="700" fill="#102a43">fan_in＝入力数　fan_out＝出力数</text>
+                <text x="102" y="374" font-size="15" fill="#31465a">例：Linear(100, 50) → fan_in=100、fan_out=50　／　標準偏差を聞かれたら √分散</text>
+            </svg>
+        </div>
+        <div class="optimization-test-point">
+            <strong>試験の解く順：</strong>① ReLUかsigmoid/tanhか → ② $fan_{in}$・$fan_{out}$ を読む → ③ 分散か標準偏差か → ④ 必要なら平方根。<br>
+            <strong>重みが小さすぎる</strong>と信号・勾配が消え、<strong>大きすぎる</strong>と爆発しやすいため、適度な広がりを保つのが初期化の目的です。
+        </div>
+        <table>
+            <tr><th>例：$fan_{in}=fan_{out}=100$</th><th>分散</th><th>標準偏差</th></tr>
+            <tr><td>Xavier</td><td>$2/(100+100)=0.01$</td><td>$\\sqrt{0.01}=0.1$</td></tr>
+            <tr><td>He</td><td>$2/100=0.02$</td><td>$\\sqrt{0.02}\\approx0.141$</td></tr>
+        </table>
+
+        <h3>■ Xavier・Heの式（確認用）</h3>
+        <p>Step 0（準備段階）で、乱数の「広がり具合（分散）」を決めます。一様分布の上下限は、分散式を理解した後に確認します。</p>
         <p><strong>共通記号：</strong>$fan_{in}$＝入力数、$fan_{out}$＝出力数、$\\mathrm{Var}(w)$＝分散、$\\sigma$＝標準偏差</p>
         <table class="initialization-formula-table">
             <tr><th>初期化手法</th><th>相性の良い関数</th><th>式・特徴</th></tr>
@@ -278,19 +367,23 @@ window.quizData = {
                 </td>
             </tr>
         </table>
-        <p><strong>試験の確認順：</strong>① XavierかHeか → ② 正規分布か一様分布か → ③ 問われているのは<strong>分散</strong>か<strong>標準偏差</strong>か。</p>
+        <p><strong>最重要：</strong>Xavierの $1/n$ は、$fan_{in}=fan_{out}=n$ の場合だけ使える簡略形です。一般形は $2/(fan_{in}+fan_{out})$ です。</p>
 
         <h3>■ 最後はこの表だけ</h3>
         <table>
             <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
+            <tr><td>全データで1回の勾配</td><td><strong>バッチ学習／最急降下法</strong></td><td>1回の計算・メモリ負荷が大きい。</td></tr>
+            <tr><td>一部データをまとめて更新</td><td><strong>ミニバッチ学習</strong></td><td>計算効率と勾配の揺らぎを両立する。</td></tr>
+            <tr><td>更新の歩幅 $\\eta$</td><td><strong>学習率</strong></td><td>大きすぎると振動・発散、小さすぎると遅い。</td></tr>
             <tr><td>現在のミニバッチ勾配だけで更新</td><td><strong>SGD</strong><br><small>Stochastic Gradient Descent（確率的勾配降下法）</small></td><td>$w\\leftarrow w-\\eta g$。細長い谷ではジグザグしやすい。</td></tr>
             <tr><td>過去の移動方向を慣性として蓄積</td><td><strong>Momentum</strong></td><td>振動を打ち消し、同じ方向へ加速する。</td></tr>
             <tr><td>一歩先の位置で勾配を見る</td><td><strong>NAG</strong><br><small>Nesterov Accelerated Gradient</small></td><td>Momentumを先読みして修正する。</td></tr>
             <tr><td>過去の勾配二乗を累積</td><td><strong>AdaGrad</strong><br><small>Adaptive Gradient</small></td><td>スパース勾配に強いが、学習率が下がり続ける。</td></tr>
             <tr><td>勾配二乗の移動平均で割る</td><td><strong>RMSProp</strong><br><small>Root Mean Square Propagation</small></td><td>AdaGradの古い履歴を忘れ、停滞を抑える。</td></tr>
             <tr><td>一次・二次モーメント＋初期バイアス補正</td><td><strong>Adam</strong><br><small>Adaptive Moment Estimation</small></td><td>MomentumとRMSPropの考えを組み合わせる。</td></tr>
-            <tr><td>直列演算の勾配</td><td><strong>連鎖律：掛ける</strong></td><td>上流の勾配×その演算の局所微分。</td></tr>
+            <tr><td>直列演算の勾配</td><td><strong>連鎖律：掛ける</strong></td><td>損失側から届いた勾配×その箱の微分。</td></tr>
             <tr><td>同じ変数から分岐した勾配</td><td><strong>各経路を加算</strong></td><td>変数への総影響をすべて足す。</td></tr>
+            <tr><td>$z=wx+b$ の誤差信号</td><td><strong>$\\delta=\\partial L/\\partial z$</strong></td><td>$\\partial L/\\partial w=\\delta x$。</td></tr>
             <tr><td>損失1個から多数パラメータへ戻る</td><td><strong>逆モード自動微分</strong></td><td>出力側から1回戻ると全勾配を効率よく得られる。</td></tr>
             <tr><td>Sigmoid／tanhと相性</td><td><strong>Xavier（Glorot）初期化</strong></td><td>入出力の分散を保ち、飽和を抑える。</td></tr>
             <tr><td>ReLUと相性／$fan_{in}$が与えられる</td><td><strong>He（Kaiming）初期化</strong></td><td>分散$2/fan_{in}$、標準偏差$\\sqrt{2/fan_{in}}$。</td></tr>
@@ -300,19 +393,19 @@ window.quizData = {
 
     questions: [
         // ---------------------------------------------------------
-        // 【基礎編】 Q1 - Q15
+        // 【基礎編】
         // ---------------------------------------------------------
         {
             category: "初期化手法",
             question: "活性化関数に「ReLU」を用いる場合、重みの初期値として最も適切なものはどれか。",
             options: ["Heの初期値", "Xavier (Glorot) の初期値", "標準偏差0.01のガウス分布", "全ての重みを0にする"],
             answer: 0,
-            explanation: "ReLUは負の領域で0になるため、Xavierの初期値では分散が小さくなりすぎて勾配消失を招きます。分散を2倍にした「Heの初期値」を使います。"
+            explanation: "ReLUでは負側の出力が0になるため、その影響を補って信号の広がりを保ちやすいHe初期化が適します。試験の合図は「ReLU→He」です。"
         },
         {
             category: "初期化手法",
             question: "活性化関数に「Sigmoid」または「Tanh」を用いる場合、最も適切な重みの初期値はどれか。",
-            options: ["Heの初期値", "Xavier (Glorot) の初期値", "一様分布", "全ての重みを1にする"],
+            options: ["Heの初期値", "Xavier (Glorot) の初期値", "分散1で固定した一様分布", "全ての重みを1にする"],
             answer: 1,
             explanation: "S字型の関数にはXavier（Glorot）の初期値が適しています。正規分布では分散 $2/(fan_{in}+fan_{out})$ を使い、入出力数が同じ $n$ なら $1/n$ になります。"
         },
@@ -321,28 +414,28 @@ window.quizData = {
             question: "SGD（確率的勾配降下法）の更新式において、パラメータ更新の「歩幅」を決めるハイパーパラメータ $\\eta$ を何と呼ぶか。",
             options: ["学習率 (Learning Rate)", "モーメンタム (Momentum)", "減衰率 (Decay Rate)", "バッチサイズ (Batch Size)"],
             answer: 0,
-            explanation: "勾配方向にどれだけ進むかを決める係数です。大きすぎると発散し、小さすぎると収束しません。"
+            explanation: "勾配方向にどれだけ進むかを決める係数です。大きすぎると振動・発散しやすく、小さすぎると学習が極端に遅くなります。"
         },
         {
             category: "誤差逆伝播法",
             question: "誤差逆伝播法（Backpropagation）において、微分を効率よく計算するために利用される数学的な性質はどれか。",
             options: ["連鎖律 (Chain Rule)", "積分法", "二分探索", "最短経路法"],
             answer: 0,
-            explanation: "合成関数の微分は、各関数の微分の積で表せる（$\\frac{\\partial L}{\\partial x} = \\frac{\\partial L}{\\partial y} \\frac{\\partial y}{\\partial x}$）という性質を利用して、出力層から入力層へ勾配を伝播させます。"
+            explanation: "合成関数では、損失側から届いた勾配に「その箱の微分」を掛けます。式では $\\frac{\\partial L}{\\partial x}=\\frac{\\partial L}{\\partial y}\\frac{\\partial y}{\\partial x}$ です。この掛け算を出力側から繰り返します。"
         },
         {
             category: "Adam",
-            question: "現在主流の最適化手法である「Adam」は、既存のどの2つの手法の利点を組み合わせたものか。",
-            options: ["Momentum と RMSProp", "AdaGrad と RMSProp", "SGD と Momentum", "Momentum と AdaGrad"],
+            question: "Adamの「一次モーメント」と「二次モーメント」の役割を説明する組み合わせとして、最も適切なものはどれか。",
+            options: ["一次はMomentum的な方向、二次はRMSProp的な歩幅調整", "一次はXavier、二次はHe", "一次はDropout、二次はBatchNorm", "一次は誤差逆伝播、二次はデータ拡張"],
             answer: 0,
-            explanation: "「慣性（Momentum）」で振動を抑えつつ、「RMSProp」の仕組みでパラメータごとに学習率を調整する、両者のいいとこ取りをした手法です。"
+            explanation: "Adamは一次モーメントで勾配の方向を平滑化し、二次モーメントでパラメータごとの歩幅を調整します。試験では「方向＋歩幅＋初期バイアス補正」が合図です。"
         },
         {
             category: "AdaGrad",
             question: "AdaGradの最大の特徴であり、同時に欠点（学習が停滞する原因）ともなり得るのはどれか。",
             options: ["過去の勾配の二乗和を累積し、学習率を徐々に小さくする", "慣性項を用いて、過去の移動方向を維持する", "勾配の符号のみを利用する", "学習率をランダムに変化させる"],
             answer: 0,
-            explanation: "「よく学習したパラメータの学習率は下げる」という適応的な調整を行いますが、二乗和が無限に増えるため、最終的に学習率がほぼ0になり更新が止まってしまいます。"
+            explanation: "「よく更新されたパラメータの実効学習率を下げる」という適応的な調整です。ただし勾配二乗和を累積し続けるため、実効学習率が極端に小さくなって停滞しやすい点が弱点です。"
         },
         {
             category: "ミニバッチ学習",
@@ -370,14 +463,14 @@ window.quizData = {
             question: "PyTorchやTensorFlowなどのフレームワークで採用されている、計算グラフを構築して勾配を自動的に求める仕組みを何と呼ぶか。",
             options: ["自動微分 (Automatic Differentiation)", "数値微分", "記号微分", "有限差分法"],
             answer: 0,
-            explanation: "Define-by-Runなどの方式で計算の過程をグラフとして記録し、逆伝播（Backprop）を自動化する技術です。"
+            explanation: "順伝播時に「どの演算を、どの順で行ったか」と中間値を計算グラフへ記録し、backward時に各箱の微分を掛けながら逆向きにたどります。手計算の連鎖律をフレームワークが自動実行する仕組みです。"
         },
         {
             category: "RMSProp",
             question: "RMSPropがAdaGradの弱点を克服するために導入した仕組みは何か。",
-            options: ["過去の勾配情報の「指数移動平均」をとり、古い情報を徐々に忘れる", "学習率を固定した", "慣性項を追加した", "勾配を正規化した"],
+            options: ["過去の勾配二乗の「指数移動平均」をとり、古い情報を徐々に忘れる", "学習率を固定した", "慣性項を追加した", "勾配を正規化した"],
             answer: 0,
-            explanation: "古い勾配情報を減衰率（$\\rho$など）で消していくため、分母が無限大にならず、学習を継続できます。"
+            explanation: "古い勾配二乗の履歴を減衰させ、AdaGradのように二乗和を一方向へ累積し続けないため、実効学習率の過度な低下を抑えます。生の勾配の移動平均を使うMomentumとの違いも押さえましょう。"
         },
         {
             category: "Nesterov (NAG)",
@@ -385,13 +478,6 @@ window.quizData = {
             options: ["「現在位置」ではなく、「慣性で進んだ先（未来の位置）」での勾配を使って補正する", "過去の勾配を忘れるようにした", "学習率を自動調整した", "重みをランダムにリセットした"],
             answer: 0,
             explanation: "「どうせそっちに行くなら、行った先でブレーキをかけるか判断しよう」という先読みの考え方を取り入れています。"
-        },
-        {
-            category: "Adadelta",
-            question: "Adadeltaの最大の特徴（ユーザーにとっての利点）は何か。",
-            options: ["学習率（Learning Rate）のハイパーパラメータを設定する必要がない", "計算が最も速い", "メモリを使わない", "GPUが不要"],
-            answer: 0,
-            explanation: "Adadeltaは単位（次元）を整える過程で学習率の項が消去されており、デフォルト設定でうまく動くように設計されています。"
         },
         {
             category: "初期化のタイミング",
@@ -403,34 +489,20 @@ window.quizData = {
         {
             category: "バッチ学習",
             question: "全データを一度に使ってパラメータを1回更新する「バッチ学習（最急降下法）」のデメリットは何か。",
-            options: ["データ量が多いと計算コストが膨大になり、局所解に陥りやすい", "計算が不安定になる", "並列化できない", "メモリを使わない"],
+            options: ["1回の更新に必要な計算量・メモリが大きく、更新頻度も低くなる", "必ず計算が不安定になる", "行列演算で並列化できない", "メモリを全く使わない"],
             answer: 0,
-            explanation: "計算は安定しますが、重すぎて実用的でなく、また確率的な揺らぎがないため局所解から抜け出しにくいです。"
+            explanation: "全データから正確な勾配を求められる一方、1回の更新が重く、次の更新まで時間がかかります。大規模データではミニバッチが実用的です。"
         },
 
         // ---------------------------------------------------------
-        // 【応用編】 Q16 - Q30
+        // 【応用編】
         // ---------------------------------------------------------
-        {
-            category: "鞍点 (Saddle Point)",
-            question: "SGDの欠点の一つとして「鞍点（あんてん）」で学習が停滞しやすいことが挙げられる。鞍点とはどのような状態か。",
-            options: ["ある方向から見れば極小だが、別の方向から見れば極大になっている（馬の鞍のような）点", "勾配が無限大になる点", "損失が0になる点", "学習率が大きすぎる状態"],
-            answer: 0,
-            explanation: "勾配が0に近い平坦な場所ですが、最小値ではありません。SGDは勾配0で止まってしまいますが、Momentumなどは勢いでここを突破できます。"
-        },
         {
             category: "Heの初期値の分散",
             question: "Heの初期値において、前の層のノード数を $n$ としたとき、重みの分散 $\\sigma^2$ はどのように設定されるか。",
             options: ["$\\frac{2}{n}$", "$\\frac{1}{n}$", "$\\frac{1}{\\sqrt{n}}$", "$n$"],
             answer: 0,
-            explanation: "Xavierは $\\frac{1}{n}$ ですが、HeはReLUで半分消えることを考慮して2倍の $\\frac{2}{n}$ に設定します。"
-        },
-        {
-            category: "Adadeltaの単位",
-            question: "AdadeltaがSGDやAdaGradと理論的に異なる点として、「単位（次元）の整合性」がある。通常のSGDの更新式の単位はどうなっているか。",
-            options: ["更新量の単位が「重みの単位」と一致していない（勾配の逆数になっている）", "更新量の単位が「重みの単位」と一致している", "単位が存在しない", "時間の単位になっている"],
-            answer: 0,
-            explanation: "通常のSGD ($w - \\eta \\frac{\\partial L}{\\partial w}$) は、単位を見ると次元が合っていません。Adadeltaはヘッセ行列の近似を用いることで、この次元不整合を解消しています。"
+            explanation: "He初期化はReLUの負側が0になる影響を補うため、$fan_{in}=n$なら分散を$2/n$とします。Xavierの$1/n$は$fan_{in}=fan_{out}=n$の場合の簡略形です。"
         },
         {
             category: "Adamのハイパーパラメータ",
@@ -442,7 +514,7 @@ window.quizData = {
         {
             category: "スパースデータ",
             question: "自然言語処理など、出現頻度が低い単語（スパースデータ）が多いタスクにおいて、SGDよりもAdaGradやAdamが有利とされる理由は何か。",
-            options: ["頻繁に出現するパラメータの学習率は下げ、滅多に出ない（重要な）パラメータの学習率を大きく保てるから", "計算速度が速いから", "メモリ消費が少ないから", "初期値に依存しないから"],
+            options: ["頻繁に更新されるパラメータの学習率は下げ、滅多に更新されないパラメータの実効学習率を大きく保てるから", "計算速度が必ず最速になるから", "メモリ消費が必ず最小になるから", "初期値に依存しなくなるから"],
             answer: 0,
             explanation: "適応的学習率の手法は、パラメータごとに学習率を変えられるため、更新回数が少ないレアな特徴量もしっかり学習できます。"
         },
@@ -455,10 +527,10 @@ window.quizData = {
         },
         {
             category: "Nesterovの数式イメージ",
-            question: "通常のMomentumの更新量が $-\\eta \\nabla E(w_t)$ を含むのに対し、Nesterov (NAG) はどのような勾配を使うか。",
-            options: ["$-\\eta \\nabla E(w_t + \\alpha v_t)$ （慣性で進んだ先での勾配）", "$-\\eta \\nabla E(w_t - \\alpha v_t)$ （過去の位置での勾配）", "$-\\eta \\nabla E(w_0)$ （初期位置での勾配）", "勾配を使わない"],
+            question: "符号込みの前回更新量を$\\Delta w_{t-1}$とし、$\\Delta w_t=\\alpha\\Delta w_{t-1}-\\eta\\nabla E(\\cdot)$と定義する。Nesterov (NAG) が勾配を測る位置はどれか。",
+            options: ["$w_t+\\alpha\\Delta w_{t-1}$（慣性で進んだ先）", "$w_t$（現在位置だけ）", "$w_0$（初期位置）", "勾配を測らない"],
             answer: 0,
-            explanation: "$w_t + \\alpha v_t$ は「今の勢いで進んだら到達するはずの未来の場所」です。そこで勾配を測ることで、賢くブレーキをかけます。"
+            explanation: "前回の更新量$\\Delta w_{t-1}$は進行方向の符号を含みます。したがって先読み位置は$w_t+\\alpha\\Delta w_{t-1}$です。そこで勾配を測り、行き過ぎを早めに補正します。"
         },
         {
             category: "重みの対称性",
@@ -467,63 +539,14 @@ window.quizData = {
             answer: 0,
             explanation: "みんな同じ値だと、みんな同じ修正を受けるため、結局1つのニューロンがあるのと同じ表現力しか持てなくなります。だから「乱数」が必要です。"
         },
-        {
-            category: "大域的最適解",
-            question: "ディープラーニングの最適化において、真の最小値である「大域的最適解（Global Minima）」に到達することは保証されているか。",
-            options: ["保証されていない（多くの局所解が存在する非凸関数であるため）", "保証されている（SGDを使えば必ず到達する）", "保証されている（Adamを使えば必ず到達する）", "凸関数なので保証されている"],
-            answer: 0,
-            explanation: "DLの損失関数は複雑な凸凹（非凸）なので、局所解（Local Minima）にハマる可能性があります。しかし、高次元空間では局所解も十分に良い値であることが多いです。"
-        },
-        {
-            category: "学習率の減衰",
-            question: "学習の後半で、オプティマイザの自動調整とは別に「Learning Rate Decay（学習率減衰）」を行う主な目的は何か。",
-            options: ["最適解の付近で振動せず、底に収束させるため", "学習を早く終わらせるため", "過学習を防ぐため", "初期化の影響を消すため"],
-            answer: 0,
-            explanation: "ある程度近づいたら、歩幅（学習率）を小さくしないと、正解の周りをうろうろ飛び跳ねてしまい、着地できません。"
-        },
-        {
-            category: "Warmup",
-            question: "学習の最初期に学習率を非常に小さく設定し、徐々に大きくしていく「Warmup」戦略の目的は何か。",
-            options: ["学習初期の不安定な勾配による急激なパラメータ変動を防ぎ、安定したスタートを切るため", "学習時間を短縮するため", "過学習を防ぐため", "データのノイズを除去するため"],
-            answer: 0,
-            explanation: "Adamなどは初期に不安定になりやすいため、最初はそっと動かし、安定してから本来の学習率まで上げることで、最終的な精度が向上することがあります。"
-        },
-        {
-            category: "Rprop",
-            question: "Rprop（Resilient Propagation）は勾配の「符号」のみを用いて更新する手法だが、なぜディープラーニング（特にミニバッチ学習）ではあまり使われないのか。",
-            options: ["バッチごとの勾配のノイズに弱く、ミニバッチ学習と相性が悪いから（フルバッチ向き）", "計算量が多すぎるから", "メモリを使いすぎるから", "学習率の設定が難しいから"],
-            answer: 0,
-            explanation: "Rpropは勾配の大きさ（信頼度）を無視して符号だけで全速力で進むため、ノイズの多いミニバッチ学習では暴れてしまい、うまく収束しません。"
-        },
-        {
-            category: "AdamW",
-            question: "Adamの改良版である「AdamW」は、通常のAdamと何が違うか。",
-            options: ["Weight Decay（重み減衰）を、勾配の更新とは独立して（Decoupled）適用する", "学習率を固定する", "Momentumを使わない", "L1正則化を使う"],
-            answer: 0,
-            explanation: "Adamでは勾配へ加えたL2項も適応的学習率で拡大・縮小されるため、単純なL2正則化とWeight Decayが等価になりません。AdamWは重み減衰を勾配更新から分離して適用します。"
-        },
-        {
-            category: "Lookahead",
-            question: "「Lookahead」オプティマイザの動作原理として正しいものはどれか。",
-            options: ["「速い重み（Adam等で更新）」と「遅い重み（指数移動平均）」を持ち、速い重みが先行して探索し、遅い重みが安定してそれを追いかける", "未来の勾配を予測する", "学習率を自動調整する", "勾配の二乗和を使う"],
-            answer: 0,
-            explanation: "「k歩進んでから、元の場所との中間地点に戻る」ような動きをすることで、局所解からの脱出と安定性を両立させるメタオプティマイザです。"
-        },
-        {
-            category: "勾配のスパース化",
-            question: "L1正則化（Lasso）を行うと、最適化の結果としてパラメータにどのような特徴が現れるか。",
-            options: ["多くのパラメータが完全に「0」になり、モデルがスパース（疎）になる", "全てのパラメータが均等に小さくなる", "パラメータが大きくなる", "パラメータが正規分布に従う"],
-            answer: 0,
-            explanation: "L1ノルムの等高線はひし形（尖っている）ため、軸上（値が0）で解が決まりやすく、不要な特徴量を削除（特徴量選択）する効果があります。"
-        },
-        {id:"opt-sgd-step-calc",category:"SGD(計算)",question:"重み$w=2$、勾配$g=3$、学習率$\\eta=0.1$のSGD更新後のwはどれか。",options:["1.7","2.3","1.9","-1"],answer:0,explanation:"$w←w-ηg=2-0.1×3=1.7$です。勾配と逆向きへ進みます。"},
-        {id:"opt-momentum-calc",category:"Momentum(計算)",question:"$v_t=0.9v_{t-1}+g_t$、$v_{t-1}=2,g_t=1$なら$v_t$はいくつか。",options:["2.8","1.9","3","1.8"],answer:0,explanation:"$0.9×2+1=2.8$です。過去の方向を慣性として残します。"},
-        {id:"opt-adagrad-calc",category:"AdaGrad(計算)",question:"AdaGradで過去の勾配二乗和が$G=9$、現在勾配$g=3$、学習率1、$\\epsilon$無視の更新量の大きさはどれか。",options:["1","3","1/3","9"],answer:0,explanation:"更新量は$ηg/√G=3/3=1$です。二乗和が増えるほど実効学習率が下がります。"},
-        {id:"opt-rmsprop-calc",category:"RMSProp(計算)",question:"RMSPropの二乗勾配移動平均$v_t=0.9v_{t-1}+0.1g_t^2$で、$v_{t-1}=4,g_t=2$なら$v_t$はどれか。",options:["4","3.6","4.4","2"],answer:0,explanation:"$0.9×4+0.1×4=4$です。過去全てを単純累積せず指数移動平均を使います。"},
-        {id:"opt-adam-first",category:"Adam(計算)",question:"Adamの一次モーメント$m_t=0.9m_{t-1}+0.1g_t$で、$m_{t-1}=0,g_t=5$なら$m_t$はどれか。",options:["0.5","5","4.5","0.1"],answer:0,explanation:"$0.9×0+0.1×5=0.5$です。実際は初期バイアス補正も行います。"},
-        {id:"opt-chain-rule-calc",category:"連鎖律(計算)",question:"$y=x^2,z=3y$のとき$x=2$での$dz/dx$はいくつか。",options:["12","6","4","3"],answer:0,explanation:"$dz/dx=(dz/dy)(dy/dx)=3×2x=3×4=12$です。"},
-        {id:"opt-xavier-var",category:"Xavier初期化(計算)",question:"単純化したXavier初期化で分散を$1/n_{in}$とすると、$n_{in}=100$での分散はどれか。",options:["0.01","0.1","1","100"],answer:0,explanation:"$1/100=0.01$です。tanh等で信号分散を保つ狙いがあります。"},
-        {id:"opt-he-var",category:"He初期化(計算)",question:"He初期化で分散を$2/n_{in}$とすると、$n_{in}=100$での分散はどれか。",options:["0.02","0.01","0.2","2"],answer:0,explanation:"$2/100=0.02$です。ReLUで負側が消える影響を補います。"},
+        {id:"opt-sgd-step-calc",category:"SGD(計算)",kind:"計算",question:"重み$w=2$、勾配$g=3$、学習率$\\eta=0.1$のSGD更新後のwはどれか。",options:["1.7","2.3","1.9","-1"],answer:0,explanation:"<strong>使う公式：</strong>$w_{new}=w-\\eta g$。<br><strong>代入：</strong>$2-0.1×3=1.7$。<br><strong>答え：</strong>1.7です。勾配と逆向きへ進みます。"},
+        {id:"opt-momentum-calc",category:"Momentum(計算)",kind:"計算",question:"$v_t=0.9v_{t-1}+g_t$、$v_{t-1}=2,g_t=1$なら$v_t$はいくつか。",options:["2.8","1.9","3","1.8"],answer:0,explanation:"<strong>使う公式：</strong>$v_t=0.9v_{t-1}+g_t$。<br><strong>代入：</strong>$0.9×2+1=2.8$。<br><strong>答え：</strong>2.8です。過去の方向を慣性として残します。"},
+        {id:"opt-adagrad-calc",category:"AdaGrad(計算)",kind:"計算",question:"AdaGradで今回の更新に使う累積二乗和が$G_t=9$、現在勾配$g_t=3$、学習率1、$\\epsilon$無視の更新量の大きさはどれか。",options:["1","3","1/3","9"],answer:0,explanation:"<strong>使う公式：</strong>更新量の大きさは$\\eta g_t/\\sqrt{G_t}$。<br><strong>代入：</strong>$1×3/\\sqrt{9}=3/3=1$。<br><strong>答え：</strong>1です。累積値が増えるほど実効学習率が下がります。"},
+        {id:"opt-rmsprop-calc",category:"RMSProp(計算)",kind:"計算",question:"RMSPropの二乗勾配移動平均$v_t=0.9v_{t-1}+0.1g_t^2$で、$v_{t-1}=4,g_t=2$なら$v_t$はどれか。",options:["4","3.6","4.4","2"],answer:0,explanation:"<strong>使う公式：</strong>$v_t=0.9v_{t-1}+0.1g_t^2$。<br><strong>代入：</strong>$0.9×4+0.1×2^2=3.6+0.4=4$。<br><strong>答え：</strong>4です。古い履歴を徐々に忘れる移動平均です。"},
+        {id:"opt-adam-first",category:"Adam(計算)",kind:"計算",question:"Adamの一次モーメント$m_t=0.9m_{t-1}+0.1g_t$で、$m_{t-1}=0,g_t=5$なら$m_t$はどれか。",options:["0.5","5","4.5","0.1"],answer:0,explanation:"<strong>使う公式：</strong>$m_t=0.9m_{t-1}+0.1g_t$。<br><strong>代入：</strong>$0.9×0+0.1×5=0.5$。<br><strong>答え：</strong>0.5です。実際のAdamは初期バイアス補正も行います。"},
+        {id:"opt-chain-rule-calc",category:"連鎖律(計算)",kind:"計算",question:"$y=x^2,z=3y$のとき$x=2$での$dz/dx$はいくつか。",options:["12","6","4","3"],answer:0,explanation:"<strong>使う公式：</strong>$dz/dx=(dz/dy)(dy/dx)$。<br><strong>局所微分：</strong>$dz/dy=3$、$dy/dx=2x$。<br><strong>代入：</strong>$3×(2×2)=12$。答えは12です。"},
+        {id:"opt-xavier-var",category:"Xavier初期化(計算)",kind:"計算",question:"Xavier初期化で$fan_{in}=fan_{out}=100$のとき、重みの分散はどれか。",options:["0.01","0.1","1","100"],answer:0,explanation:"<strong>使う公式：</strong>$\\mathrm{Var}(w)=2/(fan_{in}+fan_{out})$。<br><strong>代入：</strong>$2/(100+100)=2/200=0.01$。<br><strong>答え：</strong>0.01です。$1/n$は入出力数が同じときだけの簡略形です。"},
+        {id:"opt-he-var",category:"He初期化(計算)",kind:"計算",question:"He初期化で分散を$2/fan_{in}$とすると、$fan_{in}=100$での分散はどれか。",options:["0.02","0.01","0.2","2"],answer:0,explanation:"<strong>使う公式：</strong>$\\mathrm{Var}(w)=2/fan_{in}$。<br><strong>代入：</strong>$2/100=0.02$。<br><strong>答え：</strong>0.02です。ReLUで負側が0になる影響を補います。"},
 
         // ---------------------------------------------------------
         // 【2026シラバス補強】病的曲率・逆伝播・Adam・初期化
@@ -546,7 +569,7 @@ window.quizData = {
             question: "訓練データ1,000件をバッチサイズ100で学習する。1エポックで全データを1回ずつ使い、3エポック学習したとき、パラメータ更新は合計何回か。",
             options: ["3回", "10回", "30回", "300回"],
             answer: 2,
-            explanation: "1エポックの更新回数は $1000÷100=10$回です。3エポックなので $10×3=30$回更新します。",
+            explanation: "<strong>使う公式：</strong>更新回数＝$\\lceil$データ数÷バッチサイズ$\\rceil×$エポック数。<br><strong>代入：</strong>$(1000÷100)×3=10×3=30$。<br><strong>答え：</strong>30回です。",
             trap: "エポック数は全データを何周するか、バッチサイズは1回の更新に使う件数です。"
         },
         {
@@ -557,7 +580,7 @@ window.quizData = {
             question: "$a=wx+b$、$L=a²$ とする。$w=3, x=2, b=1$ のとき、$∂L/∂w$ はいくつか。",
             options: ["7", "14", "28", "49"],
             answer: 2,
-            explanation: "順伝播で $a=3×2+1=7$。局所微分は $∂L/∂a=2a=14$ と $∂a/∂w=x=2$ です。連鎖律より $∂L/∂w=14×2=28$ です。",
+            explanation: "<strong>使う公式：</strong>$\\partial L/\\partial w=(\\partial L/\\partial a)(\\partial a/\\partial w)$。<br><strong>順伝播：</strong>$a=3×2+1=7$。<br><strong>局所微分：</strong>$\\partial L/\\partial a=2a=14$、$\\partial a/\\partial w=x=2$。<br><strong>答え：</strong>$14×2=28$です。",
             explanationFigure: optimizationExplanationFigures.chainRule
         },
         {
@@ -568,7 +591,7 @@ window.quizData = {
             question: "計算グラフで変数 $x$ が2つの経路へ分岐し、逆伝播で各経路から $∂L/∂x=2$ と $3$ が戻ってきた。$x$ に対する合計勾配はいくつか。",
             options: ["1", "5", "6", "9"],
             answer: 1,
-            explanation: "同じ変数から分岐した経路の寄与は加算するため、$2+3=5$ です。直列では微分を掛け、分岐の合流では勾配を足します。",
+            explanation: "<strong>使うルール：</strong>同じ変数へ戻る分岐の勾配は加算。<br><strong>代入：</strong>$2+3=5$。<br><strong>答え：</strong>5です。直列では掛け、分岐の合流では足します。",
             explanationFigure: optimizationExplanationFigures.chainRule
         },
         {
@@ -588,7 +611,7 @@ window.quizData = {
             question: "Adamの一次モーメントを $m_1=β_1m_0+(1-β_1)g_1$ とする。$m_0=0, β_1=0.9, g_1=4$ のとき、補正後 $m_1/(1-β_1)$ はいくつか。",
             options: ["0.4", "3.6", "4", "40"],
             answer: 2,
-            explanation: "まず $m_1=0.9×0+0.1×4=0.4$。初回の補正は $0.4/(1-0.9)=0.4/0.1=4$ です。",
+            explanation: "<strong>使う公式：</strong>$m_1=β_1m_0+(1-β_1)g_1$、補正後$=m_1/(1-β_1)$。<br><strong>代入：</strong>$m_1=0.9×0+0.1×4=0.4$、$0.4/(1-0.9)=4$。<br><strong>答え：</strong>4です。",
             explanationFigure: optimizationExplanationFigures.adamBiasCorrection
         },
         {
@@ -608,7 +631,7 @@ window.quizData = {
             question: "Glorot正規初期化の分散を $2/(fan_{in}+fan_{out})$ とする。$fan_{in}=100, fan_{out}=50$ のとき分散はどれか。",
             options: ["1/150", "1/100", "1/75", "2/50"],
             answer: 2,
-            explanation: "$2/(100+50)=2/150=1/75≈0.0133$ です。$1/n$ はfan-inとfan-outが等しい場合の簡略形です。"
+            explanation: "<strong>使う公式：</strong>$\\mathrm{Var}(w)=2/(fan_{in}+fan_{out})$。<br><strong>代入：</strong>$2/(100+50)=2/150=1/75\\approx0.0133$。<br><strong>答え：</strong>$1/75$です。$1/n$は入出力数が等しい場合だけの簡略形です。"
         },
         {
             id: "opt-he-standard-deviation",
@@ -618,7 +641,7 @@ window.quizData = {
             question: "He正規初期化で分散が $2/fan_{in}$ のとき、$fan_{in}=200$ における標準偏差はいくつか。",
             options: ["0.01", "0.1", "1", "10"],
             answer: 1,
-            explanation: "分散は $2/200=0.01$。標準偏差はその平方根なので $√0.01=0.1$ です。",
+            explanation: "<strong>使う公式：</strong>Heの分散$=2/fan_{in}$、標準偏差$=\\sqrt{\\mathrm{Var}(w)}$。<br><strong>代入：</strong>分散$=2/200=0.01$、標準偏差$=\\sqrt{0.01}=0.1$。<br><strong>答え：</strong>0.1です。",
             explanationFigure: optimizationExplanationFigures.initializationVariance,
             trap: "分散0.01をそのまま標準偏差と答えないようにします。"
         },
@@ -636,10 +659,49 @@ window.quizData = {
             category: "勾配消失（計算）",
             kind: "計算",
             difficulty: "標準",
-            question: "逆伝播で局所微分0.5を4回連続して掛ける。上流の勾配が1なら、入力側へ届く勾配はいくつか。",
+            question: "逆伝播で局所微分0.5を4回連続して掛ける。損失側から届いた勾配が1なら、入力側へ届く勾配はいくつか。",
             options: ["0.0625", "0.125", "0.25", "2"],
             answer: 0,
-            explanation: "$1×0.5⁴=1/16=0.0625$ です。1より小さい微分を深い層で繰り返し掛けると、入力側の勾配が急速に小さくなります。"
+            explanation: "<strong>使う公式：</strong>直列の勾配は局所微分を掛ける。<br><strong>代入：</strong>$1×0.5^4=1/16=0.0625$。<br><strong>答え：</strong>0.0625です。1より小さい微分を繰り返し掛けると勾配消失につながります。"
+        },
+        {
+            id: "opt-delta-weight-gradient",
+            category: "誤差逆伝播・デルタ（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "$z=wx+b$で、デルタ$\\delta=\\partial L/\\partial z=4$、入力$x=3$とする。$\\partial L/\\partial w$はいくつか。",
+            options: ["12", "7", "4/3", "1"],
+            answer: 0,
+            explanation: "<strong>使う公式：</strong>$\\partial L/\\partial w=\\delta x$。<br><strong>代入：</strong>$4×3=12$。<br><strong>答え：</strong>12です。デルタは活性化前$z$に届いた誤差信号です。"
+        },
+        {
+            id: "opt-fan-in-out",
+            category: "He初期化・fan-in（計算）",
+            kind: "計算",
+            difficulty: "標準",
+            question: "ReLUを使う全結合層が64入力→32出力である。$fan_{in}$、$fan_{out}$、He初期化の分散の正しい組み合わせはどれか。",
+            options: [
+                "$fan_{in}=64, fan_{out}=32, \\mathrm{Var}(w)=2/64$",
+                "$fan_{in}=32, fan_{out}=64, \\mathrm{Var}(w)=2/32$",
+                "$fan_{in}=64, fan_{out}=32, \\mathrm{Var}(w)=1/64$",
+                "$fan_{in}=96, fan_{out}=96, \\mathrm{Var}(w)=2/96$"
+            ],
+            answer: 0,
+            explanation: "<strong>使う定義：</strong>$fan_{in}$＝入力数、$fan_{out}$＝出力数。ReLUではHeの分散$=2/fan_{in}$。<br><strong>代入：</strong>$fan_{in}=64$、$fan_{out}=32$、分散$=2/64=1/32$。<br><strong>答え：</strong>選択肢1です。"
+        },
+        {
+            id: "opt-learning-rate-symptoms",
+            category: "学習率・症状の識別",
+            difficulty: "標準",
+            question: "学習率と学習中の症状の組み合わせとして、最も適切なものはどれか。",
+            options: [
+                "大きすぎる→損失が振動・発散しやすい／小さすぎる→学習が極端に遅い",
+                "大きすぎる→必ず大域的最適解へ到達／小さすぎる→必ず発散",
+                "大きすぎる→重みが更新されない／小さすぎる→1回で収束",
+                "学習率の大小は学習曲線に影響しない"
+            ],
+            answer: 0,
+            explanation: "学習率は1回の更新の歩幅です。大きすぎると谷底を飛び越えて振動・発散しやすく、小さすぎると少しずつしか進めず学習が遅くなります。"
         }
     ]
 };

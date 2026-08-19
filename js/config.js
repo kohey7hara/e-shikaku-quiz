@@ -39,7 +39,7 @@ const menuConfig = [
     {
         id: "03_dl_optimization",
         title: "3-（２）深層モデルのための最適化",
-        desc: "SGD / Adam / 誤差逆伝播法 / 初期化(He, Xavier)",
+        desc: "SGD・Momentum・NAG / 誤差逆伝播・自動微分 / AdaGrad・RMSProp・Adam / Xavier・He",
         isActive: true
     },
     {
