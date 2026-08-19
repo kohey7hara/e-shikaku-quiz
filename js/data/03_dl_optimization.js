@@ -1,23 +1,4 @@
 const optimizationExplanationFigures = {
-    pathologicalCurvature: `
-        <div class="exam-figure answer-figure">
-            <span class="figure-title">PATHOLOGICAL CURVATURE：方向によって傾きが極端に違う</span>
-            <div class="diagram-row">
-                <div class="diagram-column">
-                    <div class="diagram-node warn">横方向：急</div>
-                    <div class="diagram-label">勾配が大きく左右へ振動</div>
-                </div>
-                <div class="diagram-arrow">＋</div>
-                <div class="diagram-column">
-                    <div class="diagram-node">谷方向：緩い</div>
-                    <div class="diagram-label">勾配が小さく前進が遅い</div>
-                </div>
-                <div class="diagram-arrow">→</div>
-                <div class="diagram-node primary">SGDはジグザグ</div>
-                <div class="diagram-arrow">→</div>
-                <div class="diagram-node accent">Momentumで振動を抑える</div>
-            </div>
-        </div>`,
     chainRule: `
         <div class="exam-figure answer-figure">
             <span class="figure-title">逆伝播は「損失側から届いた勾配 × この箱の微分」</span>
@@ -59,12 +40,6 @@ window.quizData = {
     
     cheatSheet: `
         <style>
-            .flow-box { display: flex; align-items: center; justify-content: center; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; flex-wrap: wrap; }
-            .step { border: 2px solid #333; padding: 5px 10px; background: white; border-radius: 5px; text-align: center; width: 90px; margin: 5px; }
-            .init-step { border: 2px solid #3498db; background: #ebf5fb; font-weight: bold; }
-            .optimizer-step { border: 2px solid #e74c3c; background: #fceceb; font-weight: bold; }
-            .arrow { margin: 0 5px; font-weight: bold; color: #555; }
-            .loop-arrow { border-top: 2px dashed #999; width: 100%; text-align: center; margin-top: 5px; font-size: 0.8em; color: #777; }
             .opt-icon { width: 80px; height: 50px; background: #fff; margin: auto; border: 1px solid #eee; }
             .path-line { fill: none; stroke-width: 3; stroke-linecap: round; }
             .core-strip { margin: 12px 0 18px; padding: 12px 14px; border-left: 5px solid #2780b8; border-radius: 8px; background: #eef7fb; line-height: 1.8; }
@@ -72,59 +47,83 @@ window.quizData = {
             .optimizer-equation, .initialization-equation { margin: 6px 0; padding: 7px 10px; border-radius: 8px; background: #f3f7fb; color: #123f68; font-size: 1.02em; white-space: nowrap; }
             .optimizer-equation mjx-container, .initialization-equation mjx-container { margin: 0 !important; }
             .optimization-visual-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 14px 0 18px; }
-            .optimization-wide-svg { display: block; width: 100%; min-width: 780px; height: auto; }
+            .optimization-wide-svg { display: block; width: 100%; min-width: 900px; height: auto; }
             .optimization-keyword-table td:nth-child(2) { font-weight: 700; color: #123f68; }
             .optimization-test-point { margin: 12px 0; padding: 11px 14px; border: 1px solid #b8d9ee; border-radius: 9px; background: #f7fbfe; line-height: 1.75; }
         </style>
 
-        <h3>■ 2026シラバスの本線</h3>
-        <div class="core-strip">
-            <strong>① SGD・ミニバッチ・学習率 → ② Momentum・NAG → ③ 誤差逆伝播・自動微分 → ④ AdaGrad・RMSProp・Adam → ⑤ Xavier・He初期化</strong><br>
-            この章では上の5本線を優先します。式は丸暗記する前に、<strong>「何を解決する式か」</strong>をつかみます。
+        <h3>■ まず全体：何を求める章なのか</h3>
+        <p>
+            深層学習では、モデルの予測と正解のずれを<strong>損失（Loss）$L$</strong>という1つの数にします。
+            この章の目的は、<strong>損失 $L$ が小さくなる重み $W$ とバイアス $b$ を探すこと</strong>です。
+        </p>
+        <div class="optimization-visual-wrap">
+            <svg class="optimization-wide-svg" viewBox="0 0 1040 500" role="img" aria-labelledby="opt-whole-flow-title opt-whole-flow-desc">
+                <title id="opt-whole-flow-title">深層学習の最適化を4段階で見る全体フロー</title>
+                <desc id="opt-whole-flow-desc">損失を小さくする重みを探すため、初期化、予測と損失計算、逆伝播による勾配計算、オプティマイザによる重み更新を行い、後ろ3段階を繰り返す。</desc>
+                <defs>
+                    <marker id="opt-whole-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2780b8"/></marker>
+                    <marker id="opt-whole-loop-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#d64545"/></marker>
+                </defs>
+                <rect x="18" y="18" width="1004" height="464" rx="18" fill="#fbfdff" stroke="#c9d8e6"/>
+                <text x="40" y="53" font-size="22" font-weight="700" fill="#102a43">何を求めたい？　損失 L が小さくなる重み W・バイアス b</text>
+                <text x="40" y="82" font-size="16" fill="#42566a">最適化は、現在の重みで予測 → ずれを測る → 影響度を求める → 重みを直す、を繰り返します。</text>
+
+                <g fill="#102a43" text-anchor="middle">
+                    <rect x="42" y="112" width="188" height="226" rx="14" fill="#eaf4fb" stroke="#2780b8" stroke-width="2"/>
+                    <text x="136" y="145" font-size="19" font-weight="700">① 初期値を決める</text>
+                    <text x="136" y="174" font-size="15">学習前に1回だけ</text>
+                    <line x1="65" y1="190" x2="207" y2="190" stroke="#9fc9e2"/>
+                    <text x="136" y="220" font-size="16" font-weight="700">Xavier／He</text>
+                    <text x="136" y="249" font-size="14">sigmoid・tanh → Xavier</text>
+                    <text x="136" y="276" font-size="14">ReLU → He</text>
+                    <text x="136" y="311" font-size="14" fill="#51697d">W を同じ0にしない</text>
+
+                    <rect x="270" y="112" width="208" height="226" rx="14" fill="#fff7e3" stroke="#e3a11a" stroke-width="2"/>
+                    <text x="374" y="145" font-size="19" font-weight="700">② 予測して採点</text>
+                    <text x="374" y="174" font-size="15">ミニバッチ X, y</text>
+                    <line x1="294" y1="190" x2="454" y2="190" stroke="#e8c979"/>
+                    <text x="374" y="220" font-size="16" font-weight="700">Forward（順伝播）</text>
+                    <text x="374" y="250" font-size="15">予測　ŷ = f(X; W, b)</text>
+                    <text x="374" y="281" font-size="15">損失　L(ŷ, y)</text>
+                    <text x="374" y="311" font-size="14" fill="#6d5b32">予測と正解のずれを1つの数へ</text>
+
+                    <rect x="518" y="112" width="222" height="226" rx="14" fill="#f2edfb" stroke="#7d61b4" stroke-width="2"/>
+                    <text x="629" y="145" font-size="19" font-weight="700">③ 影響度を求める</text>
+                    <text x="629" y="174" font-size="15">Backward（逆伝播）</text>
+                    <line x1="543" y1="190" x2="715" y2="190" stroke="#c5b5e2"/>
+                    <text x="629" y="220" font-size="16" font-weight="700">自動微分</text>
+                    <text x="629" y="250" font-size="15">連鎖律・デルタ</text>
+                    <text x="629" y="281" font-size="15">g = ∂L / ∂W</text>
+                    <text x="629" y="311" font-size="14" fill="#5d5077">各重みがLossへ与える影響</text>
+
+                    <rect x="780" y="112" width="218" height="226" rx="14" fill="#fdecec" stroke="#d64545" stroke-width="2"/>
+                    <text x="889" y="145" font-size="19" font-weight="700">④ 重みを更新する</text>
+                    <text x="889" y="174" font-size="15">Optimizer（更新方法）</text>
+                    <line x1="805" y1="190" x2="973" y2="190" stroke="#e9acac"/>
+                    <text x="889" y="220" font-size="14">SGD・Momentum・NAG</text>
+                    <text x="889" y="248" font-size="14">AdaGrad・RMSProp・Adam</text>
+                    <text x="889" y="281" font-size="15">学習率 η ＝ 1回の歩幅</text>
+                    <text x="889" y="311" font-size="14" fill="#7a4747">勾配を使って W, b を直す</text>
+                </g>
+                <g fill="none" stroke="#2780b8" stroke-width="3" marker-end="url(#opt-whole-arrow)">
+                    <path d="M230 225 H262"/><path d="M478 225 H510"/><path d="M740 225 H772"/>
+                </g>
+                <path d="M889 342 V382 H374 V346" fill="none" stroke="#d64545" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#opt-whole-loop-arrow)"/>
+                <text x="631" y="405" text-anchor="middle" font-size="16" font-weight="700" fill="#d64545">② → ③ → ④を、次のミニバッチで繰り返す</text>
+                <rect x="92" y="426" width="856" height="38" rx="9" fill="#eef7fb" stroke="#b8d9ee"/>
+                <text x="520" y="452" text-anchor="middle" font-size="16" font-weight="700" fill="#123f68">ŷ = f(X;W,b)　→　L(ŷ,y)　→　g = ∂L/∂W　→　WをOptimizerで更新</text>
+            </svg>
         </div>
         <table>
-            <tr><th>問題文の合図</th><th>答える語</th><th>初心者向けの意味</th></tr>
-            <tr><td>全データで1回の勾配</td><td><strong>バッチ学習／最急降下法</strong></td><td>正確だが、1回の更新が重い</td></tr>
-            <tr><td>一部のデータをまとめて更新</td><td><strong>ミニバッチ学習</strong></td><td>GPUで行列計算しやすく、実務で代表的</td></tr>
-            <tr><td>更新式の $\\eta$／歩幅</td><td><strong>学習率</strong></td><td>大きすぎると振動・発散、小さすぎると遅い</td></tr>
-            <tr><td>現在の勾配と逆向きへ更新</td><td><strong>SGD</strong></td><td>$w\\leftarrow w-\\eta g$</td></tr>
+            <tr><th>段階</th><th>ここで答える問い</th><th>この章の用語を入れる箱</th></tr>
+            <tr><td><strong>① 初期値</strong></td><td>学習開始時の重みをどう置く？</td><td>Xavier・He</td></tr>
+            <tr><td><strong>② 予測・Loss</strong></td><td>今の重みでは、どれくらい間違えた？</td><td>バッチ／ミニバッチ・順伝播・損失</td></tr>
+            <tr><td><strong>③ 勾配</strong></td><td>どの重みがLossへどれだけ影響した？</td><td>誤差逆伝播・連鎖律・デルタ・自動微分</td></tr>
+            <tr><td><strong>④ 更新</strong></td><td>求めた勾配で、重みをどう動かす？</td><td>学習率・SGD・Momentum・NAG・AdaGrad・RMSProp・Adam</td></tr>
         </table>
-
-        <h3>■ 学習の全体タイムライン：初期化はどこ？</h3>
-        <p>「初期化」は学習ループに入る前の<strong>準備段階（Step 0）</strong>で行われます。<br>ここでの設定（He/Xavier）が、その後の信号・勾配の流れに大きく影響します。</p>
-        
-        <div class="flow-box" style="display:block; text-align:center;">
-            <div style="display:inline-block; vertical-align:top; margin-right:20px;">
-                <div style="margin-bottom:5px; font-weight:bold; color:#3498db;">Step 0: 準備 (1回だけ)</div>
-                <div class="step init-step">
-                    <strong>初期化</strong><br>
-                    (Init)<br>
-                    <small>重み $W$ に<br>乱数を入れる</small>
-                </div>
-            </div>
-
-            <div style="display:inline-block; vertical-align:top; font-size:2em; color:#555; padding-top:10px;">→</div>
-
-            <div style="display:inline-block; vertical-align:top; margin-left:20px; border:2px dashed #999; padding:10px; border-radius:10px; background:#fff;">
-                <div style="margin-bottom:5px; font-weight:bold; color:#e74c3c;">Step 1〜N: 学習ループ (繰り返し)</div>
-                <div style="display:flex; align-items:center;">
-                    <div class="step">順伝播<br>(Forward)</div>
-                    <div class="arrow">→</div>
-                    <div class="step">逆伝播<br>(Backward)</div>
-                    <div class="arrow">→</div>
-                    <div class="step optimizer-step">
-                        <strong>最適化</strong><br>
-                        (Update)<br>
-                        <small>SGD/Adam等</small>
-                    </div>
-                </div>
-                <div class="loop-arrow">↑ 次のミニバッチへ (繰り返し) ↑</div>
-            </div>
-        </div>
-
-        <h3>■ Pathological Curvature（病的曲率）：細長い谷</h3>
         <div class="core-strip">
-            方向ごとの曲率が大きく異なると、SGDは<strong>急な方向へ左右に振動</strong>し、緩い谷方向には少ししか進めません。Momentumは過去の方向を平均化し、振動を打ち消しながら谷方向へ加速します。
+            <strong>最重要：</strong>Backwardは<strong>勾配を求める担当</strong>、Optimizerは<strong>その勾配で重みを更新する担当</strong>です。SGDやAdamは④に入ります。
         </div>
 
         <h3>■ 誤差逆伝播：まず「右へ計算、左へ影響を戻す」</h3>
@@ -170,15 +169,66 @@ window.quizData = {
             </svg>
         </div>
 
+        <h3>■ デルタ問題は「何を求めるか」で式を選ぶ</h3>
         <div class="optimization-test-point">
-            <strong>「デルタ」とは？</strong> $\\delta=\\partial L/\\partial z$ は、活性化前の値 $z$ に届いた誤差信号です。<br>
-            <strong>1サンプル・スカラーの最小例：</strong>$z=wx+b$ なら、$\\partial L/\\partial w=\\delta x$、$\\partial L/\\partial b=\\delta$、$\\partial L/\\partial x=\\delta w$。<br>
-            <strong>バッチ・行列：</strong>$\\partial L/\\partial W=X^T\\Delta$、$\\partial L/\\partial b=\\mathrm{sum}(\\Delta,\\,axis=0)$、$\\partial L/\\partial X=\\Delta W^T$。試験ではShapeや、どの軸を足すかを問われます。
+            <strong>問題文の合図：</strong>「$z=wx+b$」「$Z=XW+b$」「デルタ $\\delta$／$\\Delta$」「重み・バイアス・入力の勾配」「Shape」が出たら、この型を使います。<br>
+            <strong>デルタの扱い方：</strong>$\\Delta=\\partial L/\\partial Z$ は、後ろの層から $Z$ まで<strong>すでに戻ってきた途中の勾配</strong>です。学習率や更新量ではありません。
+        </div>
+        <div class="optimization-visual-wrap">
+            <svg class="optimization-wide-svg" viewBox="0 0 960 270" role="img" aria-labelledby="opt-delta-title opt-delta-desc">
+                <title id="opt-delta-title">全結合層の順伝播とデルタが戻る位置</title>
+                <desc id="opt-delta-desc">入力Xと重みWを掛け、バイアスbを加えてZを作り、後続層から損失Lへ進む。逆伝播では損失側からデルタがZへ戻る。</desc>
+                <defs>
+                    <marker id="opt-delta-forward-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2780b8"/></marker>
+                    <marker id="opt-delta-back-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#d64545"/></marker>
+                </defs>
+                <rect x="18" y="18" width="924" height="234" rx="16" fill="#fbfdff" stroke="#c9d8e6"/>
+                <text x="42" y="49" font-size="19" font-weight="700" fill="#102a43">順伝播：X × W ＋ b で Z を作り、Lossまで計算する</text>
+                <g font-size="15" text-anchor="middle" fill="#102a43">
+                    <rect x="48" y="70" width="150" height="64" rx="10" fill="#eaf4fb" stroke="#2780b8" stroke-width="2"/>
+                    <text x="123" y="96" font-weight="700">入力 X</text><text x="123" y="120">(B, D_in)</text>
+                    <rect x="248" y="70" width="190" height="64" rx="10" fill="#fff7e3" stroke="#e3a11a" stroke-width="2"/>
+                    <text x="343" y="88" font-weight="700">× W ＋ b</text><text x="343" y="108" font-size="13">W:(D_in, D_out)</text><text x="343" y="127" font-size="13">b:(D_out,)</text>
+                    <rect x="488" y="70" width="150" height="64" rx="10" fill="#f2edfb" stroke="#7d61b4" stroke-width="2"/>
+                    <text x="563" y="96" font-weight="700">活性化前 Z</text><text x="563" y="120">(B, D_out)</text>
+                    <rect x="688" y="70" width="100" height="64" rx="10" fill="#f5f7fa" stroke="#8796a5" stroke-width="2"/>
+                    <text x="738" y="96">後続の層</text><text x="738" y="120">…</text>
+                    <rect x="838" y="70" width="80" height="64" rx="10" fill="#fdecec" stroke="#d64545" stroke-width="2"/>
+                    <text x="878" y="96" font-weight="700">Loss</text><text x="878" y="120">L</text>
+                </g>
+                <g fill="none" stroke="#2780b8" stroke-width="3" marker-end="url(#opt-delta-forward-arrow)">
+                    <path d="M198 102 H240"/><path d="M438 102 H480"/><path d="M638 102 H680"/><path d="M788 102 H830"/>
+                </g>
+                <path d="M878 142 V178 H563 V142" fill="none" stroke="#d64545" stroke-width="3" marker-end="url(#opt-delta-back-arrow)"/>
+                <text x="726" y="201" text-anchor="middle" font-size="16" font-weight="700" fill="#d64545">逆伝播：Loss側からZへ Δ = ∂L/∂Z が戻る</text>
+                <text x="480" y="232" text-anchor="middle" font-size="15" fill="#42566a">B＝バッチ数　D_in＝入力特徴数　D_out＝出力ユニット数</text>
+            </svg>
+        </div>
+        <table>
+            <tr><th>問題で何を求める？</th><th>使う式</th><th>答えのShape</th><th>覚え方</th></tr>
+            <tr><td>Softmax＋交差エントロピーの出力デルタ</td><td>合計損失：$\\Delta=y-\\mathrm{correct}$<br>平均損失：$\\Delta=(y-\\mathrm{correct})/B$</td><td>$(B,D_{out})$</td><td>予測確率－one-hot正解</td></tr>
+            <tr><td>重み $W$ の勾配</td><td>$\\partial L/\\partial W=X^T\\Delta$</td><td>$(D_{in},D_{out})$＝$W$と同じ</td><td>入力を転置してデルタ</td></tr>
+            <tr><td>バイアス $b$ の勾配</td><td>$\\partial L/\\partial b=\\mathrm{sum}(\\Delta,axis=0)$</td><td>$(D_{out},)$＝$b$と同じ</td><td>バッチ方向を足す</td></tr>
+            <tr><td>入力 $X$ へ戻す勾配</td><td>$\\partial L/\\partial X=\\Delta W^T$</td><td>$(B,D_{in})$＝$X$と同じ</td><td>デルタに重みの転置</td></tr>
+        </table>
+        <div class="optimization-test-point">
+            <strong>解き方は4手：</strong><br>
+            ① 求めるものが $W$・$b$・$X$・出力デルタのどれか確認<br>
+            ② $X:(B,D_{in})$、$W:(D_{in},D_{out})$、$\\Delta:(B,D_{out})$ とShapeを書く<br>
+            ③ 上の表から式を選び、行列積の内側の数字が一致するか確認<br>
+            ④ 最後に「勾配のShape＝勾配を求めた元の変数のShape」を確認
+        </div>
+        <div class="optimization-test-point">
+            <strong>解法例：</strong>$X:(8,6)$、$W:(6,4)$、$\\Delta:(8,4)$ で重み勾配を聞かれたら、<br>
+            $\\partial L/\\partial W=X^T\\Delta=(6,8)(8,4)=(6,4)$。答えが元の $W:(6,4)$ と同じShapeなので確認できます。<br>
+            <strong>1サンプルのスカラー問題：</strong>$z=wx+b$なら同じ考え方で $\\partial L/\\partial w=\\delta x$ です。<br>
+            <strong>平均の注意：</strong>バッチサイズ $B$ で割るのは、損失・デルタ・更新処理のどこか1か所です。二重に割らないようにします。
         </div>
         <table>
             <tr><th>言葉</th><th>初心者向けの意味</th><th>試験で問われること</th></tr>
             <tr><td><strong>誤差逆伝播</strong></td><td>損失への影響を、右から左へ戻す手順</td><td>直列は掛ける／分岐は足す</td></tr>
             <tr><td><strong>自動微分</strong></td><td>計算グラフを記録し、逆伝播を自動計算</td><td>順伝播の記録→逆向き計算</td></tr>
+            <tr><td><strong>勾配消失</strong></td><td>1未満の局所微分を何度も掛け、入力側の勾配が極端に小さくなる</td><td>深い層／Sigmoid／入力側の重みが更新されにくい</td></tr>
             <tr><td><strong>Optimizer</strong></td><td>得られた勾配を使って重みを更新</td><td>backwardとは別担当</td></tr>
         </table>
 
@@ -375,7 +425,7 @@ window.quizData = {
             <tr><td>全データで1回の勾配</td><td><strong>バッチ学習／最急降下法</strong></td><td>1回の計算・メモリ負荷が大きい。</td></tr>
             <tr><td>一部データをまとめて更新</td><td><strong>ミニバッチ学習</strong></td><td>計算効率と勾配の揺らぎを両立する。</td></tr>
             <tr><td>更新の歩幅 $\\eta$</td><td><strong>学習率</strong></td><td>大きすぎると振動・発散、小さすぎると遅い。</td></tr>
-            <tr><td>現在のミニバッチ勾配だけで更新</td><td><strong>SGD</strong><br><small>Stochastic Gradient Descent（確率的勾配降下法）</small></td><td>$w\\leftarrow w-\\eta g$。細長い谷ではジグザグしやすい。</td></tr>
+            <tr><td>現在のミニバッチ勾配だけで更新</td><td><strong>SGD</strong><br><small>Stochastic Gradient Descent（確率的勾配降下法）</small></td><td>$w\\leftarrow w-\\eta g$。更新経路が振動することがある。</td></tr>
             <tr><td>過去の移動方向を慣性として蓄積</td><td><strong>Momentum</strong></td><td>振動を打ち消し、同じ方向へ加速する。</td></tr>
             <tr><td>一歩先の位置で勾配を見る</td><td><strong>NAG</strong><br><small>Nesterov Accelerated Gradient</small></td><td>Momentumを先読みして修正する。</td></tr>
             <tr><td>過去の勾配二乗を累積</td><td><strong>AdaGrad</strong><br><small>Adaptive Gradient</small></td><td>スパース勾配に強いが、学習率が下がり続ける。</td></tr>
@@ -549,17 +599,17 @@ window.quizData = {
         {id:"opt-he-var",category:"He初期化(計算)",kind:"計算",question:"He初期化で分散を$2/fan_{in}$とすると、$fan_{in}=100$での分散はどれか。",options:["0.02","0.01","0.2","2"],answer:0,explanation:"<strong>使う公式：</strong>$\\mathrm{Var}(w)=2/fan_{in}$。<br><strong>代入：</strong>$2/100=0.02$。<br><strong>答え：</strong>0.02です。ReLUで負側が0になる影響を補います。"},
 
         // ---------------------------------------------------------
-        // 【2026シラバス補強】病的曲率・逆伝播・Adam・初期化
+        // 【2026シラバス補強】逆伝播・デルタShape・Adam・初期化
         // ---------------------------------------------------------
         {
-            id: "opt-pathological-curvature",
-            category: "Pathological Curvature（重要）",
+            id: "opt-delta-matrix-shape",
+            category: "誤差逆伝播・デルタShape",
+            kind: "計算",
             difficulty: "標準",
-            question: "損失面が細長い谷になり、方向によって曲率が大きく異なるPathological Curvatureで、通常のSGDに起こりやすい動きはどれか。",
-            options: ["急な方向へ左右に振動し、緩い谷方向への進行が遅くなる", "全ての方向で同じ速さで一直線に進む", "勾配が必ず無限大になる", "1回の更新で大域的最適解へ到達する"],
+            question: "$Z=XW+b$で、$X$のShapeが$(5,4)$、$W$が$(4,3)$、デルタ$\\Delta=\\partial L/\\partial Z$が$(5,3)$である。$\\partial L/\\partial W$の式とShapeの正しい組み合わせはどれか。",
+            options: ["$X^T\\Delta$、Shape $(4,3)$", "$\\Delta W^T$、Shape $(5,4)$", "$\\mathrm{sum}(\\Delta,axis=0)$、Shape $(3)$", "$\\Delta^T X$、Shape $(3,4)$"],
             answer: 0,
-            explanation: "急な方向では勾配が大きいため谷を横切って振動し、緩い方向では勾配が小さいため前進が遅くなります。Momentumは振動方向を相殺し、谷方向の速度を蓄積します。",
-            explanationFigure: optimizationExplanationFigures.pathologicalCurvature
+            explanation: "<strong>問題文の合図：</strong>重み$W$の勾配とShapeを求める。<br><strong>使う公式：</strong>$\\partial L/\\partial W=X^T\\Delta$。<br><strong>Shape：</strong>$(4,5)(5,3)=(4,3)$。<br><strong>答え：</strong>$X^T\\Delta$、Shape $(4,3)$です。重み勾配のShapeは元の$W$と一致します。"
         },
         {
             id: "opt-minibatch-update-count",
@@ -580,7 +630,7 @@ window.quizData = {
             question: "$a=wx+b$、$L=a²$ とする。$w=3, x=2, b=1$ のとき、$∂L/∂w$ はいくつか。",
             options: ["7", "14", "28", "49"],
             answer: 2,
-            explanation: "<strong>使う公式：</strong>$\\partial L/\\partial w=(\\partial L/\\partial a)(\\partial a/\\partial w)$。<br><strong>順伝播：</strong>$a=3×2+1=7$。<br><strong>局所微分：</strong>$\\partial L/\\partial a=2a=14$、$\\partial a/\\partial w=x=2$。<br><strong>答え：</strong>$14×2=28$です。",
+            explanation: "<strong>順伝播：</strong>$a=3×2+1=7$。<br><strong>デルタ：</strong>$\\delta=\\partial L/\\partial a=2a=14$。<br><strong>使う公式：</strong>$\\partial L/\\partial w=\\delta x$。<br><strong>代入：</strong>$14×2=28$。答えは28です。",
             explanationFigure: optimizationExplanationFigures.chainRule
         },
         {
@@ -672,7 +722,7 @@ window.quizData = {
             question: "$z=wx+b$で、デルタ$\\delta=\\partial L/\\partial z=4$、入力$x=3$とする。$\\partial L/\\partial w$はいくつか。",
             options: ["12", "7", "4/3", "1"],
             answer: 0,
-            explanation: "<strong>使う公式：</strong>$\\partial L/\\partial w=\\delta x$。<br><strong>代入：</strong>$4×3=12$。<br><strong>答え：</strong>12です。デルタは活性化前$z$に届いた誤差信号です。"
+            explanation: "<strong>問題文の合図：</strong>デルタ$\\delta$が与えられ、重み$w$の勾配を聞かれている。<br><strong>使う公式：</strong>$\\partial L/\\partial w=\\delta x$。<br><strong>代入：</strong>$4×3=12$。<br><strong>答え：</strong>12です。"
         },
         {
             id: "opt-fan-in-out",
