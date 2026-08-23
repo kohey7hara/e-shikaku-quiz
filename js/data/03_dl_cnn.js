@@ -25,15 +25,10 @@ window.quizData = {
             .calc-card strong { color: #123f68; }
             .answer-strip { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #f39c12; border-radius: 7px; background: #fff8e7; line-height: 1.7; }
             .worked-example { margin: 12px 0 20px; padding: 16px; border: 2px solid #f39c12; border-radius: 12px; background: #fffaf0; }
-            .worked-given { margin-bottom: 12px; }
-            .worked-symbols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-top: 9px; }
-            .worked-symbol { padding: 7px 9px; border: 1px solid #ead7aa; border-radius: 7px; background: #fff; text-align: center; }
-            .worked-step { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; margin-top: 10px; padding: 11px; border: 1px solid #e5eaf0; border-radius: 9px; background: #fff; line-height: 1.65; }
-            .worked-step-number { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: #167f92; color: #fff; font-weight: 800; }
-            .worked-step strong { color: #123f68; }
-            .worked-step .formula-box { white-space: normal; overflow-x: auto; }
+            .cnn-calc-example { margin: 10px 0 0; padding-left: 1.5em; line-height: 1.85; }
+            .cnn-calc-example li { padding-left: 4px; }
+            .cnn-calc-example strong { color: #123f68; }
             .worked-result { margin-top: 12px; padding: 11px 13px; border-left: 5px solid #27ae60; border-radius: 7px; background: #eafaf1; line-height: 1.7; }
-            .worked-trap { margin-top: 10px; padding: 10px 12px; border-left: 5px solid #e74c3c; border-radius: 7px; background: #fff3f1; line-height: 1.7; }
             .comparison-table td:nth-child(3) { min-width: 330px; }
             .cnn-concept-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0 20px; }
             .cnn-concept-card { padding: 12px; border: 1px solid #d7e2ec; border-radius: 10px; background: #fff; text-align: center; }
@@ -52,7 +47,6 @@ window.quizData = {
             .cnn-model-key { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #8e44ad; border-radius: 7px; background: #f7f1fa; line-height: 1.7; }
             @media (max-width: 760px) {
                 .calc-steps { grid-template-columns: 1fr; }
-                .worked-symbols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
                 .cnn-concept-grid { grid-template-columns: 1fr; }
             }
         </style>
@@ -62,7 +56,7 @@ window.quizData = {
             <strong>形：</strong>出力の高さ・幅・チャネル数を求める。<br>
             <strong>数：</strong>重みとバイアスのパラメータ数を求める。<br>
             <strong>役割：</strong>通常畳み込み、特殊な畳み込み、プーリングを見分ける。<br>
-            <strong>迷ったら：</strong>①実効カーネル → ②出力サイズ → ③出力チャネル → ④パラメータ数の順。
+            <strong>計算は：</strong>①数字を拾う → ②高さ・幅 → ③出力の形 → ④パラメータ数の順。
         </div>
 
         <h3>■ CNNの処理フロー：形を保って特徴を掴む</h3>
@@ -130,87 +124,47 @@ window.quizData = {
             </div>
         </div>
 
-        <h3>■ 計算は4手順だけ</h3>
+        <h3>■ 通常Convの計算は4手順だけ</h3>
         <div class="calc-steps">
             <div class="calc-card">
-                <strong>① 実効カーネル</strong>
-                <div class="formula-box">$\\displaystyle K_{eff}=D(K-1)+1$</div>
-                通常の畳み込みは $D=1$ なので $K_{eff}=K$。
+                <strong>① 数字を拾う</strong>
+                <div class="formula-box">$H, W, C_{in}, K, P, S, C_{out}$</div>
+                $H/W=$高さ・幅、$C_{in}=$入力チャネル、$K=$カーネル、$P=$Padding、$S=$Stride、$C_{out}=$フィルタ数。
             </div>
             <div class="calc-card">
-                <strong>② 出力サイズ</strong>
-                <div class="formula-box">$\\displaystyle H_{out}=\\left\\lfloor\\frac{H+2P-K_{eff}}{S}\\right\\rfloor+1$</div>
-                幅 $W_{out}$ も同じ式。割り切れない端は切り捨て。
+                <strong>② 高さ・幅を出す</strong>
+                <div class="formula-box">$\\displaystyle H_{out}=\\left\\lfloor\\frac{H+2P-K}{S}\\right\\rfloor+1$</div>
+                幅 $W_{out}$ も同じ式。
             </div>
             <div class="calc-card">
-                <strong>③ 出力チャネル</strong>
-                <div class="formula-box">$\\displaystyle C_{out}=\\text{フィルタの個数}$</div>
-                1フィルタが1枚の特徴マップを作る。
+                <strong>③ 出力の形にする</strong>
+                <div class="formula-box">$H_{out}\\times W_{out}\\times C_{out}$</div>
+                $C_{out}=$ フィルタ数。NCHWなら $(N,C_{out},H_{out},W_{out})$。
             </div>
             <div class="calc-card">
                 <strong>④ パラメータ数</strong>
-                <div class="formula-box">$\\displaystyle (K_hK_wC_{in}+1)C_{out}$</div>
-                $+1$ は出力チャネルごとのバイアス。無視なら外す。
+                <div class="formula-box">$\\displaystyle (K^2C_{in}+1)C_{out}$</div>
+                正方形 $K\\times K$ の場合。「1フィルタ分（重み＋バイアス1個）」×フィルタ数。バイアスなしなら $+1$ を外す。
             </div>
         </div>
-        <h3>■ 計算例：どの数字をどこへ入れる？</h3>
+        <div class="answer-strip">
+            <strong>どこまで解く？</strong> 出力サイズ → ②まで ／ 出力形状 → ③まで ／ パラメータ数 → ④。<br>
+            <strong>Dilation（膨張率）$D$ がある時だけ：</strong>$K_{eff}=D(K-1)+1$ を②の $K$ と置き換える。④は元の $K$ を使う。<br>
+            <strong>頻出の罠：</strong>Paddingは $2P$、端数は切り捨て、パラメータ数に $H_{out}W_{out}$ は掛けない。
+        </div>
+
+        <h3>■ 30秒例題</h3>
         <div class="worked-example">
-            <div class="worked-given">
-                <strong>問題：</strong>入力 $32\\times32\\times3$ に、$3\\times3$ のフィルタを64個適用する。Padding $P=1$、Stride $S=1$ のとき、出力の形とパラメータ数を求める。
-                <div class="worked-symbols">
-                    <div class="worked-symbol">高さ・幅<br><strong>$H=W=32$</strong></div>
-                    <div class="worked-symbol">入力チャネル<br><strong>$C_{in}=3$</strong></div>
-                    <div class="worked-symbol">カーネル<br><strong>$K_h=K_w=3$</strong></div>
-                    <div class="worked-symbol">Padding<br><strong>$P=1$</strong></div>
-                    <div class="worked-symbol">Stride<br><strong>$S=1$</strong></div>
-                    <div class="worked-symbol">フィルタ数<br><strong>$C_{out}=64$</strong></div>
-                </div>
-            </div>
-
-            <div class="worked-step">
-                <span class="worked-step-number">1</span>
-                <div>
-                    <strong>実効カーネルを求める</strong><br>
-                    Dilationの指定がない通常畳み込みなので $D=1$。
-                    <div class="formula-box">$\\displaystyle K_{eff}=D(K-1)+1=1\\times(3-1)+1=3$</div>
-                    したがって、実際に見る範囲は通常どおり $3\\times3$。
-                </div>
-            </div>
-
-            <div class="worked-step">
-                <span class="worked-step-number">2</span>
-                <div>
-                    <strong>出力の高さと幅を求める</strong>
-                    <div class="formula-box">$\\displaystyle H_{out}=\\left\\lfloor\\frac{32+2\\times1-3}{1}\\right\\rfloor+1=31+1=32$</div>
-                    幅も同じ計算なので $W_{out}=32$。Paddingで $32+2=34$ に広げ、そこへ幅3のフィルタを1マスずつ動かすため、出力は元と同じ $32\\times32$ になる。
-                </div>
-            </div>
-
-            <div class="worked-step">
-                <span class="worked-step-number">3</span>
-                <div>
-                    <strong>出力チャネル数を決める</strong><br>
-                    1個のフィルタが1枚の特徴マップを作る。フィルタが64個なので、
-                    <div class="formula-box">$\\displaystyle C_{out}=64$</div>
-                    よって出力の形は <strong>$32\\times32\\times64$</strong>。
-                </div>
-            </div>
-
-            <div class="worked-step">
-                <span class="worked-step-number">4</span>
-                <div>
-                    <strong>学習するパラメータ数を求める</strong><br>
-                    1個のフィルタは、RGBの3チャネルすべてを見る。そのため重みは $3\\times3\\times3=27$ 個。さらにフィルタごとにバイアスが1個ある。
-                    <div class="formula-box">$\\displaystyle \\underbrace{(3\\times3\\times3+1)}_{\\text{1フィルタ分 }28}\\times\\underbrace{64}_{\\text{フィルタ数}}=1,792$</div>
-                    内訳は、重み $3\\times3\\times3\\times64=1,728$ 個、バイアス $64$ 個。合計 $1,728+64=1,792$ 個。
-                </div>
-            </div>
+            <strong>問題：</strong>入力 $32\\times32\\times3$、$K=3$、$P=1$、$S=1$、フィルタ64個。出力の形とパラメータ数は？
+            <ol class="cnn-calc-example">
+                <li><strong>数字：</strong>$H=W=32, C_{in}=3, K=3, P=1, S=1, C_{out}=64$</li>
+                <li><strong>高さ・幅：</strong>$\\left\\lfloor(32+2\\times1-3)/1\\right\\rfloor+1=32$</li>
+                <li><strong>出力の形：</strong>$32\\times32\\times64$</li>
+                <li><strong>パラメータ：</strong>$(3\\times3\\times3+1)\\times64=1,792$</li>
+            </ol>
 
             <div class="worked-result">
                 <strong>答え：</strong>出力の形は $32\\times32\\times64$、学習するパラメータ数は <strong>1,792個</strong>。
-            </div>
-            <div class="worked-trap">
-                <strong>試験の注意：</strong>パラメータ数に $32\\times32$ は掛けない。同じフィルタの重みを全位置で繰り返し使う<strong>重み共有</strong>だから。出力要素数を聞かれた場合は $32\\times32\\times64=65,536$ と計算する。
             </div>
         </div>
 
