@@ -793,7 +793,54 @@ window.quizData = {
             question: "受容野1から開始し、$3\\times3$ Conv（S=1）→$2\\times2$ Pool（S=2）→$3\\times3$ Conv（S=1）を通る。最終受容野の一辺はいくつか。",
             options: ["6", "8", "9", "10"],
             answer: 1,
-            explanation: "受容野 $r$ と入力上の間隔 $j$ を使います。開始 $(r,j)=(1,1)$ → Conv $(3,1)$ → Pool $(4,2)$ → Conv $(8,2)$ です。"
+            explanation: `
+                <strong>① まず、何を求める？</strong>
+                受容野は「最終出力の1マスが、元画像の何×何マスを見ているか」です。高さと幅は同じ計算なので、ここでは<strong>一辺だけ</strong>追います。
+
+                <strong>② 2つの数字を持って進む</strong>
+                $r$（receptive field）＝今の1マスが、元画像の連続何マス分を見ているか。<br>
+                $j$（jump）＝今の層で隣へ1マス動いたとき、元画像上では何マス動くか。<br>
+                入力では1画素を1画素ずつ見るため、開始は $(r,j)=(1,1)$ です。
+
+                <strong>③ 使う公式</strong>
+                $r_{new}=r_{old}+(K-1)j_{old}$<br>
+                $j_{new}=j_{old}S$<br>
+                <code>old</code> は層を通る前、<code>new</code> は通った後です。日本語では「受容野に足す量＝（カーネル幅−1）×今の間隔」「次の間隔＝今の間隔×stride」です。<strong>$r$ は更新前の $j$ で先に計算</strong>します。
+
+                <strong>④ 答え</strong>
+                下の表のとおり $(1,1)\\rightarrow(3,1)\\rightarrow(4,2)\\rightarrow(8,2)$。最終的に $r=8$ なので、受容野全体は $8\\times8$、聞かれている一辺は <strong>8</strong> です。
+
+                <strong>試験の注意</strong>
+                stride 2は $r$ を直接2倍にするのではなく、間隔 $j$ を2倍にします。Pool後は $j=2$ なので、最後のConvでは $4+(3-1)\\times2=8$。単純に $4+2=6$ ではありません。
+            `,
+            explanationFigure: `
+                <div class="exam-figure answer-figure" role="group" aria-label="受容野と入力上の間隔を各層で更新する計算図">
+                    <span class="figure-title">層を1つ通るたびに r と j を更新する</span>
+                    <div class="diagram-row">
+                        <div class="diagram-node">開始<br><b>r=1, j=1</b></div>
+                        <div class="diagram-column"><span class="diagram-label">3×3 Conv<br>S=1</span><span class="diagram-arrow">→</span></div>
+                        <div class="diagram-node">Conv後<br><b>r=3, j=1</b></div>
+                        <div class="diagram-column"><span class="diagram-label">2×2 Pool<br>S=2</span><span class="diagram-arrow">→</span></div>
+                        <div class="diagram-node warn">Pool後<br><b>r=4, j=2</b></div>
+                        <div class="diagram-column"><span class="diagram-label">3×3 Conv<br>S=1</span><span class="diagram-arrow">→</span></div>
+                        <div class="diagram-node accent">最終<br><b>r=8, j=2</b></div>
+                    </div>
+                    <div class="figure-subrow">
+                        <table class="figure-table" aria-label="受容野と入力上の間隔の層ごとの計算表">
+                            <thead><tr><th>通る層</th><th>受容野 r</th><th>間隔 j</th><th>更新後 (r, j)</th></tr></thead>
+                            <tbody>
+                                <tr><td>3×3 Conv, S=1</td><td>$1+(3-1)\\times1=3$</td><td>$1\\times1=1$</td><td>$(3,1)$</td></tr>
+                                <tr><td>2×2 Pool, S=2</td><td>$3+(2-1)\\times1=4$</td><td>$1\\times2=2$</td><td>$(4,2)$</td></tr>
+                                <tr><td>3×3 Conv, S=1</td><td>$4+(3-1)\\times2=8$</td><td>$2\\times1=2$</td><td class="hot">$(8,2)$</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="figure-subrow">
+                        <b>最後が8になる直感：</b>Pool後の3地点は元画像の「1〜4」「3〜6」「5〜8」を見ます。最終3×3 Convが3地点をまとめて見ると、範囲は1〜8です。
+                    </div>
+                    <p class="figure-caption">出力サイズを求める式ではなく、「最終出力1点が元画像のどこまでを見るか」を逆向きに追う計算です。</p>
+                </div>
+            `
         },
         {
             id: "cnn-equivariance-invariance",
