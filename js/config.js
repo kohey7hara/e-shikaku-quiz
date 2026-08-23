@@ -57,7 +57,7 @@ const menuConfig = [
     {
         id: "03_dl_rnn",
         title: "3-（５）RNN (リカレントニューラルネットワーク)",
-        desc: "BPTT / LSTM / GRU / Seq2Seq / Attention",
+        desc: "BPTT / LSTM・GRU / 双方向RNN / Seq2Seq・Attention",
         isActive: true
     },
     {
