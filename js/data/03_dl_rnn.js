@@ -10,9 +10,12 @@ window.quizData = {
             .rnn-formula{margin:8px 0;padding:9px 11px;border:1px solid #c8dbee;border-radius:8px;background:#f8fbfe;color:#123f68;text-align:center;overflow-x:auto}.rnn-formula mjx-container{margin:0!important}
             .rnn-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 18px}.rnn-card{padding:13px;border:1px solid #d7e2ec;border-radius:10px;background:#fff;line-height:1.65}.rnn-card>strong{display:block;margin-bottom:6px;color:#123f68}
             .rnn-year{display:inline-block;margin-right:7px;padding:2px 7px;border-radius:12px;background:#f7f1fa;color:#6c3483;font-size:.82em;font-weight:800}.rnn-memory-line{margin:7px 0;padding:8px 10px;border-radius:7px;background:#f8fbfe}
+            .rnn-visual-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 18px}.rnn-visual-card{padding:12px;border:1px solid #d7e2ec;border-radius:10px;background:#fff;text-align:center}.rnn-visual-card>strong{display:block;color:#123f68}.rnn-visual-svg{display:block;width:100%;max-width:340px;height:140px;margin:6px auto 8px}.rnn-visual-caption{font-size:.88em;line-height:1.6;color:#334e68}.rnn-svg-label{font-size:12px;fill:#334e68;font-weight:700}.rnn-svg-note{font-size:10px;fill:#627d98}
+            .rnn-gate-line{display:flex;align-items:center;gap:7px;margin:7px 0}.rnn-gate-icon{display:inline-flex;flex:0 0 26px;width:26px;height:26px;align-items:center;justify-content:center;border-radius:50%;background:#2780b8;color:#fff;font-size:.82em;font-weight:800}.rnn-gate-icon.gru{background:#e67e22}
+            .rnn-shift-guide{margin:12px 0 18px;padding:13px 14px;border:1px solid #c8dbee;border-radius:10px;background:#f8fbfe;overflow-x:auto}.rnn-shift-line{display:flex;align-items:center;gap:6px;min-width:350px;margin:8px 0}.rnn-shift-label{flex:0 0 6.5em;text-align:left}.rnn-shift-token{flex:0 0 auto;min-width:48px;padding:6px 9px;border:1px solid #9fb3c8;border-radius:6px;background:#fff;text-align:center}.rnn-shift-token.start{background:#f7f1fa;border-color:#8e44ad}
             .rnn-warning,.rnn-ok{margin:10px 0 18px;padding:11px 13px;border-left:5px solid;border-radius:7px;line-height:1.7}.rnn-warning{border-color:#e74c3c;background:#fff3f1}.rnn-ok{border-color:#27ae60;background:#eafaf1}
             .rnn-table-wrap{overflow-x:auto}.rnn-final-table{min-width:720px}.rnn-final-table td:nth-child(3){min-width:250px}
-            @media(max-width:760px){.rnn-two{grid-template-columns:1fr}.rnn-flow{justify-content:flex-start}}
+            @media(max-width:760px){.rnn-two,.rnn-visual-grid{grid-template-columns:1fr}.rnn-flow{justify-content:flex-start}}
         </style>
 
         <h3>■ 1. まず全体：RNNは「前の状態」を次へ渡す</h3>
@@ -25,35 +28,96 @@ window.quizData = {
         <div class="rnn-formula">$\\displaystyle h_t=\\tanh(W_{xh}x_t+W_{hh}h_{t-1}+b)$</div>
         <p><strong>BPTT（Backpropagation Through Time）：</strong>RNNを時間方向に展開し、出力側から過去へ誤差を戻します。</p>
         <div class="rnn-flow" aria-label="BPTTは時間を逆向きに誤差を伝える"><div class="rnn-node">$h_{t-2}$</div><div class="rnn-arrow">← 勾配</div><div class="rnn-node">$h_{t-1}$</div><div class="rnn-arrow">← 勾配</div><div class="rnn-node memory">$h_t$</div></div>
+        <div class="rnn-visual-grid">
+            <div class="rnn-visual-card">
+                <strong>時間が違っても同じ重み</strong>
+                <svg class="rnn-visual-svg" viewBox="0 0 280 140" role="img" aria-label="3時刻のRNNが同じ入力重みと再帰重みを共有する図">
+                    <g fill="#eafaf1" stroke="#27ae60" stroke-width="2"><rect x="18" y="48" width="58" height="38" rx="6"/><rect x="111" y="48" width="58" height="38" rx="6"/><rect x="204" y="48" width="58" height="38" rx="6"/></g>
+                    <g class="rnn-svg-label"><text x="38" y="72">h₁</text><text x="131" y="72">h₂</text><text x="224" y="72">h₃</text></g>
+                    <path d="M77 67 H107 M170 67 H200" stroke="#627d98" stroke-width="2"/><g fill="#627d98"><path d="M107 67 l-7 -5 v10 z"/><path d="M200 67 l-7 -5 v10 z"/></g>
+                    <g fill="#eef7fb" stroke="#2780b8"><circle cx="47" cy="22" r="14"/><circle cx="140" cy="22" r="14"/><circle cx="233" cy="22" r="14"/></g><g class="rnn-svg-note"><text x="41" y="26">x₁</text><text x="134" y="26">x₂</text><text x="227" y="26">x₃</text></g>
+                    <path d="M47 37 V46 M140 37 V46 M233 37 V46" stroke="#2780b8"/>
+                    <path d="M48 104 H232" stroke="#f39c12" stroke-width="3" stroke-dasharray="6,4"/><text x="45" y="124" class="rnn-svg-note">同じ Wₓₕ・Wₕₕ を全時刻で再利用</text>
+                </svg>
+                <div class="rnn-visual-caption">系列が長くなっても、<strong>時刻ごとに別の重みは作りません</strong>。</div>
+            </div>
+            <div class="rnn-visual-card">
+                <strong>BPTT：局所微分の積が続く</strong>
+                <svg class="rnn-visual-svg" viewBox="0 0 280 140" role="img" aria-label="小さい倍率の連続で勾配が消失し、大きい倍率の連続で勾配が爆発する図">
+                    <text x="13" y="18" class="rnn-svg-label">消失：0.5を4回掛ける</text><g fill="#2780b8"><circle cx="25" cy="47" r="8"/><circle cx="68" cy="47" r="6"/><circle cx="111" cy="47" r="5"/><circle cx="154" cy="47" r="3.5"/><circle cx="197" cy="47" r="2"/></g><path d="M34 47 H60 M75 47 H104 M117 47 H148 M159 47 H192" stroke="#627d98"/><text x="211" y="51" class="rnn-svg-note">0.5⁴=0.0625</text>
+                    <text x="13" y="85" class="rnn-svg-label">爆発：1.5を4回掛ける</text><g fill="#e74c3c"><circle cx="25" cy="113" r="3"/><circle cx="68" cy="113" r="4.5"/><circle cx="111" cy="113" r="7"/><circle cx="154" cy="113" r="10"/><circle cx="202" cy="113" r="15"/></g><text x="224" y="117" class="rnn-svg-note">≈5.06</text>
+                </svg>
+                <div class="rnn-visual-caption">小さい積は<strong>勾配消失</strong>、大きい積は<strong>勾配爆発</strong>。</div>
+            </div>
+        </div>
         <div class="rnn-warning"><strong>掛け算の連続が試験ポイント：</strong>小さい倍率が続く → <strong>勾配消失</strong>。大きい倍率が続く → <strong>勾配爆発</strong>。勾配爆発には<strong>勾配クリッピング</strong>。</div>
         <p><strong>パラメータ数：</strong>Simple RNNは $H(D+H+1)$、LSTMはその4組、GRUは3組。<strong>系列長 $T$ は掛けません</strong>。この式は各変換にバイアス1組とする試験用の数え方で、実装や問題文に別指定があれば従います。</p>
 
         <h3>■ 3. Jordan → Elman：戻すものを見分ける</h3>
         <p>年代順は <strong>Jordan（1986）→ Elman（1990）</strong>。試験では「何を次時刻へ戻すか」を見ます。</p>
-        <div class="rnn-two">
-            <div class="rnn-card"><strong><span class="rnn-year">1986</span>Jordan Network</strong><div class="rnn-memory-line">$y_{t-1}\\longrightarrow h_t$</div>前の<strong>出力 $y$</strong>をContext Unitへ戻す。<br><strong>Jordan＝Output</strong></div>
-            <div class="rnn-card"><strong><span class="rnn-year">1990</span>Elman Network</strong><div class="rnn-memory-line">$h_{t-1}\\longrightarrow h_t$</div>前の<strong>隠れ状態 $h$</strong>をContext Unitへ戻す。<br><strong>Elman＝Hidden</strong></div>
+        <div class="rnn-visual-grid">
+            <div class="rnn-visual-card">
+                <strong><span class="rnn-year">1986</span>Jordan：出力を戻す</strong>
+                <svg class="rnn-visual-svg" viewBox="0 0 300 140" role="img" aria-label="Jordan Networkは直前の出力をContext Unit経由で現在の隠れ層へ戻す">
+                    <rect x="10" y="61" width="48" height="34" rx="5" fill="#eef7fb" stroke="#2780b8"/><text x="26" y="82" class="rnn-svg-label">xₜ</text>
+                    <rect x="116" y="54" width="70" height="48" rx="5" fill="#eafaf1" stroke="#27ae60"/><text x="141" y="75" class="rnn-svg-label">hₜ</text><text x="130" y="91" class="rnn-svg-note">Hidden</text>
+                    <rect x="239" y="61" width="48" height="34" rx="5" fill="#fff8e7" stroke="#f39c12"/><text x="255" y="82" class="rnn-svg-label">yₜ</text>
+                    <path d="M60 78 H112 M188 78 H235" stroke="#627d98" stroke-width="2"/><g fill="#627d98"><path d="M112 78 l-7 -5 v10 z"/><path d="M235 78 l-7 -5 v10 z"/></g>
+                    <rect x="78" y="6" width="112" height="28" rx="5" fill="#fff3f1" stroke="#e74c3c"/><text x="91" y="24" class="rnn-svg-note">Context：前の yₜ₋₁</text>
+                    <path d="M263 59 V20 H193" fill="none" stroke="#e74c3c" stroke-width="3"/><path d="M193 20 l7 -5 v10 z" fill="#e74c3c"/><path d="M134 35 V51" stroke="#e74c3c" stroke-width="3"/><path d="M134 51 l-5 -7 h10 z" fill="#e74c3c"/>
+                    <text x="72" y="128" class="rnn-svg-note">1時刻遅延：yを次時刻へ</text>
+                </svg>
+                <div class="rnn-visual-caption"><strong>Jordan＝Output</strong>。前の出力 $y_{t-1}$ を次の隠れ層へ。</div>
+            </div>
+            <div class="rnn-visual-card">
+                <strong><span class="rnn-year">1990</span>Elman：隠れ状態を戻す</strong>
+                <svg class="rnn-visual-svg" viewBox="0 0 300 140" role="img" aria-label="Elman Networkは直前の隠れ状態をContext Unit経由で現在の隠れ層へ戻す">
+                    <rect x="10" y="61" width="48" height="34" rx="5" fill="#eef7fb" stroke="#2780b8"/><text x="26" y="82" class="rnn-svg-label">xₜ</text>
+                    <rect x="116" y="54" width="70" height="48" rx="5" fill="#eafaf1" stroke="#27ae60"/><text x="141" y="75" class="rnn-svg-label">hₜ</text><text x="130" y="91" class="rnn-svg-note">Hidden</text>
+                    <rect x="239" y="61" width="48" height="34" rx="5" fill="#fff8e7" stroke="#f39c12"/><text x="255" y="82" class="rnn-svg-label">yₜ</text>
+                    <path d="M60 78 H112 M188 78 H235" stroke="#627d98" stroke-width="2"/><g fill="#627d98"><path d="M112 78 l-7 -5 v10 z"/><path d="M235 78 l-7 -5 v10 z"/></g>
+                    <rect x="78" y="6" width="112" height="28" rx="5" fill="#f7f1fa" stroke="#8e44ad"/><text x="91" y="24" class="rnn-svg-note">Context：前の hₜ₋₁</text>
+                    <path d="M151 52 V36" stroke="#8e44ad" stroke-width="3"/><path d="M151 36 l-5 7 h10 z" fill="#8e44ad"/><path d="M79 20 H57 V51 H112" fill="none" stroke="#8e44ad" stroke-width="3"/><path d="M112 51 l-7 -5 v10 z" fill="#8e44ad"/>
+                    <text x="69" y="128" class="rnn-svg-note">1時刻遅延：hを次時刻へ</text>
+                </svg>
+                <div class="rnn-visual-caption"><strong>Elman＝Hidden</strong>。前の隠れ状態 $h_{t-1}$ を次へ。</div>
+            </div>
         </div>
         <div class="rnn-ok"><strong>図問題の解き方：</strong>戻り矢印の始点だけを見る。$y$から戻ればJordan、$h$から戻ればElman。</div>
 
         <h3>■ 4. LSTMとGRU：ゲート名と状態を区別</h3>
         <div class="rnn-two">
-            <div class="rnn-card"><strong>LSTM（Long Short-Term Memory）</strong><div class="rnn-memory-line"><strong>$c_t$：</strong>長期記憶（メモリーセル／Cell state）</div><div class="rnn-memory-line"><strong>$h_t$：</strong>短期記憶（現在の出力／Hidden state）</div><strong>3ゲート：</strong>忘却 $f$・入力 $i$・出力 $o$</div>
-            <div class="rnn-card"><strong>GRU（Gated Recurrent Unit）</strong>独立したセル状態 $c_t$ を持たず、$h_t$ にまとめます。<br><strong>2ゲート：</strong>更新 $z$・リセット $r$<br>LSTMより構造が簡単で、一般にパラメータが少ない。</div>
+            <div class="rnn-card"><strong>LSTM（Long Short-Term Memory）</strong><div class="rnn-memory-line"><strong>$c_t$：</strong>長期記憶（メモリーセル）<br><strong>$h_t$：</strong>短期記憶・現在の出力</div><div class="rnn-gate-line"><span class="rnn-gate-icon">F</span><span><strong>忘却：</strong>過去をどれだけ残すか</span></div><div class="rnn-gate-line"><span class="rnn-gate-icon">I</span><span><strong>入力：</strong>新情報をどれだけ書くか</span></div><div class="rnn-gate-line"><span class="rnn-gate-icon">O</span><span><strong>出力：</strong>セル内容をどれだけ見せるか</span></div></div>
+            <div class="rnn-card"><strong>GRU（Gated Recurrent Unit）</strong><div class="rnn-memory-line">独立した $c_t$ はなく、記憶を<strong>$h_t$へ統合</strong></div><div class="rnn-gate-line"><span class="rnn-gate-icon gru">Z</span><span><strong>更新：</strong>過去と新情報をどの割合で混ぜるか</span></div><div class="rnn-gate-line"><span class="rnn-gate-icon gru">R</span><span><strong>リセット：</strong>候補を作るとき過去をどれだけ見るか</span></div><p>LSTMより構造が簡単で、一般にパラメータが少ない。</p></div>
         </div>
         <div class="rnn-formula">$\\displaystyle c_t=f_t\\odot c_{t-1}+i_t\\odot\\widetilde c_t$</div><div class="rnn-formula">$\\displaystyle h_t=o_t\\odot\\tanh(c_t)$</div>
         <p><strong>式の読み方：</strong>過去を残す量（$f_t$）＋新情報を書く量（$i_t$）→ $c_t$。そこから外へ出す量を $o_t$ が決めます。</p>
 
         <h3>■ 5. 双方向RNN：前と後ろを両方読む</h3>
-        <div class="rnn-flow" aria-label="双方向RNNは順方向と逆方向を結合する"><div class="rnn-node">順方向<br>$\\overrightarrow h_t$</div><div class="rnn-arrow">＋</div><div class="rnn-node">逆方向<br>$\\overleftarrow h_t$</div><div class="rnn-arrow">→</div><div class="rnn-node memory">Concat<br>$[\\overrightarrow h_t;\\overleftarrow h_t]$</div></div>
+        <div class="rnn-visual-card">
+            <strong>順方向と逆方向を同じ位置で結合</strong>
+            <svg class="rnn-visual-svg" viewBox="0 0 340 150" role="img" aria-label="双方向RNNが過去から未来へ読む順方向と未来から過去へ読む逆方向を各時刻で結合する図">
+                <defs><marker id="rnn-birnn-forward-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#2780b8"/></marker><marker id="rnn-birnn-backward-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#e74c3c"/></marker></defs>
+                <text x="8" y="18" class="rnn-svg-note">順方向：過去 → 未来</text><g fill="#eef7fb" stroke="#2780b8"><circle cx="70" cy="46" r="15"/><circle cx="170" cy="46" r="15"/><circle cx="270" cy="46" r="15"/></g><path d="M86 46 H153 M186 46 H253" stroke="#2780b8" stroke-width="2.5" marker-end="url(#rnn-birnn-forward-arrow)"/>
+                <text x="229" y="139" class="rnn-svg-note">逆方向：未来 → 過去</text><g fill="#fff3f1" stroke="#e74c3c"><circle cx="70" cy="112" r="15"/><circle cx="170" cy="112" r="15"/><circle cx="270" cy="112" r="15"/></g><path d="M254 112 H187 M154 112 H87" stroke="#e74c3c" stroke-width="2.5" marker-end="url(#rnn-birnn-backward-arrow)"/>
+                <path d="M170 62 V67 M170 91 V96" stroke="#627d98" stroke-width="1.5" stroke-dasharray="3,2"/><rect x="145" y="67" width="50" height="24" rx="5" fill="#eafaf1" stroke="#27ae60"/><text x="155" y="83" class="rnn-svg-note">Concat</text>
+            </svg>
+            <div class="rnn-visual-caption">同じ時刻の $[\\overrightarrow h_t;\\overleftarrow h_t]$ を結合。各方向が $H$ 次元なら通常 $2H$ 次元です。</div>
+        </div>
         <p>各方向の隠れ次元が $H$ なら、Concat後は通常 $2H$。未来側も読むため、全系列が届く前の<strong>リアルタイム予測には不向き</strong>です。</p>
         <div class="rnn-ok"><strong>Shape問題：</strong><code>return_sequences=True</code>なら時間軸 $T$ を残す。Falseなら系列を1個にまとめる。</div>
 
         <h3>■ 6. Encoder–Decoder / Seq2Seq / Attention</h3>
         <div class="rnn-flow" aria-label="Seq2SeqとAttentionの情報の流れ"><div class="rnn-node">入力系列</div><div class="rnn-arrow">→</div><div class="rnn-node">Encoder<br>読む</div><div class="rnn-arrow">→</div><div class="rnn-node memory">Attention<br>必要箇所を選ぶ</div><div class="rnn-arrow">→</div><div class="rnn-node">Decoder<br>生成</div></div>
         <p><strong>Seq2Seq（Sequence-to-Sequence）：</strong>Encoderが入力系列を読み、Decoderが別の系列を1語ずつ生成します。翻訳のように入出力の長さが違っても扱えます。</p>
-        <p><strong>Attention：</strong>①Encoder状態とのscore → ②Softmaxで重み（合計1）→ ③重み付き和で文脈ベクトル。固定長ベクトル1個への詰め込みを緩和します。</p>
+        <p><strong>Attention：</strong>各生成時刻のDecoder状態とEncoder状態から、①score → ②Softmaxで重み（合計1）→ ③重み付き和で文脈ベクトル。固定長ベクトル1個への詰め込みを緩和します。</p>
         <div class="rnn-two"><div class="rnn-card"><strong>Teacher Forcing（学習時）</strong>前の<strong>正解トークン</strong>を次のDecoder入力に使う。入力は $[BOS,y_1,y_2,\\ldots]$、正解は1つ先へずらす。</div><div class="rnn-card"><strong>Exposure Bias（問題点）</strong>推論時は前の<strong>自分の予測</strong>を入力するため、学習時との条件差で誤りが連鎖しやすい。</div></div>
+        <div class="rnn-shift-guide" aria-label="Teacher Forcingで正解系列を1トークン右へずらしてDecoder入力を作る図">
+            <strong>Teacher Forcingは「1個右へずらす」</strong>
+            <div class="rnn-shift-line"><span class="rnn-shift-label"><strong>教師ラベル：</strong></span><span class="rnn-shift-token">私</span><span class="rnn-shift-token">は</span><span class="rnn-shift-token">猫</span><span class="rnn-shift-token">EOS</span></div>
+            <div class="rnn-shift-line"><span class="rnn-shift-label"><strong>Decoder入力：</strong></span><span class="rnn-shift-token start">BOS</span><span class="rnn-shift-token">私</span><span class="rnn-shift-token">は</span><span class="rnn-shift-token">猫</span></div>
+            <small><strong>縦に見る：</strong>BOSから「私」、私から「は」、はから「猫」、猫から「EOS」を予測します。</small>
+        </div>
 
         <h3>■ 7. 最後はこの表だけ</h3>
         <div class="rnn-table-wrap"><table class="rnn-final-table">
