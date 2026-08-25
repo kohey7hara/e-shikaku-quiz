@@ -5,7 +5,9 @@ window.quizData = {
         <style>
             .gm-core { background:#eef8f8; border-left:5px solid #35b9c5; border-radius:0 10px 10px 0; padding:14px 18px; margin:12px 0 22px; }
             .gm-note { background:#fff8e8; border-left:5px solid #f39c12; border-radius:0 10px 10px 0; padding:12px 16px; margin:12px 0 22px; }
-            .gm-formula { background:#f7f9fc; border:1px solid #d9e2ec; border-radius:8px; padding:11px 14px; margin:10px 0; overflow-x:auto; }
+            .gm-formula { margin:9px 0; padding:12px 14px; border:1px solid #c8dbee; border-radius:8px; background:#f3f8fd; color:#123f68; text-align:center; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+            .gm-formula mjx-container { margin:0 !important; }
+            .gm-formula-label { display:block; margin-bottom:6px; color:#123f68; text-align:left; font-weight:800; }
             .gm-visual-wrap { overflow-x:auto; margin:14px 0 22px; }
             .gm-visual-card { min-width:990px; border:1px solid #d9e2ec; border-radius:12px; background:#fff; padding:12px; }
             .gm-wide-svg { display:block; width:100%; min-width:960px; height:auto; }
@@ -124,7 +126,7 @@ window.quizData = {
 
         <div class="gm-exam-card">
             <strong class="gm-exam-title">試験で出る確率の見分け方</strong>
-            識別モデルは主に <strong>p(y|x)</strong>、生成モデルは <strong>p(x)</strong>・<strong>p(x,y)</strong>・条件付き生成の <strong>p(x|c)</strong> を扱います。
+            識別モデルは主に <strong>$p(y\\mid x)$</strong>、生成モデルは <strong>$p(x)$</strong>・<strong>$p(x,y)$</strong>・条件付き生成の <strong>$p(x\\mid c)$</strong> を扱います。
         </div>
 
         <h3>■ 2. AE・DAE・VAE：圧縮メモの違い</h3>
@@ -153,14 +155,14 @@ window.quizData = {
             <span class="gm-word"><strong>z</strong>＝圧縮した設計図（潜在変数）</span>
             <span class="gm-word"><strong>Encoder</strong>＝圧縮する側</span>
             <span class="gm-word"><strong>Decoder</strong>＝元へ戻す側</span>
-            <span class="gm-word"><strong>prior</strong>＝生成を始める事前分布（通常 N(0,I)）</span>
+            <span class="gm-word"><strong>prior</strong>＝生成を始める事前分布（通常 $\\mathcal N(0,I)$）</span>
         </div>
 
         <h3>■ 3. VAE：中心と広がりから設計図 z を選ぶ</h3>
         <div class="gm-core">
             <ol class="gm-steps">
-                <li>Encoderが<strong>中心 μ</strong>と<strong>log σ²（logvar）</strong>を出し、<strong>σ = exp(0.5 × log σ²)</strong>で広がりσへ戻す。</li>
-                <li>乱数 ε を使い、<strong>z = μ + σε</strong> で設計図を1つ選ぶ。</li>
+                <li>Encoderが<strong>中心 $\\mu$</strong>と<strong>$\\log\\sigma^2$（logvar）</strong>を出し、<strong>$\\sigma=\\exp\\!\\left(\\frac12\\log\\sigma^2\\right)$</strong>で広がり $\\sigma$ へ戻す。</li>
+                <li>乱数 $\\varepsilon$ を使い、<strong>$z=\\mu+\\sigma\\varepsilon$</strong> で設計図を1つ選ぶ。</li>
                 <li>Decoderが z から元データに似たものを作る。</li>
             </ol>
         </div>
@@ -217,15 +219,24 @@ window.quizData = {
         <div class="gm-core">
             <strong>VAEの学習でやりたいこと</strong><br>
             ① 元データへ上手に戻す　＋　② 設計図 z の分布を基準の形へそろえる
-            <div class="gm-formula"><strong>学習損失（−ELBO）</strong> ＝ 再構成損失 ＋ 分布のずれ（KL項）</div>
+            <div class="gm-formula">
+                <strong class="gm-formula-label">最小化する学習損失（−ELBO）</strong>
+                $\\displaystyle \\mathcal L_{\\mathrm{VAE}}=-\\operatorname{ELBO}(x)=\\underbrace{-\\mathbb E_{q_\\phi(z\\mid x)}\\!\\left[\\log p_\\theta(x\\mid z)\\right]}_{\\text{再構成損失}}+\\underbrace{D_{\\mathrm{KL}}\\!\\left(q_\\phi(z\\mid x)\\,\\|\\,p(z)\\right)}_{\\text{KL項}}$
+            </div>
             <strong>KL</strong>＝Kullback–Leibler divergence（KLダイバージェンス：分布のずれ）／
             <strong>ELBO</strong>＝Evidence Lower Bound（変分下限）
         </div>
 
         <div class="gm-exam-card">
             <strong class="gm-exam-title">VAEで使う式はこの2本</strong>
-            <div class="gm-formula"><strong>再パラメータ化：</strong>σ = exp(0.5 × log σ²)、z = μ + σε</div>
-            <div class="gm-formula"><strong>ELBO（変分下限）：</strong>E<sub>q</sub>[log p<sub>θ</sub>(x|z)] − KL(q<sub>φ</sub>(z|x) || p(z))</div>
+            <div class="gm-formula">
+                <strong class="gm-formula-label">再パラメータ化</strong>
+                $\\displaystyle \\sigma=\\exp\\!\\left(\\frac12\\log\\sigma^2\\right),\\qquad \\varepsilon\\sim\\mathcal N(0,I),\\qquad z=\\mu+\\sigma\\varepsilon$
+            </div>
+            <div class="gm-formula">
+                <strong class="gm-formula-label">ELBO（変分下限）</strong>
+                $\\displaystyle \\operatorname{ELBO}(x)=\\mathbb E_{q_\\phi(z\\mid x)}\\!\\left[\\log p_\\theta(x\\mid z)\\right]-D_{\\mathrm{KL}}\\!\\left(q_\\phi(z\\mid x)\\,\\|\\,p(z)\\right)$
+            </div>
             <strong>聞かれ方：</strong>ELBOは<strong>最大化</strong>。同じことを「−ELBO＝再構成損失＋KL項を<strong>最小化</strong>」とも表します。生成時は事前分布からzを選び、基本的に<strong>Decoderだけ</strong>を使います。
         </div>
 
@@ -294,10 +305,19 @@ window.quizData = {
 
         <div class="gm-exam-card">
             <strong class="gm-exam-title">GANで使う目標と式</strong>
-            <div class="gm-formula"><strong>Dの目標：</strong>本物 D(x)→1、偽物 D(G(z))→0</div>
-            <div class="gm-formula"><strong>Gの目標：</strong>偽物を D(G(z))→1 と判定させる</div>
-            <div class="gm-formula"><strong>原式 minimax：</strong>min<sub>G</sub> max<sub>D</sub> E<sub>x</sub>[log D(x)] + E<sub>z</sub>[log(1−D(G(z)))]</div>
-            <strong>注意：</strong>実装ではGに <strong>−log D(G(z))</strong> を使うnon-saturating損失（勾配が弱くなりにくい実用損失）が一般的です。式が違っても「偽物を本物側へ」が共通の目標です。BCEはBinary Cross-Entropy（二値交差エントロピー）、WGAN-GPは勾配ペナルティで1-Lipschitz制約を近似します。
+            <div class="gm-formula">
+                <strong class="gm-formula-label">D（識別器）の目標</strong>
+                $\\displaystyle D(x)\\to1,\\qquad D(G(z))\\to0$
+            </div>
+            <div class="gm-formula">
+                <strong class="gm-formula-label">G（生成器）の目標</strong>
+                $\\displaystyle D(G(z))\\to1$
+            </div>
+            <div class="gm-formula">
+                <strong class="gm-formula-label">原式（minimax）</strong>
+                $\\displaystyle \\min_G\\max_D\\;V(D,G)=\\mathbb E_{x\\sim p_{\\mathrm{data}}}\\!\\left[\\log D(x)\\right]+\\mathbb E_{z\\sim p_z}\\!\\left[\\log\\!\\left(1-D(G(z))\\right)\\right]$
+            </div>
+            <strong>注意：</strong>実装ではGに <strong>$\\mathcal L_G^{\\mathrm{NS}}=-\\mathbb E_{z\\sim p_z}[\\log D(G(z))]$</strong> を使うnon-saturating損失（勾配が弱くなりにくい実用損失）が一般的です。式が違っても「偽物を本物側へ」が共通の目標です。BCEはBinary Cross-Entropy（二値交差エントロピー）、WGAN-GPは勾配ペナルティで1-Lipschitz制約を近似します。
         </div>
 
         <h3>■ 5. 拡散モデルとFlow：戻し方が違う</h3>
@@ -306,7 +326,7 @@ window.quizData = {
             <strong>Flow（フローベース）</strong>＝必ず元へ戻れる変換で、簡単な乱数とデータを行き来。
         </div>
         <div class="gm-note">
-            <strong>DDPM</strong>＝Denoising Diffusion Probabilistic Models。Forward processは固定、Reverse processを学習します。代表的には<strong>汚れたx<sub>t</sub>と時刻t</strong>をモデルへ入れ、加えた<strong>ノイズε</strong>を当てます。
+            <strong>DDPM</strong>＝Denoising Diffusion Probabilistic Models。Forward processは固定、Reverse processを学習します。代表的には<strong>汚れた $x_t$ と時刻 $t$</strong> をモデルへ入れ、加えた<strong>ノイズ $\\varepsilon$</strong>を当てます。
         </div>
 
         <div class="gm-visual-wrap">
@@ -374,8 +394,8 @@ window.quizData = {
 
         <div class="gm-note">
             <strong>拡散モデルの記号：</strong>
-            x₀＝元データ／x<sub>t</sub>＝時刻tの汚れたデータ／x̂₀＝ノイズから生成した新しい標本／ε＝加えたノイズ。<br>
-            α<sub>t</sub>＝1−β<sub>t</sub>、ᾱ<sub>t</sub>＝α₁からα<sub>t</sub>までの積。√ᾱ<sub>t</sub>＝元データ側、√(1−ᾱ<sub>t</sub>)＝ノイズ側の係数。
+            $x_0$＝元データ／$x_t$＝時刻 $t$ の汚れたデータ／$\\hat{x}_0$＝ノイズから生成した新しい標本／$\\varepsilon$＝加えたノイズ。<br>
+            $\\alpha_t=1-\\beta_t$、$\\bar\\alpha_t=\\prod_{s=1}^{t}\\alpha_s$。$\\sqrt{\\bar\\alpha_t}$＝元データ側、$\\sqrt{1-\\bar\\alpha_t}$＝ノイズ側の係数。
         </div>
 
         <div class="gm-note">
@@ -385,10 +405,19 @@ window.quizData = {
 
         <div class="gm-exam-card">
             <strong class="gm-exam-title">Diffusion・Flowで使う式</strong>
-            <div class="gm-formula"><strong>途中のx<sub>t</sub>を作る：</strong>x<sub>t</sub> = √ᾱ<sub>t</sub>x<sub>0</sub> + √(1−ᾱ<sub>t</sub>)ε</div>
-            <div class="gm-formula"><strong>ノイズ予測の損失：</strong>|| ε − ε<sub>θ</sub>(x<sub>t</sub>, t) ||²</div>
-            <div class="gm-formula"><strong>Flow：</strong>z=g(x) のとき、log p<sub>X</sub>(x) = log p<sub>Z</sub>(g(x)) + log |det J<sub>g</sub>(x)|</div>
-            <strong>図問題の合図：</strong>DDPMの予測器は<strong>x<sub>t</sub>と時刻t</strong>を受け取り、典型的には<strong>U-Net＋Time Embedding（時刻tのベクトル表現）</strong>を使います。
+            <div class="gm-formula">
+                <strong class="gm-formula-label">途中の $x_t$ を作る</strong>
+                $\\displaystyle x_t=\\sqrt{\\bar\\alpha_t}\\,x_0+\\sqrt{1-\\bar\\alpha_t}\\,\\varepsilon,\\qquad \\varepsilon\\sim\\mathcal N(0,I)$
+            </div>
+            <div class="gm-formula">
+                <strong class="gm-formula-label">ノイズ予測の損失</strong>
+                $\\displaystyle \\mathcal L_{\\mathrm{simple}}=\\mathbb E_{x_0,t,\\varepsilon}\\!\\left[\\left\\|\\varepsilon-\\varepsilon_\\theta(x_t,t)\\right\\|_2^2\\right]$
+            </div>
+            <div class="gm-formula">
+                <strong class="gm-formula-label">Flow（$g:x\\to z$ の変数変換）</strong>
+                $\\displaystyle z=g(x),\\qquad \\log p_X(x)=\\log p_Z\\!\\left(g(x)\\right)+\\log\\left|\\det J_g(x)\\right|$
+            </div>
+            <strong>図問題の合図：</strong>DDPMの予測器は<strong>$x_t$ と時刻 $t$</strong>を受け取り、典型的には<strong>U-Net＋Time Embedding（時刻 $t$ のベクトル表現）</strong>を使います。
         </div>
 
         <div class="gm-note"><strong>DAEとの違い：</strong>DAEは汚した入力を主に<strong>1回で復元</strong>。拡散モデルは多数の時刻を使い、ノイズから<strong>反復して新しい標本を生成</strong>します。</div>
@@ -411,22 +440,22 @@ window.quizData = {
         </div>
         <div class="gm-exam-card">
             <strong class="gm-exam-title">自己回帰で使う式</strong>
-            <div class="gm-formula">p(x₁:T) = ∏<sub>t=1</sub><sup>T</sup> p(x<sub>t</sub> | x<sub>1:t−1</sub>)</div>
-            x₁:T＝系列全体、x₁:t−1＝それまでに出た要素。尤度を分解できますが、生成は原則1つずつなので時間がかかります。
+            <div class="gm-formula">$\\displaystyle p(x_{1:T})=\\prod_{t=1}^{T}p\\!\\left(x_t\\mid x_{1:t-1}\\right)$</div>
+            $x_{1:T}$＝系列全体、$x_{1:t-1}$＝それまでに出た要素。尤度を分解できますが、生成は原則1つずつなので時間がかかります。
         </div>
 
         <h3>■ 7. 計算問題：「合図 → 公式 → 3手」で解く</h3>
         <div class="gm-table-wrap">
             <table class="gm-table">
                 <tr><th>問題文の合図</th><th>使う公式</th><th>3手の解法</th></tr>
-                <tr><td>μ・σ・εからz</td><td>z＝μ＋σε</td><td>①σ×ε → ②μを足す → ③zと答える</td></tr>
-                <tr><td>logσ²からσ</td><td>σ＝exp(0.5×logσ²)</td><td>①0.5倍 → ②exp → ③zの式へ代入</td></tr>
-                <tr><td>再構成対数尤度・KL</td><td>ELBO＝再構成対数尤度−KL</td><td>①引く → ②Lossなら符号反転 → ③最大化／最小化を確認</td></tr>
-                <tr><td>q=N(μ,σ²)、p=N(0,1)のKL</td><td>½(μ²＋σ²−logσ²−1)</td><td>①σ² → ②logσ² → ③括弧を計算して½倍</td></tr>
-                <tr><td>D(real)・D(fake)</td><td>−ln D(real)−ln(1−D(fake))</td><td>①本物側 → ②偽物側 → ③2つを足す</td></tr>
-                <tr><td>x₀・ε・ᾱ<sub>t</sub></td><td>x<sub>t</sub>＝√ᾱ<sub>t</sub>x₀＋√(1−ᾱ<sub>t</sub>)ε</td><td>①元データ側 → ②ノイズ側 → ③足す</td></tr>
-                <tr><td>CycleGANの往復結果（応用）</td><td>||F(G(x))−x||₁</td><td>①各差 → ②絶対値 → ③合計</td></tr>
-                <tr><td>密度・変換の傾き（応用）</td><td>p<sub>X</sub>＝p<sub>Z</sub>×|dg/dx|</td><td>①微分 → ②絶対値 → ③密度へ掛ける</td></tr>
+                <tr><td>$\\mu$・$\\sigma$・$\\varepsilon$ から $z$</td><td>$\\displaystyle z=\\mu+\\sigma\\varepsilon$</td><td>①$\\sigma\\times\\varepsilon$ → ②$\\mu$を足す → ③$z$と答える</td></tr>
+                <tr><td>$\\log\\sigma^2$ から $\\sigma$</td><td>$\\displaystyle \\sigma=\\exp\\!\\left(\\frac12\\log\\sigma^2\\right)$</td><td>①$\\frac12$倍 → ②exp → ③$z$の式へ代入</td></tr>
+                <tr><td>再構成対数尤度・KL</td><td>$\\displaystyle \\operatorname{ELBO}(x)=\\mathbb E_q[\\log p_\\theta(x\\mid z)]-D_{\\mathrm{KL}}$</td><td>①引く → ②Lossなら符号反転 → ③最大化／最小化を確認</td></tr>
+                <tr><td>$q=\\mathcal N(\\mu,\\sigma^2)$、$p=\\mathcal N(0,1)$ のKL</td><td>$\\displaystyle D_{\\mathrm{KL}}=\\frac12\\left(\\mu^2+\\sigma^2-\\log\\sigma^2-1\\right)$</td><td>①$\\sigma^2$ → ②$\\log\\sigma^2$ → ③括弧を計算して$\\frac12$倍</td></tr>
+                <tr><td>$D(\\mathrm{real})$・$D(\\mathrm{fake})$</td><td>$\\displaystyle \\mathcal L_D=-\\log D(x)-\\log\\!\\left(1-D(G(z))\\right)$</td><td>①本物側 → ②偽物側 → ③2項を合計</td></tr>
+                <tr><td>$x_0$・$\\varepsilon$・$\\bar\\alpha_t$</td><td>$\\displaystyle x_t=\\sqrt{\\bar\\alpha_t}\\,x_0+\\sqrt{1-\\bar\\alpha_t}\\,\\varepsilon$</td><td>①元データ側 → ②ノイズ側 → ③足す</td></tr>
+                <tr><td>CycleGANの片方向の往復結果（応用）</td><td>$\\displaystyle \\left\\|F(G(x))-x\\right\\|_1$</td><td>①各差 → ②絶対値 → ③合計</td></tr>
+                <tr><td>密度・変換の傾き（応用）</td><td>$\\displaystyle p_X(x)=p_Z\\!\\left(g(x)\\right)\\left|\\frac{dg(x)}{dx}\\right|$</td><td>①微分 → ②絶対値 → ③密度へ掛ける</td></tr>
             </table>
         </div>
 
@@ -446,7 +475,7 @@ window.quizData = {
                 <tr><td>作りたい条件を指定</td><td><strong>cGAN</strong></td><td>条件cをGとDへ</td></tr>
                 <tr><td>ペアなし・2G＋2D・往復</td><td><strong>CycleGAN</strong></td><td>A→B→Aで元へ</td></tr>
                 <tr><td>Forward固定・Reverse学習</td><td><strong>DDPM</strong></td><td>ノイズを加え、少しずつ除く</td></tr>
-                <tr><td>x<sub>t</sub>と時刻t・U-Net・Time Embedding</td><td><strong>ノイズ予測器</strong></td><td>正解εとのMSE</td></tr>
+                <tr><td>$x_t$と時刻$t$・U-Net・Time Embedding</td><td><strong>ノイズ予測器</strong></td><td>正解$\\varepsilon$とのMSE</td></tr>
                 <tr><td>戻せる変換・ヤコビアン</td><td><strong>Flow</strong></td><td>乱数とデータを往復</td></tr>
             </table>
         </div>
