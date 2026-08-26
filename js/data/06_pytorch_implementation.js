@@ -120,12 +120,56 @@ with torch.inference_mode():
         </table></div>
 
         <h4>① 多class分類：CrossEntropyLoss</h4>
+        <p>ここでは、本試験の基本形である<strong>「1sampleにつき正解classが1つ」</strong>の場合を扱います。</p>
         <pre class="pt-question-code"><code>logits = model(x)                  # (B, C)：生の点数
 target = target.long()            # (B,)：正解class番号
 loss = nn.CrossEntropyLoss()(logits, target)
 
 pred = logits.argmax(dim=1)       # 予測classは(B,)</code></pre>
-        <div class="pt-note"><strong>覚え方：</strong>CE＝<code>raw logits (B,C)</code>＋<code>longのclass番号 (B,)</code>。通常のhard labelでは、loss前のSoftmaxとone-hot変換は不要です。</div>
+        <div class="pt-note">
+            <strong>最重要：</strong><code>logits</code>は「モデルの予測」、<code>target</code>は「正解」です。引数の順番は必ず<strong>予測 → 正解</strong>。<br>
+            CEの基本形では、<code>logits=(B,C)</code>と<code>target=(B,)</code>は<strong>同じShapeではありません</strong>。
+        </div>
+
+        <h4><code>nn.CrossEntropyLoss()(logits, target)</code>を2段階に分ける</h4>
+        <pre class="pt-question-code"><code># ① 最初の ()：損失関数を作る
+criterion = nn.CrossEntropyLoss()
+
+# ② 次の (logits, target)：予測と正解を渡す
+loss = criterion(logits, target)
+
+# 上の2行と同じ意味
+loss = nn.CrossEntropyLoss()(logits, target)</code></pre>
+        <div class="pt-table-wrap"><table class="pt-table">
+            <tr><th>空欄になりやすい場所</th><th>答え</th><th>なぜそうなるか</th><th>よくある誤答</th></tr>
+            <tr><td>モデルの最終層</td><td><code>nn.Linear(hidden, C)</code></td><td>C classそれぞれの点数を出す。</td><td><code>nn.Linear(hidden, 1)</code></td></tr>
+            <tr><td><code>logits</code>のShape</td><td><strong>(B,C)</strong></td><td>B件それぞれにC個の点数。</td><td>(C,B)、(B,)</td></tr>
+            <tr><td><code>target</code>のShape</td><td><strong>(B,)</strong></td><td>1sampleにつき正解class番号は1個。</td><td>(B,1)、(B,C)のone-hot</td></tr>
+            <tr><td><code>target</code>のdtype</td><td><code>torch.long</code></td><td>0〜C−1のclass番号を入れる。</td><td><code>float</code></td></tr>
+            <tr><td>lossの引数順</td><td><code>(logits, target)</code></td><td>予測を先、正解を後に渡す。</td><td><code>(target, logits)</code></td></tr>
+            <tr><td>予測class</td><td><code>argmax(dim=1)</code></td><td><code>dim=1</code>がclass軸C。</td><td><code>dim=0</code></td></tr>
+            <tr><td>lossのShape</td><td><strong>scalar <code>()</code></strong></td><td>既定の<code>reduction='mean'</code>でBatch平均。</td><td>(B,C)</td></tr>
+        </table></div>
+
+        <h4>Shape図解：「点数表」と「正解番号」を比べる</h4>
+        <pre class="pt-question-code"><code>logits = [                         # Shape (B=3, C=3)
+    [ 2.1, 0.3, -1.0 ],          # sample 0：3classの点数
+    [ 0.2, 0.8,  1.5 ],          # sample 1：3classの点数
+    [ 0.1, 2.0,  0.4 ]           # sample 2：3classの点数
+]
+
+target = [0, 2, 1]               # Shape (B=3,)・long
+         # ↑  ↑  ↑
+         # 各sampleの正解class番号
+
+loss = criterion(logits, target) # 既定では平均された1個のloss</code></pre>
+
+        <div class="pt-card-grid">
+            <div class="pt-card"><strong>試験でよく聞かれる5か所</strong>①<code>Linear</code>の出力数C<br>②logitsのShape<br>③targetのShape・dtype<br>④<code>(logits,target)</code>の順番<br>⑤<code>argmax(dim=1)</code></div>
+            <div class="pt-card"><strong>この基本形なら5秒で消せる</strong>loss前にSoftmax／targetがfloat／引数が逆／<code>argmax(dim=0)</code>／C classなのに最終出力が1個。</div>
+            <div class="pt-card"><strong>覚える1行</strong><code>点数表 (B,C) ＋ 正解番号 (B,) → loss 1個</code><br><code>pred</code>は正解率の計算用で、lossへは渡さない。</div>
+        </div>
+        <div class="pt-note"><strong>Softmaxはいつ使う？</strong>CEの学習時は不要です。確率を表示したい推論時だけ使います。最大位置は変わらないため、予測classだけなら<code>logits.argmax(dim=1)</code>で求められます。</div>
 
         <h4>② 1出力の2値分類：BCEWithLogitsLoss</h4>
         <pre class="pt-question-code"><code>logits = model(x)                         # (B, 1)
@@ -439,9 +483,21 @@ b = b - learning_rate * db / B</code></pre>
         // 2. 損失・Optimizer・DataLoader・保存
         {
             id:"pt-ce-input", category:"損失関数", kind:"コード判定", difficulty:"必須",
-            question:"3classから1つを選ぶ分類で、空欄へ入る標準的なコードはどれか。<pre class='pt-question-code'><code>logits = model(x)  # (8, 3)\ntarget = torch.tensor([1,0,2,1,2,0,1,2])  # (8,)\nloss = （あ）</code></pre>",
-            options:["<code>nn.CrossEntropyLoss()(logits, target.long())</code>","<code>nn.CrossEntropyLoss()(torch.softmax(logits, dim=1), target.float())</code>","<code>nn.BCEWithLogitsLoss()(logits, target.long())</code>","<code>nn.MSELoss()(logits, target)</code>"], answer:0,
-            explanation:"<p><strong>① 出力：</strong><code>logits=(B,C)=(8,3)</code>です。</p><p><strong>② target：</strong>1sampleにつきclass番号1個なので、<code>longの(B,)=(8,)</code>です。</p><p><strong>③ loss：</strong><code>CrossEntropyLoss(logits, target)</code>。loss前のSoftmaxは不要です。</p>"
+            question:"3classから1つを選ぶ分類で、（あ）（い）の正しい組合せはどれか。<pre class='pt-question-code'><code>logits = model(x)  # float・(8, 3)\ntarget = torch.tensor([1,0,2,1,2,0,1,2])  # (8,)\ncriterion = nn.CrossEntropyLoss()\nloss = criterion(（あ）, （い）)</code></pre>",
+            options:["（あ）<code>logits</code>／（い）<code>target.long()</code>","（あ）<code>target</code>／（い）<code>logits</code>","（あ）<code>torch.softmax(logits, dim=1)</code>／（い）<code>target.float()</code>","（あ）<code>logits.argmax(dim=1)</code>／（い）<code>target</code>"], answer:0,
+            explanation:"<p><strong>① 第1引数：</strong><code>logits</code>はモデルが出したfloatの生点数<code>(B,C)=(8,3)</code>です。</p><p><strong>② 第2引数：</strong><code>target.long()</code>は正解class番号<code>(B,)=(8,)</code>です。</p><p><strong>③ 引数順：</strong><code>criterion(logits, target)</code>＝予測→正解。<code>pred=argmax(...)</code>やSoftmax後の確率は、この基本形のlossへ渡しません。</p>"
+        },
+        {
+            id:"pt-ce-target-range", category:"損失関数", kind:"コード判定", difficulty:"標準",
+            question:"次の3class分類コードがエラーになる主な理由はどれか。<pre class='pt-question-code'><code>logits = torch.randn(4, 3)\ntarget = torch.tensor([0, 2, 3, 1], dtype=torch.long)\nloss = nn.CrossEntropyLoss()(logits, target)</code></pre>",
+            options:["3classの有効なclass番号は0・1・2だが、targetに3が含まれる","logitsのShapeは必ず(3,4)でなければならない","targetはfloat型でなければならない","CrossEntropyLossの前にSoftmaxがない"], answer:0,
+            explanation:"<p><strong>① class数：</strong><code>logits=(B,C)=(4,3)</code>なのでC=3です。</p><p><strong>② 番号の範囲：</strong>class番号は<code>0〜C-1</code>、つまり0・1・2です。</p><p><strong>③ 誤り：</strong><code>target</code>に範囲外の3が含まれます。Softmaxはloss前に不要です。</p>"
+        },
+        {
+            id:"pt-ce-loss-pred-shape", category:"損失関数", kind:"形状計算", difficulty:"標準",
+            question:"既定設定の<code>CrossEntropyLoss</code>を使う。<code>loss</code>と<code>pred</code>のShapeの組合せはどれか。<pre class='pt-question-code'><code>logits = model(x)  # (5, 3)\ntarget = target.long()  # (5,)\nloss = nn.CrossEntropyLoss()(logits, target)\npred = logits.argmax(dim=1)</code></pre>",
+            options:["lossはscalar <code>()</code>、predは<code>(5,)</code>","lossは<code>(5,3)</code>、predはscalar <code>()</code>","lossもpredも<code>(5,3)</code>","lossもpredも<code>(3,)</code>"], answer:0,
+            explanation:"<p><strong>① loss：</strong>既定の<code>reduction='mean'</code>はsampleのlossを平均するためscalar Tensorです。</p><p><strong>② pred：</strong><code>argmax(dim=1)</code>は各sampleのclass軸を1個の番号へ縮めます。</p><p><strong>③ 答え：</strong><code>loss.shape=()</code>、<code>pred.shape=(B,)=(5,)</code>です。</p>"
         },
         {
             id:"pt-bce-logits-input", category:"損失関数", kind:"コード判定", difficulty:"必須",
