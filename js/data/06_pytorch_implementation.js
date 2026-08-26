@@ -29,11 +29,9 @@ window.quizData = {
 
         <div class="pt-wrap">
         <div class="pt-lead">
-            <strong>シラバスにPyTorch専用の独立章はないため、この章は「全章の概念をPyTorchコードで読めるか」を鍛える横断ドリルです。</strong><br>
-            試験コードは、まず <strong>①Shape ②dtype ③device ④学習／推論モード ⑤勾配の流れ</strong> の5点を確認します。公開受験レポートを参考に、複数行コードから連続して問う「本試験型コード読解」も収録しています。
+            <strong>試験コードは、①Shape ②dtype ③device ④学習／推論モード ⑤勾配の流れ、の順に確認します。</strong><br>
+            まず各行の右にShapeを書き、次にtargetの型と損失関数が合っているかを確認します。
         </div>
-        <div class="pt-note"><strong>2026#2の確認環境：</strong>JDLA公式掲載の <code>torch==2.12.0</code>、<code>torchvision==0.27.0</code> を基準にしています。古いAPIを丸暗記するのではなく、Shape・処理の意味・現在の代表的な書き方を優先します。</div>
-        <div class="pt-note"><strong>先に略語：</strong>MLP＝Multilayer Perceptron（多層パーセプトロン）、CNN＝Convolutional Neural Network（畳み込みニューラルネットワーク）、RNN＝Recurrent Neural Network（再帰型ニューラルネットワーク）、LSTM＝Long Short-Term Memory、GRU＝Gated Recurrent Unit、BN＝Batch Normalization、BCE＝Binary Cross-Entropy、VAE＝Variational Autoencoder、GAN＝Generative Adversarial Network、DQN＝Deep Q-Network、DDP＝Distributed Data Parallel、AMP＝Automatic Mixed Precision（自動混合精度）。<br>CPU＝Central Processing Unit、GPU＝Graphics Processing Unit、RGB＝Red・Green・Blueです。NCHWはN＝B（batch数）・C＝channel・H＝height・W＝width。CLS tokenは分類用token、PAD tokenは長さをそろえる埋め草です。logits（ロジット）はSoftmaxやSigmoidをかける前の生の点数です。</div>
 
         <h3>■ 最初に読む記号</h3>
         <div class="pt-table-wrap"><table class="pt-table">
@@ -106,15 +104,87 @@ with torch.inference_mode():
     logits = model(x)
     pred = logits.argmax(dim=1)</div>
 
-        <h3>■ 損失関数：タスク・出力・targetをセットで覚える</h3>
+        <h3>■ 損失関数：コードは「出力 → target → loss」の3行で読む</h3>
+        <div class="pt-lead">
+            <strong>試験の3手：</strong>①モデル出力のShapeを見る → ②targetのShapeとdtypeをそろえる → ③損失関数へ渡す。<br>
+            <strong>logits（ロジット）</strong>は、SoftmaxやSigmoidをかける前の「生の点数」です。
+        </div>
         <div class="pt-table-wrap"><table class="pt-table">
-            <tr><th>タスク</th><th>モデル最終出力</th><th>損失</th><th>target</th><th>試験の罠</th></tr>
-            <tr><td>回帰</td><td>(B,1)などの実数</td><td><code>MSELoss</code><br><small>Mean Squared Error（平均二乗誤差）</small> / <code>L1Loss</code></td><td>float・予測と同shape</td><td>不要なSoftmaxを入れない</td></tr>
-            <tr><td>2値分類</td><td>raw logits (B)または(B,1)</td><td><code>BCEWithLogitsLoss</code></td><td>float・logitsと同shape</td><td>Sigmoidを先にかけない</td></tr>
-            <tr><td>多クラス分類</td><td>raw logits (B,C)</td><td><code>CrossEntropyLoss</code></td><td>long・クラス番号(B)</td><td>Softmaxとone-hotは通常不要</td></tr>
-            <tr><td>マルチラベル</td><td>各ラベルのraw logits (B,C)</td><td><code>BCEWithLogitsLoss</code></td><td>float・0/1の(B,C)</td><td>各ラベルを独立判定</td></tr>
-            <tr><td>画像セグメンテーション（多クラス）</td><td>(B,C,H,W)</td><td><code>CrossEntropyLoss</code></td><td>long・クラス番号(B,H,W)</td><td>targetにC軸はない</td></tr>
+            <tr><th>何を予測するか</th><th>出力</th><th>target</th><th>使う損失</th><th>試験の一言</th></tr>
+            <tr><td>実数</td><td><code>pred=(B,1)</code>など</td><td>float・predと同Shape</td><td><code>MSELoss</code></td><td>回帰には確率化もargmaxも不要。</td></tr>
+            <tr><td>C classから1つ</td><td><code>logits=(B,C)</code></td><td>long・class番号<code>(B,)</code></td><td><code>CrossEntropyLoss</code></td><td>loss前のSoftmaxは不要。</td></tr>
+            <tr><td>1出力の2値分類</td><td><code>logits=(B,1)</code></td><td>float・logitsと同Shape</td><td><code>BCEWithLogitsLoss</code></td><td>Sigmoid込み。先にSigmoidしない。</td></tr>
+            <tr><td>複数labelを独立判定</td><td><code>logits=(B,C)</code></td><td>float・0/1の<code>(B,C)</code></td><td><code>BCEWithLogitsLoss</code></td><td>C個のYes／No判定。</td></tr>
+            <tr><td>多class segmentation</td><td><code>logits=(B,C,H,W)</code></td><td>long・class番号<code>(B,H,W)</code></td><td><code>CrossEntropyLoss</code></td><td>targetからC軸を除く。</td></tr>
+            <tr><td>LogSoftmax済み</td><td><code>log_probs=(B,C)</code></td><td>long・class番号<code>(B,)</code></td><td><code>NLLLoss</code></td><td>raw logitsを直接渡さない。</td></tr>
         </table></div>
+
+        <h4>① 多class分類：CrossEntropyLoss</h4>
+        <pre class="pt-question-code"><code>logits = model(x)                  # (B, C)：生の点数
+target = target.long()            # (B,)：正解class番号
+loss = nn.CrossEntropyLoss()(logits, target)
+
+pred = logits.argmax(dim=1)       # 予測classは(B,)</code></pre>
+        <div class="pt-note"><strong>覚え方：</strong>CE＝<code>raw logits (B,C)</code>＋<code>longのclass番号 (B,)</code>。通常のhard labelでは、loss前のSoftmaxとone-hot変換は不要です。</div>
+
+        <h4>② 1出力の2値分類：BCEWithLogitsLoss</h4>
+        <pre class="pt-question-code"><code>logits = model(x)                         # (B, 1)
+target = target.float().view_as(logits)  # (B, 1)へそろえる
+loss = nn.BCEWithLogitsLoss()(logits, target)
+
+prob = torch.sigmoid(logits)             # Sigmoidは予測時</code></pre>
+        <div class="pt-note"><strong>覚え方：</strong>BCEWithLogits＝Sigmoid＋BCE。targetはfloatかつlogitsと同Shapeです。<code>target=(B,)</code>のまま渡すのはShape不一致です。</div>
+
+        <h4>③ 回帰・マルチラベル・segmentation</h4>
+        <pre class="pt-question-code"><code># 回帰：実数を当てる
+pred = model(x)                           # (B, 1)
+target = target.float().view_as(pred)    # (B, 1)
+loss = nn.MSELoss()(pred, target)
+
+# マルチラベル：各labelを独立にYes／No
+logits = model(x)                         # (B, C)
+target = target.float()                  # (B, C)、各要素は0/1
+loss = nn.BCEWithLogitsLoss()(logits, target)
+
+# 多class segmentation：画素ごとにclass番号
+logits = model(x)                         # (B, C, H, W)
+target = target.long()                   # (B, H, W)
+loss = nn.CrossEntropyLoss()(logits, target)</code></pre>
+
+        <h4>④ CrossEntropyLossとNLLLossのコード差</h4>
+        <pre class="pt-question-code"><code># raw logitsをそのまま使う
+loss_ce = nn.CrossEntropyLoss()(logits, target)
+
+# LogSoftmaxを自分で書いた場合
+log_probs = torch.log_softmax(logits, dim=1)
+loss_nll = nn.NLLLoss()(log_probs, target)</code></pre>
+        <div class="pt-note"><strong>試験の見分け方：</strong><code>raw logits → CrossEntropyLoss</code>、<code>log_softmax済み → NLLLoss</code>です。通常のclass番号targetでは、この2つは同じ組合せを別の書き方にしたものです。</div>
+
+        <h4>⑤ 手書きSoftmax＋Cross Entropy：逆伝播まで</h4>
+        <pre class="pt-question-code"><code># u: (B,in), W: (in,C), z・y・correct: (B,C)
+z = u @ W + b
+z = z - np.max(z, axis=1, keepdims=True)  # 各sampleの最大値を引く
+exp_z = np.exp(z)
+y = exp_z / np.sum(exp_z, axis=1, keepdims=True)
+
+loss = -np.mean(
+    np.sum(correct * np.log(y + 1e-8), axis=1)
+)
+
+# 各sampleの未平均の誤差と勾配和
+dz = y - correct
+dW = u.T @ dz
+db = np.sum(dz, axis=0)
+du = dz @ W.T
+
+# この実装では更新時に1回だけBatch平均する
+B = u.shape[0]
+W = W - learning_rate * dW / B
+b = b - learning_rate * db / B</code></pre>
+        <div class="pt-note">
+            <strong>最重要：</strong>各sampleでは<code>dz = y - correct</code>です。平均lossなら<code>/B</code>を、<code>dz</code>・勾配・更新式の<strong>どこか1か所だけ</strong>で行います。2回割ってはいけません。<br>
+            <strong>PyTorchでは：</strong>通常はこれらを手書きせず、<code>loss.backward()</code>が自動計算します。NumPyの穴埋め問題では上の式を使います。
+        </div>
 
         <h3>■ NumPy手書きDNN連問は「Shape → 公式 → コード」で解く</h3>
         <p>本試験では、PyTorchだけでなくNumPyで全結合層・Softmax・Cross Entropy・誤差逆伝播を手書きした長いコードから、複数の空欄を連続して問う形式があります。コードを丸暗記せず、<strong>行列のShapeがつながるか</strong>を先に確認します。</p>
@@ -261,8 +331,10 @@ with torch.inference_mode():
             <tr><td>1回の学習更新</td><td><code>zero_grad → forward → loss → backward → step</code></td><td>勾配は.gradへ加算される。</td></tr>
             <tr><td>多クラス分類</td><td><code>CrossEntropyLoss(logits, target)</code></td><td>logits=(B,C)、target=longの(B)。</td></tr>
             <tr><td>2値・マルチラベル</td><td><code>BCEWithLogitsLoss</code></td><td>Sigmoid込み。targetはfloatで同shape。</td></tr>
+            <tr><td>回帰</td><td><code>MSELoss(pred, target.float().view_as(pred))</code></td><td>予測とtargetを同Shapeにする。</td></tr>
+            <tr><td>LogSoftmax済み</td><td><code>NLLLoss(log_probs, target)</code></td><td>raw logitsならCrossEntropyLoss。</td></tr>
             <tr><td>NumPyで隣接層を初期化</td><td><code>zip(sizes[:-1], sizes[1:])</code></td><td>重みShapeを(入力, 出力)で作る。</td></tr>
-            <tr><td>手書きSoftmax＋CEの逆伝播</td><td>各sampleは<code>dz=y-correct</code><br><code>dW=u.T@dz</code>、<code>db=sum(dz,axis=0)</code></td><td>biasはBatch軸axis=0を足す。</td></tr>
+            <tr><td>手書きSoftmax＋CEの逆伝播</td><td>各sampleは<code>dz=y-correct</code><br><code>dW=u.T@dz</code>、<code>db=sum(dz,axis=0)</code></td><td>biasはBatch軸axis=0を足す。Batch平均は1回だけ。</td></tr>
             <tr><td>手書きSGD・正解率</td><td><code>W-=lr*dW/B</code><br><code>mean(argmax予測 == argmax正解)</code></td><td>下降はマイナス。class軸はaxis=1。</td></tr>
             <tr><td>推論</td><td><code>eval()</code>＋<code>inference_mode()</code></td><td>層のモードと勾配記録を別々に切替。</td></tr>
             <tr><td>CNN</td><td>(B,C,H,W)→<code>flatten(x,1)</code></td><td>Batch軸だけ残す。</td></tr>
@@ -367,27 +439,39 @@ with torch.inference_mode():
         // 2. 損失・Optimizer・DataLoader・保存
         {
             id:"pt-ce-input", category:"損失関数", kind:"コード判定", difficulty:"必須",
-            question:"hard class label（正解クラス番号）を使う3クラス分類で、<code>CrossEntropyLoss</code>へ渡す標準的な組合せはどれか。",
-            options:["raw logits (B,3) と long型クラス番号 (B)","Softmax後の確率 (B,3) とfloat型one-hot (B,3)","Sigmoid後の値 (B) とlong型(B)","クラス番号だけを2回渡す"], answer:0,
-            explanation:"<p><code>CrossEntropyLoss</code>は内部でLogSoftmaxとNLLLoss相当を安定に計算します。モデルはSoftmax前のlogitsを出し、targetは通常<code>torch.long</code>のクラスindexです。</p>"
+            question:"3classから1つを選ぶ分類で、空欄へ入る標準的なコードはどれか。<pre class='pt-question-code'><code>logits = model(x)  # (8, 3)\ntarget = torch.tensor([1,0,2,1,2,0,1,2])  # (8,)\nloss = （あ）</code></pre>",
+            options:["<code>nn.CrossEntropyLoss()(logits, target.long())</code>","<code>nn.CrossEntropyLoss()(torch.softmax(logits, dim=1), target.float())</code>","<code>nn.BCEWithLogitsLoss()(logits, target.long())</code>","<code>nn.MSELoss()(logits, target)</code>"], answer:0,
+            explanation:"<p><strong>① 出力：</strong><code>logits=(B,C)=(8,3)</code>です。</p><p><strong>② target：</strong>1sampleにつきclass番号1個なので、<code>longの(B,)=(8,)</code>です。</p><p><strong>③ loss：</strong><code>CrossEntropyLoss(logits, target)</code>。loss前のSoftmaxは不要です。</p>"
         },
         {
             id:"pt-bce-logits-input", category:"損失関数", kind:"コード判定", difficulty:"必須",
-            question:"2値分類でモデル出力がraw logits (B,1)である。推奨される損失とtargetはどれか。",
-            options:["<code>BCEWithLogitsLoss</code>とfloat型(B,1)","<code>BCELoss</code>へraw logitsを直接渡す","<code>CrossEntropyLoss</code>とfloat型(B,1)","<code>MSELoss</code>とlong型(B)だけ"], answer:0,
-            explanation:"<p>BCEはBinary Cross-Entropy（二値交差エントロピー）です。<code>BCEWithLogitsLoss</code>はSigmoidとBCEを統合し、数値的に安定です。targetはlogitsと同shapeのfloatにそろえます。</p>"
+            question:"1出力の2値分類で、空欄へ入る適切なコードはどれか。<pre class='pt-question-code'><code>logits = model(x)  # (6, 1)\ntarget = torch.tensor([1,0,1,1,0,0])  # (6,)\nloss = （あ）</code></pre>",
+            options:["<code>nn.BCEWithLogitsLoss()(logits, target.float().view_as(logits))</code>","<code>nn.BCEWithLogitsLoss()(torch.sigmoid(logits), target.long())</code>","<code>nn.CrossEntropyLoss()(logits, target.float())</code>","<code>nn.MSELoss()(logits, target.long())</code>"], answer:0,
+            explanation:"<p><strong>① 出力：</strong><code>logits=(6,1)</code>です。</p><p><strong>② target：</strong><code>float().view_as(logits)</code>で同じ<code>(6,1)</code>へそろえます。</p><p><strong>③ loss：</strong><code>BCEWithLogitsLoss</code>はSigmoid込みなので、先にSigmoidしません。</p>"
         },
         {
             id:"pt-multilabel-loss", category:"損失関数", kind:"コード判定", difficulty:"標準",
-            question:"5ラベルを独立に複数選べるマルチラベル分類で、出力が(B,5)のraw logitsなら適切な損失はどれか。",
-            options:["<code>nn.BCEWithLogitsLoss()</code>","<code>nn.CrossEntropyLoss()</code>だけ","<code>nn.NLLLoss()</code>へSigmoid後を渡す","<code>nn.TripletMarginLoss()</code>"], answer:0,
-            explanation:"<p>各ラベルが独立なYes/Noなので、5個の2値分類として扱います。targetも0/1のfloatでshape (B,5)です。多クラス分類の『どれか1つ』とは異なります。</p>"
+            question:"5labelを独立に複数選べる分類で、空欄へ入る適切なコードはどれか。<pre class='pt-question-code'><code>logits = model(x)   # (B, 5)\ntarget = labels     # (B, 5)、各要素は0または1\nloss = （あ）</code></pre>",
+            options:["<code>nn.BCEWithLogitsLoss()(logits, target.float())</code>","<code>nn.CrossEntropyLoss()(logits, target.long())</code>","<code>nn.NLLLoss()(torch.sigmoid(logits), target)</code>","<code>nn.MSELoss()(logits.argmax(1), target)</code>"], answer:0,
+            explanation:"<p><strong>① 問題文：</strong>複数labelが同時に正解になります。</p><p><strong>② Shape：</strong>logitsとtargetはともに<code>(B,5)</code>。</p><p><strong>③ loss：</strong>5個の独立したYes／No判定なので、float targetと<code>BCEWithLogitsLoss</code>を使います。</p>"
         },
         {
             id:"pt-segmentation-ce-shape", category:"損失関数", kind:"形状計算", difficulty:"本試験型",
-            question:"多クラスSemantic Segmentationでlogitsが(B,C,H,W)のとき、<code>CrossEntropyLoss</code>へ渡すtargetの代表的shapeはどれか。",
-            options:["(B,H,W)のlong型クラス番号","(B,C,H,W)のlong型one-hotだけ","(B)だけ","(C,H,W)でBatch軸なし"], answer:0,
-            explanation:"<p><strong>使うShape規則：</strong>多クラスCrossEntropyLossはlogitsのclass軸Cに対し、targetはその軸を持たず各位置のclass番号を持ちます。</p><p><strong>代入：</strong>logits=(B,C,H,W)からC軸を除く。</p><p><strong>答え：</strong>target=(B,H,W)のlong型です。</p>"
+            question:"多class Semantic Segmentationで、空欄へ入る適切なコードはどれか。<pre class='pt-question-code'><code>logits = model(images)  # (B, C, H, W)\ntarget = masks          # (B, H, W)、各画素のclass番号\nloss = （あ）</code></pre>",
+            options:["<code>nn.CrossEntropyLoss()(logits, target.long())</code>","<code>nn.CrossEntropyLoss()(logits, target.float().unsqueeze(1))</code>","<code>nn.BCEWithLogitsLoss()(logits, target.long())</code>","<code>nn.MSELoss()(logits.argmax(1), target)</code>"], answer:0,
+            explanation:"<p><strong>① 出力：</strong>class軸Cを持つ<code>(B,C,H,W)</code>です。</p><p><strong>② target：</strong>各画素にclass番号1個なので、C軸のないlong型<code>(B,H,W)</code>です。</p><p><strong>③ loss：</strong><code>CrossEntropyLoss(logits, target)</code>を使います。</p>"
+        },
+        {
+            id:"pt-mse-shape-contract", category:"損失関数", kind:"コード判定", difficulty:"必須",
+            question:"1個の実数を予測する回帰で、Shapeをそろえて<code>MSELoss</code>を計算するコードはどれか。<pre class='pt-question-code'><code>pred = model(x)  # (5, 1)\ntarget = torch.tensor([2.1, 3.0, 1.5, 4.2, 0.8])  # (5,)\nloss = （あ）</code></pre>",
+            options:["<code>nn.MSELoss()(pred, target.float().view_as(pred))</code>","<code>nn.MSELoss()(torch.softmax(pred, dim=1), target)</code>","<code>nn.CrossEntropyLoss()(pred, target.long())</code>","<code>nn.BCEWithLogitsLoss()(pred, target.long())</code>"], answer:0,
+            explanation:"<p><strong>① task：</strong>実数を当てる回帰なので<code>MSELoss</code>です。</p><p><strong>② Shape：</strong><code>pred=(5,1)</code>に対しtargetは元々<code>(5,)</code>です。</p><p><strong>③ 修正：</strong><code>float().view_as(pred)</code>でfloat型の<code>(5,1)</code>へそろえます。Shape不一致のbroadcastを避けます。</p>"
+        },
+        {
+            id:"pt-nllloss-code", category:"損失関数", kind:"コード判定", difficulty:"標準",
+            question:"多class分類で<code>NLLLoss</code>を使う正しいコードはどれか。targetはlong型のclass番号<code>(B,)</code>とする。",
+            options:["<code>nn.NLLLoss()(torch.log_softmax(logits, dim=1), target)</code>","<code>nn.NLLLoss()(torch.softmax(logits, dim=1), target)</code>","<code>nn.NLLLoss()(logits, target.float())</code>","<code>nn.NLLLoss()(torch.sigmoid(logits), target)</code>"], answer:0,
+            explanation:"<p><strong>① NLLLossの入力：</strong>通常の確率ではなくlog確率です。</p><p><strong>② 前処理：</strong><code>torch.log_softmax(logits, dim=1)</code>を使います。</p><p><strong>③ 関係：</strong>標準的なclass番号targetなら、これは<code>CrossEntropyLoss(logits, target)</code>と同じ組合せです。</p>"
         },
         {
             id:"pt-train-loop-order", category:"学習ループ", kind:"コード判定", difficulty:"必須",
