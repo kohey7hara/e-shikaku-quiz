@@ -10,6 +10,14 @@ window.quizData = {
             .pt-code .pt-comment { color:#b7c9d8; }
             .pt-question-code { margin:12px 0; padding:12px 14px; background:#f6f9fc; color:#17324d; border:1px solid #cfdae7; border-radius:9px; font:600 .82em/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; white-space:pre; overflow-x:auto; }
             .pt-question-code code { display:block; padding:0; border-radius:0; background:transparent; color:inherit; font:inherit; }
+            .pt-ask { color:#5a2200; background:#fff2a8; font-weight:900; border:2px solid #9a3412; border-radius:4px; padding:0 .14em; text-decoration:underline double #9a3412 2px; text-underline-offset:2px; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+            .pt-ask-legend { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:10px 0 18px; padding:9px 12px; color:#334e68; background:#fffdf4; border:1px solid #ecd889; border-radius:9px; font-weight:700; }
+            .pt-exam-tag { display:inline-block; padding:3px 8px; color:#fff; background:#9a3412; border-radius:999px; font-size:.82em; letter-spacing:.02em; }
+            .pt-formula { margin:12px 0; padding:12px 14px; background:#eef7ff; border:1px solid #b8d4ee; border-radius:9px; }
+            .pt-shape-flow { display:flex; align-items:stretch; gap:7px; min-width:920px; }
+            .pt-shape-step { flex:1; min-width:132px; padding:11px 9px; background:#fff; border:1px solid #b8d4ee; border-radius:9px; text-align:center; }
+            .pt-shape-step strong { display:block; color:#0b6b78; margin-bottom:5px; }
+            .pt-shape-arrow { display:flex; align-items:center; color:#52799b; font-size:1.35em; font-weight:900; }
             .pt-table-wrap, .pt-visual-wrap { overflow-x:auto; margin:14px 0 20px; }
             .pt-table { width:100%; min-width:760px; border-collapse:collapse; }
             .pt-table th, .pt-table td { border:1px solid #d7e2ee; padding:10px 12px; text-align:left; vertical-align:top; }
@@ -32,6 +40,7 @@ window.quizData = {
             <strong>試験コードは、①Shape ②dtype ③device ④学習／推論モード ⑤勾配の流れ、の順に確認します。</strong><br>
             まず各行の右にShapeを書き、次にtargetの型と損失関数が合っているかを確認します。
         </div>
+        <div class="pt-ask-legend"><span class="pt-exam-tag">★頻出空欄</span><span><span class="pt-ask">黄色＋濃い文字＋二重下線</span>の箇所が、選択肢・空欄・Shape問題で特に聞かれます。まずここだけ拾ってください。</span></div>
 
         <h3>■ 最初に読む記号</h3>
         <div class="pt-table-wrap"><table class="pt-table">
@@ -88,21 +97,21 @@ window.quizData = {
         </svg></div>
 
         <div class="pt-code"><span class="pt-comment"># 学習</span>
-model.train()
+<span class="pt-ask">model.train()</span>
 for x, y in train_loader:
     x, y = x.to(device), y.to(device)
-    optimizer.zero_grad(set_to_none=True)
+    <span class="pt-ask">optimizer.zero_grad(set_to_none=True)</span>
     logits = model(x)
     loss = criterion(logits, y)
-    loss.backward()
+    <span class="pt-ask">loss.backward()</span>
     torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  <span class="pt-comment"># 必要な場合</span>
-    optimizer.step()
+    <span class="pt-ask">optimizer.step()</span>
 
 <span class="pt-comment"># 推論</span>
-model.eval()
-with torch.inference_mode():
+<span class="pt-ask">model.eval()</span>
+with <span class="pt-ask">torch.inference_mode()</span>:
     logits = model(x)
-    pred = logits.argmax(dim=1)</div>
+    pred = <span class="pt-ask">logits.argmax(dim=1)</span></div>
 
         <h3>■ 損失関数：コードは「出力 → target → loss」の3行で読む</h3>
         <div class="pt-lead">
@@ -121,11 +130,11 @@ with torch.inference_mode():
 
         <h4>① 多class分類：CrossEntropyLoss</h4>
         <p>ここでは、本試験の基本形である<strong>「1sampleにつき正解classが1つ」</strong>の場合を扱います。</p>
-        <pre class="pt-question-code"><code>logits = model(x)                  # (B, C)：生の点数
-target = target.long()            # (B,)：正解class番号
-loss = nn.CrossEntropyLoss()(logits, target)
+        <pre class="pt-question-code"><code>logits = <span class="pt-ask">model(x)</span>                  # <span class="pt-ask">(B, C)</span>：生の点数
+target = <span class="pt-ask">target.long()</span>            # <span class="pt-ask">(B,)</span>：正解class番号
+loss = <span class="pt-ask">nn.CrossEntropyLoss()(logits, target)</span>
 
-pred = logits.argmax(dim=1)       # 予測classは(B,)</code></pre>
+pred = <span class="pt-ask">logits.argmax(dim=1)</span>       # 予測classは(B,)</code></pre>
         <div class="pt-note">
             <strong>最重要：</strong><code>logits</code>は「モデルの予測」、<code>target</code>は「正解」です。引数の順番は必ず<strong>予測 → 正解</strong>。<br>
             CEの基本形では、<code>logits=(B,C)</code>と<code>target=(B,)</code>は<strong>同じShapeではありません</strong>。
@@ -133,13 +142,13 @@ pred = logits.argmax(dim=1)       # 予測classは(B,)</code></pre>
 
         <h4><code>nn.CrossEntropyLoss()(logits, target)</code>を2段階に分ける</h4>
         <pre class="pt-question-code"><code># ① 最初の ()：損失関数を作る
-criterion = nn.CrossEntropyLoss()
+criterion = <span class="pt-ask">nn.CrossEntropyLoss()</span>
 
 # ② 次の (logits, target)：予測と正解を渡す
-loss = criterion(logits, target)
+loss = <span class="pt-ask">criterion(logits, target)</span>
 
 # 上の2行と同じ意味
-loss = nn.CrossEntropyLoss()(logits, target)</code></pre>
+loss = <span class="pt-ask">nn.CrossEntropyLoss()(logits, target)</span></code></pre>
         <div class="pt-table-wrap"><table class="pt-table">
             <tr><th>空欄になりやすい場所</th><th>答え</th><th>なぜそうなるか</th><th>よくある誤答</th></tr>
             <tr><td>モデルの最終層</td><td><code>nn.Linear(hidden, C)</code></td><td>C classそれぞれの点数を出す。</td><td><code>nn.Linear(hidden, 1)</code></td></tr>
@@ -173,41 +182,41 @@ loss = criterion(logits, target) # 既定では平均された1個のloss</code>
 
         <h4>② 1出力の2値分類：BCEWithLogitsLoss</h4>
         <pre class="pt-question-code"><code>logits = model(x)                         # (B, 1)
-target = target.float().view_as(logits)  # (B, 1)へそろえる
-loss = nn.BCEWithLogitsLoss()(logits, target)
+target = <span class="pt-ask">target.float().view_as(logits)</span>  # (B, 1)へそろえる
+loss = <span class="pt-ask">nn.BCEWithLogitsLoss()(logits, target)</span>
 
-prob = torch.sigmoid(logits)             # Sigmoidは予測時</code></pre>
+prob = <span class="pt-ask">torch.sigmoid(logits)</span>             # Sigmoidは予測時</code></pre>
         <div class="pt-note"><strong>覚え方：</strong>BCEWithLogits＝Sigmoid＋BCE。targetはfloatかつlogitsと同Shapeです。<code>target=(B,)</code>のまま渡すのはShape不一致です。</div>
 
         <h4>③ 回帰・マルチラベル・segmentation</h4>
         <pre class="pt-question-code"><code># 回帰：実数を当てる
 pred = model(x)                           # (B, 1)
-target = target.float().view_as(pred)    # (B, 1)
-loss = nn.MSELoss()(pred, target)
+target = <span class="pt-ask">target.float().view_as(pred)</span>    # (B, 1)
+loss = <span class="pt-ask">nn.MSELoss()(pred, target)</span>
 
 # マルチラベル：各labelを独立にYes／No
 logits = model(x)                         # (B, C)
 target = target.float()                  # (B, C)、各要素は0/1
-loss = nn.BCEWithLogitsLoss()(logits, target)
+loss = <span class="pt-ask">nn.BCEWithLogitsLoss()(logits, target)</span>
 
 # 多class segmentation：画素ごとにclass番号
 logits = model(x)                         # (B, C, H, W)
-target = target.long()                   # (B, H, W)
-loss = nn.CrossEntropyLoss()(logits, target)</code></pre>
+target = <span class="pt-ask">target.long()</span>                   # (B, H, W)
+loss = <span class="pt-ask">nn.CrossEntropyLoss()(logits, target)</span></code></pre>
 
         <h4>④ CrossEntropyLossとNLLLossのコード差</h4>
         <pre class="pt-question-code"><code># raw logitsをそのまま使う
-loss_ce = nn.CrossEntropyLoss()(logits, target)
+loss_ce = <span class="pt-ask">nn.CrossEntropyLoss()(logits, target)</span>
 
 # LogSoftmaxを自分で書いた場合
-log_probs = torch.log_softmax(logits, dim=1)
-loss_nll = nn.NLLLoss()(log_probs, target)</code></pre>
+log_probs = <span class="pt-ask">torch.log_softmax(logits, dim=1)</span>
+loss_nll = <span class="pt-ask">nn.NLLLoss()(log_probs, target)</span></code></pre>
         <div class="pt-note"><strong>試験の見分け方：</strong><code>raw logits → CrossEntropyLoss</code>、<code>log_softmax済み → NLLLoss</code>です。通常のclass番号targetでは、この2つは同じ組合せを別の書き方にしたものです。</div>
 
         <h4>⑤ 手書きSoftmax＋Cross Entropy：逆伝播まで</h4>
         <pre class="pt-question-code"><code># u: (B,in), W: (in,C), z・y・correct: (B,C)
 z = u @ W + b
-z = z - np.max(z, axis=1, keepdims=True)  # 各sampleの最大値を引く
+z = z - np.max(z, <span class="pt-ask">axis=1, keepdims=True</span>)  # 各sampleの最大値を引く
 exp_z = np.exp(z)
 y = exp_z / np.sum(exp_z, axis=1, keepdims=True)
 
@@ -216,14 +225,14 @@ loss = -np.mean(
 )
 
 # 各sampleの未平均の誤差と勾配和
-dz = y - correct
-dW = u.T @ dz
-db = np.sum(dz, axis=0)
-du = dz @ W.T
+<span class="pt-ask">dz = y - correct</span>
+<span class="pt-ask">dW = u.T @ dz</span>
+<span class="pt-ask">db = np.sum(dz, axis=0)</span>
+<span class="pt-ask">du = dz @ W.T</span>
 
 # この実装では更新時に1回だけBatch平均する
 B = u.shape[0]
-W = W - learning_rate * dW / B
+<span class="pt-ask">W = W - learning_rate * dW / B</span>
 b = b - learning_rate * db / B</code></pre>
         <div class="pt-note">
             <strong>最重要：</strong>各sampleでは<code>dz = y - correct</code>です。平均lossなら<code>/B</code>を、<code>dz</code>・勾配・更新式の<strong>どこか1か所だけ</strong>で行います。2回割ってはいけません。<br>
@@ -301,15 +310,15 @@ b = b - learning_rate * db / B</code></pre>
 
         <div class="pt-code">class MLP(nn.Module):
     def __init__(self, in_dim, hidden, classes):
-        super().__init__()
+        <span class="pt-ask">super().__init__()</span>
         self.layers = nn.Sequential(
             nn.Linear(in_dim, hidden),
             nn.ReLU(),
-            nn.Linear(hidden, classes)
+            <span class="pt-ask">nn.Linear(hidden, classes)</span>
         )
 
     def forward(self, x):
-        return self.layers(x)</div>
+        <span class="pt-ask">return self.layers(x)</span></div>
 
         <h3>■ 図解②：CNN・RNN・TransformerのShape</h3>
         <div class="pt-visual-wrap">
@@ -322,11 +331,11 @@ b = b - learning_rate * db / B</code></pre>
             <rect x="28" y="58" width="904" height="145" rx="12" fill="#f5f9ff" stroke="#3498db"/>
             <text x="48" y="84" class="pt-svg-label">CNN（Convolutional Neural Network／畳み込みニューラルネットワーク）</text>
             <rect x="52" y="105" width="130" height="52" rx="7" fill="#fff" stroke="#3498db"/><text x="70" y="128" class="pt-svg-label">x: (B,C,H,W)</text><text x="67" y="147" class="pt-svg-mini">N=B（batch）</text>
-            <rect x="226" y="105" width="160" height="52" rx="7" fill="#fff" stroke="#3498db"/><text x="238" y="128" class="pt-svg-label">Conv / BatchNorm</text><text x="249" y="147" class="pt-svg-mini">Pool→(B,Cout,Hout,Wout)</text>
+            <rect x="226" y="105" width="160" height="52" rx="7" fill="#fff" stroke="#3498db"/><text x="260" y="128" class="pt-svg-label">Conv / Pool</text><text x="235" y="147" class="pt-svg-mini">Conv:C→Cout／Pool:C維持</text>
             <rect x="430" y="105" width="150" height="52" rx="7" fill="#fff" stroke="#3498db"/><text x="449" y="128" class="pt-svg-label">flatten(x,1)</text><text x="455" y="147" class="pt-svg-mini">→(B,Features)</text>
             <rect x="624" y="105" width="130" height="52" rx="7" fill="#fff" stroke="#3498db"/><text x="650" y="128" class="pt-svg-label">Linear</text><text x="646" y="147" class="pt-svg-mini">→(B,classes)</text>
             <g stroke="#52799b" stroke-width="2" marker-end="url(#pt-arrow-shape)"><path d="M182 131H223"/><path d="M386 131H427"/><path d="M580 131H621"/></g>
-            <text x="52" y="184" class="pt-svg-mini">BatchNorm2d(num_features=Cout)／AdaptiveAvgPool2d((1,1))なら空間を1×1へ</text>
+            <text x="52" y="184" class="pt-svg-mini">ReLU・BatchNorm2dはShape不変／PoolはCを保つ／AdaptiveAvgPool2d((1,1))はH,Wを1×1へ</text>
 
             <rect x="28" y="222" width="904" height="167" rx="12" fill="#f4fbf7" stroke="#27ae60"/>
             <text x="48" y="248" class="pt-svg-label">RNN（再帰型NN）/ LSTM（長短期記憶）（batch_first=True）</text>
@@ -348,6 +357,62 @@ b = b - learning_rate * db / B</code></pre>
             <text x="52" y="540" class="pt-svg-mini">d_modelはnheadで割り切れる。padding mask: (B,L)／causal mask: (L,L)。役割は別。</text>
             <text x="52" y="562" class="pt-svg-mini">Padding mask＝PADを見ない。Causal mask＝未来を見ない。</text>
         </svg></div>
+
+        <h3>■ CNNのNCHW連問：<code>32 → 28 → 14 → 10 → 5</code>を追う</h3>
+        <div class="pt-lead">
+            <strong>NCHWは、N＝画像枚数、C＝channel数、H＝高さ、W＝幅です。</strong><br>
+            先にH・Wを計算し、ConvではCを<code>out_channels</code>へ変更、PoolではCをそのまま残します。
+        </div>
+        <div class="pt-formula">
+            <strong>通常の試験（dilation=1）で使う式：</strong>
+            <code>out = floor((in + 2P − K) / S) + 1</code><br>
+            <small>K＝kernel、S＝stride、P＝padding。dilationが指定されたときだけ、<code>K</code>を<code>D(K−1)+1</code>へ置き換えます。</small>
+        </div>
+
+        <pre class="pt-question-code"><code>class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, <span class="pt-ask">6</span>, kernel_size=<span class="pt-ask">5</span>, stride=1, padding=0)
+        self.pool  = nn.MaxPool2d(kernel_size=<span class="pt-ask">2</span>, stride=<span class="pt-ask">2</span>)
+        self.conv2 = nn.Conv2d(6, <span class="pt-ask">16</span>, kernel_size=<span class="pt-ask">5</span>, stride=1, padding=0)
+        self.fc1   = nn.Linear(in_features=<span class="pt-ask">16 * 5 * 5</span>, out_features=120)
+        self.fc2   = nn.Linear(120, 84)
+        self.fc3   = nn.Linear(84, 10)
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = <span class="pt-ask">torch.flatten(x, 1)</span>
+        return self.fc3(F.relu(self.fc2(F.relu(self.fc1(x)))))</code></pre>
+
+        <div class="pt-visual-wrap"><div class="pt-shape-flow" role="img" aria-label="4枚の32×32 RGB画像がConv、Pool、Conv、Pool、Flatten、Linearを通るNCHWの数値遷移">
+            <div class="pt-shape-step"><strong>入力</strong><code>(4,3,32,32)</code><br><small>N=4, C=3</small></div><div class="pt-shape-arrow">→</div>
+            <div class="pt-shape-step"><strong>Conv1</strong><code>(4,6,28,28)</code><br><small>32−5＋1</small></div><div class="pt-shape-arrow">→</div>
+            <div class="pt-shape-step"><strong>Pool1</strong><code>(4,6,14,14)</code><br><small>28÷2</small></div><div class="pt-shape-arrow">→</div>
+            <div class="pt-shape-step"><strong>Conv2</strong><code>(4,16,10,10)</code><br><small>14−5＋1</small></div><div class="pt-shape-arrow">→</div>
+            <div class="pt-shape-step"><strong>Pool2</strong><code>(4,16,5,5)</code><br><small>10÷2</small></div><div class="pt-shape-arrow">→</div>
+            <div class="pt-shape-step"><strong>Flatten</strong><code>(4,400)</code><br><small>16×5×5</small></div><div class="pt-shape-arrow">→</div>
+            <div class="pt-shape-step"><strong>3つのLinear</strong><code>(4,10)</code><br><small>120→84→10</small></div>
+        </div></div>
+
+        <div class="pt-table-wrap"><table class="pt-table">
+            <tr><th>通過地点</th><th>N</th><th>C</th><th>H×W／Features</th><th>書き込むShape</th></tr>
+            <tr><td>入力</td><td>4</td><td>3</td><td>32×32</td><td><code>(4,3,32,32)</code></td></tr>
+            <tr><td><code>Conv2d(3,6,K=5,S=1,P=0)</code></td><td>4</td><td><span class="pt-ask">6</span></td><td><span class="pt-ask">32−5＋1＝28</span></td><td><code>(4,6,28,28)</code></td></tr>
+            <tr><td><code>MaxPool2d(K=2,S=2)</code></td><td>4</td><td>6</td><td><span class="pt-ask">28÷2＝14</span></td><td><code>(4,6,14,14)</code></td></tr>
+            <tr><td><code>Conv2d(6,16,K=5,S=1,P=0)</code></td><td>4</td><td><span class="pt-ask">16</span></td><td><span class="pt-ask">14−5＋1＝10</span></td><td><code>(4,16,10,10)</code></td></tr>
+            <tr><td>同じPoolをもう1回</td><td>4</td><td>16</td><td><span class="pt-ask">10÷2＝5</span></td><td><code>(4,16,5,5)</code></td></tr>
+            <tr><td><code>torch.flatten(x,1)</code></td><td>4</td><td colspan="2"><span class="pt-ask">16×5×5＝400</span></td><td><code>(4,400)</code></td></tr>
+            <tr><td><code>Linear(400,120)→(120,84)→(84,10)</code></td><td>4</td><td colspan="2">最後の軸だけ120→84→10</td><td><code>(4,10)</code></td></tr>
+        </table></div>
+
+        <div class="pt-note"><strong>空欄（あ）の答え方：</strong>2回目のPool直後は<code>(B,16,5,5)</code>。したがって、<code>torch.flatten(x,1)</code>後の1sampleは<strong>16×5×5＝400個</strong>です。答えは<code>nn.Linear(in_features=16 * 5 * 5, out_features=120)</code>です。</div>
+        <div class="pt-card-grid">
+            <div class="pt-card"><strong>forwardの返り値</strong>最後にSoftmaxがないため、返すのはclass事後確率ではなく<strong>raw logits</strong>です。</div>
+            <div class="pt-card"><strong>入力画像サイズ</strong><code>fc1</code>を<code>16*5*5</code>へ固定したため、任意サイズの正方形画像へそのまま対応はできません。</div>
+            <div class="pt-card"><strong>同じPoolを2回使用</strong>同じobjectを呼びますが、<code>MaxPool2d</code>には学習parameterがありません。「訓練parameterを共有」は不適切です。</div>
+            <div class="pt-card"><strong>Normalize</strong><code>Normalize(mean=(.5,.5,.5), std=(.5,.5,.5))</code>なら、各RGB channelへ平均0.5・標準偏差0.5を使う正規化が適用されます。</div>
+        </div>
 
         <h3>■ 実装で混同しやすい5組</h3>
         <div class="pt-table-wrap"><table class="pt-table">
@@ -372,16 +437,19 @@ b = b - learning_rate * db / B</code></pre>
         <h3>■ 最後はこの表だけ</h3>
         <div class="pt-table-wrap"><table class="pt-table">
             <tr><th>問題文の合図</th><th>答えるコード／Shape</th><th>一言理由</th></tr>
-            <tr><td>1回の学習更新</td><td><code>zero_grad → forward → loss → backward → step</code></td><td>勾配は.gradへ加算される。</td></tr>
-            <tr><td>多クラス分類</td><td><code>CrossEntropyLoss(logits, target)</code></td><td>logits=(B,C)、target=longの(B)。</td></tr>
-            <tr><td>2値・マルチラベル</td><td><code>BCEWithLogitsLoss</code></td><td>Sigmoid込み。targetはfloatで同shape。</td></tr>
-            <tr><td>回帰</td><td><code>MSELoss(pred, target.float().view_as(pred))</code></td><td>予測とtargetを同Shapeにする。</td></tr>
-            <tr><td>LogSoftmax済み</td><td><code>NLLLoss(log_probs, target)</code></td><td>raw logitsならCrossEntropyLoss。</td></tr>
+            <tr><td>1回の学習更新</td><td><code class="pt-ask">optimizer.zero_grad() → model(x) → criterion(...) → loss.backward() → optimizer.step()</code></td><td>勾配は.gradへ加算される。</td></tr>
+            <tr><td>多クラス分類</td><td><code class="pt-ask">nn.CrossEntropyLoss()(logits, target.long())</code></td><td>logits=(B,C)、target=longの(B,)。</td></tr>
+            <tr><td>1出力の2値分類</td><td><code class="pt-ask">nn.BCEWithLogitsLoss()(logits, target.float().view_as(logits))</code></td><td>logits・targetは同じ(B,1)。Sigmoid込み。</td></tr>
+            <tr><td>マルチラベル</td><td><code class="pt-ask">nn.BCEWithLogitsLoss()(logits, target.float())</code></td><td>logits・targetは同じ(B,C)。</td></tr>
+            <tr><td>回帰</td><td><code class="pt-ask">nn.MSELoss()(pred, target.float().view_as(pred))</code></td><td>予測とtargetを同Shapeにする。</td></tr>
+            <tr><td>LogSoftmax済み</td><td><code class="pt-ask">nn.NLLLoss()(log_probs, target)</code></td><td>raw logitsならCrossEntropyLoss。</td></tr>
             <tr><td>NumPyで隣接層を初期化</td><td><code>zip(sizes[:-1], sizes[1:])</code></td><td>重みShapeを(入力, 出力)で作る。</td></tr>
             <tr><td>手書きSoftmax＋CEの逆伝播</td><td>各sampleは<code>dz=y-correct</code><br><code>dW=u.T@dz</code>、<code>db=sum(dz,axis=0)</code></td><td>biasはBatch軸axis=0を足す。Batch平均は1回だけ。</td></tr>
             <tr><td>手書きSGD・正解率</td><td><code>W-=lr*dW/B</code><br><code>mean(argmax予測 == argmax正解)</code></td><td>下降はマイナス。class軸はaxis=1。</td></tr>
-            <tr><td>推論</td><td><code>eval()</code>＋<code>inference_mode()</code></td><td>層のモードと勾配記録を別々に切替。</td></tr>
-            <tr><td>CNN</td><td>(B,C,H,W)→<code>flatten(x,1)</code></td><td>Batch軸だけ残す。</td></tr>
+            <tr><td>推論</td><td><code class="pt-ask">model.eval()</code>＋<code class="pt-ask">with torch.inference_mode():</code></td><td>層のモードと勾配記録を別々に切替。</td></tr>
+            <tr><td>CNNのNCHW入力</td><td><code class="pt-ask">(N,C,H,W)=(4,3,32,32)</code></td><td>NはBatch、CはRGB channel。</td></tr>
+            <tr><td>Conv→Pool→Conv→Pool</td><td><code class="pt-ask">(4,3,32,32)→(4,6,28,28)→(4,6,14,14)→(4,16,10,10)→(4,16,5,5)</code></td><td>ConvはCをout_channelsへ、PoolはCを保つ。</td></tr>
+            <tr><td>CNNのFlatten→Linear</td><td><code class="pt-ask">(4,16,5,5)→flatten(x,1)→(4,400)→Linear(400,120)→(4,120)</code></td><td>16×5×5＝400。Linearは右端だけ変更。</td></tr>
             <tr><td>LSTM</td><td>output=(B,L,Directions×H<sub>hidden</sub>)<br>h_n/c_n=(Layers×Directions,B,H<sub>hidden</sub>)</td><td>batch_firstでも状態の軸順は不変。</td></tr>
             <tr><td>Transformer</td><td>(B,L,D)、D % nhead = 0</td><td>各headの次元はD/nhead。</td></tr>
             <tr><td>可変長系列</td><td><code>collate_fn</code>＋padding mask／pack</td><td>PADを実データとして扱わない。</td></tr>
@@ -940,6 +1008,20 @@ b = b - learning_rate * db / B</code></pre>
             question:"同じモデルで、<code>AdaptiveAvgPool2d((1,1))</code>以降のShape推移として正しいものはどれか。<pre class='pt-question-code'><code>...\nnn.Conv2d(16, 32, 3, padding=1),\nnn.AdaptiveAvgPool2d((1, 1)),\nnn.Flatten(1),\nnn.Linear(32, 10)</code></pre>",
             options:["(8,32,1,1)→(8,32)→(8,10)","(8,1,1,32)→(256)→(10)","(8,32,16,16)→(8,8192)→(8,10)だけ","(32,8,1,1)→(32,8)→(10,8)"], answer:0,
             explanation:"<p><strong>使うShape規則：</strong>AdaptiveAvgPoolは各channelの空間を1×1へし、Flatten(1)はBatch以外をまとめ、Linearは最後の軸を10へ変えます。</p><p><strong>代入：</strong>(8,32,H,W)→(8,32,1,1)→(8,32)→(8,10)。</p><p><strong>答え：</strong>選択肢1です。</p>"
+        },
+        {
+            id:"pt-exam-cnn-lenet-linear", setId:"pt-exam-cnn-lenet", setOrder:1,
+            category:"本試験型・CNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"32×32のRGB画像を入力する。クラス<code>Net</code>の（あ）に入る適切なコードはどれか。<pre class='pt-question-code'><code>class Net(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.conv1 = nn.Conv2d(3, 6, 5, stride=1, padding=0)\n        self.pool  = nn.MaxPool2d(2, stride=2, padding=0)\n        self.conv2 = nn.Conv2d(6, 16, 5, stride=1, padding=0)\n        self.fc1   = <span class='pt-ask'>（あ）</span>\n        self.fc2   = nn.Linear(120, 84)\n        self.fc3   = nn.Linear(84, 10)\n\n    def forward(self, x):\n        x = self.pool(F.relu(self.conv1(x)))\n        x = self.pool(F.relu(self.conv2(x)))\n        x = torch.flatten(x, 1)\n        x = F.relu(self.fc1(x))\n        x = F.relu(self.fc2(x))\n        return self.fc3(x)</code></pre>",
+            options:["<code>nn.Linear(in_features=16 * 32 * 32, out_features=120)</code>","<code>nn.Linear(in_features=16 * 11 * 11, out_features=120)</code>","<code>nn.Linear(in_features=16 * 5 * 5, out_features=120)</code>","<code>nn.Linear(in_features=16 * 8 * 8, out_features=120)</code>"], answer:2,
+            explanation:"<p><strong>使う公式：</strong>dilation=1なら、<code>out=floor((in+2P−K)/S)+1</code>です。正方形なのでHとWは同じ計算をします。</p><div class='pt-table-wrap'><table class='pt-table'><tr><th>場所</th><th>空間サイズ</th><th>Shape</th></tr><tr><td>入力</td><td>32</td><td><code>(B,3,32,32)</code></td></tr><tr><td>Conv1：K=5</td><td>32−5＋1＝28</td><td><code>(B,6,28,28)</code></td></tr><tr><td>Pool1：K=S=2</td><td>28÷2＝14</td><td><code>(B,6,14,14)</code></td></tr><tr><td>Conv2：K=5</td><td>14−5＋1＝10</td><td><code>(B,16,10,10)</code></td></tr><tr><td>Pool2：K=S=2</td><td>10÷2＝5</td><td><code>(B,16,5,5)</code></td></tr></table></div><p><strong>Flatten：</strong>Batch軸を残し、1sampleを<code>16×5×5＝400</code>個へまとめます。</p><p><strong>答え：</strong><code>nn.Linear(in_features=16 * 5 * 5, out_features=120)</code>です。最短メモは<strong>32→28→14→10→5</strong>です。</p>"
+        },
+        {
+            id:"pt-exam-cnn-lenet-statement", setId:"pt-exam-cnn-lenet", setOrder:2,
+            category:"本試験型・CNN", kind:"図表・長文", difficulty:"本試験型",
+            question:"同じCNNプログラムの説明として、適切なものはどれか。<pre class='pt-question-code'><code># model\nself.pool = nn.MaxPool2d(2, stride=2)\nself.fc1 = nn.Linear(16 * 5 * 5, 120)\n...\nreturn self.fc3(x)\n\n# input transform\ntransforms.Normalize(\n    mean=(0.5, 0.5, 0.5),\n    std=(0.5, 0.5, 0.5)\n)</code></pre>",
+            options:["<code>forward()</code>の返り値は、入力画像に対するclass事後確率である","正方形画像であれば、画像sizeに依存せずclass分類が可能である","<code>forward()</code>で2度用いるPooling層は、訓練parameterを共有している","入力画像には、各RGB channelについて平均0.5・標準偏差0.5を用いるNormalizeが適用される"], answer:3,
+            explanation:"<p><strong>正解：</strong>4です。<code>Normalize(mean=(.5,.5,.5), std=(.5,.5,.5))</code>が、各RGB channelへ指定値を使う正規化を適用します。</p><p><strong>1が誤り：</strong>最後にSoftmaxがないため、<code>fc3</code>の返り値は確率ではなくraw logitsです。<code>CrossEntropyLoss</code>にはこのlogitsを渡します。</p><p><strong>2が誤り：</strong><code>fc1</code>の入力を<code>16*5*5</code>へ固定しているため、入力sizeを変えるとShapeが合いません。</p><p><strong>3が誤り：</strong>同じ<code>self.pool</code>を2回呼びますが、<code>MaxPool2d</code>に学習parameterはありません。共有する訓練parameter自体がありません。</p>"
         },
 
         {
