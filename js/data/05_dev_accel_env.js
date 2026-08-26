@@ -24,6 +24,11 @@ window.quizData = {
             .acc-purple { fill:#f7f0ff; stroke:#8e44ad; stroke-width:1.5; }
             .acc-gray { fill:#f1f5f9; stroke:#94a3b8; stroke-width:1.5; }
             .acc-caption { margin:8px 8px 0; color:#334e68; }
+            .acc-code { margin:10px 0 14px; padding:13px 15px; border:1px solid #cbd5e1; border-radius:9px; background:#f6f8fa; color:#102a43; font:600 .92em/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+            .acc-command-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:12px 0 22px; }
+            .acc-command-card { padding:12px 14px; border:1px solid #d9e2ec; border-radius:9px; background:#fff; line-height:1.7; }
+            .acc-command-card strong { display:block; margin-bottom:5px; color:#123f68; }
+            @media(max-width:760px) { .acc-command-grid { grid-template-columns:1fr; } }
         </style>
 
         <h3>■ まず全体：「命令の流し方」と「環境の分け方」を見分ける</h3>
@@ -154,10 +159,67 @@ window.quizData = {
         <div class="acc-table-wrap"><table class="acc-table">
             <tr><th>Dockerfile命令</th><th>役割</th><th>実行される時点</th></tr>
             <tr><td><code>FROM</code></td><td>土台にするbase imageを指定</td><td>buildの開始</td></tr>
+            <tr><td><code>WORKDIR</code></td><td>以後の命令で使う作業directoryを指定</td><td>build時に設定し、起動時にも引き継ぐ</td></tr>
             <tr><td><code>COPY</code></td><td>build contextからfileをimageへcopy</td><td>build時</td></tr>
             <tr><td><code>RUN</code></td><td>package導入などを実行し、image layerへ保存</td><td>build時</td></tr>
+            <tr><td><code>ARG</code></td><td><code>--build-arg</code>で渡すbuild用変数</td><td>原則build時だけ</td></tr>
+            <tr><td><code>ENV</code></td><td>環境変数を設定し、完成imageにも残す</td><td>以後のbuild＋container起動時</td></tr>
+            <tr><td><code>EXPOSE</code></td><td>containerが待受予定のportを示す</td><td>説明用metadata。Hostには公開しない</td></tr>
+            <tr><td><code>ENTRYPOINT</code></td><td>containerの中心となる実行programを指定</td><td>run時</td></tr>
             <tr><td><code>CMD</code></td><td>container起動時の既定commandを指定</td><td>run時（上書き可能）</td></tr>
         </table></div>
+
+        <h3>■ Dockerコード問題：5か所だけ順に読む</h3>
+        <div class="acc-core">
+            <strong>試験の5手：</strong>
+            ①DockerfileかComposeか → ②<code>RUN</code>はbuild時、<code>CMD</code>・<code>ENTRYPOINT</code>は起動時 →
+            ③<code>docker build</code>の<code>-t</code>でimage名 → ④<code>docker run</code>の最後で起動元image →
+            ⑤<code>--gpus</code>と<code>-p Host:Container</code>を読む。
+        </div>
+
+        <div class="acc-table-wrap"><table class="acc-table">
+            <tr><th>管理するもの</th><th>使うfile</th><th>試験での一言</th></tr>
+            <tr><td>1つの<strong>imageの作り方</strong></td><td><strong>Dockerfile</strong></td><td><code>FROM</code>・<code>COPY</code>・<code>RUN</code>・<code>CMD</code>などを書く。</td></tr>
+            <tr><td>複数service／containerの<strong>起動構成</strong></td><td><strong>compose.yaml</strong><br>旧名：<strong>docker-compose.yml</strong></td><td>試験で<code>docker-compose.yml</code>とあればこちら。imageの中身そのものではない。</td></tr>
+            <tr><td>Pythonの依存package</td><td><strong>requirements.txt</strong></td><td>Dockerや複数containerの構成fileではない。</td></tr>
+            <tr><td>Docker daemonのservice設定</td><td><strong>docker.service</strong></td><td>Compose fileではない。</td></tr>
+        </table></div>
+        <div class="acc-note">
+            <strong>名称の注意：</strong>現行Dockerで推奨されるCompose file名は<code>compose.yaml</code>です。試験例でよく見る<code>docker-compose.yml</code>も後方互換名として利用できます。<br>
+            <strong>最小2コマンド：</strong><code>docker compose up -d</code>＝backgroundで作成・起動／<code>docker compose down</code>＝停止・削除。
+        </div>
+
+        <h4>コード例は上から「imageを作る手順」</h4>
+        <pre class="acc-code"><code>FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+ENV PORT=8080
+EXPOSE 8080
+CMD [&quot;python&quot;, &quot;app.py&quot;]</code></pre>
+        <div class="acc-command-grid">
+            <div class="acc-command-card"><strong><code>RUN</code> と <code>CMD</code></strong><code>RUN</code>はimageを<strong>作る途中</strong>で実行。<code>CMD</code>はcontainerを<strong>起動するとき</strong>の既定commandです。</div>
+            <div class="acc-command-card"><strong><code>EXPOSE</code> と <code>-p</code></strong><code>EXPOSE 8080</code>は待受予定の宣言だけ。実際にHostへ公開するのは<code>docker run -p</code>です。</div>
+            <div class="acc-command-card"><strong><code>ARG</code> と <code>ENV</code></strong><code>ARG</code>は原則build中だけ。<code>ENV</code>は完成imageに残り、起動したcontainerでも使えます。</div>
+            <div class="acc-command-card"><strong><code>ENTRYPOINT</code> と <code>CMD</code></strong><code>ENTRYPOINT</code>は固定したい実行program、<code>CMD</code>は既定commandまたは既定引数です。</div>
+        </div>
+
+        <h4>コマンド例は左から1語ずつ分解する</h4>
+        <pre class="acc-code"><code>docker build -t tensorflow-image .
+docker run --rm --gpus all -p 8080:8080 tensorflow-image</code></pre>
+        <div class="acc-table-wrap"><table class="acc-table">
+            <tr><th>部分</th><th>意味</th><th>ひっかけ</th></tr>
+            <tr><td><code>docker build</code></td><td>Dockerfileを基に<strong>imageを作る</strong></td><td>containerを起動するcommandではない。</td></tr>
+            <tr><td><code>-t tensorflow-image</code></td><td>imageへ名前／tagを付ける</td><td>container名ではない。container名は<code>--name</code>。</td></tr>
+            <tr><td>最後の<code>.</code></td><td>現在のdirectoryをbuild contextにする</td><td>省略できる句読点ではない。不要fileは<code>.dockerignore</code>で除外。</td></tr>
+            <tr><td><code>docker run</code></td><td>imageから新しいcontainerを作成して起動</td><td>imageをbuildするcommandではない。</td></tr>
+            <tr><td><code>--rm</code></td><td>停止後にcontainerを自動削除</td><td>imageまで削除する意味ではない。</td></tr>
+            <tr><td><code>--gpus all</code></td><td>利用可能な全GPUをcontainerへ公開</td><td>applicationが必ず全GPUで計算する保証ではない。</td></tr>
+            <tr><td><code>-p 8080:8080</code></td><td><strong>Host 8080 → Container 8080</strong></td><td>順番は<code>Host側:Container側</code>。</td></tr>
+            <tr><td>最後の<code>tensorflow-image</code></td><td>起動元のimage名</td><td>自動的なcontainer名ではない。</td></tr>
+        </table></div>
+        <div class="acc-note"><strong>GPU指定の注意：</strong><code>--gpus all</code>＝全GPUを利用可能、<code>--gpus 2</code>＝利用可能なGPUを2枚にする指定です。GPU番号2だけ、という意味ではありません。</div>
 
         <h3>■ 最後はこの表だけ</h3>
         <div class="acc-table-wrap"><table class="acc-table">
@@ -172,6 +234,10 @@ window.quizData = {
             <tr><td>Host kernelを共有</td><td><strong>コンテナ型</strong></td><td>Guest OSを個別に持たず軽量。</td></tr>
             <tr><td>build手順→template→実行実体</td><td><strong>Dockerfile → Image → Container</strong></td><td><code>build</code>してから<code>run</code>。</td></tr>
             <tr><td>build時／起動時</td><td><strong>RUN／CMD</strong></td><td>実行timingを見分ける。</td></tr>
+            <tr><td>imageの作り方／複数serviceの構成</td><td><strong>Dockerfile／Compose file</strong></td><td>試験では<code>docker-compose.yml</code>もCompose。</td></tr>
+            <tr><td><code>-p 3000:8080</code></td><td><strong>Host 3000 → Container 8080</strong></td><td>左がHost、右がContainer。</td></tr>
+            <tr><td><code>EXPOSE</code>／<code>-p</code></td><td><strong>待受予定の宣言／実際の公開</strong></td><td><code>EXPOSE</code>だけではHostへ公開しない。</td></tr>
+            <tr><td><code>--gpus all</code></td><td><strong>全GPUを利用可能にする</strong></td><td>全GPUを必ず計算に使う保証ではない。</td></tr>
         </table></div>
     `,
 
@@ -206,6 +272,137 @@ window.quizData = {
         { id:"env-dockerfile-from", category:"Dockerfile命令", question:"DockerfileのFROM命令の役割はどれか。", options:["土台となるbase imageを指定する", "container起動時の既定commandを実行する", "fileを削除する", "GPUを選ぶ"], answer:0, explanation:"Dockerfileは通常FROMから始まり、どの環境を土台にbuildするかを決めます。" },
         { id:"env-dockerfile-copy-run", category:"Dockerfile命令", question:"DockerfileのCOPYとRUNの対応として正しいものはどれか。", options:["COPYはfileをimageへcopyし、RUNはbuild時にcommandを実行してlayerへ保存する", "COPYは起動command、RUNはHost OS", "両方ともrun時だけ実行", "両方ともGPU命令"], answer:0, explanation:"COPYはbuild context内のfileを取り込み、RUNはpackage導入などのbuild処理に使います。" },
         { id:"env-dockerfile-run-cmd", category:"Dockerfile命令", question:"DockerfileのRUNとCMDの違いとして正しいものはどれか。", options:["RUNはimage build時、CMDはcontainer起動時の既定command", "CMDはbuild時だけ", "RUNはcontainer停止時だけ", "両者の実行timingは同じ"], answer:0, explanation:"RUNの結果はimage layerへ保存されます。CMDは起動時の既定値で、docker run時に上書きできます。" },
+
+        {
+            id:"env-dockerfile-compose-pair",
+            category:"Dockerfile・Compose",
+            question:"Dockerは、imageの構成を（あ）で管理し、複数containerの構成を（い）で管理する。（あ）（い）の正しい組合せはどれか。",
+            options:[
+                "（あ）docker-compose.yml／（い）Dockerfile",
+                "（あ）Dockerfile／（い）docker-compose.yml",
+                "（あ）docker.service／（い）requirements.txt",
+                "（あ）requirements.txt／（い）docker.service"
+            ],
+            answer:1,
+            explanation:"<strong>① imageの作り方：</strong>Dockerfileです。<br><strong>② 複数serviceの構成：</strong>Compose fileです。<br><strong>③ 答え：</strong>（あ）Dockerfile、（い）docker-compose.yml。現行の推奨名はcompose.yamlですが、docker-compose.ymlも対応しています。"
+        },
+        {
+            id:"env-docker-command-inappropriate",
+            category:"Dockerコマンド総合",
+            question:"GPUを4枚搭載したHostで次を実行した。説明として<strong>不適切</strong>なものはどれか。<pre class=\"acc-code\"><code>docker build -t tensorflow-image .\ndocker run --gpus all -p 8080:8080 tensorflow-image</code></pre>",
+            options:[
+                "Hostの4枚すべてのGPUをcontainerから利用可能にしている",
+                "Hostの8080番portをContainerの8080番portへ割り当てている",
+                "作成したimageの名前はtensorflow-imageである",
+                "docker buildでcontainerを起動している"
+            ],
+            answer:3,
+            explanation:"<strong>① build：</strong>imageを作ります。<br><strong>② run：</strong>containerを作成して起動します。<br><strong>③ 不適切：</strong>「docker buildでcontainerを起動」です。<code>--gpus all</code>は全GPUを利用可能にしますが、実際に全GPUで計算するかはapplication次第です。"
+        },
+        {
+            id:"env-docker-port-order",
+            category:"Docker port（コマンド）",
+            question:"次のcommandの説明として正しいものはどれか。<pre class=\"acc-code\"><code>docker run -p 9000:8080 exam-app</code></pre>",
+            options:[
+                "Hostの9000番portをContainerの8080番portへ割り当てる",
+                "Hostの8080番portをContainerの9000番portへ割り当てる",
+                "9000枚のGPUを利用可能にする",
+                "image名を9000:8080にする"
+            ],
+            answer:0,
+            explanation:"<strong>使う規則：</strong><code>-p Host側:Container側</code>。<br><strong>代入：</strong>左が9000、右が8080。<br><strong>答え：</strong>外部からHost 9000へ接続すると、Container 8080へ届きます。"
+        },
+        {
+            id:"env-docker-expose-publish",
+            category:"EXPOSE・port公開",
+            question:"Dockerfileの<code>EXPOSE 8080</code>について、正しい説明はどれか。",
+            options:[
+                "Hostの8080番portへ自動的に公開する",
+                "Containerが8080番portを使う想定を示すが、それだけではHostへ公開しない",
+                "GPUを8080個割り当てる",
+                "8080という名前のimageを作る"
+            ],
+            answer:1,
+            explanation:"<strong>① EXPOSE：</strong>待受予定portを示すmetadataです。<br><strong>② 公開：</strong>実際のHost公開は<code>docker run -p</code>を使います。<br><strong>③ 罠：</strong>EXPOSEだけでは外部から接続できる設定になりません。"
+        },
+        {
+            id:"env-docker-build-read",
+            category:"docker build（コマンド）",
+            question:"次のcommandの説明として正しいものはどれか。<pre class=\"acc-code\"><code>docker build -t api:v1 .</code></pre>",
+            options:[
+                "api:v1というcontainerを起動する",
+                "現在のdirectoryをbuild contextとし、imageへapi:v1という名前・tagを付ける",
+                "GPU番号1だけを使う",
+                "Composeの全serviceを起動する"
+            ],
+            answer:1,
+            explanation:"<strong>① build：</strong>imageを作ります。<br><strong>② -t：</strong>名前とtagを付けます。<br><strong>③ 最後の .：</strong>現在のdirectoryがbuild contextです。"
+        },
+        {
+            id:"env-dockerfile-workdir",
+            category:"WORKDIR（コード）",
+            question:"次のDockerfileについて正しい説明はどれか。<pre class=\"acc-code\"><code>FROM python:3.12-slim\nWORKDIR /app\nCOPY . .\nCMD [&quot;python&quot;, &quot;main.py&quot;]</code></pre>",
+            options:[
+                "以後の作業directoryは/appとなり、main.pyも通常/appを基準に実行される",
+                "Host側の作業directoryが/appへ変更される",
+                "COPY . .は必ずroot directoryへcopyする",
+                "image名が/appになる"
+            ],
+            answer:0,
+            explanation:"<strong>① WORKDIR：</strong>image／container内の作業場所を/appにします。<br><strong>② 以後：</strong>COPYの宛先やCMDの相対pathは/app基準です。<br><strong>③ Host：</strong>Host側のdirectoryを変更する命令ではありません。"
+        },
+        {
+            id:"env-dockerfile-arg-env",
+            category:"ARG・ENV",
+            question:"DockerfileのARGとENVの違いとして適切なものはどれか。",
+            options:[
+                "ARGは主にbuild時の変数、ENVはimageに保存されcontainer起動時にも既定で利用できる",
+                "ENVはbuild時だけ、ARGは起動時だけ使う",
+                "両方ともport公開命令である",
+                "両方ともpasswordを安全に保存する専用命令である"
+            ],
+            answer:0,
+            explanation:"<strong>① ARG：</strong><code>--build-arg</code>で渡す作成途中の変数です。<br><strong>② ENV：</strong>完成imageへ残り、起動後にも使えます。<br><strong>③ 暗記：</strong>ARG＝作る途中、ENV＝動かす環境。"
+        },
+        {
+            id:"env-dockerfile-entrypoint-cmd",
+            category:"ENTRYPOINT・CMD",
+            question:"次のDockerfileからimage <code>trainer</code>を作った。<code>docker run trainer --epochs 20</code>で実行されるcommandはどれか。<pre class=\"acc-code\"><code>ENTRYPOINT [&quot;python&quot;, &quot;train.py&quot;]\nCMD [&quot;--epochs&quot;, &quot;10&quot;]</code></pre>",
+            options:[
+                "--epochs 20だけ",
+                "python train.py --epochs 10 --epochs 20",
+                "python train.py --epochs 20",
+                "python --epochs train.py 20"
+            ],
+            answer:2,
+            explanation:"<strong>① ENTRYPOINT：</strong><code>python train.py</code>を固定します。<br><strong>② CMD：</strong>既定引数<code>--epochs 10</code>です。<br><strong>③ run後の引数：</strong>CMDを<code>--epochs 20</code>へ置き換えるため、答えは<code>python train.py --epochs 20</code>です。"
+        },
+        {
+            id:"env-docker-compose-commands",
+            category:"Docker Compose",
+            question:"Docker Compose commandの対応として正しいものはどれか。",
+            options:[
+                "docker compose up -d＝backgroundで作成・起動、docker compose down＝停止・削除",
+                "up -d＝Dockerfile削除、down＝GPU追加",
+                "up -d＝image名変更、down＝port公開",
+                "両方ともimageをbuildするだけ"
+            ],
+            answer:0,
+            explanation:"<strong>① up：</strong>Compose fileのservice群を作成・起動します。<br><strong>② -d：</strong>background実行です。<br><strong>③ down：</strong>Composeで作ったcontainerやnetworkを停止・削除します。"
+        },
+        {
+            id:"env-dockerignore-role",
+            category:".dockerignore",
+            question:".dockerignoreの主な役割として正しいものはどれか。",
+            options:[
+                "起動中containerを停止する",
+                "GPUを無効にする",
+                "Composeのservice数を制限する",
+                "不要なfileやdirectoryをbuild contextから除外する"
+            ],
+            answer:3,
+            explanation:"<strong>① 場面：</strong>docker buildでcontextを渡すときに働きます。<br><strong>② 役割：</strong>不要fileを除外します。<br><strong>③ 効果：</strong>送信量を減らし、build高速化や不要情報の混入防止に役立ちます。"
+        },
         { id:"env-reproducibility", category:"環境再現性", question:"Dockerfileをversion管理する主な利点はどれか。", options:["環境構築手順をtextとして共有し、同じimageを再buildしやすくする", "Host kernelを不要にする", "すべてのsecurity問題を自動解決する", "GPUをTPUへ変換する"], answer:0, explanation:"手作業の設定を減らし、依存packageや手順をcodeとして追跡できます。外部repository更新などにより完全な再現にはversion固定も重要です。" }
     ]
 };
