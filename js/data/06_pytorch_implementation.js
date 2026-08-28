@@ -298,6 +298,27 @@ b = b - learning_rate * db / B</code></pre>
         </table></div>
         <div class="pt-note"><strong>添付問題を安全に読む補足：</strong>定義が<code>DNNClassifier(input_size, num_class, hidden_units)</code>なら、実行できる生成例は<code>DNNClassifier(784, 10, [128,64])</code>です。また、<code>np.equal(...)</code>だけではTrue/Falseの配列なので、正解率にするには最後に<code>np.mean(...)</code>が必要です。</div>
 
+        <h3>■ 本試験型：L1・L2のコード空欄</h3>
+        <div class="pt-note"><strong>最初に式を見る：</strong>L1なら<code>abs()</code>、L2なら<code>pow(2)</code>または<code>weight_decay</code>。損失へ手動で足す方式とoptimizerの<code>weight_decay</code>を同時に使うと二重適用になるため、問題文の方式に合わせます。</div>
+        <div class="pt-code"># L1：損失へ絶対値和を足す
+data_loss = criterion(outputs, labels)
+l1_penalty = <span class="pt-ask">sum(p.abs().sum() for p in model.parameters())</span>
+loss = data_loss + lambda_l1 * l1_penalty
+
+# L2相当：optimizerで指定
+optimizer = torch.optim.SGD(
+    model.parameters(),
+    lr=0.01,
+    <span class="pt-ask">weight_decay=lambda_l2</span>
+)</div>
+        <div class="pt-table-wrap"><table class="pt-table">
+            <tr><th>問題文の合図</th><th>空欄へ答えるコード</th><th>意味</th></tr>
+            <tr><td>L1／絶対値和／スパース</td><td><code class="pt-ask">p.abs().sum()</code></td><td>各parameterの絶対値を合計。</td></tr>
+            <tr><td>L2／二乗和を手動加算</td><td><code>p.pow(2).sum()</code></td><td>二乗和をlossへ足す。</td></tr>
+            <tr><td>optimizerでL2相当</td><td><code class="pt-ask">weight_decay=...</code></td><td>SGDではL2と同じ更新形。</td></tr>
+            <tr><td>Adamで減衰を分離</td><td><code>torch.optim.AdamW(...)</code></td><td>weight decayを適応的勾配更新から分ける。</td></tr>
+        </table></div>
+
         <h3>■ Module・Tensor・DataLoaderの最小セット</h3>
         <div class="pt-card-grid">
             <div class="pt-card"><strong>nn.Module</strong><code>__init__</code>で層を登録し、<code>forward</code>で接続する。可変個数の層は<code>ModuleList</code>。</div>
@@ -614,6 +635,24 @@ b = b - learning_rate * db / B</code></pre>
             question:"AdamWでweight decayを0.01に設定する代表的なコードはどれか。",
             options:["<code>torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.01)</code>","<code>model.eval(weight_decay=0.01)</code>","<code>loss.backward(0.01)</code>","<code>nn.Dropout(weight_decay=0.01)</code>"], answer:0,
             explanation:"<p>AdamWはweight decayをgradient更新から分離して適用します。biasやNormalization parameterをdecay対象外にする場合はparameter groupを分けます。</p>"
+        },
+        {
+            id:"pt-l1-regularization-hole", category:"正則化実装", kind:"コード穴埋め", difficulty:"本試験型",
+            question:"PyTorchでL1正則化を手動で加える。コードの（あ）に入るものはどれか。<pre class='pt-question-code'><code>outputs = model(x)\ndata_loss = criterion(outputs, target)\nl1_penalty = （あ）\nloss = data_loss + lambda_l1 * l1_penalty</code></pre>",
+            options:["<code>sum(p.abs().sum() for p in model.parameters())</code>","<code>sum(p.pow(2).sum() for p in model.parameters())</code>","<code>sum(p.argmax() for p in model.parameters())</code>","<code>model.eval()</code>"], answer:0,
+            explanation:"<p><strong>使う式：</strong>L1は$\\sum_i|w_i|$です。</p><p><strong>コード対応：</strong><code>p.abs()</code>で絶対値、内側の<code>sum()</code>でTensor内、外側の<code>sum</code>でparameter間を合計します。</p><p><strong>答え：</strong><code>sum(p.abs().sum() for p in model.parameters())</code>。L2なら<code>p.pow(2).sum()</code>です。</p>"
+        },
+        {
+            id:"pt-l2-manual-regularization-hole", category:"正則化実装", kind:"コード穴埋め", difficulty:"本試験型",
+            question:"PyTorchでL2の二乗和を損失へ手動で加える。コードの（あ）に入るものはどれか。<pre class='pt-question-code'><code>l2_penalty = （あ）\nloss = data_loss + lambda_l2 / 2 * l2_penalty</code></pre>",
+            options:["<code>sum(p.abs().sum() for p in model.parameters())</code>","<code>sum(p.pow(2).sum() for p in model.parameters())</code>","<code>sum(p.sign().sum() for p in model.parameters())</code>","<code>torch.argmax(outputs)</code>"], answer:1,
+            explanation:"<p><strong>使う式：</strong>$L=L_{data}+\\frac{\\lambda}{2}\\sum_iw_i^2$。</p><p><strong>コード対応：</strong><code>p.pow(2)</code>が二乗、<code>sum()</code>が総和です。</p><p><strong>答え：</strong>選択肢2。L1の<code>abs</code>と取り違えないでください。</p>"
+        },
+        {
+            id:"pt-sgd-weight-decay-hole", category:"正則化実装", kind:"コード穴埋め", difficulty:"本試験型",
+            question:"SGDでL2正則化と同じ更新形になる設定を加える。コードの（あ）に入るものはどれか。<pre class='pt-question-code'><code>optimizer = torch.optim.SGD(\n    model.parameters(),\n    lr=0.01,\n    （あ）\n)</code></pre>",
+            options:["<code>weight_decay=lambda_l2</code>","<code>dropout=lambda_l2</code>","<code>l1=lambda_l2</code>","<code>eval=lambda_l2</code>"], answer:0,
+            explanation:"<p><strong>答え：</strong><code>weight_decay=lambda_l2</code>です。</p><p>SGDではL2正則化と同じ更新形になります。すでにL2項をlossへ手動加算しているなら、同じ係数をweight decayでも重ねないようにします。</p>"
         },
         {
             id:"pt-scheduler-timing", category:"学習率", kind:"コード判定", difficulty:"本試験型",

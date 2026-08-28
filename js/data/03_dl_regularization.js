@@ -21,8 +21,14 @@ window.quizData = {
             .formula-box mjx-container { margin: 0 !important; }
             .comparison-table td:nth-child(3) { min-width: 330px; }
             .reg-memory { margin: 10px 0 18px; padding: 11px 13px; border-left: 5px solid #f39c12; border-radius: 8px; background: #fff8e7; line-height: 1.75; }
+            .reg-code-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0 18px; }
+            .reg-code-card { min-width: 0; padding: 13px; border: 2px solid #c8dbee; border-radius: 10px; background: #fff; }
+            .reg-code-card strong { display: block; margin-bottom: 7px; color: #123f68; }
+            .reg-code-card pre { margin: 7px 0; overflow-x: auto; }
+            .reg-blank { color: #5a2200; background: #fff2a8; border: 2px solid #9a3412; border-radius: 4px; padding: 0 .12em; font-weight: 900; text-decoration: underline double #9a3412 2px; text-underline-offset: 2px; }
             @media (max-width: 760px) {
                 .visual-grid { grid-template-columns: 1fr; }
+                .reg-code-grid { grid-template-columns: 1fr; }
             }
         </style>
 
@@ -86,6 +92,51 @@ window.quizData = {
             </tr>
         </table>
         <div class="reg-memory"><strong>$\\lambda$ を大きくしすぎると：</strong>制約が強すぎて重みが小さくなり、未学習（underfitting）になります。</div>
+
+        <h3>■ 本試験型コード穴埋め：L1はabs、L2は2乗</h3>
+        <div class="reg-memory"><strong>解法は3手：</strong>①問題文の式を見る → ②L1なら絶対値、L2なら二乗を探す → ③勾配を聞かれたら、L1はsign、$\\frac{\\lambda}{2}\\sum w^2$のL2は$\\lambda w$。</div>
+        <div class="reg-code-grid">
+            <div class="reg-code-card">
+                <strong>NumPy：損失へ足す空欄</strong>
+                <pre><code># L1
+loss = data_loss + lam * <span class="reg-blank">np.sum(np.abs(W))</span>
+
+# L2（式に1/2がある形）
+loss = data_loss + lam / 2 * <span class="reg-blank">np.sum(W ** 2)</span></code></pre>
+                <small><code>abs</code>が見えたらL1、<code>** 2</code>が見えたらL2。</small>
+            </div>
+            <div class="reg-code-card">
+                <strong>NumPy：勾配へ足す空欄</strong>
+                <pre><code># dW_data は元の損失の勾配
+dW_l1 = dW_data + lam * <span class="reg-blank">np.sign(W)</span>
+dW_l2 = dW_data + lam * <span class="reg-blank">W</span></code></pre>
+                <small>L2に$1/2$があるので微分後の2が消えます。</small>
+            </div>
+            <div class="reg-code-card">
+                <strong>PyTorch：L1を手動で加算</strong>
+                <pre><code>data_loss = criterion(outputs, labels)
+l1 = <span class="reg-blank">sum(p.abs().sum()
+         for p in model.parameters())</span>
+loss = data_loss + lam * l1</code></pre>
+                <small><code>weight</code>だけを対象にする指定なら、biasを除いて集計します。</small>
+            </div>
+            <div class="reg-code-card">
+                <strong>PyTorch：L2 / weight decay</strong>
+                <pre><code>optimizer = torch.optim.SGD(
+    model.parameters(), lr=0.01,
+    <span class="reg-blank">weight_decay=lam</span>
+)</code></pre>
+                <small>SGDではL2と同じ更新形。AdamWは減衰を勾配更新から分離します。</small>
+            </div>
+        </div>
+        <table class="comparison-table">
+            <tr><th>問題文・コードの合図</th><th>空欄へ入れるもの</th><th>覚え方</th></tr>
+            <tr><td>スパース化／絶対値和</td><td><code>np.sum(np.abs(W))</code></td><td>L1＝縦棒＝abs。</td></tr>
+            <tr><td>二乗和／重みを滑らかに縮小</td><td><code>np.sum(W ** 2)</code></td><td>L2＝square。</td></tr>
+            <tr><td>L1項の勾配</td><td><code>np.sign(W)</code></td><td>正なら+1、負なら−1。</td></tr>
+            <tr><td>$\\frac{\\lambda}{2}\\sum W^2$の勾配</td><td><code>lam * W</code></td><td>微分の2と式の1/2が消える。</td></tr>
+            <tr><td>optimizerの引数でL2相当</td><td><code>weight_decay=...</code></td><td>損失へ手動加算する方式と二重適用しない。</td></tr>
+        </table>
 
         <h3>■ DropoutとDropConnect：何を消す？</h3>
         <div class="visual-grid">
@@ -173,6 +224,8 @@ window.quizData = {
             <tr><th>問題文の合図</th><th>答える語</th><th>一言理由</th></tr>
             <tr><td>絶対値ペナルティ／スパース化</td><td><strong>L1正則化（Lasso）</strong><br><small>Least Absolute Shrinkage and Selection Operator</small></td><td>ひし形の角で接し、重みをちょうど0にしやすい。</td></tr>
             <tr><td>二乗ペナルティ／全体を小さく</td><td><strong>L2正則化（Ridge）</strong></td><td>大きな重みを強く罰し、滑らかに縮める。</td></tr>
+            <tr><td>L1のコード空欄</td><td><code>np.sum(np.abs(W))</code><br><code>p.abs().sum()</code></td><td>絶対値を合計。勾配なら<code>sign(W)</code>。</td></tr>
+            <tr><td>L2のコード空欄</td><td><code>np.sum(W ** 2)</code><br><code>weight_decay=...</code></td><td>二乗和。$\\lambda\\sum W^2/2$の勾配は$\\lambda W$。</td></tr>
             <tr><td>更新ごとに重みを直接縮める</td><td><strong>weight decay</strong></td><td>SGD（Stochastic Gradient Descent）ではL2と同じ更新形。</td></tr>
             <tr><td>適応的勾配更新と重み減衰を分離</td><td><strong>AdamW</strong><br><small>Adaptive Moment Estimation with decoupled Weight Decay</small></td><td>L2項を適応的学習率で歪めず、別に減衰させる。</td></tr>
             <tr><td>ニューロンをランダムに無効化</td><td><strong>Dropout</strong></td><td>特定ノード同士の共適応を抑える。</td></tr>
@@ -200,6 +253,46 @@ window.quizData = {
             options: ["全体的に0へ近づき小さくなる", "多くのパラメータが必ず完全に0になる", "必ず大きくなる", "符号だけが反転する"],
             answer: 0,
             explanation: "L2は大きな重みを二乗で強く罰し、重み全体を滑らかに縮めます。通常、L1のように多数をちょうど0にはしません。"
+        },
+        {
+            id: "reg-l1-numpy-code-hole",
+            category: "L1正則化・コード穴埋め",
+            kind: "コード穴埋め",
+            difficulty: "本試験型",
+            question: "L1正則化を加える次のコードで、（あ）に入るものはどれか。<pre><code>data_loss = cross_entropy(y, target)\nloss = data_loss + lam * （あ）</code></pre>",
+            options: ["<code>np.sum(np.abs(W))</code>", "<code>np.sum(W ** 2)</code>", "<code>np.mean(W)</code>", "<code>np.argmax(W)</code>"],
+            answer: 0,
+            explanation: "<p><strong>使う式：</strong>$L=L_{data}+\\lambda\\sum_i|w_i|$。</p><p><strong>コード対応：</strong>絶対値は<code>np.abs</code>、全重みの合計は<code>np.sum</code>です。</p><p><strong>答え：</strong><code>np.sum(np.abs(W))</code>。試験では<strong>L1＝abs</strong>を最初に探します。</p>"
+        },
+        {
+            id: "reg-l2-numpy-code-hole",
+            category: "L2正則化・コード穴埋め",
+            kind: "コード穴埋め",
+            difficulty: "本試験型",
+            question: "L2正則化を加える次のコードで、（あ）に入るものはどれか。<pre><code>data_loss = cross_entropy(y, target)\nloss = data_loss + lam / 2 * （あ）</code></pre>",
+            options: ["<code>np.sum(np.abs(W))</code>", "<code>np.sum(W ** 2)</code>", "<code>np.sign(W)</code>", "<code>np.max(W)</code>"],
+            answer: 1,
+            explanation: "<p><strong>使う式：</strong>$L=L_{data}+\\frac{\\lambda}{2}\\sum_iw_i^2$。</p><p><strong>コード対応：</strong>二乗和は<code>np.sum(W ** 2)</code>です。</p><p><strong>答え：</strong>選択肢2。<strong>L2＝square</strong>と覚えます。</p>"
+        },
+        {
+            id: "reg-l2-gradient-code-hole",
+            category: "L2正則化・勾配",
+            kind: "コード穴埋め",
+            difficulty: "本試験型",
+            question: "正則化項が $\\frac{\\lambda}{2}\\sum_i W_i^2$ のとき、勾配コードの（あ）に入るものはどれか。<pre><code>dW = dW_data + lam * （あ）</code></pre>",
+            options: ["<code>np.abs(W)</code>", "<code>np.sign(W)</code>", "<code>W</code>", "<code>W ** 2</code>"],
+            answer: 2,
+            explanation: "<p><strong>使う微分：</strong>$\\frac{d}{dW}\\{\\frac{\\lambda}{2}W^2\\}=\\lambda W$。</p><p><strong>答え：</strong><code>W</code>です。微分で出る2と、式の1/2が打ち消し合います。</p>"
+        },
+        {
+            id: "reg-l1-gradient-code-hole",
+            category: "L1正則化・勾配",
+            kind: "コード穴埋め",
+            difficulty: "応用",
+            question: "L1正則化項 $\\lambda\\sum_i|W_i|$ の勾配を加えるコードとして最も近いものはどれか（$W=0$での扱いは簡略化）。",
+            options: ["<code>dW = dW_data + lam * np.sign(W)</code>", "<code>dW = dW_data + lam * W</code>", "<code>dW = dW_data + lam * W ** 2</code>", "<code>dW = np.zeros_like(W)</code>"],
+            answer: 0,
+            explanation: "<p>$|W|$の微分は、$W&gt;0$で+1、$W&lt;0$で−1なので<code>np.sign(W)</code>を使います。対してL2の勾配は<code>lam * W</code>です。</p>"
         },
         {
             id: "reg-objective",

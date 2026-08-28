@@ -152,6 +152,57 @@ window.quizData = {
         </table>
         <p><strong>ひっかけ対策：</strong>特異度が99.9%なら偽陽性率は $1-0.999=0.001=0.1\\%$。また、1%は0.01、0.1%は0.001です。百分率を小数へ直すときは100で割ります。</p>
 
+        <h3>■ 26文字から2文字：自己情報量は「数え方 → $\\log_2$」</h3>
+        <p><strong>本試験の最初の判断：</strong>「26文字から2文字」だけでは全パターン数は決まりません。<strong>ABとBAを別にするか（順序）</strong>、<strong>AAを許すか（重複）</strong>を問題文で確認します。</p>
+        <div class="exam-figure answer-figure" role="group" aria-label="26文字から2文字を選ぶ自己情報量の4手順">
+            <span class="figure-title">問題文 → 全パターン数 $N$ → 確率 $1/N$ → 情報量 $\\log_2N$</span>
+            <svg viewBox="0 0 1080 260" role="img" aria-labelledby="math-info-choice-title math-info-choice-desc" style="display:block;width:100%;min-width:820px;height:auto">
+                <title id="math-info-choice-title">26文字から2文字を選ぶ自己情報量の解法</title>
+                <desc id="math-info-choice-desc">順序と重複を確認し、全パターン数Nを数え、特定の1パターンの確率を1割るNとし、自己情報量をログ2のNとして求めます。</desc>
+                <defs>
+                    <marker id="math-info-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                        <path d="M0 0L10 5L0 10Z" fill="#627d98"></path>
+                    </marker>
+                </defs>
+                <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans JP',sans-serif" fill="#102a43">
+                    <rect x="20" y="45" width="220" height="150" rx="16" fill="#eaf3ff" stroke="#1769df" stroke-width="3"></rect>
+                    <text x="130" y="76" text-anchor="middle" font-size="17" font-weight="900">① 問題文を確認</text>
+                    <text x="130" y="110" text-anchor="middle" font-size="15" font-weight="800">AB と BA は別？</text>
+                    <text x="130" y="138" text-anchor="middle" font-size="15" font-weight="800">AA は使える？</text>
+                    <text x="130" y="174" text-anchor="middle" font-size="13" fill="#486581">順序・重複を決める</text>
+
+                    <path d="M240 120H280" fill="none" stroke="#627d98" stroke-width="3" marker-end="url(#math-info-arrow)"></path>
+                    <rect x="285" y="45" width="220" height="150" rx="16" fill="#e8f7f2" stroke="#168a67" stroke-width="3"></rect>
+                    <text x="395" y="76" text-anchor="middle" font-size="17" font-weight="900">② 全パターン数 N</text>
+                    <text x="395" y="110" text-anchor="middle" font-size="15" font-weight="800">26² ／ C(26, 2)</text>
+                    <text x="395" y="140" text-anchor="middle" font-size="15" font-weight="800">／ 26 × 25</text>
+                    <text x="395" y="174" text-anchor="middle" font-size="13" fill="#486581">条件に合う式を1つ選ぶ</text>
+
+                    <path d="M505 120H545" fill="none" stroke="#627d98" stroke-width="3" marker-end="url(#math-info-arrow)"></path>
+                    <rect x="550" y="45" width="220" height="150" rx="16" fill="#fff2dd" stroke="#d9822b" stroke-width="3"></rect>
+                    <text x="660" y="76" text-anchor="middle" font-size="17" font-weight="900">③ 1パターンの確率</text>
+                    <text x="660" y="130" text-anchor="middle" font-size="26" font-weight="900">p = 1 / N</text>
+                    <text x="660" y="174" text-anchor="middle" font-size="13" fill="#486581">すべて等確率のとき</text>
+
+                    <path d="M770 120H810" fill="none" stroke="#627d98" stroke-width="3" marker-end="url(#math-info-arrow)"></path>
+                    <rect x="815" y="45" width="245" height="150" rx="16" fill="#f3eaff" stroke="#7c3aed" stroke-width="3"></rect>
+                    <text x="938" y="76" text-anchor="middle" font-size="17" font-weight="900">④ 自己情報量</text>
+                    <text x="938" y="116" text-anchor="middle" font-size="21" font-weight="900">I = −log₂(1 / N)</text>
+                    <text x="938" y="151" text-anchor="middle" font-size="25" font-weight="900" fill="#6d28d9">= log₂N bit</text>
+                    <text x="938" y="181" text-anchor="middle" font-size="13" fill="#486581">最後は全パターン数の対数</text>
+                </g>
+            </svg>
+            <p class="figure-caption"><strong>暗記は4手：</strong>順序・重複を確認 → 全パターン数 $N$ → $p=1/N$ → $I=\\log_2N$ bit。</p>
+        </div>
+        <table>
+            <tr><th>問題文の合図</th><th>順序</th><th>重複</th><th>全パターン数 $N$</th><th>自己情報量</th></tr>
+            <tr><td><strong>2文字の暗証番号・文字列</strong><br>同じ文字も使用可</td><td>あり<br>AB≠BA</td><td>あり<br>AA可</td><td>$26\\times26=26^2=676$</td><td>$\\log_2 676\\approx9.40$ bit</td></tr>
+            <tr><td><strong>異なる2文字を選ぶ</strong><br>順序を区別しない</td><td>なし<br>AB＝BA</td><td>なし<br>AA不可</td><td>$\\binom{26}{2}=\\dfrac{26\\times25}{2}=325$</td><td>$\\log_2 325\\approx8.34$ bit</td></tr>
+            <tr><td><strong>異なる2文字を並べる</strong><br>順序を区別する</td><td>あり<br>AB≠BA</td><td>なし<br>AA不可</td><td>$26\\times25=650$</td><td>$\\log_2 650\\approx9.34$ bit</td></tr>
+        </table>
+        <p><strong>言葉の見分け：</strong>「選ぶ・組・順不同」なら組合せ、「並べる・文字列・コード」なら順序ありです。「異なる・重複なし」なら、2文字目は25通りになります。</p>
+        <p><strong>最重要：</strong>自己情報量の式へ26や2を直接入れません。先に<strong>全パターン数 $N$</strong>を作り、特定の1パターンの確率を $1/N$ としてから計算します。</p>
+
         <h3>■ 情報理論の5概念は「何を測るか」で使い分ける</h3>
         <table>
             <tr><th>用語</th><th>数式・何を測る？</th><th>簡単な例・使われる場面</th></tr>
@@ -229,6 +280,7 @@ window.quizData = {
             <tr><td>陽性後に本当に感染している確率</td><td><strong>真陽性÷陽性全員</strong></td><td>感染側と非感染側の陽性を両方数える。</td></tr>
             <tr><td>特異度から偽陽性率を出す</td><td><strong>偽陽性率＝1−特異度</strong></td><td>陽性問題の非感染者側へ掛ける。</td></tr>
             <tr><td>1つの事象の珍しさ・驚き</td><td><strong>自己情報量</strong></td><td>$I(x)=-\\log_2P(x)$。起こりにくいほど大きい。</td></tr>
+            <tr><td>等確率な $N$ 通りから1つが出る</td><td><strong>$I=\\log_2N$ bit</strong></td><td>文字選択では、先に順序・重複を確認して $N$ を数える。</td></tr>
             <tr><td>1つの分布の迷い・平均情報量</td><td><strong>エントロピー</strong></td><td>均等なほど大きく、確実なら0。</td></tr>
             <tr><td>正解分布 $P$ で予測 $Q$ を採点</td><td><strong>クロスエントロピー</strong></td><td>正解へ低い確率を付けるほど罰が大きい。</td></tr>
             <tr><td>向きのある2分布のずれ</td><td><strong>KL</strong><br><small>Kullback-Leibler divergence</small></td><td>非負・非対称で、同じ分布なら0。</td></tr>
@@ -512,6 +564,36 @@ window.quizData = {
             options: ["0 bit", "0.5 bit", "2.0 bit", "1.0 bit"],
             answer: 3,
             explanation: `<ol><li>相互情報量は、$I(X;Y)=H(X)-H(X|Y)$ です。</li><li>値を代入すると、$I(X;Y)=1.5-0.5=1.0$ bit です。</li></ol><p>$Y$ を知ることで、$X$ の不確実性が1.0 bit減った、つまり $X$ について1.0 bitの情報を得たことを意味します。</p>`
+        },
+        {
+            id: "math-self-information-letters-repeat-order-calc",
+            category: "自己情報量・文字選択（計算）",
+            kind: "計算",
+            difficulty: "本試験型",
+            question: "英大文字26文字から2文字のコードを等確率で作る。同じ文字を2回使ってよく、ABとBAは異なるコードとする。特定のコードが得られたときの自己情報量に最も近い値はどれか。$\\log_2 26\\approx4.700$ とする。",
+            options: ["約4.70 bit", "約8.34 bit", "約9.34 bit", "約9.40 bit"],
+            answer: 3,
+            explanation: `<p><strong>使う公式：</strong>$I=-\\log_2p$。全パターンが等確率なら $p=1/N$ なので、$I=\\log_2N$ です。</p><ol><li><strong>順序：</strong>ABとBAは別なので、順序あり。</li><li><strong>重複：</strong>AAも使えるので、重複あり。</li><li><strong>全パターン数：</strong>$N=26\\times26=26^2=676$。</li><li><strong>自己情報量：</strong>$I=\\log_2(26^2)=2\\log_2 26\\approx2\\times4.700=9.40$ bit。</li></ol><p><strong>答え：</strong>約9.40 bitです。「文字列・コード、同じ文字も可」なら $26^2$ と覚えます。</p>`
+        },
+        {
+            id: "math-self-information-letters-combination-calc",
+            category: "自己情報量・文字選択（計算）",
+            kind: "計算",
+            difficulty: "本試験型",
+            question: "英大文字26文字から異なる2文字を、順序を区別せず等確率で選ぶ。特定の1組が選ばれたときの自己情報量に最も近い値はどれか。$\\log_2 325\\approx8.344$ とする。",
+            options: ["約9.40 bit", "約8.34 bit", "約4.70 bit", "約16.69 bit"],
+            answer: 1,
+            explanation: `<p><strong>使う公式：</strong>全パターンが等確率なら $I=\\log_2N$ です。</p><ol><li><strong>順序：</strong>順序を区別しないので、ABとBAは同じ1組。</li><li><strong>重複：</strong>「異なる2文字」なのでAAは不可。</li><li><strong>全パターン数：</strong>$N=\\binom{26}{2}=26\\times25/2=325$。</li><li><strong>自己情報量：</strong>$I=\\log_2 325\\approx8.344$ bit。</li></ol><p><strong>答え：</strong>約8.34 bitです。$26\\times25$ のままではABとBAを二重に数えるため、順序なしでは2で割ります。</p>`
+        },
+        {
+            id: "math-self-information-letters-permutation-calc",
+            category: "自己情報量・文字選択（計算）",
+            kind: "計算",
+            difficulty: "本試験型",
+            question: "英大文字26文字から異なる2文字を順番に並べ、等確率で2文字列を作る。特定の文字列が得られたときの自己情報量に最も近い値はどれか。$\\log_2 650\\approx9.344$ とする。",
+            options: ["約8.34 bit", "約9.34 bit", "約9.40 bit", "約18.69 bit"],
+            answer: 1,
+            explanation: `<p><strong>使う公式：</strong>全パターンが等確率なら $I=\\log_2N$ です。</p><ol><li><strong>順序：</strong>「順番に並べる」ので、ABとBAは別。</li><li><strong>重複：</strong>「異なる2文字」なのでAAは不可。</li><li><strong>全パターン数：</strong>1文字目は26通り、2文字目は残り25通りなので、$N=26\\times25=650$。</li><li><strong>自己情報量：</strong>$I=\\log_2 650\\approx9.344$ bit。</li></ol><p><strong>答え：</strong>約9.34 bitです。「並べる・順序あり・重複なし」なら $26\\times25$ です。</p>`
         }
     ]
 };

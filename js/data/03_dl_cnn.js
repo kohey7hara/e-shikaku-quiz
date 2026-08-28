@@ -334,6 +334,57 @@ window.quizData = {
             <tr><td><strong>Transposed</strong></td><td>学習可能なアップサンプリング</td><td>数学的な逆畳み込みではない。</td></tr>
         </table>
 
+        <h3>■ MobileNetの計算量：$D_K, D_F, M, N$ が出たらこの3式</h3>
+        <div class="exam-core">
+            <strong>何を求める問題？</strong> 通常畳み込みを<strong>Depthwise（空間処理）＋Pointwise（チャネル混合）</strong>へ分けると、演算量が何分の1になるかを比べます。<br>
+            <strong>前提：</strong>正方形カーネル・正方形特徴マップ、Depthwiseのdepth multiplier＝1とし、乗算回数に比例する量で比較します。
+        </div>
+        <table class="comparison-table">
+            <tr><th>記号</th><th>意味</th><th>数字の読み方</th></tr>
+            <tr><td>$D_K$</td><td>カーネルの一辺</td><td>$3\\times3$なら $D_K=3$</td></tr>
+            <tr><td>$D_F$</td><td>出力特徴マップの一辺</td><td>$28\\times28$なら $D_F=28$</td></tr>
+            <tr><td>$M$</td><td>入力チャネル数</td><td>$C_{in}$ と同じ</td></tr>
+            <tr><td>$N$</td><td>出力チャネル数</td><td>$C_{out}$ と同じ</td></tr>
+        </table>
+        <div class="calc-steps">
+            <div class="calc-card">
+                <strong>① 通常畳み込み</strong>
+                <div class="formula-box">$\\displaystyle D_K^2\\,M\\,N\\,D_F^2$</div>
+                <strong>カーネル面積 × 入力CH × 出力CH × 出力位置数</strong>。全部を一度に処理します。
+            </div>
+            <div class="calc-card">
+                <strong>② Depthwise</strong>
+                <div class="formula-box">$\\displaystyle D_K^2\\,M\\,D_F^2$</div>
+                入力チャネルごとに空間処理するため、ここには<strong>$N$がありません</strong>。
+            </div>
+            <div class="calc-card">
+                <strong>③ Pointwise（1×1）</strong>
+                <div class="formula-box">$\\displaystyle M\\,N\\,D_F^2$</div>
+                1×1でチャネルを混ぜるため、ここには<strong>$D_K^2$がありません</strong>。
+            </div>
+            <div class="calc-card">
+                <strong>④ 軽量化後と比率</strong>
+                <div class="formula-box">$\\displaystyle D_K^2MD_F^2+MND_F^2$</div>
+                <div class="formula-box">$\\displaystyle \\frac{\\text{分離後}}{\\text{通常}}=\\frac{1}{N}+\\frac{1}{D_K^2}$</div>
+            </div>
+        </div>
+        <div class="answer-strip">
+            <strong>式の見分け方：</strong>通常は<strong>$D_K^2,M,N,D_F^2$を全部掛ける</strong>。分離後は「$N$を外したDepthwise」と「$D_K^2$を外したPointwise」を<strong>足す</strong>。<br>
+            <strong>比率の罠：</strong>$M$と$D_F^2$は約分で消えるため、答えは $\\frac1N+\\frac1{D_K^2}$。これは<strong>残る計算量の割合</strong>であり、削減率は $1-$ この値です。
+        </div>
+        <div class="worked-example">
+            <strong>数値代入：</strong>$D_K=3, D_F=28, M=32, N=64$ の場合
+            <ol class="cnn-calc-example">
+                <li><strong>通常：</strong>$3^2\\times32\\times64\\times28^2=14,450,688$</li>
+                <li><strong>Depthwise：</strong>$3^2\\times32\\times28^2=225,792$</li>
+                <li><strong>Pointwise：</strong>$32\\times64\\times28^2=1,605,632$</li>
+                <li><strong>分離後：</strong>$225,792+1,605,632=1,831,424$</li>
+            </ol>
+            <div class="worked-result">
+                <strong>30秒解法：</strong>大きい数を計算せず、$\\frac1{64}+\\frac1{3^2}\\approx0.1267$。通常の<strong>約12.7%</strong>まで軽量化（約87.3%削減、約7.9分の1）です。
+            </div>
+        </div>
+
         <h3>■ プーリング：残すものを見分ける</h3>
         <table class="comparison-table">
             <tr><th>手法</th><th>残すもの</th><th>形・特徴</th></tr>
@@ -390,6 +441,10 @@ window.quizData = {
         </div>
         <div class="cnn-model-key">
             <strong>歴史問題の解き方：</strong>「深くする」だけでなく、<strong>AlexNet＝学習を成立</strong>、<strong>VGG＝小さいカーネル</strong>、<strong>GoogLeNet＝並列</strong>、<strong>ResNet＝足し算</strong>、<strong>ResNeXt＝分岐数</strong>、<strong>DenseNet＝連結</strong>で区別する。ResNet／WideResNetのResidual Block・劣化問題・Projection Shortcutは <a href="quiz.html?id=04_app_image">4-（1〜3）画像認識</a>で詳しく演習します。
+        </div>
+
+        <div class="cnn-model-key">
+            <strong>SOTA（State of the Art）とは：</strong>その時点の、指定されたデータセット・評価指標・条件で<strong>最高水準</strong>の性能という意味。<strong>永久に最高、全タスク・全条件で絶対に最強</strong>という意味ではありません。
         </div>
 
         <h3>■ モデル図はこの順で読む</h3>
@@ -505,6 +560,8 @@ window.quizData = {
                 <tr><td>フィルタ数を聞かれた</td><td><strong>出力チャネル数 $C_{out}$</strong></td><td>1フィルタが特徴マップを1枚作る。</td></tr>
                 <tr><td>パラメータ数（バイアスあり）</td><td><strong>$(K_hK_wC_{in}+1)C_{out}$</strong></td><td>重みだけなら$K_hK_wC_{in}C_{out}$。$+1$は各出力チャネルのバイアス。</td></tr>
                 <tr><td>チャネル別の空間処理 → $1×1$で混合</td><td><strong>Depthwise Separable Convolution</strong></td><td>空間処理とチャネル混合を分けて軽量化する。</td></tr>
+                <tr><td>$D_K,D_F,M,N$で軽量化率</td><td><strong>$\\dfrac1N+\\dfrac1{D_K^2}$</strong></td><td>分離後÷通常の「残る割合」。削減率は1から引く。</td></tr>
+                <tr><td>その時点・指定条件で最高水準</td><td><strong>SOTA（State of the Art）</strong></td><td>永久・全条件で絶対最強という意味ではない。</td></tr>
                 <tr><td>各特徴マップ全体を1個の平均へ</td><td><strong>GAP（Global Average Pooling）</strong></td><td>$H×W×C→1×1×C$で、Cは残す。</td></tr>
                 <tr><td>GPU・Dropout・ReLU</td><td><strong>AlexNet</strong></td><td>ReLU（Rectified Linear Unit）で深いCNNの学習を実用化。</td></tr>
                 <tr><td>小さい $3×3$ を反復</td><td><strong>VGG（Visual Geometry Group）</strong></td><td>小さなカーネルを積み、深さと非線形性を増やす。</td></tr>
@@ -745,6 +802,45 @@ window.quizData = {
             options: ["通常18,432、分離2,336", "通常2,336、分離18,432", "どちらも18,432", "通常2,048、分離288"],
             answer: 0,
             explanation: "通常畳み込みでは、1個の出力フィルタが $3\\times3$ の空間と入力32チャネルのすべてを見るため、1フィルタの重みは $3\\times3\\times32$ 個です。これを出力64チャネル分持つので、一般式 $K^2C_{in}C_{out}$ に代入して $3^2\\times32\\times64=18,432$ 個です。Depthwise Separable Convolutionはこれを2段階へ分けます。①Depthwise：入力チャネルごとに $3\\times3$ フィルタを1個使うため $3^2\\times32=288$ 個。この段階ではチャネル同士を混ぜません。②Pointwise：$1\\times1$ 畳み込みで32チャネルを混ぜて64チャネルへ変換するため $1^2\\times32\\times64=2,048$ 個。合計は $288+2,048=2,336$ 個です。したがって正解は「通常18,432、分離2,336」。空間処理とチャネル混合を分離することで、重み数は約87%削減されます。"
+        },
+        {
+            id: "cnn-mobilenet-standard-cost-formula",
+            category: "MobileNet・通常畳み込みの演算量",
+            kind: "計算",
+            difficulty: "本試験型",
+            question: "カーネルの一辺を $D_K$、特徴マップの一辺を $D_F$、入力チャネル数を $M$、出力チャネル数を $N$ とする。通常畳み込みの演算量に比例する式はどれか。",
+            options: ["$D_K^2MN D_F^2$", "$D_K^2M D_F^2$", "$MN D_F^2$", "$D_K^2+M+N+D_F^2$"],
+            answer: 0,
+            explanation: "<strong>使う公式：</strong>通常畳み込みは $D_K^2\\times M\\times N\\times D_F^2$。カーネル面積、入力チャネル、出力チャネル、出力位置数を全部掛けます。$N$がない式はDepthwise、$D_K^2$がない式はPointwiseです。"
+        },
+        {
+            id: "cnn-mobilenet-separable-cost-formula",
+            category: "MobileNet・分離後の演算量",
+            kind: "計算",
+            difficulty: "本試験型",
+            question: "同じ記号を用いる。Depthwise Separable Convolutionへ分解した後の演算量に比例する式はどれか。",
+            options: ["$D_K^2MN D_F^2$", "$D_K^2M D_F^2+MN D_F^2$", "$D_K^2N D_F^2+MN D_F^2$", "$D_K^2MND_F$"],
+            answer: 1,
+            explanation: "<strong>使う公式：</strong>Depthwise $D_K^2MD_F^2$ とPointwise $MND_F^2$を足します。覚え方は「Depthwiseでは$N$を外す、Pointwiseでは$D_K^2$を外す、最後に足す」です。"
+        },
+        {
+            id: "cnn-mobilenet-cost-ratio-calc",
+            category: "MobileNet・軽量化率（計算）",
+            kind: "計算",
+            difficulty: "本試験型",
+            question: "$D_K=3,N=64$ のとき、Depthwise Separable Convolutionの演算量は通常畳み込みのおよそ何%か。$\\frac{1}{N}+\\frac{1}{D_K^2}$ を用いる。",
+            options: ["約1.7%", "約9.5%", "約12.7%", "約87.3%"],
+            answer: 2,
+            explanation: "<strong>使う公式：</strong>分離後÷通常 $=\\frac1N+\\frac1{D_K^2}$。$\\frac1{64}+\\frac1{9}\\approx0.0156+0.1111=0.1267$なので約12.7%です。87.3%は<strong>削減率</strong> $1-0.1267$ であり、残る演算量と取り違えないでください。$M$と$D_F$は約分で消えます。"
+        },
+        {
+            id: "cnn-mobilenet-inappropriate-feature",
+            category: "MobileNet・不適切選択",
+            difficulty: "本試験型",
+            question: "MobileNetで用いられるDepthwise Separable Convolutionの説明として、<strong>不適切</strong>なものを1つ選べ。",
+            options: ["通常畳み込みをDepthwiseとPointwiseへ分ける", "Depthwiseは入力チャネルごとに空間畳み込みを行う", "Pointwiseの1×1畳み込みでチャネルを混合する", "Depthwiseだけで全入力チャネルを混合し、任意の出力チャネル数へ変換する"],
+            answer: 3,
+            explanation: "<p><strong>不適切なのは4：</strong>Depthwiseはチャネルごとに独立して空間処理するため、チャネル同士を混ぜません。チャネル混合と出力チャネル数の変更は後段のPointwise（1×1）が担当します。</p><p><strong>見分け方：</strong>Depthwise＝空間、Pointwise＝チャネル。通常畳み込みの仕事を2つへ分担することで軽量化します。</p>"
         },
         {
             id: "cnn-group-conv-parameter",
@@ -1030,6 +1126,15 @@ window.quizData = {
             options: ["DenseNetはAddし、ResNetはConcatする", "DenseNetはチャネル方向にConcatし、ResNetは要素ごとにAddする", "両方とも必ず掛け算する", "両方とも接続を持たない"],
             answer: 1,
             explanation: "DenseNetは過去の特徴マップを連結して再利用するためチャネル数が増えます。ResNetは同じ形状の特徴を足すため、加算自体ではチャネル数は増えません。"
+        },
+        {
+            id: "cnn-sota-definition",
+            category: "モデル比較・SOTA",
+            difficulty: "本試験型",
+            question: "機械学習の論文で用いられるSOTA（State of the Art）の説明として最も適切なものはどれか。",
+            options: ["その時点の指定された評価条件で最高水準の性能", "すべてのデータセットで永久に最高性能であることの証明", "モデルのパラメータ数が必ず最小であること", "オープンソースで公開されたモデルの総称"],
+            answer: 0,
+            explanation: "SOTAは<strong>その時点・そのデータセット・その評価指標などの条件で最高水準</strong>という意味です。後の手法に更新される可能性があり、速度・メモリ・別タスクを含む全条件で絶対に最強という意味でもありません。"
         },
         {
             id: "cnn-mobilenet-v2",

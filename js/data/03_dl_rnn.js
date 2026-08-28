@@ -110,6 +110,19 @@ window.quizData = {
         <h3>■ 6. Encoder–Decoder / Seq2Seq / Attention</h3>
         <div class="rnn-flow" aria-label="Seq2SeqとAttentionの情報の流れ"><div class="rnn-node">入力系列</div><div class="rnn-arrow">→</div><div class="rnn-node">Encoder<br>読む</div><div class="rnn-arrow">→</div><div class="rnn-node memory">Attention<br>必要箇所を選ぶ</div><div class="rnn-arrow">→</div><div class="rnn-node">Decoder<br>生成</div></div>
         <p><strong>Seq2Seq（Sequence-to-Sequence）：</strong>Encoderが入力系列を読み、Decoderが別の系列を1語ずつ生成します。翻訳のように入出力の長さが違っても扱えます。</p>
+        <div class="rnn-visual-card">
+            <strong>図問題は「左に入力系列・中央に橋・右に出力系列」</strong>
+            <svg class="rnn-visual-svg" viewBox="0 0 340 140" role="img" aria-label="複数の入力をEncoderが読みcontextまたはmemoryをDecoderへ渡し複数の出力を生成するSeq2Seqの見分け方">
+                <defs><marker id="rnn-seq2seq-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#627d98"/></marker></defs>
+                <g fill="#eef7fb" stroke="#2780b8" stroke-width="1.7"><rect x="8" y="48" width="38" height="35" rx="5"/><rect x="55" y="48" width="38" height="35" rx="5"/><rect x="102" y="48" width="38" height="35" rx="5"/></g>
+                <g class="rnn-svg-note"><text x="20" y="69">x₁</text><text x="67" y="69">x₂</text><text x="114" y="69">x₃</text></g><path d="M47 65 H53 M94 65 H100 M141 65 H163" stroke="#627d98" stroke-width="2" marker-end="url(#rnn-seq2seq-arrow)"/>
+                <rect x="168" y="39" width="65" height="53" rx="8" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/><text x="178" y="60" class="rnn-svg-label">context</text><text x="179" y="77" class="rnn-svg-note">/ memory</text>
+                <path d="M235 65 H254" stroke="#627d98" stroke-width="2" marker-end="url(#rnn-seq2seq-arrow)"/>
+                <g fill="#fff8e7" stroke="#f39c12" stroke-width="1.7"><rect x="258" y="48" width="34" height="35" rx="5"/><rect x="298" y="48" width="34" height="35" rx="5"/></g><g class="rnn-svg-note"><text x="268" y="69">y₁</text><text x="308" y="69">y₂</text></g><path d="M293 65 H296" stroke="#627d98" stroke-width="2" marker-end="url(#rnn-seq2seq-arrow)"/>
+                <text x="44" y="112" class="rnn-svg-label">Encoder：読む</text><text x="254" y="112" class="rnn-svg-label">Decoder：生成</text><text x="103" y="130" class="rnn-svg-note">入力数と出力数は同じでなくてもよい</text>
+            </svg>
+            <div class="rnn-visual-caption"><strong>3点確認：</strong>①入力側をEncoderが順に読む　②context／memoryが左右を橋渡し　③Decoderが別の出力系列を順に生成。Attention付きなら、複数のEncoder状態からDecoderへ参照線が増えてもSeq2Seqです。</div>
+        </div>
         <p><strong>Attention：</strong>各生成時刻のDecoder状態とEncoder状態から、①score → ②Softmaxで重み（合計1）→ ③重み付き和で文脈ベクトル。固定長ベクトル1個への詰め込みを緩和します。</p>
         <div class="rnn-two"><div class="rnn-card"><strong>Teacher Forcing（学習時）</strong>前の<strong>正解トークン</strong>を次のDecoder入力に使う。入力は $[BOS,y_1,y_2,\\ldots]$、正解は1つ先へずらす。</div><div class="rnn-card"><strong>Exposure Bias（問題点）</strong>推論時は前の<strong>自分の予測</strong>を入力するため、学習時との条件差で誤りが連鎖しやすい。</div></div>
         <div class="rnn-shift-guide" aria-label="Teacher Forcingで正解系列を1トークン右へずらしてDecoder入力を作る図">
@@ -562,6 +575,23 @@ window.quizData = {
         ],
         "answer": 0,
         "explanation": "<p><strong>図で見る場所：</strong>2本の経路で、次のDecoderへ入るものが「正解」か「モデルの予測」かを比較します。</p><p><strong>読み取り：</strong>Teacher Forcing中は常にきれいな正解履歴を見ます。しかし推論では一度の誤予測が次の入力となり、その後の誤りへつながります。</p><p><strong>答え：</strong>この学習時と推論時の条件差が<strong>Exposure Bias</strong>です。</p><p><strong>他が違う理由：</strong>画像解像度やBiLSTMの次元の問題ではありません。推論時には正解ラベルを利用できないため、正解を必ず入力できるという説明も逆です。</p>"
+    },
+    {
+        id: "rnn-exam-seq2seq-diagram-identification",
+        category: "Seq2Seq（図の識別）",
+        kind: "図表・長文",
+        difficulty: "本試験型",
+        beginnerReviewed: true,
+        question: `<div style="line-height:1.7;">図I〜IVのうち、入力系列を読み込む<strong>Encoder</strong>と、別の出力系列を生成する<strong>Decoder</strong>からなるSeq2Seq（Sequence-to-Sequence）を最も適切に表すものはどれか。</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:13px 0;">
+                <div style="padding:9px;border:1px solid #c8dbee;border-radius:9px;background:#fff;"><strong>図I</strong><svg viewBox="0 0 260 105" role="img" aria-label="複数の入力を一つの分類結果へまとめるmany-to-oneモデル" style="display:block;width:100%;height:105px;"><g fill="#eef7fb" stroke="#2780b8"><rect x="9" y="34" width="38" height="30" rx="5"/><rect x="57" y="34" width="38" height="30" rx="5"/><rect x="105" y="34" width="38" height="30" rx="5"/></g><g font-size="11" fill="#334e68"><text x="20" y="53">x₁</text><text x="68" y="53">x₂</text><text x="116" y="53">x₃</text><text x="168" y="53">集約</text><text x="222" y="53">class</text></g><path d="M48 49H55M96 49H103M144 49H160M194 49H216" stroke="#627d98" stroke-width="2"/><rect x="161" y="31" width="34" height="36" rx="5" fill="#eafaf1" stroke="#27ae60"/><circle cx="231" cy="49" r="18" fill="#fff3f1" stroke="#e74c3c"/></svg></div>
+                <div style="padding:9px;border:1px solid #c8dbee;border-radius:9px;background:#fff;"><strong>図II</strong><svg viewBox="0 0 260 105" role="img" aria-label="一つの画像を潜在表現へ圧縮して同じ画像を復元するAutoencoder" style="display:block;width:100%;height:105px;"><g font-size="11" fill="#334e68"><text x="11" y="25">画像</text><text x="68" y="25">Encoder</text><text x="130" y="25">z</text><text x="163" y="25">Decoder</text><text x="225" y="25">復元</text></g><rect x="9" y="34" width="38" height="38" fill="#eef7fb" stroke="#2780b8"/><path d="M49 53H67M113 53H128M143 53H161M210 53H224" stroke="#627d98" stroke-width="2"/><polygon points="68,34 113,43 113,63 68,72" fill="#eafaf1" stroke="#27ae60"/><circle cx="136" cy="53" r="8" fill="#f7f1fa" stroke="#8e44ad"/><polygon points="162,43 208,34 208,72 162,63" fill="#fff8e7" stroke="#f39c12"/><rect x="225" y="34" width="28" height="38" fill="#eef7fb" stroke="#2780b8"/></svg></div>
+                <div style="padding:9px;border:1px solid #c8dbee;border-radius:9px;background:#fff;"><strong>図III</strong><svg viewBox="0 0 260 105" role="img" aria-label="入力系列をEncoderが読みcontextを介してDecoderが出力系列を生成するSeq2Seq" style="display:block;width:100%;height:105px;"><g fill="#eef7fb" stroke="#2780b8"><rect x="7" y="39" width="31" height="30" rx="4"/><rect x="45" y="39" width="31" height="30" rx="4"/><rect x="83" y="39" width="31" height="30" rx="4"/></g><g fill="#fff8e7" stroke="#f39c12"><rect x="178" y="39" width="31" height="30" rx="4"/><rect x="217" y="39" width="31" height="30" rx="4"/></g><g font-size="10" fill="#334e68"><text x="16" y="58">x₁</text><text x="54" y="58">x₂</text><text x="92" y="58">x₃</text><text x="187" y="58">y₁</text><text x="226" y="58">y₂</text><text x="36" y="89">Encoder</text><text x="198" y="89">Decoder</text></g><path d="M39 54H44M77 54H82M115 54H127M166 54H177M210 54H216" stroke="#627d98" stroke-width="2"/><rect x="128" y="31" width="37" height="46" rx="7" fill="#eafaf1" stroke="#27ae60"/><text x="135" y="51" font-size="9" fill="#334e68">context</text><text x="136" y="64" font-size="8" fill="#627d98">memory</text></svg></div>
+                <div style="padding:9px;border:1px solid #c8dbee;border-radius:9px;background:#fff;"><strong>図IV</strong><svg viewBox="0 0 260 105" role="img" aria-label="一つの入力から複数の独立した分類器へ分岐するmulti-taskモデル" style="display:block;width:100%;height:105px;"><rect x="15" y="34" width="51" height="37" rx="6" fill="#eef7fb" stroke="#2780b8"/><text x="27" y="56" font-size="11" fill="#334e68">入力x</text><path d="M67 52H121M121 52V24H178M121 52V80H178" stroke="#627d98" stroke-width="2" fill="none"/><rect x="179" y="9" width="70" height="31" rx="5" fill="#eafaf1" stroke="#27ae60"/><rect x="179" y="65" width="70" height="31" rx="5" fill="#fff8e7" stroke="#f39c12"/><text x="190" y="29" font-size="10" fill="#334e68">属性class</text><text x="190" y="85" font-size="10" fill="#334e68">物体class</text></svg></div>
+            </div>`,
+        options: ["図I", "図II", "図III", "図IV"],
+        answer: 2,
+        explanation: `<p><strong>図で見る場所：</strong>入力側と出力側にそれぞれ<strong>複数の時刻</strong>があり、その間をcontext／memoryが橋渡ししているかを見ます。</p><p><strong>答え：</strong><strong>図III</strong>です。$x_1,x_2,x_3$をEncoderが読み、得た情報をDecoderへ渡して$y_1,y_2,\ldots$を順に生成しています。入力長と出力長は一致しなくても構いません。</p><p><strong>他が違う理由：</strong>図Iは系列全体を1クラスへまとめるmany-to-one、図IIは1つの入力を復元するAutoencoder、図IVは1入力から複数の独立した予測へ分岐するmulti-task型です。</p><p><strong>本試験の合言葉：</strong><strong>左に入力系列 → Encoder → context/memory → Decoder → 右に出力系列</strong>。</p>`
     }
 ]
 };
